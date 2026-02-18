@@ -258,12 +258,24 @@ Set deserialize(
   uint32_t size;
   reader.readSetBegin(ttype, size);
 
+  // Handle protocols that omit container sizes (e.g., SimpleJSON)
+  if constexpr (ProtocolReader::kOmitsContainerSizes()) {
+    while (reader.peekSet()) {
+      ret.insert(deserializeValue(reader, type.elementType(), alloc));
+    }
+    reader.readSetEnd();
+    return ret;
+  }
+
   if (!size) {
     reader.readSetEnd();
     return ret;
   }
 
-  if (type_system::ToTTypeFn{}(type.elementType()) != ttype) {
+  // T_VOID indicates protocol doesn't encode type information (e.g.,
+  // SimpleJSON)
+  if (ttype != protocol::TType::T_VOID &&
+      type_system::ToTTypeFn{}(type.elementType()) != ttype) {
     throw std::runtime_error(
         fmt::format(
             "type mismatch in set deserialization: {} vs {}",
@@ -297,12 +309,26 @@ Map deserialize(
   uint32_t size;
   reader.readMapBegin(keyTType, valueTType, size);
 
+  // Handle protocols that omit container sizes (e.g., SimpleJSON)
+  if constexpr (ProtocolReader::kOmitsContainerSizes()) {
+    while (reader.peekMap()) {
+      auto key = deserializeValue(reader, type.keyType(), alloc);
+      auto value = deserializeValue(reader, type.valueType(), alloc);
+      ret.insert(std::move(key), std::move(value));
+    }
+    reader.readMapEnd();
+    return ret;
+  }
+
   if (!size) {
     reader.readMapEnd();
     return ret;
   }
 
-  if (type_system::ToTTypeFn{}(type.keyType()) != keyTType) {
+  // T_VOID indicates protocol doesn't encode type information (e.g.,
+  // SimpleJSON)
+  if (keyTType != protocol::TType::T_VOID &&
+      type_system::ToTTypeFn{}(type.keyType()) != keyTType) {
     throw std::runtime_error(
         fmt::format(
             "type mismatch in map key deserialization: {} vs {}",
@@ -310,7 +336,8 @@ Map deserialize(
             type_system::ToTTypeFn{}(type.keyType())));
   }
 
-  if (type_system::ToTTypeFn{}(type.valueType()) != valueTType) {
+  if (valueTType != protocol::TType::T_VOID &&
+      type_system::ToTTypeFn{}(type.valueType()) != valueTType) {
     throw std::runtime_error(
         fmt::format(
             "type mismatch in map value deserialization: {} vs {}",
@@ -469,45 +496,62 @@ List deserialize(
         protocol::TType ttype;
         uint32_t size;
         reader.readListBegin(ttype, size);
-        if (!size) {
+
+        // Handle protocols that omit container sizes (e.g., SimpleJSON)
+        if constexpr (ProtocolReader::kOmitsContainerSizes()) {
+          while (reader.peekList()) {
+            if constexpr (std::is_same_v<elemDatumType, bool>) {
+              bool value = deserialize(reader, elemTypeNode, alloc);
+              data.emplace_back(static_cast<std::byte>(value));
+            } else {
+              data.emplace_back(deserialize(reader, elemTypeNode, alloc));
+            }
+          }
+          reader.readListEnd();
+          return List(detail::IList::Ptr(impl));
+        } else {
+          if (!size) {
+            reader.readListEnd();
+            return List(detail::IList::Ptr(impl));
+          }
+
+          // T_VOID indicates protocol doesn't encode type information
+          if (ttype != protocol::TType::T_VOID &&
+              type_system::ToTTypeFn{}(type.elementType()) != ttype) {
+            throw std::runtime_error(
+                fmt::format(
+                    "type mismatch in deserialization: {} vs {}",
+                    ttype,
+                    type_system::ToTTypeFn{}(type.elementType())));
+          }
+
+          if (!apache::thrift::canReadNElements(reader, size, {ttype})) {
+            protocol::TProtocolException::throwTruncatedData();
+          }
+
+          if constexpr (
+              ProtocolReader::kSupportsArithmeticVectors() &&
+              !std::is_same_v<elemDatumType, bool> &&
+              std::is_arithmetic_v<elemStorageType>) {
+            data.resize(size);
+            reader.template readArithmeticVector<elemStorageType>(
+                data.data(), size);
+          } else if constexpr (std::is_same_v<elemDatumType, bool>) {
+            // For bool elements (stored as std::byte), deserialize and cast
+            data.reserve(size);
+            for (; size > 0; --size) {
+              bool value = deserialize(reader, elemTypeNode, alloc);
+              data.emplace_back(static_cast<std::byte>(value));
+            }
+          } else {
+            data.reserve(size);
+            for (; size > 0; --size) {
+              data.emplace_back(deserialize(reader, elemTypeNode, alloc));
+            }
+          }
           reader.readListEnd();
           return List(detail::IList::Ptr(impl));
         }
-
-        if (type_system::ToTTypeFn{}(type.elementType()) != ttype) {
-          throw std::runtime_error(
-              fmt::format(
-                  "type mismatch in deserialization: {} vs {}",
-                  ttype,
-                  type_system::ToTTypeFn{}(type.elementType())));
-        }
-
-        if (!apache::thrift::canReadNElements(reader, size, {ttype})) {
-          protocol::TProtocolException::throwTruncatedData();
-        }
-
-        if constexpr (
-            ProtocolReader::kSupportsArithmeticVectors() &&
-            !std::is_same_v<elemDatumType, bool> &&
-            std::is_arithmetic_v<elemStorageType>) {
-          data.resize(size);
-          reader.template readArithmeticVector<elemStorageType>(
-              data.data(), size);
-        } else if constexpr (std::is_same_v<elemDatumType, bool>) {
-          // For bool elements (stored as std::byte), deserialize and cast
-          data.reserve(size);
-          for (; size > 0; --size) {
-            bool value = deserialize(reader, elemTypeNode, alloc);
-            data.emplace_back(static_cast<std::byte>(value));
-          }
-        } else {
-          data.reserve(size);
-          for (; size > 0; --size) {
-            data.emplace_back(deserialize(reader, elemTypeNode, alloc));
-          }
-        }
-        reader.readListEnd();
-        return List(detail::IList::Ptr(impl));
       });
 }
 
@@ -571,26 +615,34 @@ Struct deserialize(
       break;
     }
 
-    // Find the field
-    Struct::FieldId id{fid};
+    // Find the field - use field name for name-based protocols, ID otherwise
     auto handle = [&]() {
-      // Optimize the case where fields are serialized in order.
-      for (; pos < type.fields().size(); pos++) {
-        auto& nextField = type.fields()[pos];
-        // Happy path: we read the next field
-        if (nextField.identity().id() == id) {
-          return type_system::FastFieldHandle{++pos};
+      if constexpr (ProtocolReader::kUsesFieldNames()) {
+        // Field name-based protocol (e.g., SimpleJSON)
+        return type.fieldHandleFor(name);
+      } else {
+        // Field ID-based protocol (e.g., Compact, Binary)
+        Struct::FieldId id{fid};
+        // Optimize the case where fields are serialized in order.
+        for (; pos < type.fields().size(); pos++) {
+          auto& nextField = type.fields()[pos];
+          // Happy path: we read the next field
+          if (nextField.identity().id() == id) {
+            return type_system::FastFieldHandle{++pos};
+          }
+          // We might have skipped an optional/terse field, so try the next one.
         }
-        // We might have skipped an optional/terse field, so try the next one.
+        // Unknown field or not in order
+        return type.fieldHandleFor(id);
       }
-      // Unknown field or not in order
-      return type.fieldHandleFor(id);
     }();
 
     if (handle.valid()) {
       const auto& field = type.at(handle);
 
-      if (ftype != field.wireType()) {
+      // T_VOID indicates protocol doesn't encode type information (e.g.,
+      // SimpleJSON)
+      if (ftype != protocol::TType::T_VOID && ftype != field.wireType()) {
         throw std::runtime_error(
             fmt::format(
                 "Expected field {} on struct {} to have wire-type {} but got {}",
@@ -668,14 +720,24 @@ Union deserialize(
     return ret;
   }
 
-  // Find the field
-  Union::FieldId id{fid};
-  auto handle = type.fieldHandleFor(id);
+  // Find the field - use field name for name-based protocols, ID otherwise
+  auto handle = [&]() {
+    if constexpr (ProtocolReader::kUsesFieldNames()) {
+      // Field name-based protocol (e.g., SimpleJSON)
+      return type.fieldHandleFor(name);
+    } else {
+      // Field ID-based protocol (e.g., Compact, Binary)
+      Union::FieldId id{fid};
+      return type.fieldHandleFor(id);
+    }
+  }();
 
   if (handle.valid()) {
     const auto& field = type.at(handle);
 
-    if (ftype != field.wireType()) {
+    // T_VOID indicates protocol doesn't encode type information (e.g.,
+    // SimpleJSON)
+    if (ftype != protocol::TType::T_VOID && ftype != field.wireType()) {
       throw std::runtime_error(
           fmt::format(
               "Expected field {} on union {} to have wire-type {} but got {}",

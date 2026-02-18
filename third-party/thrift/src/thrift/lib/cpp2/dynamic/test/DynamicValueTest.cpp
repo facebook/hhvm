@@ -30,6 +30,7 @@
 #include <thrift/lib/cpp2/dynamic/Union.h>
 #include <thrift/lib/cpp2/dynamic/detail/ConcreteList.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+#include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 
 #include <limits>
 
@@ -766,6 +767,154 @@ TEST_F(TraverseTest, TraverseEmptyPath) {
   EXPECT_EQ(constValue.traverse(path)->asI32(), 42);
   value.traverse(path)->asI32() = 100;
   EXPECT_EQ(value.asI32(), 100);
+}
+
+// ============================================================================
+// SimpleJSON serialization tests
+// ============================================================================
+
+TEST(DynamicValueTest, SimpleJSONContainerRoundTrip) {
+  // Test list
+  {
+    auto listType = makeListType(type_system::TypeSystem::I32());
+    auto list = makeList(listType);
+    list.push_back(DynamicValue::makeI32(1));
+    list.push_back(DynamicValue::makeI32(2));
+    list.push_back(DynamicValue::makeI32(3));
+
+    folly::IOBufQueue bufQueue;
+    SimpleJSONProtocolWriter writer;
+    writer.setOutput(&bufQueue);
+    serialize(writer, list);
+
+    auto buf = bufQueue.move();
+    SimpleJSONProtocolReader reader;
+    reader.setInput(buf.get());
+    auto deserList = deserialize(reader, listType, nullptr);
+
+    EXPECT_EQ(list.size(), deserList.size());
+    for (size_t i = 0; i < list.size(); ++i) {
+      EXPECT_EQ(list[i], deserList[i]);
+    }
+  }
+
+  // Test set
+  {
+    static type_system::detail::ContainerTypeCache setCache;
+    auto setType =
+        type_system::TypeRef::Set::of(type_system::TypeSystem::I32(), setCache);
+    auto set = makeSet(setType);
+    set.insert(DynamicValue::makeI32(10));
+    set.insert(DynamicValue::makeI32(20));
+    set.insert(DynamicValue::makeI32(30));
+
+    folly::IOBufQueue bufQueue;
+    SimpleJSONProtocolWriter writer;
+    writer.setOutput(&bufQueue);
+    serialize(writer, set);
+
+    auto buf = bufQueue.move();
+    SimpleJSONProtocolReader reader;
+    reader.setInput(buf.get());
+    auto deserSet = deserialize(reader, setType, nullptr);
+
+    EXPECT_EQ(set.size(), deserSet.size());
+    for (auto elemRef : set) {
+      EXPECT_TRUE(deserSet.contains(elemRef.copy()));
+    }
+  }
+
+  // Test map
+  {
+    static type_system::detail::ContainerTypeCache mapCache;
+    auto mapType = type_system::TypeRef::Map::of(
+        type_system::TypeSystem::String(),
+        type_system::TypeSystem::I32(),
+        mapCache);
+    auto map = makeMap(mapType);
+    map.insert(DynamicValue::makeString("one"), DynamicValue::makeI32(1));
+    map.insert(DynamicValue::makeString("two"), DynamicValue::makeI32(2));
+
+    folly::IOBufQueue bufQueue;
+    SimpleJSONProtocolWriter writer;
+    writer.setOutput(&bufQueue);
+    serialize(writer, map);
+
+    auto buf = bufQueue.move();
+    SimpleJSONProtocolReader reader;
+    reader.setInput(buf.get());
+    auto deserMap = deserialize(reader, mapType, nullptr);
+
+    EXPECT_EQ(map.size(), deserMap.size());
+  }
+}
+
+TEST(DynamicValueTest, SimpleJSONStructRoundTrip) {
+  type_system::TypeSystemBuilder builder;
+  builder.addType(
+      "facebook.com/thrift/test/SimpleJSONTestStruct",
+      def::Struct({
+          def::Field(def::Identity(1, "id"), def::AlwaysPresent, TypeIds::I32),
+          def::Field(
+              def::Identity(2, "name"), def::AlwaysPresent, TypeIds::String),
+          def::Field(def::Identity(3, "active"), def::Optional, TypeIds::Bool),
+          def::Field(
+              def::Identity(4, "count"), def::AlwaysPresent, TypeIds::I64),
+      }));
+  auto typeSystem = std::move(builder).build();
+  const auto& structNode =
+      typeSystem
+          ->getUserDefinedTypeOrThrow(
+              "facebook.com/thrift/test/SimpleJSONTestStruct")
+          .asStruct();
+
+  // Test with all fields set
+  {
+    auto value = DynamicValue::makeDefault(type_system::TypeRef(structNode));
+    auto& structValue = value.asStruct();
+    structValue.setField("id", DynamicValue::makeI32(42));
+    structValue.setField("name", DynamicValue::makeString(String("test")));
+    structValue.setField("active", DynamicValue::makeBool(true));
+    structValue.setField("count", DynamicValue::makeI64(1000));
+
+    folly::IOBufQueue bufQueue;
+    SimpleJSONProtocolWriter writer;
+    writer.setOutput(&bufQueue);
+    serializeValue(writer, value);
+
+    auto buf = bufQueue.move();
+    SimpleJSONProtocolReader reader;
+    reader.setInput(buf.get());
+    auto deserValue =
+        deserializeValue(reader, type_system::TypeRef(structNode), nullptr);
+
+    EXPECT_EQ(value, deserValue);
+  }
+
+  // Test with optional field unset
+  {
+    auto value = DynamicValue::makeDefault(type_system::TypeRef(structNode));
+    auto& structValue = value.asStruct();
+    structValue.setField("id", DynamicValue::makeI32(99));
+    structValue.setField("name", DynamicValue::makeString(String("partial")));
+    structValue.setField("count", DynamicValue::makeI64(500));
+    // active field left unset
+
+    folly::IOBufQueue bufQueue;
+    SimpleJSONProtocolWriter writer;
+    writer.setOutput(&bufQueue);
+    serializeValue(writer, value);
+
+    auto buf = bufQueue.move();
+    SimpleJSONProtocolReader reader;
+    reader.setInput(buf.get());
+    auto deserValue =
+        deserializeValue(reader, type_system::TypeRef(structNode), nullptr);
+
+    auto& deserStruct = deserValue.asStruct();
+    EXPECT_EQ(deserStruct.getField("id")->asI32(), 99);
+    EXPECT_FALSE(deserStruct.hasField("active"));
+  }
 }
 
 } // namespace

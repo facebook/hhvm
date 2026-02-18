@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/dynamic/TypeSystemTraits.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+#include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
@@ -68,6 +69,12 @@ DynamicValue Any::load(
     CompactProtocolReader reader;
     reader.setInput(&data_.data());
     return deserializeValue(reader, typeRef, mr);
+  } else if (
+      data_.protocol() ==
+      type::Protocol::get<type::StandardProtocol::SimpleJson>()) {
+    SimpleJSONProtocolReader reader;
+    reader.setInput(&data_.data());
+    return deserializeValue(reader, typeRef, mr);
   } else {
     folly::throw_exception<std::runtime_error>(
         "Unsupported protocol for Any deserialization");
@@ -90,6 +97,10 @@ DynamicValue Any::load(
     serializeValue(writer, value);
   } else if (protocol == type::StandardProtocol::Compact) {
     CompactProtocolWriter writer;
+    writer.setOutput(&bufQueue);
+    serializeValue(writer, value);
+  } else if (protocol == type::StandardProtocol::SimpleJson) {
+    SimpleJSONProtocolWriter writer;
     writer.setOutput(&bufQueue);
     serializeValue(writer, value);
   } else {

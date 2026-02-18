@@ -290,7 +290,7 @@ folly::AsyncIoUringSocket::Options getIoUringSocketOptions() {
 folly::AsyncTransport::UniquePtr createIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto ring = new folly::AsyncIoUringSocket(evb, getIoUringSocketOptions());
-  if (cfg.ioUringZcrx && cfg.srcPortBind) {
+  if (cfg.ioUringZcrx && cfg.ioUringZcrxSocketBind) {
     folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
         *ring, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
   }
@@ -303,7 +303,7 @@ folly::AsyncTransport::UniquePtr createIOUringTLS(
   auto sock = folly::AsyncSSLSocket::newSocket(getSslContext(cfg), evb);
   auto ring =
       new folly::AsyncIoUringSocket(std::move(sock), getIoUringSocketOptions());
-  if (cfg.ioUringZcrx && cfg.srcPortBind) {
+  if (cfg.ioUringZcrx && cfg.ioUringZcrxSocketBind) {
     folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
         *ring, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
   }
@@ -314,7 +314,7 @@ folly::AsyncTransport::UniquePtr createIOUringTLS(
 folly::AsyncTransport::UniquePtr createIOUringFizz(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = new folly::AsyncIoUringSocket(evb, getIoUringSocketOptions());
-  if (cfg.ioUringZcrx && cfg.srcPortBind) {
+  if (cfg.ioUringZcrx && cfg.ioUringZcrxSocketBind) {
     folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
         *sock, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
   }

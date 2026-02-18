@@ -290,7 +290,8 @@ void ClientRunner::run(const StressTestBase* test) {
 
   latch_.wait();
 
-  if (config_.connConfig.ioUringZcrx && !config_.connConfig.srcPortBind) {
+  if (config_.connConfig.ioUringZcrx &&
+      !config_.connConfig.ioUringZcrxSocketBind) {
     for (auto& thread : clientThreads_) {
       auto napiId = thread->getEventBase()->getBackend()->getNapiId();
       napiToThreads_.emplace(napiId, thread.get());

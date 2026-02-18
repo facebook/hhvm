@@ -32,6 +32,10 @@ DEFINE_int32(io_registers, 2048, "");
 DEFINE_int32(io_prov_buffs_size, 2048, "");
 DEFINE_int32(io_prov_buffs, 2000, "");
 DEFINE_bool(io_zcrx, false, "");
+DEFINE_bool(
+    io_zcrx_socket_bind,
+    false,
+    "Enable src port calculation and binding prior to connection. Default is false. (true, false)");
 DEFINE_bool(io_zctx, false, "");
 DEFINE_int32(io_zcrx_num_pages, 16384, "");
 DEFINE_int32(io_zcrx_refill_entries, 16384, "");

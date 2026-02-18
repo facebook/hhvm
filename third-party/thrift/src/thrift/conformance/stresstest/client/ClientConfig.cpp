@@ -52,10 +52,6 @@ DEFINE_int64(
     10,
     "How often to poll in secs stats when running continuously");
 DEFINE_bool(io_uring, false, "Flag to enable io_uring on the client");
-DEFINE_bool(
-    src_port_bind,
-    false,
-    "Enable src port calculation and binding prior to connection. Default is false. (true, false)");
 DEFINE_bool(quic, false, "Flag to enable quic on the client");
 DEFINE_int64(runtime_s, 10, "Runtime of test in seconds");
 DEFINE_int64(warmup_s, 2, "Warmup time of test in seconds");
@@ -171,7 +167,7 @@ protocol::PROTOCOL_TYPES createThriftProtocolFromFlags() {
   connCfg.trustedCertsPath = FLAGS_client_ca_path;
   connCfg.ioUring = FLAGS_io_uring;
   connCfg.ioUringZcrx = FLAGS_io_zcrx;
-  connCfg.srcPortBind = FLAGS_src_port_bind;
+  connCfg.ioUringZcrxSocketBind = FLAGS_io_zcrx_socket_bind;
   connCfg.useQuic = FLAGS_quic;
   connCfg.stopTLSv1 = FLAGS_stopTLSv1 && (security == ClientSecurity::FIZZ);
   connCfg.stopTLSv2 = FLAGS_stopTLSv2 && (security == ClientSecurity::FIZZ);

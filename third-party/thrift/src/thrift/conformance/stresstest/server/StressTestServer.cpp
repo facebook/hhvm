@@ -19,9 +19,9 @@
 #include <memory>
 
 #include <glog/logging.h>
-#include <folly/experimental/io/IoUringBackend.h>
 #include <folly/init/Init.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/io/async/IoUringBackend.h>
 
 #include <gflags/gflags.h>
 #include <wangle/ssl/SSLContextConfig.h>

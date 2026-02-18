@@ -22,7 +22,7 @@
 #include <thrift/conformance/stresstest/util/Util.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 
-#include <folly/experimental/io/IoUringBackend.h>
+#include <folly/io/async/IoUringBackend.h>
 
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
 

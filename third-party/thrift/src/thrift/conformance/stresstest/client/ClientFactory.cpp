@@ -25,9 +25,9 @@
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/experimental/io/AsyncIoUringSocket.h>
 #include <folly/experimental/io/AsyncIoUringSocketFactory.h>
-#include <folly/experimental/io/IoUringBackend.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
+#include <folly/io/async/IoUringBackend.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <quic/client/QuicClientAsyncTransport.h>
 #include <quic/common/events/FollyQuicEventBase.h>

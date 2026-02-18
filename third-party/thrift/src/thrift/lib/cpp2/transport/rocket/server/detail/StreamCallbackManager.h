@@ -98,7 +98,7 @@ class StreamCallbackManager {
       folly::variant_match(
           it->second,
           [](const std::unique_ptr<RocketStreamClientCallback>& stream) {
-            stream->pauseStream();
+            stream->handlePausedByConnection();
           },
           [](const auto&) {
             // Only handle stream callbacks - ignore sinks/channels
@@ -119,7 +119,7 @@ class StreamCallbackManager {
       folly::variant_match(
           it->second,
           [](const std::unique_ptr<RocketStreamClientCallback>& stream) {
-            stream->resumeStream();
+            stream->handleResumedByConnection();
           },
           [](const auto&) {
             // Only handle stream callbacks - ignore sinks/channels

@@ -51,7 +51,7 @@ bool RocketStreamClientCallback::onFirstResponse(
 
   serverCallbackOrCancelled_ = reinterpret_cast<intptr_t>(serverCallback);
   if (UNLIKELY(connection_.areStreamsPaused())) {
-    pauseStream();
+    handlePausedByConnection();
   }
 
   DCHECK_NE(tokens_, 0u);
@@ -146,7 +146,7 @@ void RocketStreamClientCallback::resetServerCallback(
     StreamServerCallback& serverCallback) {
   serverCallbackOrCancelled_ = reinterpret_cast<intptr_t>(&serverCallback);
   if (UNLIKELY(connection_.areStreamsPaused())) {
-    pauseStream();
+    handlePausedByConnection();
   }
 }
 
@@ -166,7 +166,7 @@ void RocketStreamClientCallback::handleStreamHeadersPush(
   std::ignore = serverCallback()->onSinkHeaders(std::move(payload));
 }
 
-void RocketStreamClientCallback::pauseStream() {
+void RocketStreamClientCallback::handlePausedByConnection() {
   DCHECK(connection_.areStreamsPaused());
   if (UNLIKELY(!serverCallbackReady())) {
     return;
@@ -174,7 +174,7 @@ void RocketStreamClientCallback::pauseStream() {
   serverCallback()->pauseStream();
 }
 
-void RocketStreamClientCallback::resumeStream() {
+void RocketStreamClientCallback::handleResumedByConnection() {
   DCHECK(!connection_.areStreamsPaused());
   if (UNLIKELY(!serverCallbackReady())) {
     return;

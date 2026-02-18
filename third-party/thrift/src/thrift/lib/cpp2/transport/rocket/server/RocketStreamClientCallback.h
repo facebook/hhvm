@@ -59,8 +59,8 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   void handle(ExtFrame extFrame);
   void handleStreamHeadersPush(HeadersPayload&& payload);
   void handleConnectionClose();
-  void pauseStream();
-  void resumeStream();
+  void handlePausedByConnection();
+  void handleResumedByConnection();
 
   StreamServerCallback& getStreamServerCallback();
   void timeoutExpired() noexcept;

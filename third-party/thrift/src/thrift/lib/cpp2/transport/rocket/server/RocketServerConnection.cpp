@@ -1381,7 +1381,7 @@ void RocketServerConnection::pauseStreams() {
     folly::variant_match(
         it->second,
         [](const std::unique_ptr<RocketStreamClientCallback>& stream) {
-          stream->pauseStream();
+          stream->handlePausedByConnection();
         },
         [](const auto&) {});
   }
@@ -1394,7 +1394,7 @@ void RocketServerConnection::resumeStreams() {
     folly::variant_match(
         it->second,
         [](const std::unique_ptr<RocketStreamClientCallback>& stream) {
-          stream->resumeStream();
+          stream->handleResumedByConnection();
         },
         [](const auto&) {});
   }

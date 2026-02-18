@@ -18,6 +18,14 @@
 
 namespace apache::thrift {
 
+ThriftParametersClientExtension::ThriftParametersClientExtension(
+    const std::shared_ptr<ThriftParametersContext>& context)
+    : context_(context) {
+  // context_->getSupportedPSPNegotiations() invokes an arbitrary policy
+  // function, so we evaluate it once and use the result consistently
+  // throughout the lifetime of the connection.
+  offerredPSP_ = context_->getSupportedPSPNegotiations();
+}
 std::vector<fizz::Extension>
 ThriftParametersClientExtension::getClientHelloExtensions() const {
   std::vector<fizz::Extension> clientExtensions;
@@ -27,10 +35,13 @@ ThriftParametersClientExtension::getClientHelloExtensions() const {
     assert(comp != CompressionAlgorithm::NONE);
     compressionAlgorithms |= 1ull << (int(comp) - 1);
   }
+
   params.compressionAlgos() = compressionAlgorithms;
   params.useStopTLS() = context_->getUseStopTLS();
   params.useStopTLSV2() = context_->getUseStopTLSV2(); // Added for StopTLS V2
   params.useStopTLSForTTLSTunnel() = context_->getUseStopTLSForTTLSTunnel();
+  params.pspUpgradeProtocol() = offerredPSP_;
+
   ThriftParametersExt paramsExt;
   paramsExt.params = params;
   clientExtensions.push_back(encodeThriftExtension(paramsExt));
@@ -46,7 +57,8 @@ void ThriftParametersClientExtension::onEncryptedExtensions(
     VLOG(6) << "Server did not negotiate thrift parameters";
     return;
   }
-  if (auto serverCompressions = serverParams->params.compressionAlgos()) {
+  const auto& negotiatedParams = serverParams->params;
+  if (auto serverCompressions = negotiatedParams.compressionAlgos()) {
     for (const auto& comp : context_->getSupportedCompressionAlgorithms()) {
       assert(comp != CompressionAlgorithm::NONE);
       if (*serverCompressions & 1ull << (int(comp) - 1)) {
@@ -59,11 +71,18 @@ void ThriftParametersClientExtension::onEncryptedExtensions(
   }
 
   negotiatedStopTLS_ = context_->getUseStopTLS() &&
-      serverParams->params.useStopTLS().value_or(false);
+      negotiatedParams.useStopTLS().value_or(false);
   negotiatedStopTLSV2_ = context_->getUseStopTLSV2() &&
-      serverParams->params.useStopTLSV2().value_or(false);
+      negotiatedParams.useStopTLSV2().value_or(false);
   negotiatedStopTLSForTTLSTunnel_ = context_->getUseStopTLSForTTLSTunnel() &&
-      serverParams->params.useStopTLSForTTLSTunnel().value_or(false);
+      negotiatedParams.useStopTLSForTTLSTunnel().value_or(false);
+
+  // The server must select a bit from our offerred bitmask and the server
+  // must select only one version.
+  auto serverPSPSelection = negotiatedParams.pspUpgradeProtocol().value_or(0);
+  if (folly::popcount((serverPSPSelection & offerredPSP_)) == 1) {
+    negotiatedPSP_ = serverPSPSelection;
+  }
 }
 
 } // namespace apache::thrift

@@ -59,6 +59,9 @@ TEST_F(ThriftParametersClientExtensionTest, ValidExtensions) {
 TEST_F(ThriftParametersClientExtensionTest, NoExtensions) {
   extensions_->onEncryptedExtensions(serverExtensions_);
   EXPECT_FALSE(extensions_->getThriftCompressionAlgorithm().has_value());
+  EXPECT_EQ(
+      extensions_->getNegotiatedPSPUpgrade(),
+      PSPNegotiationVersion::THRIFT_PSP_NONE);
 }
 
 TEST_F(ThriftParametersClientExtensionTest, ServerMismatchCompressionAlgo) {
@@ -82,4 +85,77 @@ TEST_F(ThriftParametersClientExtensionTest, ServerMultipleCompressionAlgo) {
   EXPECT_EQ(
       extensions_->getThriftCompressionAlgorithm(), CompressionAlgorithm::ZSTD);
 }
+
+class ThriftClientPSPNegotiationTest : public testing::Test {
+ protected:
+  void negotiate() {
+    context_ = std::make_shared<ThriftParametersContext>();
+    if (clientOffers_.has_value()) {
+      context_->setSupportedPSPVersionsPolicy(
+          [this](const auto&) { return clientOffers_.value(); });
+    }
+    extensions_ = std::make_shared<ThriftParametersClientExtension>(context_);
+    NegotiationParameters params;
+    if (serverSends_.has_value()) {
+      params.pspUpgradeProtocol() = serverSends_.value();
+    }
+    ThriftParametersExt paramsExt;
+    paramsExt.params = params;
+    auto encodedExtension = encodeThriftExtension(paramsExt);
+    std::vector<fizz::Extension> serverExtensions;
+    serverExtensions.push_back(std::move(encodedExtension));
+
+    extensions_->onEncryptedExtensions(serverExtensions);
+  }
+
+  void clientOffers(uint64_t version) { clientOffers_ = version; }
+
+  void serverSelects(uint64_t version) { serverSends_ = version; }
+
+  std::optional<uint64_t> clientOffers_{};
+  std::optional<uint64_t> serverSends_{};
+  std::shared_ptr<ThriftParametersClientExtension> extensions_;
+  std::shared_ptr<ThriftParametersContext> context_;
+};
+
+// Server sends unsolicited PSP version. No PSP negotiated
+TEST_F(ThriftClientPSPNegotiationTest, UnsolicitedPSPVersion) {
+  serverSelects(PSPNegotiationVersion::THRIFT_PSP_V0);
+  negotiate();
+  EXPECT_EQ(extensions_->getNegotiatedPSPUpgrade(), 0);
+}
+
+// Client offers to negotiate PSP. Server doesn't respond. No PSP negotiated
+TEST_F(ThriftClientPSPNegotiationTest, ClientOffersServerDoesntRespond) {
+  clientOffers(PSPNegotiationVersion::THRIFT_PSP_V0);
+  negotiate();
+  EXPECT_EQ(extensions_->getNegotiatedPSPUpgrade(), 0);
+}
+
+// Client offers to negotiate PSP. Server responds with version outside of
+// its range. No PSP negotiated
+TEST_F(ThriftClientPSPNegotiationTest, ServerSendsDisjoint) {
+  clientOffers(0x3);
+  serverSelects(0x4);
+  negotiate();
+  EXPECT_EQ(extensions_->getNegotiatedPSPUpgrade(), 0);
+}
+
+// Client offers to negotiate PSP. Server selects mulitple versions. No PSP
+// negotiated
+TEST_F(ThriftClientPSPNegotiationTest, ServerSelectsMultiple) {
+  clientOffers(0x3);
+  serverSelects(0x3);
+  negotiate();
+  EXPECT_EQ(extensions_->getNegotiatedPSPUpgrade(), 0);
+}
+
+// Client offers to negotiate PSP. Server selects a version. PSP negotiated
+TEST_F(ThriftClientPSPNegotiationTest, ServerNegotiates) {
+  clientOffers(0x3);
+  serverSelects(0x1);
+  negotiate();
+  EXPECT_EQ(extensions_->getNegotiatedPSPUpgrade(), 0x1);
+}
+
 } // namespace apache::thrift

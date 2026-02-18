@@ -25,8 +25,7 @@ namespace apache::thrift {
 class ThriftParametersClientExtension : public fizz::ClientExtensions {
  public:
   explicit ThriftParametersClientExtension(
-      const std::shared_ptr<ThriftParametersContext>& context)
-      : context_(context) {}
+      const std::shared_ptr<ThriftParametersContext>& context);
 
   std::vector<fizz::Extension> getClientHelloExtensions() const override;
 
@@ -50,11 +49,16 @@ class ThriftParametersClientExtension : public fizz::ClientExtensions {
     return negotiatedStopTLSForTTLSTunnel_;
   }
 
+  uint64_t getNegotiatedPSPUpgrade() const { return negotiatedPSP_; }
+
  private:
   folly::Optional<CompressionAlgorithm> negotiatedThriftCompressionAlgo_;
   bool negotiatedStopTLS_{false};
   bool negotiatedStopTLSV2_{false}; // Added for StopTLS V2 support
   bool negotiatedStopTLSForTTLSTunnel_{false};
+
+  uint64_t offerredPSP_{};
+  uint64_t negotiatedPSP_{};
   std::shared_ptr<ThriftParametersContext> context_;
 };
 } // namespace apache::thrift

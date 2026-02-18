@@ -374,7 +374,7 @@ void RefactoredRocketServerConnection::closeIfNeeded() {
                   ErrorCode::CANCELED,
                   getPayloadSerializer()->packCompact(
                       getStreamConnectionClosingError())));
-          callback->onStreamCancel();
+          callback->handleConnectionClose();
         },
         [](const std::unique_ptr<RocketSinkClientCallback>& callback) {
           bool state = callback->onSinkError(TApplicationException(

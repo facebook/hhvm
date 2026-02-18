@@ -181,7 +181,23 @@ void RocketStreamClientCallback::resumeStream() {
   serverCallback()->resumeStream();
 }
 
-void RocketStreamClientCallback::onStreamCancel() {
+void RocketStreamClientCallback::handle(CancelFrame /* cancelFrame */) {
+  if (!serverCallbackReady()) {
+    DCHECK(!serverCallback());
+    serverCallbackOrCancelled_ = kCancelledFlag;
+    return;
+  }
+  serverCallback()->onStreamCancel();
+  if (contextStack_) {
+    contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
+  }
+  connection_.freeStream(streamId_, true);
+}
+
+void RocketStreamClientCallback::handleConnectionClose() {
+  if (!serverCallbackReady()) {
+    return;
+  }
   serverCallback()->onStreamCancel();
   if (contextStack_) {
     contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);

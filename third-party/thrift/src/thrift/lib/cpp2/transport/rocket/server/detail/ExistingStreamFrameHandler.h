@@ -142,12 +142,12 @@ class ExistingStreamFrameHandler {
    * Uses pure delegation to avoid circular dependencies.
    */
   template <typename IteratorType>
-  void handleCancelFrame(CancelFrame&& /*frame*/, IteratorType& it) noexcept {
+  void handleCancelFrame(CancelFrame&& frame, IteratorType& it) noexcept {
     folly::variant_match(
         it->second,
         [&](std::unique_ptr<RequestStreamCallback>& clientCallback) {
           if (clientCallback) {
-            clientCallback->onStreamCancel();
+            clientCallback->handle(std::move(frame));
           }
         },
         [&](std::unique_ptr<RequestChannelCallback>& clientCallback) {

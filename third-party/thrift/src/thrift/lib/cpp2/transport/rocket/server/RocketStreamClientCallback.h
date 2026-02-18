@@ -55,7 +55,8 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   void resetServerCallback(StreamServerCallback&) override;
 
   bool handle(RequestNFrame requestNFrame);
-  void onStreamCancel();
+  void handle(CancelFrame cancelFrame);
+  void handleConnectionClose();
   void headers(HeadersPayload&& payload);
   void pauseStream();
   void resumeStream();
@@ -66,10 +67,6 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   void setCompressionConfig(CompressionConfig compressionConfig);
   bool serverCallbackReady() const {
     return serverCallbackOrCancelled_ != kCancelledFlag && serverCallback();
-  }
-  void earlyCancelled() {
-    DCHECK(!serverCallbackReady());
-    serverCallbackOrCancelled_ = kCancelledFlag;
   }
 
   void setRpcMethodName(std::string rpcMethodName) {

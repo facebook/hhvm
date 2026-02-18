@@ -42,12 +42,6 @@ constexpr size_t smashableJmpLen()  { return 5; }
 constexpr size_t smashableJccLen()  { return 6; }
 constexpr size_t smashableInterceptLen () { return 2; }
 
-// This could be cache_line_size() on Intel but on AMD it has to be 32 bytes
-// If a write happen over a 32 byte boundary the write is no longer atomic in
-// the sense that a different thread executing that memory might see partially
-// the new and old value.
-constexpr size_t smashableAlignTo() { return 32; }
-
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d);
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target);

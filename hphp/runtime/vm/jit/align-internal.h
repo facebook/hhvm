@@ -37,18 +37,18 @@ void align(CodeBlock& cb, CGMeta* meta,
 /*
  * Used in align-*.cpp to generate an AlignInfo table within an arch namespace.
  */
-#define DECLARE_ALIGN_TABLE(table)                                            \
-  constexpr AlignInfo table[] = {                                             \
+#define DECLARE_ALIGN_TABLE(table)                                           \
+  constexpr AlignInfo table[] = {                                            \
     { cache_line_size(),  cache_line_size(),      0 }, /* CacheLine */        \
     { cache_line_size(),  cache_line_size() / 2,  0 }, /* CacheLineRoundUp */ \
     { kJmpTargetAlign,    kJmpTargetAlign,        0 }, /* JmpTarget */        \
     { 8,                  8,                      0 }, /* QWord Lit */        \
-    { smashableAlignTo(), smashableMovqLen(),     kSmashMovqImmOff },         \
-    { smashableAlignTo(), smashableCmpqLen(),     kSmashCmpqImmOff },         \
-    { smashableAlignTo(), smashableCallLen(),     0 },                        \
-    { smashableAlignTo(), smashableJmpLen(),      0 },                        \
-    { smashableAlignTo(), smashableJccLen(),      0 },                        \
-    { smashableAlignTo(), smashableInterceptLen(), 0 }, /* InterceptJmp/Jcc */ \
+    { SmashableAlignTo,   smashableMovqLen(),     kSmashMovqImmOff },         \
+    { SmashableAlignTo,   smashableCmpqLen(),     kSmashCmpqImmOff },         \
+    { SmashableAlignTo,   smashableCallLen(),     0 },                        \
+    { SmashableAlignTo,   smashableJmpLen(),      0 },                        \
+    { SmashableAlignTo,   smashableJccLen(),      0 },                        \
+    { SmashableAlignTo,   smashableInterceptLen(), 0 }, /* InterceptJmp/Jcc */ \
   }
 
 #define DEFINE_ALIGN_TABLE(table) \
@@ -60,4 +60,3 @@ void align(CodeBlock& cb, CGMeta* meta,
 }
 
 #include "hphp/runtime/vm/jit/align-internal-inl.h"
-

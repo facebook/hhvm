@@ -68,11 +68,6 @@ size_t smashableJccLen();
 size_t smashableInterceptLen();
 
 /*
- * Boundry to align the smashables to (normally cache line size).
- */
-size_t smashableAlignTo();
-
-/*
  * Emit a smashable instruction and return the instruction's address.
  *
  * For jcc_and_jmp, return a pair of (jcc_addr, jmp_addr).

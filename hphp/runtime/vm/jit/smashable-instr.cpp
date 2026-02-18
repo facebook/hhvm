@@ -44,10 +44,6 @@ size_t smashableJccLen() {
   return ARCH_SWITCH_CALL(smashableJccLen);
 }
 
-size_t smashableAlignTo() {
-  return ARCH_SWITCH_CALL(smashableAlignTo);
-}
-
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d) {
   return ARCH_SWITCH_CALL(emitSmashableMovq, cb, fixups, imm, d);

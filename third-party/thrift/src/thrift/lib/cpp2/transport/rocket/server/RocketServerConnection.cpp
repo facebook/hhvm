@@ -707,15 +707,7 @@ void RocketServerConnection::handleStreamFrame(
 
     case FrameType::EXT: {
       ExtFrame extFrame(streamId, flags, cursor, std::move(frame));
-      if (!extFrame.hasIgnore()) {
-        close(
-            folly::make_exception_wrapper<RocketException>(
-                ErrorCode::INVALID,
-                fmt::format(
-                    "Received unhandleable EXT frame type ({}) for stream (id {})",
-                    static_cast<uint32_t>(extFrame.extFrameType()),
-                    static_cast<uint32_t>(streamId))));
-      }
+      clientCallback.handle(std::move(extFrame));
       return;
     }
 

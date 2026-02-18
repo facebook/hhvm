@@ -194,6 +194,18 @@ void RocketStreamClientCallback::handle(CancelFrame /* cancelFrame */) {
   connection_.freeStream(streamId_, true);
 }
 
+void RocketStreamClientCallback::handle(ExtFrame extFrame) {
+  if (!extFrame.hasIgnore()) {
+    connection_.close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID,
+            fmt::format(
+                "Received unhandleable EXT frame type ({}) for stream (id {})",
+                static_cast<uint32_t>(extFrame.extFrameType()),
+                static_cast<uint32_t>(streamId_))));
+  }
+}
+
 void RocketStreamClientCallback::handleConnectionClose() {
   if (!serverCallbackReady()) {
     return;

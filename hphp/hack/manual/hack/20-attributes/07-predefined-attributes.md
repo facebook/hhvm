@@ -482,6 +482,15 @@ Safe calls include:
 - Calling via `static::` from another `<<__NeedsConcrete>>` method
 - Calling from within a concrete class
 
+### How to fix warnings
+
+- Instead of `static::foo()`, you can often adjust the receiver to be a specific concrete class rather than `static`.  
+- Mark the containing class `final`: then Hack knows that `static` refers to the containing class  
+- Sometimes `static::` is used to implicitly pass around a class name. If the class name is being used just as a name (no methods called, not instantiated), intent can be clearer if you pass the class name as an explicit parameter and remove the \_\_NeedsConcrete attribute.  
+- When a static method relies on the current class being concrete, add the `__NeedsConcrete` attribute. We have codemods that do this automatically, but there may be stragglers in WWW.
+
+Fixing the warnings helps avoid runtime errors from calling static methods or attempting to instantiate abstract classes.
+
 ## __Newable
 
 This attribute is used to annotate reified type parameters to ensure that they are only instantiated with classes on which `new` can be safely called.  A common pattern, defining a function that creates instances of a class passed as type parameter, is:

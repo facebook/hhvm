@@ -2026,9 +2026,6 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
     ty.lower = opt(std::move(ty.lower));
     ty.upper = opt(std::move(ty.upper));
   }
-  // We cannot ever say an upper-bound check will succeed, so its
-  // lower-bound is always empty.
-  if (tc.isUpperBound()) ty.lower = TBottom;
   // Soft type-constraints can potentially allow anything, so its
   // upper-bound is maximal. We might still be able to optimize away
   // the check if the lower bound is satisfied.

@@ -419,12 +419,10 @@ using lift_view_t = std::conditional_t<
 template <typename ProtocolReader>
 std::string_view readStringView(ProtocolReader& protocol) {
   int32_t size;
-  protocol.readI32(size);
-  if (size < 0) {
-    TProtocolException::throwNegativeSize();
-  }
+  protocol.readStringSize(size);
   folly::io::Cursor c = protocol.getCursor();
-  if (static_cast<size_t>(size) >= c.length()) {
+  // current buffer must hold the string data
+  if (static_cast<size_t>(size) > c.length()) {
     TProtocolException::throwTruncatedData();
   }
   protocol.skipBytes(size);

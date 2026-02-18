@@ -267,6 +267,10 @@ class BinaryProtocolReader : public detail::ProtocolBase {
   void readBinary(StrType& str);
   void readBinary(std::unique_ptr<folly::IOBuf>& str);
   void readBinary(folly::IOBuf& str);
+  void readStringSize(int32_t& size) {
+    readI32(size);
+    checkStringSize(size);
+  }
   bool peekMap() { return false; }
   bool peekSet() { return false; }
   bool peekList() { return false; }

@@ -624,3 +624,43 @@ TEST(DynamicCursorSerializer, SimpleJSONUnknownFieldsHandled) {
 
   wrapper.endRead(std::move(reader));
 }
+
+TEST(DynamicCursorSerializer, ContiguousReadCompactProtocol) {
+  Struct s;
+  s.string_field() = "hello";
+
+  auto serialized = CompactSerializer::serialize<folly::IOBufQueue>(s).move();
+  serialized->coalesce();
+
+  DynamicCursorSerializationWrapper<
+      CompactProtocolReader,
+      CompactProtocolWriter>
+      wrapper(std::move(serialized));
+
+  auto reader = wrapper.beginRead</*Contiguous=*/true>();
+  while (reader.fieldId() != 1) {
+    ASSERT_NE(reader.fieldType(), TType::T_STOP);
+    reader.skip();
+  }
+  EXPECT_EQ(reader.read(type::string_t{}), "hello");
+  wrapper.endRead(std::move(reader));
+}
+
+TEST(DynamicCursorSerializer, ContiguousReadBinaryProtocol) {
+  Struct s;
+  s.string_field() = "hello";
+
+  auto serialized = BinarySerializer::serialize<folly::IOBufQueue>(s).move();
+  serialized->coalesce();
+
+  DynamicCursorSerializationWrapper<BinaryProtocolReader, BinaryProtocolWriter>
+      wrapper(std::move(serialized));
+
+  auto reader = wrapper.beginRead</*Contiguous=*/true>();
+  while (reader.fieldId() != 1) {
+    ASSERT_NE(reader.fieldType(), TType::T_STOP);
+    reader.skip();
+  }
+  EXPECT_EQ(reader.read(type::string_t{}), "hello");
+  wrapper.endRead(std::move(reader));
+}

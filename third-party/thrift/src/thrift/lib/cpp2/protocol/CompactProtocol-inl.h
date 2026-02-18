@@ -722,10 +722,7 @@ inline void CompactProtocolReader::readFloat(float& flt) {
   flt = folly::bit_cast<float>(bits);
 }
 
-inline void CompactProtocolReader::readStringSize(int32_t& size) {
-  apache::thrift::util::readVarint(in_, size);
-
-  // Catch error cases
+inline void CompactProtocolReader::checkStringSize(int32_t size) {
   if (size < 0) {
     TProtocolException::throwNegativeSize();
   }

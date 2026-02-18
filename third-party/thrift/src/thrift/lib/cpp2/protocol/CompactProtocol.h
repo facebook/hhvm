@@ -27,6 +27,7 @@
 #include <folly/portability/GFlags.h>
 #include <folly/small_vector.h>
 #include <thrift/lib/cpp/protocol/TProtocol.h>
+#include <thrift/lib/cpp/util/VarintUtils.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 
 FOLLY_GFLAGS_DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
@@ -314,6 +315,10 @@ class CompactProtocolReader : public detail::ProtocolBase {
   void readBinary(StrType& str);
   void readBinary(std::unique_ptr<IOBuf>& str);
   void readBinary(IOBuf& str);
+  void readStringSize(int32_t& size) {
+    apache::thrift::util::readVarint(in_, size);
+    checkStringSize(size);
+  }
 
   static constexpr std::size_t fixedSizeInContainer(TType type);
   void skipBytes(size_t bytes) { in_.skip(bytes); }
@@ -337,9 +342,9 @@ class CompactProtocolReader : public detail::ProtocolBase {
    */
   Cursor in_;
 
-  void readStringSize(int32_t& size);
-
  private:
+  void checkStringSize(int32_t size);
+
   template <typename StrType>
   void readStringBody(StrType& str, int32_t size);
 

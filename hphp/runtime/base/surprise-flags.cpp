@@ -18,22 +18,31 @@
 
 #include "hphp/util/rds-local.h"
 
+#include <climits>
 #include <type_traits>
 
 namespace HPHP {
+
 // NoHandleSurpriseScope is only implemented in DEBUG mode.
 #ifndef NDEBUG
-struct NoSurprise {
-  int64_t depth[sizeof(SurpriseFlag)] = {0,};
-};
+
 namespace {
+constexpr size_t kSurpriseFlagBits = sizeof(SurpriseFlag) * CHAR_BIT;
+}
+
+struct NoSurprise {
+  int64_t depth[kSurpriseFlagBits] = {0,};
+};
+
+namespace {
+
 RDS_LOCAL(NoSurprise, rl_noSurprise);
 // Cache of flags with depth > 0.
 RDS_LOCAL(SurpriseFlag, rl_noSurpriseMask);
 
 void addNoSurpriseDepth(SurpriseFlag flags, int increment) {
   typename std::underlying_type<SurpriseFlag>::type mask = 0;
-  for (size_t i = 0; i < sizeof(flags); ++i) {
+  for (size_t i = 0; i < kSurpriseFlagBits; ++i) {
     if (flags & (1ull << i)) rl_noSurprise->depth[i] += increment;
     if (rl_noSurprise->depth[i] > 0) mask |= (1ull << i);
   }
@@ -54,6 +63,7 @@ NoHandleSurpriseScope::NoHandleSurpriseScope(SurpriseFlag flags) {
 NoHandleSurpriseScope::~NoHandleSurpriseScope() {
   addNoSurpriseDepth(m_flags, -1);
 }
+
 #endif // DEBUG
 
 }

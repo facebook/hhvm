@@ -15,4 +15,4 @@ bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.19.1", features = ["allocator_api", "collections"] }
 
 [dev-dependencies]
-pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }
+pretty_assertions = { version = "1.4.1", features = ["alloc"], default-features = false }

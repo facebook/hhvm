@@ -17,4 +17,4 @@ jwalk = "0.8.1"
 relative_path = { version = "0.0.0", path = "../rust/relative_path" }
 
 [dev-dependencies]
-pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }
+pretty_assertions = { version = "1.4.1", features = ["alloc"], default-features = false }

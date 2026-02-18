@@ -20,4 +20,4 @@ ocaml_helper = { version = "0.0.0", path = "../../../../utils/ocaml_helper" }
 regex = "1.12.2"
 
 [dev-dependencies]
-pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }
+pretty_assertions = { version = "1.4.1", features = ["alloc"], default-features = false }

@@ -41,4 +41,4 @@ thiserror = "2.0.18"
 toml = { version = "0.9.11", features = ["preserve_order"] }
 
 [dev-dependencies]
-pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }
+pretty_assertions = { version = "1.4.1", features = ["alloc"], default-features = false }

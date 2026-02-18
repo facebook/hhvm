@@ -150,6 +150,10 @@ func EncodeSimpleJSON(msg types.WritableStruct) ([]byte, error) {
 	return format.EncodeSimpleJSON(msg)
 }
 
+func EncodeSimpleJSONV2(msg types.WritableStruct) ([]byte, error) {
+	return format.EncodeSimpleJSONV2(msg)
+}
+
 func DecodeCompact(data []byte, msg types.ReadableStruct) error {
 	return format.DecodeCompact(data, msg)
 }
@@ -164,6 +168,10 @@ func DecodeCompactJSON(data []byte, msg types.ReadableStruct) error {
 
 func DecodeSimpleJSON(data []byte, msg types.ReadableStruct) error {
 	return format.DecodeSimpleJSON(data, msg)
+}
+
+func DecodeSimpleJSONV2(data []byte, msg types.ReadableStruct) error {
+	return format.DecodeSimpleJSONV2(data, msg)
 }
 
 func WithFrameworkMetadata(ctx context.Context, metadata []byte) context.Context {

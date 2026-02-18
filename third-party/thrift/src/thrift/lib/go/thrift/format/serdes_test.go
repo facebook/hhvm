@@ -60,6 +60,9 @@ func TestBasicSerDes(t *testing.T) {
 	t.Run("SimpleJSON", func(t *testing.T) {
 		encodeDecodeTestFn(t, EncodeSimpleJSON, DecodeSimpleJSON)
 	})
+	t.Run("SimpleJSONV2", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeSimpleJSONV2, DecodeSimpleJSONV2)
+	})
 }
 
 // Dummy struct for TestErrorSerDes
@@ -93,6 +96,9 @@ func TestErrorSerDes(t *testing.T) {
 	})
 	t.Run("SimpleJSON", func(t *testing.T) {
 		encodeDecodeTestFn(t, EncodeSimpleJSON, DecodeSimpleJSON)
+	})
+	t.Run("SimpleJSONV2", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeSimpleJSONV2, DecodeSimpleJSONV2)
 	})
 }
 
@@ -138,6 +144,12 @@ func TestConsequentSerDes(t *testing.T) {
 		deserializer := newSimpleJSONDeserializer(buffer)
 		encodeDecodeTestFn(t, serializer, deserializer)
 	})
+	t.Run("SimpleJSONV2", func(t *testing.T) {
+		buffer := new(bytes.Buffer)
+		serializer := newSimpleJSONSerializerV2(buffer)
+		deserializer := newSimpleJSONDeserializerV2(buffer)
+		encodeDecodeTestFn(t, serializer, deserializer)
+	})
 }
 
 func TestGiantStructSerDes(t *testing.T) {
@@ -170,5 +182,8 @@ func TestGiantStructSerDes(t *testing.T) {
 	})
 	t.Run("SimpleJSON", func(t *testing.T) {
 		encodeDecodeTestFn(t, EncodeSimpleJSON, DecodeSimpleJSON)
+	})
+	t.Run("SimpleJSONV2", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeSimpleJSONV2, DecodeSimpleJSONV2)
 	})
 }

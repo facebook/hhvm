@@ -167,14 +167,26 @@ func readCodecSetSpec(d Decoder, dstValue reflect.Value, spec *CodecSetSpec) err
 	// NOTE: the 'dstValue' slice may not be empty, because of
 	// Thrift field defaults. It may also be nil (zero value).
 	// So we set it to a fresh empty slice.
-	dstValue.Set(reflect.MakeSlice(dstValue.Type(), size, size))
-
-	for i := range size {
-		err := ReadTypeSpec(d, dstValue.Index(i), spec.ElementTypeSpec)
-		if err != nil {
-			return err
+	dstSlice := reflect.MakeSlice(dstValue.Type(), max(size, 0), max(size, 0))
+	if size >= 0 { // Known size
+		for i := range size {
+			err := ReadTypeSpec(d, dstSlice.Index(i), spec.ElementTypeSpec)
+			if err != nil {
+				return err
+			}
+		}
+	} else { // Unknown size
+		for {
+			elem := reflect.New(dstValue.Type().Elem())
+			err := ReadTypeSpec(d, elem.Elem(), spec.ElementTypeSpec)
+			if err != nil {
+				break
+			}
+			dstSlice = reflect.Append(dstSlice, elem.Elem())
 		}
 	}
+
+	dstValue.Set(dstSlice)
 
 	if err := d.ReadSetEnd(); err != nil {
 		return PrependError("error reading set end: ", err)
@@ -192,14 +204,26 @@ func readCodecListSpec(d Decoder, dstValue reflect.Value, spec *CodecListSpec) e
 	// NOTE: the 'dstValue' slice may not be empty, because of
 	// Thrift field defaults. It may also be nil (zero value).
 	// So we set it to a fresh empty slice.
-	dstValue.Set(reflect.MakeSlice(dstValue.Type(), size, size))
-
-	for i := range size {
-		err := ReadTypeSpec(d, dstValue.Index(i), spec.ElementTypeSpec)
-		if err != nil {
-			return err
+	dstSlice := reflect.MakeSlice(dstValue.Type(), max(size, 0), max(size, 0))
+	if size >= 0 { // Known size
+		for i := range size {
+			err := ReadTypeSpec(d, dstSlice.Index(i), spec.ElementTypeSpec)
+			if err != nil {
+				return err
+			}
+		}
+	} else { // Unknown size
+		for {
+			elem := reflect.New(dstValue.Type().Elem())
+			err := ReadTypeSpec(d, elem.Elem(), spec.ElementTypeSpec)
+			if err != nil {
+				break
+			}
+			dstSlice = reflect.Append(dstSlice, elem.Elem())
 		}
 	}
+
+	dstValue.Set(dstSlice)
 
 	if err := d.ReadListEnd(); err != nil {
 		return PrependError("error reading list end: ", err)
@@ -217,7 +241,7 @@ func readCodecMapSpec(d Decoder, dstValue reflect.Value, spec *CodecMapSpec) err
 	// NOTE: the 'dstValue' map might not be empty, because of
 	// Thrift field defaults. It may also be nil (zero value).
 	// So we set it to a fresh empty map.
-	dstValue.Set(reflect.MakeMapWithSize(dstValue.Type(), size))
+	dstValue.Set(reflect.MakeMapWithSize(dstValue.Type(), max(size, 0)))
 
 	keyReflectType := dstValue.Type().Key()
 	valReflectType := dstValue.Type().Elem()
@@ -247,32 +271,61 @@ func readCodecMapSpec(d Decoder, dstValue reflect.Value, spec *CodecMapSpec) err
 	// Temporary slices to hold keys and values. This is a performance optimization.
 	// Rather than calling reflect.New() for each key and value, we create slices
 	// which create zero values for us under-the-hood. This is much faster.
-	keysSlice := reflect.MakeSlice(reflect.SliceOf(passedKeyReflectType), size, size)
-	valuesSlice := reflect.MakeSlice(reflect.SliceOf(valReflectType), size, size)
+	keysSlice := reflect.MakeSlice(reflect.SliceOf(passedKeyReflectType), max(size, 0), max(size, 0))
+	valuesSlice := reflect.MakeSlice(reflect.SliceOf(valReflectType), max(size, 0), max(size, 0))
 
 	// Read keys and values into temporary slices.
-	for i := range size {
-		passedKeyReflectValue := keysSlice.Index(i)
-		err := ReadTypeSpec(d, passedKeyReflectValue, spec.KeyTypeSpec)
-		if err != nil {
-			return err
-		}
-		valueReflectValue := valuesSlice.Index(i)
-		err = ReadTypeSpec(d, valueReflectValue, spec.ValueTypeSpec)
-		if err != nil {
-			return err
-		}
+	if size >= 0 {
+		for i := range size {
+			passedKeyReflectValue := keysSlice.Index(i)
+			err := ReadTypeSpec(d, passedKeyReflectValue, spec.KeyTypeSpec)
+			if err != nil {
+				return err
+			}
+			valueReflectValue := valuesSlice.Index(i)
+			err = ReadTypeSpec(d, valueReflectValue, spec.ValueTypeSpec)
+			if err != nil {
+				return err
+			}
 
-		assignedKeyReflectValue := passedKeyReflectValue
-		if isComparable && isStruct {
-			// See comments earlier in this function. This is the same logic in reverse.
-			assignedKeyReflectValue = passedKeyReflectValue.Elem()
-		} else if !isComparable && !isStruct {
-			// See comments earlier in this function. This is the same logic in reverse.
-			assignedKeyReflectValue = passedKeyReflectValue.Addr()
-		}
+			assignedKeyReflectValue := passedKeyReflectValue
+			if isComparable && isStruct {
+				// See comments earlier in this function. This is the same logic in reverse.
+				assignedKeyReflectValue = passedKeyReflectValue.Elem()
+			} else if !isComparable && !isStruct {
+				// See comments earlier in this function. This is the same logic in reverse.
+				assignedKeyReflectValue = passedKeyReflectValue.Addr()
+			}
 
-		dstValue.SetMapIndex(assignedKeyReflectValue, valueReflectValue)
+			dstValue.SetMapIndex(assignedKeyReflectValue, valueReflectValue)
+		}
+	} else {
+		for {
+			keyElem := reflect.New(passedKeyReflectType)
+			valueElem := reflect.New(valReflectType)
+
+			passedKeyReflectValue := keyElem.Elem()
+			err := ReadTypeSpec(d, passedKeyReflectValue, spec.KeyTypeSpec)
+			if err != nil {
+				break
+			}
+			valueReflectValue := valueElem.Elem()
+			err = ReadTypeSpec(d, valueReflectValue, spec.ValueTypeSpec)
+			if err != nil {
+				return err
+			}
+
+			assignedKeyReflectValue := passedKeyReflectValue
+			if isComparable && isStruct {
+				// See comments earlier in this function. This is the same logic in reverse.
+				assignedKeyReflectValue = passedKeyReflectValue.Elem()
+			} else if !isComparable && !isStruct {
+				// See comments earlier in this function. This is the same logic in reverse.
+				assignedKeyReflectValue = passedKeyReflectValue.Addr()
+			}
+
+			dstValue.SetMapIndex(assignedKeyReflectValue, valueReflectValue)
+		}
 	}
 
 	if err := d.ReadMapEnd(); err != nil {

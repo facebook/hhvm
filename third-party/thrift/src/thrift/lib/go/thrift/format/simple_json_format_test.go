@@ -538,7 +538,7 @@ func TestReadSimpleJSONProtocolBinary(t *testing.T) {
 	base64.StdEncoding.Encode(b64value, value)
 	b64String := string(b64value)
 	trans := new(bytes.Buffer)
-	p := NewSimpleJSONFormat(trans)
+	p := newSimpleJSONFormatV2(trans)
 	trans.WriteString(jsonQuote(b64String))
 	s := trans.String()
 	v, e := p.ReadBinary()
@@ -583,7 +583,7 @@ func TestReadSimpleJSONProtocolBinaryNull(t *testing.T) {
 func TestWriteSimpleJSONProtocolList(t *testing.T) {
 	thetype := "list"
 	trans := new(bytes.Buffer)
-	p := NewSimpleJSONFormat(trans)
+	p := newSimpleJSONFormatV2(trans)
 	p.WriteListBegin(types.DOUBLE, len(doubleValues))
 	for _, value := range doubleValues {
 		if e := p.WriteDouble(value); e != nil {
@@ -604,14 +604,8 @@ func TestWriteSimpleJSONProtocolList(t *testing.T) {
 	if len(l) < 2 {
 		t.Fatalf("List must be at least of length two to include metadata")
 	}
-	if int(l[0].(float64)) != int(types.DOUBLE) {
-		t.Fatal("Invalid type for list, expected: ", types.DOUBLE, ", but was: ", l[0])
-	}
-	if int(l[1].(float64)) != len(doubleValues) {
-		t.Fatal("Invalid length for list, expected: ", len(doubleValues), ", but was: ", l[1])
-	}
 	for k, value := range doubleValues {
-		s := l[k+2]
+		s := l[k]
 		if math.IsInf(value, 1) {
 			if s.(string) != JSON_INFINITY {
 				t.Fatalf("Bad value for %s at index %v %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(JSON_INFINITY), str)
@@ -636,7 +630,7 @@ func TestWriteSimpleJSONProtocolList(t *testing.T) {
 func TestWriteSimpleJSONProtocolSet(t *testing.T) {
 	thetype := "set"
 	trans := new(bytes.Buffer)
-	p := NewSimpleJSONFormat(trans)
+	p := newSimpleJSONFormatV2(trans)
 	p.WriteSetBegin(types.DOUBLE, len(doubleValues))
 	for _, value := range doubleValues {
 		if e := p.WriteDouble(value); e != nil {
@@ -657,14 +651,8 @@ func TestWriteSimpleJSONProtocolSet(t *testing.T) {
 	if len(l) < 2 {
 		t.Fatalf("Set must be at least of length two to include metadata")
 	}
-	if int(l[0].(float64)) != int(types.DOUBLE) {
-		t.Fatal("Invalid type for set, expected: ", types.DOUBLE, ", but was: ", l[0])
-	}
-	if int(l[1].(float64)) != len(doubleValues) {
-		t.Fatal("Invalid length for set, expected: ", len(doubleValues), ", but was: ", l[1])
-	}
 	for k, value := range doubleValues {
-		s := l[k+2]
+		s := l[k]
 		if math.IsInf(value, 1) {
 			if s.(string) != JSON_INFINITY {
 				t.Fatalf("Bad value for %s at index %v %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(JSON_INFINITY), str)
@@ -689,7 +677,7 @@ func TestWriteSimpleJSONProtocolSet(t *testing.T) {
 func TestWriteSimpleJSONProtocolMap(t *testing.T) {
 	thetype := "map"
 	trans := new(bytes.Buffer)
-	p := NewSimpleJSONFormat(trans)
+	p := newSimpleJSONFormatV2(trans)
 	p.WriteMapBegin(types.I32, types.DOUBLE, len(doubleValues))
 	for k, value := range doubleValues {
 		if e := p.WriteI32(int32(k)); e != nil {
@@ -704,28 +692,17 @@ func TestWriteSimpleJSONProtocolMap(t *testing.T) {
 		t.Fatalf("Unable to write %s due to error flushing: %s", thetype, e.Error())
 	}
 	str := trans.String()
-	if str[0] != '[' || str[len(str)-1] != ']' {
+	if str[0] != '{' || str[len(str)-1] != '}' {
 		t.Fatalf("Bad value for %s, wrote: %q, in go: %v", thetype, str, doubleValues)
 	}
 	l := strings.Split(str[1:len(str)-1], ",")
 	if len(l) < 3 {
 		t.Fatal("Expected list of at least length 3 for map for metadata, but was of length ", len(l))
 	}
-	expectedKeyType, _ := strconv.Atoi(l[0])
-	expectedValueType, _ := strconv.Atoi(l[1])
-	expectedSize, _ := strconv.Atoi(l[2])
-	if expectedKeyType != int(types.I32) {
-		t.Fatal("Expected map key type ", types.I32, ", but was ", l[0])
-	}
-	if expectedValueType != int(types.DOUBLE) {
-		t.Fatal("Expected map value type ", types.DOUBLE, ", but was ", l[1])
-	}
-	if expectedSize != len(doubleValues) {
-		t.Fatal("Expected map size of ", len(doubleValues), ", but was ", l[2])
-	}
 	for k, value := range doubleValues {
-		strk := l[k*2+3]
-		strv := l[k*2+4]
+		kvStrs := strings.Split(l[k], ":")
+		strk := strings.Trim(kvStrs[0], "\"")
+		strv := kvStrs[1]
 		ik, err := strconv.Atoi(strk)
 		if err != nil {
 			t.Fatalf("Bad value for %s index %v, wrote: %v, expected: %v, error: %s", thetype, k, strk, strconv.Itoa(k), err.Error())

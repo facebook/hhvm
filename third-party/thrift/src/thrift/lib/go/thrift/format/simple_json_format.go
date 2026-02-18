@@ -120,6 +120,8 @@ type simpleJSONFormat struct {
 
 	writer *bufio.Writer
 	reader *bufio.Reader
+
+	containerBugFix bool
 }
 
 var _ types.Format = (*simpleJSONFormat)(nil)
@@ -134,6 +136,17 @@ func newSimpleJSONFormat(readWriter io.ReadWriter) *simpleJSONFormat {
 		buffer: readWriter,
 		writer: bufio.NewWriter(readWriter),
 		reader: bufio.NewReader(readWriter),
+	}
+	v.resetContextStack()
+	return v
+}
+
+func newSimpleJSONFormatV2(readWriter io.ReadWriter) *simpleJSONFormat {
+	v := &simpleJSONFormat{
+		buffer:          readWriter,
+		writer:          bufio.NewWriter(readWriter),
+		reader:          bufio.NewReader(readWriter),
+		containerBugFix: true,
 	}
 	v.resetContextStack()
 	return v
@@ -202,6 +215,9 @@ func (p *simpleJSONFormat) WriteFieldEnd() error {
 func (p *simpleJSONFormat) WriteFieldStop() error { return nil }
 
 func (p *simpleJSONFormat) WriteMapBegin(keyType types.Type, valueType types.Type, size int) error {
+	if p.containerBugFix {
+		return p.OutputObjectBegin()
+	}
 	if err := p.OutputListBegin(); err != nil {
 		return err
 	}
@@ -215,10 +231,16 @@ func (p *simpleJSONFormat) WriteMapBegin(keyType types.Type, valueType types.Typ
 }
 
 func (p *simpleJSONFormat) WriteMapEnd() error {
+	if p.containerBugFix {
+		return p.OutputObjectEnd()
+	}
 	return p.OutputListEnd()
 }
 
 func (p *simpleJSONFormat) WriteListBegin(elemType types.Type, size int) error {
+	if p.containerBugFix {
+		return p.OutputListBegin()
+	}
 	return p.OutputElemListBegin(elemType, size)
 }
 
@@ -227,6 +249,9 @@ func (p *simpleJSONFormat) WriteListEnd() error {
 }
 
 func (p *simpleJSONFormat) WriteSetBegin(elemType types.Type, size int) error {
+	if p.containerBugFix {
+		return p.OutputListBegin()
+	}
 	return p.OutputElemListBegin(elemType, size)
 }
 
@@ -357,6 +382,14 @@ func (p *simpleJSONFormat) ReadFieldEnd() error {
 }
 
 func (p *simpleJSONFormat) ReadMapBegin() (types.Type /* kType */, types.Type /* vType */, int /* size */, error) {
+	if p.containerBugFix {
+		isNull, err := p.ParseObjectStart()
+		if isNull || err != nil {
+			return types.STOP, types.STOP, 0, err
+		}
+		// SimpleJSON does not encode key/value types or size; return placeholders
+		return types.STOP, types.STOP, -1, nil
+	}
 	isNull, err := p.ParseListBegin()
 	if isNull || err != nil {
 		return 0, 0, 0, err
@@ -383,10 +416,21 @@ func (p *simpleJSONFormat) ReadMapBegin() (types.Type /* kType */, types.Type /*
 }
 
 func (p *simpleJSONFormat) ReadMapEnd() error {
+	if p.containerBugFix {
+		return p.ParseObjectEnd()
+	}
 	return p.ParseListEnd()
 }
 
 func (p *simpleJSONFormat) ReadListBegin() (types.Type /* elemType */, int /* size */, error) {
+	if p.containerBugFix {
+		isNull, err := p.ParseListBegin()
+		if isNull || err != nil {
+			return types.STOP, 0, err
+		}
+		// SimpleJSON does not encode element type or size; return placeholders
+		return types.STOP, -1, nil
+	}
 	return p.ParseElemListBegin()
 }
 
@@ -395,6 +439,14 @@ func (p *simpleJSONFormat) ReadListEnd() error {
 }
 
 func (p *simpleJSONFormat) ReadSetBegin() (types.Type /* elemType */, int /* size */, error) {
+	if p.containerBugFix {
+		isNull, err := p.ParseListBegin()
+		if isNull || err != nil {
+			return types.STOP, 0, err
+		}
+		// SimpleJSON does not encode element type or size; return placeholders
+		return types.STOP, -1, nil
+	}
 	return p.ParseElemListBegin()
 }
 

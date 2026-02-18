@@ -55,6 +55,11 @@ func newSimpleJSONSerializer(readWriter io.ReadWriter) *Serializer {
 	return &Serializer{format: NewSimpleJSONFormat(readWriter)}
 }
 
+// newSimpleJSONSerializerV2 creates a new serializer using the SimpleJSON format
+func newSimpleJSONSerializerV2(readWriter io.ReadWriter) *Serializer {
+	return &Serializer{format: newSimpleJSONFormatV2(readWriter)}
+}
+
 // EncodeCompact serializes msg using the compact format
 func EncodeCompact(msg types.WritableStruct) ([]byte, error) {
 	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
@@ -95,6 +100,16 @@ func EncodeSimpleJSON(msg types.WritableStruct) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
+// EncodeSimpleJSONV2 serializes msg using the simple JSON format
+func EncodeSimpleJSONV2(msg types.WritableStruct) ([]byte, error) {
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	err := newSimpleJSONSerializerV2(buffer).Encode(msg)
+	if err != nil {
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
 // Encode encodes a Thrift struct into the underlying format/writer.
 func (s *Serializer) Encode(msg types.WritableStruct) error {
 	if err := msg.Write(s.format); err != nil {
@@ -128,6 +143,11 @@ func newSimpleJSONDeserializer(readWriter io.ReadWriter) *Deserializer {
 	return &Deserializer{format: NewSimpleJSONFormat(readWriter)}
 }
 
+// newSimpleJSONDeserializerV2 creates a new deserializer using the simple JSON format
+func newSimpleJSONDeserializerV2(readWriter io.ReadWriter) *Deserializer {
+	return &Deserializer{format: newSimpleJSONFormatV2(readWriter)}
+}
+
 // DecodeCompact deserializes a compact format message
 func DecodeCompact(data []byte, msg types.ReadableStruct) error {
 	reader := bytes.NewBuffer(data)
@@ -150,6 +170,12 @@ func DecodeCompactJSON(data []byte, msg types.ReadableStruct) error {
 func DecodeSimpleJSON(data []byte, msg types.ReadableStruct) error {
 	reader := bytes.NewBuffer(data)
 	return newSimpleJSONDeserializer(reader).Decode(msg)
+}
+
+// DecodeSimpleJSONV2 deserializes a simple JSON format message
+func DecodeSimpleJSONV2(data []byte, msg types.ReadableStruct) error {
+	reader := bytes.NewBuffer(data)
+	return newSimpleJSONDeserializerV2(reader).Decode(msg)
 }
 
 // Decode deserializes a Thrift struct from the underlying format

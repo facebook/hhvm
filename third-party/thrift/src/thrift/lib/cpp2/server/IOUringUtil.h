@@ -16,8 +16,8 @@
 
 #pragma once
 
-#if __has_include(<folly/experimental/io/IoUringBackend.h>)
-#include <folly/experimental/io/IoUringBackend.h>
+#if __has_include(<folly/io/async/IoUringBackend.h>)
+#include <folly/io/async/IoUringBackend.h>
 #endif
 
 #if FOLLY_HAS_LIBURING

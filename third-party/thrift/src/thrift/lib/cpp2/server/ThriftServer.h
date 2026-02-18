@@ -135,6 +135,15 @@ class RocketRequestHandler;
 
 enum class SSLPolicy { DISABLED, PERMITTED, REQUIRED };
 
+enum class PSPUpgradePolicy {
+  // Server will refuse to negotiate PSP
+  DISABLED,
+
+  // Server will always accept PSP upgrade requests. This will result in
+  // fatal connection errors if this runs on unsupported hardware.
+  ALWAYS,
+};
+
 enum class EffectiveTicketSeedStrategy {
   IN_MEMORY,
   IN_MEMORY_WITH_ROTATION,
@@ -149,6 +158,7 @@ class ThriftTlsConfig : public wangle::CustomConfig {
   bool enableThriftParamsNegotiation{true};
   bool enableStopTLS{false};
   bool enableStopTLSV2{false};
+  folly::Optional<PSPUpgradePolicy> pspUpgradePolicy;
 };
 
 class TLSCredentialWatcher {
@@ -2676,6 +2686,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   static folly::observer::Observer<bool> enableStopTLS();
 
   static folly::observer::Observer<bool> enableStopTLSV2();
+
+  static folly::observer::Observer<PSPUpgradePolicy> pspUpgradePolicy();
 
   static folly::observer::Observer<bool> enableReceivingDelegatedCreds();
 

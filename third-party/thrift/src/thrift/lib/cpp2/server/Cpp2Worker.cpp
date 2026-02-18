@@ -27,6 +27,7 @@
 #include <folly/portability/Sockets.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
+#include <thrift/lib/cpp2/security/PSP.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
@@ -434,12 +435,28 @@ Cpp2Worker::makeThriftServerExtension(const folly::SocketAddress& clientAddr) {
     return nullptr;
   }
 
+  auto effectivePspPolicy = [&] {
+    if (thriftConfig->pspUpgradePolicy.has_value()) {
+      return *thriftConfig->pspUpgradePolicy;
+    }
+    return **ThriftServer::pspUpgradePolicy();
+  }();
+
   auto thriftParametersContext = std::make_shared<ThriftParametersContext>();
+  thriftParametersContext->setPeerAddress(clientAddr);
   thriftParametersContext->setUseStopTLS(
       clientAddr.getFamily() == AF_UNIX || thriftConfig->enableStopTLS ||
       **ThriftServer::enableStopTLS());
   thriftParametersContext->setUseStopTLSV2(
       thriftConfig->enableStopTLSV2 || **ThriftServer::enableStopTLSV2());
+  if (effectivePspPolicy == PSPUpgradePolicy::ALWAYS) {
+    constexpr uint64_t kSupportedPSPPolicies = (THRIFT_PSP_V0);
+
+    thriftParametersContext->setSupportedPSPVersionsPolicy(
+        [](const folly::SocketAddress&) -> uint64_t {
+          return kSupportedPSPPolicies;
+        });
+  }
   return std::make_shared<ThriftParametersServerExtension>(
       thriftParametersContext);
 }

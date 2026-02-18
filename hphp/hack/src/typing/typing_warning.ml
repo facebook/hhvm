@@ -248,6 +248,12 @@ module Set_or_keyset_array_get = struct
   type t = {
     kind: kind;
     ty: string;
+    full_expr_pos: Pos.t;
+    replacement_text: string option;
+        (** The replacement text for the quickfix, if source text was available.
+        * For keyset: `C\contains_key($arr, $idx)`
+        * For ConstSet: `$arr->contains($idx)`
+        *)
   }
 end
 

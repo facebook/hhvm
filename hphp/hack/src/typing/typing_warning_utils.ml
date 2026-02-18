@@ -854,7 +854,7 @@ module Set_or_keyset_array_get = struct
 
   let code _ = code
 
-  let claim { Typing_warning.Set_or_keyset_array_get.kind; ty } =
+  let claim { Typing_warning.Set_or_keyset_array_get.kind; ty; _ } =
     let suggestion =
       match kind with
       | Typing_warning.Set_or_keyset_array_get.Keyset -> "`C\\contains_key`"
@@ -868,7 +868,24 @@ module Set_or_keyset_array_get = struct
 
   let reasons _ = []
 
-  let quickfixes _ = []
+  let quickfixes
+      {
+        Typing_warning.Set_or_keyset_array_get.kind;
+        full_expr_pos;
+        replacement_text;
+        _;
+      } =
+    match replacement_text with
+    | None -> []
+    | Some new_text ->
+      let title =
+        match kind with
+        | Typing_warning.Set_or_keyset_array_get.Keyset ->
+          "Replace with `C\\contains_key`"
+        | Typing_warning.Set_or_keyset_array_get.ConstSet ->
+          "Replace with `->contains`"
+      in
+      [Quickfix.make_eager_default_hint_style ~title ~new_text full_expr_pos]
 end
 
 module Sealed_not_subtype = struct

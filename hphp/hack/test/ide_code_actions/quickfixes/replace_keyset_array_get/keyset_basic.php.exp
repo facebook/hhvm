@@ -1,0 +1,33 @@
+Code actions available:
+------------------------------------------
+Replace with `C\contains_key` (CodeActionKind: "quickfix") SELECTED
+Devmate Quick Fix - Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (CodeActionKind: "quickfix")
+Devmate Agent Fix - Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"C\\contains_key($ks, $key)",
+          "range":{"end":{"character":16,"line":3},"start":{"character":7,"line":3}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Replace with `C\\contains_key`"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function test_keyset(keyset<string> $ks, string $key): void {
+  $_ = C\contains_key($ks, $key);
+  //      ^ at-caret
+}
+

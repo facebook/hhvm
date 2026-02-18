@@ -16,10 +16,18 @@
 
 #pragma once
 
+#include <cstdint>
+#include <folly/Function.h>
+#include <folly/SocketAddress.h>
+#include <thrift/lib/cpp2/security/PSP.h>
 #include <thrift/lib/cpp2/security/extensions/Types.h>
 
 namespace apache::thrift {
 
+/**
+ * ThriftParametersContext conveys per-connection properties that may be used
+ * during TLS negotiation for a secure Thrift connection.
+ */
 class ThriftParametersContext {
  public:
   folly::Range<const CompressionAlgorithm*> getSupportedCompressionAlgorithms()
@@ -27,6 +35,7 @@ class ThriftParametersContext {
     return supportedCompressionAlgos_;
   }
 
+  void setPeerAddress(const folly::SocketAddress& addr) { peerAddr_ = addr; }
   void setUseStopTLS(bool useStopTLS) { useStopTLS_ = useStopTLS; }
 
   bool getUseStopTLS() const { return useStopTLS_; }
@@ -41,6 +50,21 @@ class ThriftParametersContext {
 
   bool getUseStopTLSForTTLSTunnel() const { return useStopTLSForTTLSTunnel_; }
 
+  // A policy function that determines which PSP negotiation versions are
+  // supported for a given peer at `peerAddr`.
+  using PSPNegotiationPolicy =
+      std::uint64_t(const folly::SocketAddress& peerAddr) const;
+  void setSupportedPSPVersionsPolicy(
+      folly::Function<PSPNegotiationPolicy> pspPolicy) {
+    if (pspPolicy) {
+      pspNegotiationPolicy_ = std::move(pspPolicy);
+    }
+  }
+
+  uint64_t getSupportedPSPNegotiations() const {
+    return pspNegotiationPolicy_(peerAddr_);
+  }
+
  private:
   static constexpr std::array<CompressionAlgorithm, 2>
       supportedCompressionAlgos_{{
@@ -50,5 +74,8 @@ class ThriftParametersContext {
   bool useStopTLS_{false};
   bool useStopTLSV2_{false};
   bool useStopTLSForTTLSTunnel_{false};
+  folly::SocketAddress peerAddr_;
+  folly::Function<PSPNegotiationPolicy> pspNegotiationPolicy_{
+      [](const folly::SocketAddress&) { return THRIFT_PSP_NONE; }};
 };
 } // namespace apache::thrift

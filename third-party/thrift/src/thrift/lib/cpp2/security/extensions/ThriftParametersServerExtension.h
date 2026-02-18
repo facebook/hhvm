@@ -39,24 +39,34 @@ class ThriftParametersServerExtension : public fizz::ServerExtensions {
     }
     clientExtensions_ = std::move(params);
 
-    // send the server accept list
-    std::uint64_t compressionAlgorithms = 0;
-    for (const auto& comp : context_->getSupportedCompressionAlgorithms()) {
-      assert(comp != CompressionAlgorithm::NONE);
-      compressionAlgorithms |= 1ull << (int(comp) - 1);
-    }
-    NegotiationParameters negotiatedParams;
-    negotiatedParams.compressionAlgos() = compressionAlgorithms;
-    negotiatedParams.useStopTLS() = context_->getUseStopTLS();
-    negotiatedParams.useStopTLSV2() =
-        context_->getUseStopTLSV2(); // Added for StopTLS V2
-    negotiatedParams.useStopTLSForTTLSTunnel() =
-        context_->getUseStopTLSForTTLSTunnel();
+    NegotiationParameters negotiatedParams =
+        negotiate(*clientExtensions_, *context_);
+    // We need to save the result of `negotiatedPSP_` since determining which
+    // value to send to the client involves a side effect (invoking the
+    // PSP upgrade policy function). We need to ensure that the server is
+    // consistent with its advertised behavior in case the policy function
+    // changes in between invocations.
+    negotiatedPSP_ = *negotiatedParams.pspUpgradeProtocol();
+
     ThriftParametersExt paramsExt;
     paramsExt.params = negotiatedParams;
     serverExtensions.push_back(encodeThriftExtension(paramsExt));
     return serverExtensions;
   }
+
+  /**
+   * Computes the NegotiationParameters that we will send back to the client.
+   *
+   * `clientParameters` is data sent by the Thrift client.
+   *
+   * `serverConfiguration` represents the server negotiation configuration
+   *  parameters.
+   *
+   * This function is static to allow for unit testing.
+   */
+  static NegotiationParameters negotiate(
+      const ThriftParametersExt& clientParameters,
+      const ThriftParametersContext& serverConfiguration);
 
   /**
    * Return the negotiated compression algorithm that the server will use to
@@ -93,9 +103,12 @@ class ThriftParametersServerExtension : public fizz::ServerExtensions {
         clientExtensions_->params.useStopTLSForTTLSTunnel().value_or(false);
   }
 
+  uint64_t getNegotiatedPSPUpgrade() const { return negotiatedPSP_; }
+
  private:
   folly::Optional<ThriftParametersExt> clientExtensions_;
   std::shared_ptr<ThriftParametersContext> context_;
+  uint64_t negotiatedPSP_{};
 };
 
 } // namespace apache::thrift

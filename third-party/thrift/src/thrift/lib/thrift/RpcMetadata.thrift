@@ -219,6 +219,12 @@ struct NegotiationParameters {
   2: optional bool useStopTLS;
   3: optional bool useStopTLSV2;
   4: optional bool useStopTLSForTTLSTunnel;
+
+  // Client: a bitmask of supported psp upgrade protocols
+  // Server: a single bit which indicates the selected psp upgrade protocol
+  //         chosen for the connection
+  @cpp.Type{name = "std::uint64_t"}
+  5: optional i64 pspUpgradeProtocol;
 }
 
 // String type optimized for generated code

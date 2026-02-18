@@ -157,7 +157,7 @@ function replace_ci_l(
   string $haystack,
   string $needle,
   string $replacement,
-): string {
+)[]: string {
   return _Str\replace_ci_l($haystack, $needle, $replacement, $locale);
 }
 

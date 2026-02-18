@@ -188,12 +188,11 @@ function replace(
  *
  * @guide /hack/built-in-types/string
  */
-// not pure: str_ireplace uses global locale for capitalization
 function replace_ci(
   string $haystack,
   string $needle,
   string $replacement,
-): string {
+)[]: string {
   return _Str\replace_ci_l($haystack, $needle, $replacement);
 }
 

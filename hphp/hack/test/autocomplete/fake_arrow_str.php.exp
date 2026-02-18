@@ -101,7 +101,7 @@ SORT TEXT: none
 Str\replace_ci
   INSERT Str\replace_ci(
   INSERT , ${1:\$needle}, ${2:\$replacement})
-  (function(string $haystack, string $needle, string $replacement): string)
+  (function(string $haystack, string $needle, string $replacement)[]: string)
 SORT TEXT: none
 Str\replace_every
   INSERT Str\replace_every(

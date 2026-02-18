@@ -38,14 +38,9 @@ var _ types.Format = (*binaryFormat)(nil)
 
 // NewBinaryFormat creates a new Format handler using a buffer
 func NewBinaryFormat(readWriter types.ReadWriteSizer) types.Format {
-	return NewBinaryFormatOptions(readWriter, false /* strict read */, true /* strict write */)
-}
-
-// NewBinaryFormatOptions creates a new Format handler using a buffer
-func NewBinaryFormatOptions(readWriter types.ReadWriteSizer, strictRead, strictWrite bool) types.Format {
 	return &binaryFormat{
-		binaryDecoder: binaryDecoder{reader: readWriter, strictRead: strictRead},
-		binaryEncoder: binaryEncoder{writer: readWriter, strictWrite: strictWrite},
+		binaryDecoder: binaryDecoder{reader: readWriter, strictRead: false},
+		binaryEncoder: binaryEncoder{writer: readWriter, strictWrite: true},
 	}
 }
 

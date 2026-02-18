@@ -130,10 +130,6 @@ func NewBinaryFormat(readWriter types.ReadWriteSizer) types.Format {
 	return format.NewBinaryFormat(readWriter)
 }
 
-func NewBinaryFormatOptions(readWriter types.ReadWriteSizer, strictRead, strictWrite bool) types.Format {
-	return format.NewBinaryFormatOptions(readWriter, strictRead, strictWrite)
-}
-
 func NewSimpleJSONFormat(readWriter io.ReadWriter) types.Format {
 	return format.NewSimpleJSONFormat(readWriter)
 }

@@ -61,7 +61,7 @@ func (p *httpProtocol) resetProtocol() error {
 	switch p.protoID {
 	case types.ProtocolIDBinary:
 		// These defaults match cpp implementation
-		p.Format = format.NewBinaryFormatOptions(p.transport, false, true)
+		p.Format = format.NewBinaryFormat(p.transport)
 	case types.ProtocolIDCompact:
 		p.Format = format.NewCompactFormat(p.transport)
 	default:

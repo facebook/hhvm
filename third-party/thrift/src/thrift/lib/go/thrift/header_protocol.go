@@ -70,7 +70,7 @@ func (p *headerProtocol) resetProtocol() error {
 	switch p.protoID {
 	case types.ProtocolIDBinary:
 		// These defaults match cpp implementation
-		p.Format = format.NewBinaryFormatOptions(p.trans, false, true)
+		p.Format = format.NewBinaryFormat(p.trans)
 	case types.ProtocolIDCompact:
 		p.Format = format.NewCompactFormat(p.trans)
 	default:

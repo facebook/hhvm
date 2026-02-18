@@ -161,7 +161,8 @@ bool RocketStreamClientCallback::handle(RequestNFrame requestNFrame) {
   return serverCallback()->onStreamRequestN(tokens);
 }
 
-void RocketStreamClientCallback::headers(HeadersPayload&& payload) {
+void RocketStreamClientCallback::handleStreamHeadersPush(
+    HeadersPayload&& payload) {
   std::ignore = serverCallback()->onSinkHeaders(std::move(payload));
 }
 

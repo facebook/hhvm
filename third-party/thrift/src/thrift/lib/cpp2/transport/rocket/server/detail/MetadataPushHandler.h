@@ -110,10 +110,8 @@ template <typename ConnectionT, template <typename> class ConnectionAdapter>
 template <typename StreamCallback>
 void MetadataPushHandler<ConnectionT, ConnectionAdapter>::processStreamHeaders(
     StreamCallback* callback, const ClientPushMetadata& clientMeta) noexcept {
-  std::ignore =
-      callback->getStreamServerCallback().onSinkHeaders(HeadersPayload(
-          clientMeta.streamHeadersPush()->headersPayloadContent().value_or(
-              {})));
+  callback->handleStreamHeadersPush(HeadersPayload(
+      clientMeta.streamHeadersPush()->headersPayloadContent().value_or({})));
 }
 
 } // namespace apache::thrift::rocket

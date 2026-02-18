@@ -627,11 +627,10 @@ void RocketServerConnection::handleUntrackedFrame(
                 it->second,
                 [&](const std::unique_ptr<RocketStreamClientCallback>&
                         clientCallback) {
-                  std::ignore =
-                      clientCallback->getStreamServerCallback().onSinkHeaders(
-                          HeadersPayload(clientMeta.streamHeadersPush()
-                                             ->headersPayloadContent()
-                                             .value_or({})));
+                  clientCallback->handleStreamHeadersPush(
+                      HeadersPayload(clientMeta.streamHeadersPush()
+                                         ->headersPayloadContent()
+                                         .value_or({})));
                 },
                 [&](const std::unique_ptr<RocketSinkClientCallback>&) {
                   // do nothing, headers push is not supported for sinks

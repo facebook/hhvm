@@ -699,7 +699,7 @@ void RocketServerConnection::handleStreamFrame(
   switch (frameType) {
     case FrameType::REQUEST_N: {
       RequestNFrame requestNFrame(streamId, flags, cursor);
-      clientCallback.request(requestNFrame.requestN());
+      clientCallback.handle(std::move(requestNFrame));
       return;
     }
 

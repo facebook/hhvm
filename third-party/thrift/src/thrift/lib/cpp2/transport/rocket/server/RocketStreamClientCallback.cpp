@@ -55,10 +55,7 @@ bool RocketStreamClientCallback::onFirstResponse(
   }
 
   DCHECK_NE(tokens_, 0u);
-  int tokens = 0;
-  if (--tokens_) {
-    tokens = std::exchange(tokens_, 0);
-  } else {
+  if (!--tokens_) {
     scheduleTimeout();
   }
 
@@ -70,8 +67,8 @@ bool RocketStreamClientCallback::onFirstResponse(
       /* complete */ false,
       /* sendCallback */ nullptr);
 
-  if (tokens) {
-    return request(tokens);
+  if (tokens_) {
+    return serverCallback->onStreamRequestN(tokens_);
   }
   return true;
 }
@@ -153,7 +150,8 @@ void RocketStreamClientCallback::resetServerCallback(
   }
 }
 
-bool RocketStreamClientCallback::request(uint32_t tokens) {
+bool RocketStreamClientCallback::handle(RequestNFrame requestNFrame) {
+  auto tokens = requestNFrame.requestN();
   if (!tokens) {
     return true;
   }

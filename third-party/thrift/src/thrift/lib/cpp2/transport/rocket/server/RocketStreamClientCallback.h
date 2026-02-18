@@ -24,6 +24,7 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 
 THRIFT_FLAG_DECLARE(rocket_server_disable_send_callback, bool);
@@ -53,7 +54,7 @@ class RocketStreamClientCallback final : public StreamClientCallback {
 
   void resetServerCallback(StreamServerCallback&) override;
 
-  bool request(uint32_t n);
+  bool handle(RequestNFrame requestNFrame);
   void onStreamCancel();
   void headers(HeadersPayload&& payload);
   void pauseStream();

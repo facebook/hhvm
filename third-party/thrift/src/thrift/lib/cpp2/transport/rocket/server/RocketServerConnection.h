@@ -469,13 +469,6 @@ class RocketServerConnection final : public IRocketServerConnection {
       FrameType frameType,
       Flags flags,
       folly::io::Cursor cursor);
-  void handleStreamFrame(
-      std::unique_ptr<folly::IOBuf> frame,
-      StreamId streamId,
-      FrameType frameType,
-      Flags flags,
-      folly::io::Cursor cursor,
-      RocketStreamClientCallback& clientCallback);
   void handleSinkFrame(
       std::unique_ptr<folly::IOBuf> frame,
       StreamId streamId,

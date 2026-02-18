@@ -522,13 +522,50 @@ void RocketServerConnection::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
             iter->second,
             [&](const std::unique_ptr<RocketStreamClientCallback>&
                     clientCallback) {
-              handleStreamFrame(
-                  std::move(frame),
-                  streamId,
-                  frameType,
-                  flags,
-                  std::move(cursor),
-                  *clientCallback);
+              if (!clientCallback->serverCallbackReady()) {
+                switch (frameType) {
+                  case FrameType::CANCEL: {
+                    clientCallback->handle(CancelFrame(streamId));
+                    return;
+                  }
+                  default:
+                    return close(
+                        folly::make_exception_wrapper<RocketException>(
+                            ErrorCode::INVALID,
+                            fmt::format(
+                                "Received unexpected early frame, stream id ({}) type ({})",
+                                static_cast<uint32_t>(streamId),
+                                static_cast<uint8_t>(frameType))));
+                }
+              }
+
+              switch (frameType) {
+                case FrameType::REQUEST_N: {
+                  RequestNFrame requestNFrame(streamId, flags, cursor);
+                  clientCallback->handle(std::move(requestNFrame));
+                  return;
+                }
+
+                case FrameType::CANCEL: {
+                  clientCallback->handle(CancelFrame(streamId));
+                  return;
+                }
+
+                case FrameType::EXT: {
+                  ExtFrame extFrame(streamId, flags, cursor, std::move(frame));
+                  clientCallback->handle(std::move(extFrame));
+                  return;
+                }
+
+                default:
+                  close(
+                      folly::make_exception_wrapper<RocketException>(
+                          ErrorCode::INVALID,
+                          fmt::format(
+                              "Received unhandleable frame type ({}) for stream (id {})",
+                              static_cast<uint8_t>(frameType),
+                              static_cast<uint32_t>(streamId))));
+              }
             },
             [&](const std::unique_ptr<RocketSinkClientCallback>&
                     clientCallback) {
@@ -665,59 +702,6 @@ void RocketServerConnection::handleUntrackedFrame(
               fmt::format(
                   "Received unhandleable frame type ({})",
                   static_cast<uint8_t>(frameType))));
-  }
-}
-
-void RocketServerConnection::handleStreamFrame(
-    std::unique_ptr<folly::IOBuf> frame,
-    StreamId streamId,
-    FrameType frameType,
-    Flags flags,
-    folly::io::Cursor cursor,
-    RocketStreamClientCallback& clientCallback) {
-  if (!clientCallback.serverCallbackReady()) {
-    switch (frameType) {
-      case FrameType::CANCEL: {
-        clientCallback.handle(CancelFrame(streamId));
-        return;
-      }
-      default:
-        return close(
-            folly::make_exception_wrapper<RocketException>(
-                ErrorCode::INVALID,
-                fmt::format(
-                    "Received unexpected early frame, stream id ({}) type ({})",
-                    static_cast<uint32_t>(streamId),
-                    static_cast<uint8_t>(frameType))));
-    }
-  }
-
-  switch (frameType) {
-    case FrameType::REQUEST_N: {
-      RequestNFrame requestNFrame(streamId, flags, cursor);
-      clientCallback.handle(std::move(requestNFrame));
-      return;
-    }
-
-    case FrameType::CANCEL: {
-      clientCallback.handle(CancelFrame(streamId));
-      return;
-    }
-
-    case FrameType::EXT: {
-      ExtFrame extFrame(streamId, flags, cursor, std::move(frame));
-      clientCallback.handle(std::move(extFrame));
-      return;
-    }
-
-    default:
-      close(
-          folly::make_exception_wrapper<RocketException>(
-              ErrorCode::INVALID,
-              fmt::format(
-                  "Received unhandleable frame type ({}) for stream (id {})",
-                  static_cast<uint8_t>(frameType),
-                  static_cast<uint32_t>(streamId))));
   }
 }
 

@@ -437,14 +437,6 @@ void RefactoredRocketServerConnection::handleFrame(
   batcher->handle(std::move(frame), connectionAdapter_, incomingFrameHandler_);
 }
 
-void RefactoredRocketServerConnection::handleStreamFrame(
-    std::unique_ptr<folly::IOBuf>,
-    StreamId,
-    FrameType,
-    Flags,
-    folly::io::Cursor,
-    RocketStreamClientCallback&) {}
-
 void RefactoredRocketServerConnection::handleSinkFrame(
     std::unique_ptr<folly::IOBuf> frame,
     StreamId streamId,

@@ -458,12 +458,12 @@ metadata::ThriftService genServiceMetadata(
       i.structured_annotations() =
           genStructuredAnnotations(exception.annotations());
       i.type() = genType(md, exception.type());
-      if (exception.type().isStructured()) {
+      if (exception.type().trueType().isStructured()) {
         // Mimicking the existing logic: we add all types in throw clause
         // into `exceptions` field as long as it's structured.
         // https://github.com/facebook/fbthrift/blob/v2025.11.03.00/thrift/compiler/generate/templates/cpp2/module_metadata.cpp.mustache#L153-L157
         genStructuredInMetadataMap(
-            md, *md.exceptions(), exception.type().asStructured());
+            md, *md.exceptions(), exception.type().trueType().asStructured());
       }
     }
     ret.functions()->back().structured_annotations() =

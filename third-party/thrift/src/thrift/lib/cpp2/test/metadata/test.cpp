@@ -133,6 +133,22 @@ TEST_F(ServiceMetadataTest, ExceptionTest) {
       ThriftPrimitiveType::THRIFT_I32_TYPE);
 }
 
+TEST_F(ServiceMetadataTest, ExceptionAliasTest) {
+  auto& metadata = getMetadata<apache::thrift::ServiceHandler<
+      metadata::test::exceptions::ExceptionTestService>>();
+  EXPECT_EQ(response_.services()->front().module()->name(), "exception_test");
+  EXPECT_TRUE(
+      metadata.exceptions()->contains("exception_test.AliasedException"));
+  EXPECT_FALSE(
+      metadata.exceptions()->contains("exception_test.ExceptionAlias"));
+  EXPECT_TRUE(
+      metadata.exceptions()->contains("exception_test.DoublyAliasedException"));
+  EXPECT_FALSE(
+      metadata.exceptions()->contains("exception_test.ExceptionSingleAlias"));
+  EXPECT_FALSE(
+      metadata.exceptions()->contains("exception_test.ExceptionDoubleAlias"));
+}
+
 TEST_F(ServiceMetadataTest, SimpleStructsTest) {
   auto& metadata = getMetadata<apache::thrift::ServiceHandler<
       metadata::test::simple_structs::SimpleStructsTestService>>();

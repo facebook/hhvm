@@ -26,6 +26,15 @@ exception RuntimeException {
   2: i32 level;
 }
 
+exception AliasedException {}
+typedef AliasedException ExceptionAlias
+
+exception DoublyAliasedException {}
+typedef DoublyAliasedException ExceptionSingleAlias
+typedef ExceptionSingleAlias ExceptionDoubleAlias
+
 service ExceptionTestService {
   void foo() throws (1: RuntimeException ex);
+  void bar() throws (1: ExceptionAlias ex);
+  void baz() throws (1: ExceptionDoubleAlias ex);
 }

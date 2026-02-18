@@ -25,7 +25,6 @@ include "thrift/annotation/thrift.thrift"
 cpp_include "thrift/lib/thrift/detail/TypeSystemAdapter.h"
 cpp_include "folly/container/F14Map.h"
 
-@thrift.TerseWrite
 package "facebook.com/thrift/type_system"
 
 namespace cpp2 apache.thrift.type_system

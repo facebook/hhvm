@@ -69,6 +69,18 @@ let make_diagnostics (diagnostics : (int * string * string) list) :
   in
   Diagnostics.from_file_diagnostic_list diagnostics
 
+let make_warning_diagnostics (diagnostics : (int * string * string) list) :
+    Diagnostics.t =
+  let diagnostics =
+    List.map diagnostics ~f:(fun (code, rel_path, message) ->
+        let path = Relative_path.from_root ~suffix:rel_path in
+        let diagnostic =
+          User_diagnostic.make_warning code (Pos.make_from path, message) []
+        in
+        (path, diagnostic))
+  in
+  Diagnostics.from_file_diagnostic_list diagnostics
+
 let a_diagnostic : Diagnostics.t = make_diagnostics [(101, "c", "oops")]
 
 let test_completed () : bool Lwt.t =
@@ -559,6 +571,7 @@ let env =
       save_64bit = None;
       save_human_readable_64bit_dep_map = None;
       output_json = false;
+      output_jsonl = false;
       prechecked = None;
       mini_state = None;
       root = Path.dummy_path;
@@ -649,6 +662,458 @@ let test_check_errors () : bool Lwt.t =
         let%lwt (exit_status, _telemetry) = check_future in
         let exit_status = Exit_status.show exit_status in
         String_asserter.assert_equals "Exit_status.Type_error" exit_status "x";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let capture_stdout f =
+  let (read_fd, write_fd) = Unix.pipe () in
+  let old_stdout = Unix.dup Unix.stdout in
+  Unix.dup2 write_fd Unix.stdout;
+  Unix.close write_fd;
+  let%lwt result = f () in
+  Unix.dup2 old_stdout Unix.stdout;
+  Unix.close old_stdout;
+  let ic = Unix.in_channel_of_descr read_fd in
+  let buf = Buffer.create 256 in
+  (try
+     while true do
+       match In_channel.input_char ic with
+       | Some c -> Buffer.add_char buf c
+       | None -> raise Exit
+     done
+   with
+  | Exit -> ());
+  In_channel.close ic;
+  Lwt.return (result, Buffer.contents buf)
+
+let test_check_jsonl_success () : bool Lwt.t =
+  let%lwt () =
+    try_with_tmp (fun ~root ->
+        Server_progress.write ~include_in_logs:false "test1";
+        Server_progress.ErrorsWrite.new_empty_file
+          ~clock:None
+          ~ignore_hh_version:false
+          ~cancel_reason;
+        let env =
+          { env with ClientEnv.root; output_jsonl = true; output_json = false }
+        in
+        let connect_then_close () = Lwt.return_unit in
+        let partial_telemetry_ref = ref None in
+        let check =
+          ClientCheckStatus.go_streaming
+            env
+            ServerLocalConfigLoad.default
+            (make_error_filter env)
+            ~partial_telemetry_ref
+            ~connect_then_close
+        in
+        let%lwt () = Lwt_unix.sleep 1.0 in
+        Server_progress.ErrorsWrite.complete telemetry;
+        let%lwt ((exit_status, _telemetry), stdout) =
+          capture_stdout (fun () -> check)
+        in
+        String_asserter.assert_equals
+          "Exit_status.No_error"
+          (Exit_status.show exit_status)
+          "exit_status";
+        let lines =
+          String.split_lines stdout
+          |> List.filter ~f:(fun s -> not (String.is_empty s))
+        in
+        Int_asserter.assert_equals 1 (List.length lines) "one line (summary)";
+        let summary = Yojson.Safe.from_string (List.hd_exn lines) in
+        let kind =
+          Yojson.Safe.Util.member "kind" summary |> Yojson.Safe.Util.to_string
+        in
+        let passed =
+          Yojson.Safe.Util.member "passed" summary |> Yojson.Safe.Util.to_bool
+        in
+        String_asserter.assert_equals "summary" kind "kind";
+        Bool_asserter.assert_equals true passed "passed";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_check_jsonl_errors () : bool Lwt.t =
+  let%lwt () =
+    try_with_tmp (fun ~root ->
+        Server_progress.write ~include_in_logs:false "test1";
+        let env =
+          { env with ClientEnv.root; output_jsonl = true; output_json = false }
+        in
+        let connect_then_close () = Lwt.return_unit in
+        let partial_telemetry_ref = ref None in
+        let check =
+          ClientCheckStatus.go_streaming
+            env
+            ServerLocalConfigLoad.default
+            (make_error_filter env)
+            ~partial_telemetry_ref
+            ~connect_then_close
+        in
+        let%lwt () = Lwt_unix.sleep 0.2 in
+        Server_progress.ErrorsWrite.new_empty_file
+          ~clock:None
+          ~ignore_hh_version:false
+          ~cancel_reason;
+        Server_progress.ErrorsWrite.report
+          (make_diagnostics [(101, "c", "oops")]);
+        Server_progress.ErrorsWrite.complete telemetry;
+        let%lwt ((exit_status, _telemetry), stdout) =
+          capture_stdout (fun () -> check)
+        in
+        String_asserter.assert_equals
+          "Exit_status.Type_error"
+          (Exit_status.show exit_status)
+          "exit_status";
+        let lines =
+          String.split_lines stdout
+          |> List.filter ~f:(fun s -> not (String.is_empty s))
+        in
+        Int_asserter.assert_equals
+          2
+          (List.length lines)
+          "two lines (diagnostic + summary)";
+        let diag = Yojson.Safe.from_string (List.nth_exn lines 0) in
+        let summary = Yojson.Safe.from_string (List.nth_exn lines 1) in
+        String_asserter.assert_equals
+          "diagnostic"
+          (Yojson.Safe.Util.member "kind" diag |> Yojson.Safe.Util.to_string)
+          "diagnostic kind";
+        String_asserter.assert_equals
+          "error"
+          (Yojson.Safe.Util.member "severity" diag |> Yojson.Safe.Util.to_string)
+          "severity";
+        String_asserter.assert_equals
+          "summary"
+          (Yojson.Safe.Util.member "kind" summary |> Yojson.Safe.Util.to_string)
+          "summary kind";
+        Bool_asserter.assert_equals
+          false
+          (Yojson.Safe.Util.member "passed" summary |> Yojson.Safe.Util.to_bool)
+          "passed";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_check_jsonl_warnings_only () : bool Lwt.t =
+  let%lwt () =
+    try_with_tmp (fun ~root ->
+        Server_progress.write ~include_in_logs:false "test1";
+        let env =
+          { env with ClientEnv.root; output_jsonl = true; output_json = false }
+        in
+        let connect_then_close () = Lwt.return_unit in
+        let partial_telemetry_ref = ref None in
+        let check =
+          ClientCheckStatus.go_streaming
+            env
+            ServerLocalConfigLoad.default
+            (make_error_filter env)
+            ~partial_telemetry_ref
+            ~connect_then_close
+        in
+        let%lwt () = Lwt_unix.sleep 0.2 in
+        Server_progress.ErrorsWrite.new_empty_file
+          ~clock:None
+          ~ignore_hh_version:false
+          ~cancel_reason;
+        Server_progress.ErrorsWrite.report
+          (make_warning_diagnostics [(12001, "w", "sketchy")]);
+        Server_progress.ErrorsWrite.complete telemetry;
+        let%lwt ((exit_status, _telemetry), stdout) =
+          capture_stdout (fun () -> check)
+        in
+        (* Warnings only should give exit code 0 *)
+        String_asserter.assert_equals
+          "Exit_status.No_error"
+          (Exit_status.show exit_status)
+          "exit_status";
+        let lines =
+          String.split_lines stdout
+          |> List.filter ~f:(fun s -> not (String.is_empty s))
+        in
+        Int_asserter.assert_equals
+          2
+          (List.length lines)
+          "two lines (diagnostic + summary)";
+        let diag = Yojson.Safe.from_string (List.nth_exn lines 0) in
+        let summary = Yojson.Safe.from_string (List.nth_exn lines 1) in
+        String_asserter.assert_equals
+          "diagnostic"
+          (Yojson.Safe.Util.member "kind" diag |> Yojson.Safe.Util.to_string)
+          "diagnostic kind";
+        String_asserter.assert_equals
+          "warning"
+          (Yojson.Safe.Util.member "severity" diag |> Yojson.Safe.Util.to_string)
+          "severity";
+        String_asserter.assert_equals
+          "summary"
+          (Yojson.Safe.Util.member "kind" summary |> Yojson.Safe.Util.to_string)
+          "summary kind";
+        Bool_asserter.assert_equals
+          true
+          (Yojson.Safe.Util.member "passed" summary |> Yojson.Safe.Util.to_bool)
+          "passed";
+        Int_asserter.assert_equals
+          0
+          (Yojson.Safe.Util.member "error_count" summary
+          |> Yojson.Safe.Util.to_int)
+          "error_count";
+        Int_asserter.assert_equals
+          1
+          (Yojson.Safe.Util.member "warning_count" summary
+          |> Yojson.Safe.Util.to_int)
+          "warning_count";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_check_jsonl_mixed_errors_and_warnings () : bool Lwt.t =
+  let%lwt () =
+    try_with_tmp (fun ~root ->
+        Server_progress.write ~include_in_logs:false "test1";
+        let env =
+          { env with ClientEnv.root; output_jsonl = true; output_json = false }
+        in
+        let connect_then_close () = Lwt.return_unit in
+        let partial_telemetry_ref = ref None in
+        let check =
+          ClientCheckStatus.go_streaming
+            env
+            ServerLocalConfigLoad.default
+            (make_error_filter env)
+            ~partial_telemetry_ref
+            ~connect_then_close
+        in
+        let%lwt () = Lwt_unix.sleep 0.2 in
+        Server_progress.ErrorsWrite.new_empty_file
+          ~clock:None
+          ~ignore_hh_version:false
+          ~cancel_reason;
+        Server_progress.ErrorsWrite.report
+          (make_diagnostics [(4110, "e", "type error")]);
+        Server_progress.ErrorsWrite.report
+          (make_warning_diagnostics [(12001, "w", "sketchy")]);
+        Server_progress.ErrorsWrite.complete telemetry;
+        let%lwt ((exit_status, _telemetry), stdout) =
+          capture_stdout (fun () -> check)
+        in
+        (* Mixed errors+warnings should give exit code Type_error *)
+        String_asserter.assert_equals
+          "Exit_status.Type_error"
+          (Exit_status.show exit_status)
+          "exit_status";
+        let lines =
+          String.split_lines stdout
+          |> List.filter ~f:(fun s -> not (String.is_empty s))
+        in
+        Int_asserter.assert_equals
+          3
+          (List.length lines)
+          "three lines (2 diagnostics + summary)";
+        let diag_error = Yojson.Safe.from_string (List.nth_exn lines 0) in
+        let diag_warning = Yojson.Safe.from_string (List.nth_exn lines 1) in
+        let summary = Yojson.Safe.from_string (List.nth_exn lines 2) in
+        String_asserter.assert_equals
+          "error"
+          (Yojson.Safe.Util.member "severity" diag_error
+          |> Yojson.Safe.Util.to_string)
+          "error severity";
+        String_asserter.assert_equals
+          "warning"
+          (Yojson.Safe.Util.member "severity" diag_warning
+          |> Yojson.Safe.Util.to_string)
+          "warning severity";
+        String_asserter.assert_equals
+          "summary"
+          (Yojson.Safe.Util.member "kind" summary |> Yojson.Safe.Util.to_string)
+          "summary kind";
+        Bool_asserter.assert_equals
+          false
+          (Yojson.Safe.Util.member "passed" summary |> Yojson.Safe.Util.to_bool)
+          "passed";
+        Int_asserter.assert_equals
+          1
+          (Yojson.Safe.Util.member "error_count" summary
+          |> Yojson.Safe.Util.to_int)
+          "error_count";
+        Int_asserter.assert_equals
+          1
+          (Yojson.Safe.Util.member "warning_count" summary
+          |> Yojson.Safe.Util.to_int)
+          "warning_count";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+(** Mask the "version" field in a JSON string, replacing its value with "<VERSION>".
+    This lets us do full-output snapshot assertions without being sensitive to build version. *)
+let mask_version (line : string) : string =
+  let json = Yojson.Safe.from_string line in
+  let masked =
+    match json with
+    | `Assoc fields ->
+      `Assoc
+        (List.map fields ~f:(fun (k, v) ->
+             if String.equal k "version" then
+               (k, `String "<VERSION>")
+             else
+               (k, v)))
+    | other -> other
+  in
+  Yojson.Safe.to_string masked
+
+let test_check_jsonl_full_output () : bool Lwt.t =
+  let%lwt () =
+    try_with_tmp (fun ~root ->
+        Server_progress.write ~include_in_logs:false "test1";
+        let env =
+          { env with ClientEnv.root; output_jsonl = true; output_json = false }
+        in
+        let connect_then_close () = Lwt.return_unit in
+        let partial_telemetry_ref = ref None in
+        let check =
+          ClientCheckStatus.go_streaming
+            env
+            ServerLocalConfigLoad.default
+            (make_error_filter env)
+            ~partial_telemetry_ref
+            ~connect_then_close
+        in
+        let%lwt () = Lwt_unix.sleep 0.2 in
+        Server_progress.ErrorsWrite.new_empty_file
+          ~clock:None
+          ~ignore_hh_version:false
+          ~cancel_reason;
+        Server_progress.ErrorsWrite.report
+          (make_diagnostics [(4110, "e.php", "type mismatch")]);
+        Server_progress.ErrorsWrite.report
+          (make_warning_diagnostics [(12001, "w.php", "sketchy")]);
+        Server_progress.ErrorsWrite.complete telemetry;
+        let%lwt ((_exit_status, _telemetry), stdout) =
+          capture_stdout (fun () -> check)
+        in
+        let lines =
+          String.split_lines stdout
+          |> List.filter ~f:(fun s -> not (String.is_empty s))
+        in
+        Int_asserter.assert_equals
+          3
+          (List.length lines)
+          "three lines (error + warning + summary)";
+        (* Mask the version field and compare exact output *)
+        let masked_lines = List.map lines ~f:mask_version in
+        let actual = String.concat ~sep:"\n" masked_lines in
+        (* Build the expected path prefix from root *)
+        let prefix = Path.to_string root ^ "/" in
+        let expected =
+          Printf.sprintf
+            {|{"kind":"diagnostic","severity":"error","message":[{"descr":"type mismatch","path":"%se.php","line":0,"start":0,"end":0,"code":4110}],"custom_messages":[]}
+{"kind":"diagnostic","severity":"warning","message":[{"descr":"sketchy","path":"%sw.php","line":0,"start":0,"end":0,"code":12001}],"custom_messages":[]}
+{"kind":"summary","passed":false,"version":"<VERSION>","error_count":1,"warning_count":1}|}
+            prefix
+            prefix
+        in
+        String_asserter.assert_equals expected actual "full jsonl output";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+(** This test proves that JSONL diagnostic lines are emitted to stdout
+    *before* the typecheck completes — i.e. they stream incrementally. *)
+let test_check_jsonl_streaming () : bool Lwt.t =
+  let%lwt () =
+    try_with_tmp (fun ~root ->
+        Server_progress.write ~include_in_logs:false "test1";
+        let env =
+          { env with ClientEnv.root; output_jsonl = true; output_json = false }
+        in
+        let connect_then_close () = Lwt.return_unit in
+        let partial_telemetry_ref = ref None in
+        (* Set up stdout pipe redirect manually so we can read incrementally *)
+        let (pipe_read_fd, pipe_write_fd) = Unix.pipe () in
+        let old_stdout = Unix.dup Unix.stdout in
+        Unix.dup2 pipe_write_fd Unix.stdout;
+        Unix.close pipe_write_fd;
+        (* Create the errors file and start streaming *)
+        Server_progress.ErrorsWrite.new_empty_file
+          ~clock:None
+          ~ignore_hh_version:false
+          ~cancel_reason;
+        let check_future =
+          ClientCheckStatus.go_streaming
+            env
+            ServerLocalConfigLoad.default
+            (make_error_filter env)
+            ~partial_telemetry_ref
+            ~connect_then_close
+        in
+        (* Give the polling loop time to start *)
+        let%lwt () = Lwt_unix.sleep 0.2 in
+        (* Report one error — but do NOT complete yet *)
+        Server_progress.ErrorsWrite.report
+          (make_diagnostics [(4110, "e.php", "type mismatch")]);
+        (* The check should still be sleeping (not completed) *)
+        let%lwt () = Lwt_unix.sleep 0.5 in
+        assert (Lwt.is_sleeping check_future);
+        (* Read what's available on the pipe so far.
+           We use a non-blocking read: set the read fd to non-blocking,
+           read as many bytes as available, then set it back. *)
+        Unix.set_nonblock pipe_read_fd;
+        let buf = Buffer.create 256 in
+        (try
+           let tmp = Bytes.create 4096 in
+           let rec read_available () =
+             let n = Unix.read pipe_read_fd tmp 0 4096 in
+             if n > 0 then (
+               Buffer.add_subbytes buf tmp ~pos:0 ~len:n;
+               read_available ()
+             )
+           in
+           read_available ()
+         with
+        | Unix.Unix_error (Unix.EAGAIN, _, _)
+        | Unix.Unix_error (Unix.EWOULDBLOCK, _, _) ->
+          ());
+        Unix.clear_nonblock pipe_read_fd;
+        let partial_stdout = Buffer.contents buf in
+        (* The diagnostic line should already be there — this proves streaming *)
+        assert (
+          String.is_substring
+            partial_stdout
+            ~substring:"\"kind\":\"diagnostic\"");
+        assert (
+          String.is_substring partial_stdout ~substring:"\"severity\":\"error\"");
+        (* There should be no summary line yet *)
+        assert (
+          not
+            (String.is_substring
+               partial_stdout
+               ~substring:"\"kind\":\"summary\""));
+        (* Now complete the check *)
+        Server_progress.ErrorsWrite.complete telemetry;
+        let%lwt (_exit_status, _telemetry) = check_future in
+        (* Restore stdout *)
+        Unix.dup2 old_stdout Unix.stdout;
+        Unix.close old_stdout;
+        (* Read remaining pipe contents *)
+        let ic = Unix.in_channel_of_descr pipe_read_fd in
+        let rest_buf = Buffer.create 256 in
+        (try
+           while true do
+             match In_channel.input_char ic with
+             | Some c -> Buffer.add_char rest_buf c
+             | None -> raise Exit
+           done
+         with
+        | Exit -> ());
+        In_channel.close ic;
+        let rest_stdout = Buffer.contents rest_buf in
+        (* The summary line should now appear in the remaining output *)
+        assert (
+          String.is_substring rest_stdout ~substring:"\"kind\":\"summary\"");
         Lwt.return_unit)
   in
   Lwt.return_true
@@ -871,6 +1336,19 @@ let () =
         (fun () -> Lwt_main.run (test_async_read_start ())) );
       ("test_check_success", (fun () -> Lwt_main.run (test_check_success ())));
       ("test_check_errors", (fun () -> Lwt_main.run (test_check_errors ())));
+      ( "test_check_jsonl_success",
+        (fun () -> Lwt_main.run (test_check_jsonl_success ())) );
+      ( "test_check_jsonl_errors",
+        (fun () -> Lwt_main.run (test_check_jsonl_errors ())) );
+      ( "test_check_jsonl_warnings_only",
+        (fun () -> Lwt_main.run (test_check_jsonl_warnings_only ())) );
+      ( "test_check_jsonl_mixed_errors_and_warnings",
+        (fun () -> Lwt_main.run (test_check_jsonl_mixed_errors_and_warnings ()))
+      );
+      ( "test_check_jsonl_full_output",
+        (fun () -> Lwt_main.run (test_check_jsonl_full_output ())) );
+      ( "test_check_jsonl_streaming",
+        (fun () -> Lwt_main.run (test_check_jsonl_streaming ())) );
       ( "test_check_connect_success",
         (fun () -> Lwt_main.run (test_check_connect_success ())) );
       ( "test_check_connect_failure",

@@ -102,6 +102,7 @@ type client_check_env = {
   save_64bit: string option;
   save_human_readable_64bit_dep_map: string option;
   output_json: bool;
+  output_jsonl: bool;
   prechecked: bool option;
   mini_state: string option;
   root: Path.t;

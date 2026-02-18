@@ -158,6 +158,7 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   let lock_file = ref false in
   let no_load = ref false in
   let output_json = ref false in
+  let output_jsonl = ref false in
   let prechecked = ref None in
   let mini_state : string option ref = ref None in
   let rename_before = ref "" in
@@ -541,6 +542,10 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
       ( "--json",
         Arg.Set output_json,
         " output json for machine consumption (default: false)" );
+      ( "--jsonl",
+        Arg.Set output_jsonl,
+        " output streaming jsonl (JSON Lines) for machine consumption (default: false)"
+      );
       ( "--lint",
         Arg.Unit (fun () -> set_mode MODE_LINT),
         " (mode) lint the given list of files" );
@@ -822,6 +827,11 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
 
   validate_check_args ~invalid_warning_codes:!invalid_warning_codes;
 
+  if !output_json && !output_jsonl then begin
+    Printf.eprintf "--json and --jsonl are mutually exclusive\n%!";
+    exit 2
+  end;
+
   if !version then (
     if !output_json then
       ServerArgs.print_json_version ()
@@ -908,6 +918,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     save_64bit = !save_64bit;
     save_human_readable_64bit_dep_map = !save_human_readable_64bit_dep_map;
     output_json = !output_json;
+    output_jsonl = !output_jsonl;
     prechecked = !prechecked;
     mini_state = !mini_state;
     root;

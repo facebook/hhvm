@@ -42,7 +42,8 @@ let is_stale_msg liveness =
       ^ " file watcher being unresponsive)\n")
   | Live_status -> None
 
-let go status error_format ~is_interactive ~output_json ~max_errors =
+let go
+    status error_format ~is_interactive ~output_json ~output_jsonl ~max_errors =
   let {
     Server_status.liveness;
     error_list;
@@ -53,44 +54,59 @@ let go status error_format ~is_interactive ~output_json ~max_errors =
     status
   in
   let stale_msg = is_stale_msg liveness in
-  let error_count =
-    if
-      output_json
-      || (Option.is_none error_format && not is_interactive)
-      || List.is_empty error_list
-    then (
-      ServerError.print_error_list
-        stdout
-        ~stale_msg
-        ~output_json
-        ~error_format
-        ~error_list
-        ~recheck_stats:last_recheck_stats;
-      0
-    ) else
-      let error_format = Diagnostics.format_or_default error_format in
-      List.iter error_list ~f:(print_diagnostic ~error_format);
-      let (error_count, warning_count) =
-        Diagnostics.count_errors_and_warnings error_list
-      in
-      Option.iter
-        (Diagnostics.format_summary
-           error_format
-           ~error_count
-           ~warning_count
-           ~dropped_count:(Some dropped_count)
-           ~max_errors)
-        ~f:(fun msg -> Printf.printf "%s" msg);
-      (* [stale_msg] ultimately comes from [ServerMain.query_notifier], and says whether the check
-         reflects data from a sync file watcher query, or just whatever has arrived asynchronously
-         so far. *)
-      Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
-      error_count
-  in
-  if Int.( = ) error_count 0 then
-    Exit_status.No_error
-  else
-    Exit_status.Type_error
+  if output_jsonl then begin
+    let error_format = Diagnostics.format_or_default error_format in
+    List.iter
+      error_list
+      ~f:(Client_jsonl_printer.print_diagnostic ~error_format);
+    let (error_count, warning_count) =
+      Diagnostics.count_errors_and_warnings error_list
+    in
+    let passed = error_count = 0 in
+    Client_jsonl_printer.print_summary ~passed ~error_count ~warning_count;
+    if passed then
+      Exit_status.No_error
+    else
+      Exit_status.Type_error
+  end else
+    let error_count =
+      if
+        output_json
+        || (Option.is_none error_format && not is_interactive)
+        || List.is_empty error_list
+      then (
+        ServerError.print_error_list
+          stdout
+          ~stale_msg
+          ~output_json
+          ~error_format
+          ~error_list
+          ~recheck_stats:last_recheck_stats;
+        0
+      ) else
+        let error_format = Diagnostics.format_or_default error_format in
+        List.iter error_list ~f:(print_diagnostic ~error_format);
+        let (error_count, warning_count) =
+          Diagnostics.count_errors_and_warnings error_list
+        in
+        Option.iter
+          (Diagnostics.format_summary
+             error_format
+             ~error_count
+             ~warning_count
+             ~dropped_count:(Some dropped_count)
+             ~max_errors)
+          ~f:(fun msg -> Printf.printf "%s" msg);
+        (* [stale_msg] ultimately comes from [ServerMain.query_notifier], and says whether the check
+           reflects data from a sync file watcher query, or just whatever has arrived asynchronously
+           so far. *)
+        Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
+        error_count
+    in
+    if Int.( = ) error_count 0 then
+      Exit_status.No_error
+    else
+      Exit_status.Type_error
 
 type end_sentinel =
   | Completed of Server_progress.completion_reason
@@ -226,7 +242,7 @@ let go_streaming_on_fd
     ~(initial_telemetry : Telemetry.t)
     ~(progress_callback : string option -> unit) :
     (Exit_status.t * Telemetry.t) Lwt.t =
-  let ClientEnv.{ max_errors; error_format; _ } = args in
+  let ClientEnv.{ max_errors; error_format; output_jsonl; _ } = args in
   let errors_stream = Server_progress_lwt.watch_errors_file ~pid fd in
   let start_time = Unix.gettimeofday () in
   let first_error_time = ref None in
@@ -309,25 +325,36 @@ let go_streaming_on_fd
         in
         let printer =
           try
-            let printer =
+            if output_jsonl then begin
               Relative_path.Map.fold
                 diagnostics
-                ~init:printer
-                ~f:(fun _path diagnostics_in_file acc ->
-                  List.fold
-                    diagnostics_in_file
-                    ~init:acc
-                    ~f:(fun acc (diag, _) ->
-                      DiagnosticPrinter.print_diagnostic_if_below_limit
-                        ~error_format
-                        acc
-                        diag))
-            in
-            let printer =
-              DiagnosticPrinter.print_extra_diagnostics_if_any printer
-            in
-            Printf.printf "%!";
-            printer
+                ~init:()
+                ~f:(fun _path diagnostics_in_file () ->
+                  List.iter diagnostics_in_file ~f:(fun (diag, _) ->
+                      Client_jsonl_printer.print_diagnostic ~error_format diag));
+              Printf.printf "%!";
+              printer
+            end else begin
+              let printer =
+                Relative_path.Map.fold
+                  diagnostics
+                  ~init:printer
+                  ~f:(fun _path diagnostics_in_file acc ->
+                    List.fold
+                      diagnostics_in_file
+                      ~init:acc
+                      ~f:(fun acc (diag, _) ->
+                        DiagnosticPrinter.print_diagnostic_if_below_limit
+                          ~error_format
+                          acc
+                          diag))
+              in
+              let printer =
+                DiagnosticPrinter.print_extra_diagnostics_if_any printer
+              in
+              Printf.printf "%!";
+              printer
+            end
           with
           | Sys_error msg when String.equal msg "Broken pipe" ->
             (* We catch this error very locally, as small as we can around [printf],
@@ -361,7 +388,10 @@ let go_streaming_on_fd
     match end_sentinel with
     | Completed (Server_progress.Complete telemetry) ->
       (* complete either because the server completed, or we truncated early *)
-      if not @@ DiagnosticPrinter.has_printed_counts printer then
+      if output_jsonl then begin
+        let passed = error_count = 0 in
+        Client_jsonl_printer.print_summary ~passed ~error_count ~warning_count
+      end else if not @@ DiagnosticPrinter.has_printed_counts printer then
         Option.iter
           (Diagnostics.format_summary
              error_format
@@ -387,11 +417,17 @@ let go_streaming_on_fd
         log_message;
       HackEventLogger.client_check_errors_file_restarted
         (user_message ^ "\n" ^ log_message);
-      (* All errors, warnings, informationals go to stdout. *)
-      let msg =
-        Tty.apply_color (Tty.Bold Tty.Red) (user_message ^ "\nPlease re-run hh.")
-      in
-      Printf.printf "\n%s\n%!" msg;
+      if output_jsonl then
+        Client_jsonl_printer.print_restarted ~message:user_message
+      else begin
+        (* All errors, warnings, informationals go to stdout. *)
+        let msg =
+          Tty.apply_color
+            (Tty.Bold Tty.Red)
+            (user_message ^ "\nPlease re-run hh.")
+        in
+        Printf.printf "\n%s\n%!" msg
+      end;
       raise Exit_status.(Exit_with Exit_status.Typecheck_restarted)
     | Completed Server_progress.Stopped
     | Watch_error _ ->
@@ -399,9 +435,12 @@ let go_streaming_on_fd
         "Errors-file: on %s, read %s"
         (Sys_utils.show_inode fd)
         (show_end_sentinel end_sentinel);
-      Printf.printf
-        "hh_server has terminated. [%s]\n%!"
-        (end_sentinel_short_string end_sentinel);
+      let short = end_sentinel_short_string end_sentinel in
+      if output_jsonl then
+        Client_jsonl_printer.print_stopped
+          ~message:(Printf.sprintf "hh_server has terminated. [%s]" short)
+      else
+        Printf.printf "hh_server has terminated. [%s]\n%!" short;
       raise Exit_status.(Exit_with Exit_status.Typecheck_abandoned)
   in
 

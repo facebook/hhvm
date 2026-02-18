@@ -19,5 +19,6 @@ val go :
   Diagnostics.format option ->
   is_interactive:bool ->
   output_json:bool ->
+  output_jsonl:bool ->
   max_errors:int option ->
   Exit_status.t

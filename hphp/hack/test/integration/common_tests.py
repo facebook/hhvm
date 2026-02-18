@@ -529,6 +529,46 @@ class CommonTests(BarebonesTests):
         self.assertEqual(output["passed"], True)
         self.assertIn("version", output)
 
+    def test_jsonl_no_errors(self) -> None:
+        self.test_driver.start_hh_server()
+        stdout, _ = self.test_driver.check_cmd(None, options=["--jsonl"])
+        lines = [
+            json.loads(line) for line in stdout.strip().split("\n") if line.strip()
+        ]
+        self.assertTrue(len(lines) >= 1)
+        summary = lines[-1]
+        self.assertEqual(summary["kind"], "summary")
+        self.assertTrue(summary["passed"])
+        self.assertIn("version", summary)
+        self.assertEqual(summary["error_count"], 0)
+        self.assertEqual(summary["warning_count"], 0)
+
+    def test_jsonl_with_errors(self) -> None:
+        with open(os.path.join(self.test_driver.repo_dir, "jsonl_err.php"), "w") as f:
+            f.write("<?hh\nfunction jsonl_err(): int { return 'oops'; }\n")
+
+        self.test_driver.start_hh_server(changed_files=["jsonl_err.php"])
+        stdout, _ = self.test_driver.check_cmd(None, options=["--jsonl"])
+        lines = [
+            json.loads(line) for line in stdout.strip().split("\n") if line.strip()
+        ]
+        diagnostics = [line for line in lines if line["kind"] == "diagnostic"]
+        summaries = [line for line in lines if line["kind"] == "summary"]
+        self.assertTrue(len(diagnostics) > 0)
+        self.assertEqual(len(summaries), 1)
+        summary = summaries[0]
+        self.assertFalse(summary["passed"])
+        self.assertGreater(summary["error_count"], 0)
+        for d in diagnostics:
+            self.assertEqual(d["kind"], "diagnostic")
+            self.assertIn(d["severity"], ["error", "warning"])
+            self.assertIn("message", d)
+
+    def test_jsonl_and_json_mutually_exclusive(self) -> None:
+        self.test_driver.start_hh_server()
+        (_, _, retcode) = self.test_driver.run_check(options=["--json", "--jsonl"])
+        self.assertNotEqual(retcode, 0)
+
     def test_modify_file(self) -> None:
         """
         Add an error to a file that previously had none.

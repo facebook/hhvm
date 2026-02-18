@@ -40,6 +40,7 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     save_64bit = _;
     save_human_readable_64bit_dep_map = _;
     output_json = _;
+    output_jsonl = _;
     prechecked = _;
     mini_state = _;
     sort_results = _;

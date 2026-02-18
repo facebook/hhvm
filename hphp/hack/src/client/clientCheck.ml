@@ -130,6 +130,7 @@ let connect
     max_errors = _;
     mode = _;
     output_json = _;
+    output_jsonl = _;
     sort_results = _;
     stdin_name = _;
     desc = _;
@@ -308,6 +309,7 @@ let main_internal
           status
           args.error_format
           ~output_json:args.output_json
+          ~output_jsonl:args.output_jsonl
           ~max_errors:args.max_errors
           ~is_interactive:args.is_interactive
       in
@@ -379,6 +381,7 @@ let main_internal
         args.error_format
         ~is_interactive:args.is_interactive
         ~output_json:args.output_json
+        ~output_jsonl:args.output_jsonl
         ~max_errors:args.max_errors
     in
     Lwt.return (exit_status, telemetry)

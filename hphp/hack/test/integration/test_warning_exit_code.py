@@ -9,6 +9,7 @@ with code 2.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import json
 import os
 from typing import List, Optional, Tuple
 
@@ -141,3 +142,74 @@ function has_error(): int {
             f"Expected exit code 2 when both warnings and errors present, "
             f"but got {retcode}.",
         )
+
+    def test_jsonl_warnings_only(self) -> None:
+        """
+        Test that --jsonl output correctly reports warnings with severity
+        "warning" and passes (exit code 0) when only warnings are present.
+        """
+        with open(os.path.join(self.test_driver.repo_dir, "jsonl_warn.php"), "w") as f:
+            f.write(
+                """<?hh
+function jsonl_warn_test(vec<int> $arg): void {
+  if (null !== $arg) {
+    // Warn[12007]: This comparison will always return true
+  }
+}
+"""
+            )
+
+        self.test_driver.start_hh_server(changed_files=["jsonl_warn.php"])
+        stdout, _ = self.test_driver.check_cmd(None, options=["--jsonl"])
+        lines = [
+            json.loads(line) for line in stdout.strip().split("\n") if line.strip()
+        ]
+        diagnostics = [line for line in lines if line["kind"] == "diagnostic"]
+        summaries = [line for line in lines if line["kind"] == "summary"]
+        self.assertTrue(
+            len(diagnostics) > 0, "Expected at least one warning diagnostic"
+        )
+        self.assertEqual(len(summaries), 1)
+        summary = summaries[0]
+        self.assertTrue(summary["passed"])
+        self.assertEqual(summary["error_count"], 0)
+        self.assertGreater(summary["warning_count"], 0)
+        for d in diagnostics:
+            self.assertEqual(d["severity"], "warning")
+
+    def test_jsonl_mixed_warnings_and_errors(self) -> None:
+        """
+        Test that --jsonl output correctly reports both errors and warnings
+        with appropriate severity values and fails when errors are present.
+        """
+        with open(os.path.join(self.test_driver.repo_dir, "jsonl_warn2.php"), "w") as f:
+            f.write(
+                """<?hh
+function jsonl_warn2_test(vec<int> $arg): void {
+  if (null !== $arg) {
+    // Warn[12007]
+  }
+}
+"""
+            )
+
+        with open(os.path.join(self.test_driver.repo_dir, "jsonl_err2.php"), "w") as f:
+            f.write("<?hh\nfunction jsonl_err2_test(): int { return 'oops'; }\n")
+
+        self.test_driver.start_hh_server(
+            changed_files=["jsonl_warn2.php", "jsonl_err2.php"]
+        )
+        stdout, _ = self.test_driver.check_cmd(None, options=["--jsonl"])
+        lines = [
+            json.loads(line) for line in stdout.strip().split("\n") if line.strip()
+        ]
+        diagnostics = [line for line in lines if line["kind"] == "diagnostic"]
+        summaries = [line for line in lines if line["kind"] == "summary"]
+        self.assertEqual(len(summaries), 1)
+        summary = summaries[0]
+        self.assertFalse(summary["passed"])
+        self.assertGreater(summary["error_count"], 0)
+        self.assertGreater(summary["warning_count"], 0)
+        severities = {d["severity"] for d in diagnostics}
+        self.assertIn("error", severities)
+        self.assertIn("warning", severities)

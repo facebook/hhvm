@@ -848,6 +848,59 @@ let test_hhi_error () : bool Lwt.t =
   in
   Lwt.return_true
 
+let test_client_jsonl_streaming () : bool Lwt.t =
+  let%lwt () =
+    try_with_server [b_php; loop_php] (fun ~tmp ~root ~hhi ->
+        (* This test proves that JSONL output streams mid-typecheck with real
+           hh_server/hh_client processes, following the same pattern as
+           test_errors_kill and test_client_during.
+           b.php has a typing error; loop.php hangs forever.
+           We use max_workers=4 so they get separate buckets. *)
+        let%lwt _stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "start";
+              "--no-load";
+              "--config";
+              "max_workers=4";
+              "--config";
+              "produce_streaming_errors=true";
+              "--custom-hhi-path";
+              Path.to_string hhi;
+            |]
+        in
+        (* Wait for the server to be actively typechecking *)
+        let%lwt () =
+          wait_for_progress
+            ~deadline:(Unix.gettimeofday () +. 60.0)
+            ~expected:"[DWorking] typechecking"
+        in
+        (* Open hh check --jsonl while typechecking is still in progress *)
+        let%lwt hh_client =
+          hh_open
+            ~root
+            ~tmp
+            [|
+              "check"; "--jsonl"; "--config"; "consume_streaming_errors=true";
+            |]
+        in
+        (* Wait for a diagnostic line — this proves streaming, because loop.php
+           is still being typechecked (it hangs forever) *)
+        let%lwt () =
+          hh_await_substring hh_client ~substring:"\"kind\":\"diagnostic\""
+        in
+        (* Stop the server *)
+        let%lwt _ = hh ~root ~tmp [| "stop" |] in
+        (* Read the remaining output from hh_client *)
+        let%lwt stdout = Lwt_io.read hh_client#stdout in
+        (* The output should contain a stopped line *)
+        assert_substring stdout ~substring:"\"kind\":\"stopped\"";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
 let () =
   Printexc.record_backtrace true;
   EventLogger.init_fake ();
@@ -868,6 +921,7 @@ let () =
       ("test_no_load", test_no_load);
       ("test_hhi_error", test_hhi_error);
       ("test_interrupt", test_interrupt);
+      ("test_client_jsonl_streaming", test_client_jsonl_streaming);
     ]
     |> List.map ~f:(fun (name, f) ->
            ( name,

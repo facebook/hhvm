@@ -47,8 +47,8 @@ proxygen_add_library(proxygen_services_worker
   SRCS
     WorkerThread.cpp
   DEPS
-    Folly::folly_experimental_io_io_uring_backend
     Folly::folly_io_async_event_base_manager
+    Folly::folly_io_async_io_uring_backend
     Folly::folly_string
     glog::glog
   EXPORTED_DEPS

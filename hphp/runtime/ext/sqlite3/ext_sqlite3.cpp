@@ -589,6 +589,11 @@ Variant HHVM_METHOD(SQLite3Stmt, execute) {
   SYNC_VM_REGS_SCOPED();
   data->validate();
 
+  // Reset the statement before re-binding. This ensures clean cursor state
+  // if execute() is called again without an explicit reset(). Safe because
+  // sqlite3_reset() does NOT clear bindings.
+  sqlite3_reset(data->m_raw_stmt);
+
   for (unsigned int i = 0; i < data->m_bound_params.size(); i++) {
     SQLite3Stmt::BoundParam &p = *data->m_bound_params[i];
     if (p.value.isNull()) {
@@ -640,6 +645,14 @@ Variant HHVM_METHOD(SQLite3Stmt, execute) {
 
   switch (sqlite3_step(data->m_raw_stmt)) {
   case SQLITE_ROW: /* Valid Row */
+    {
+      Object ret{SQLite3Result::classof()};
+      SQLite3Result *result = Native::data<SQLite3Result>(ret);
+      result->m_stmt_obj = Object(this_);
+      result->m_stmt = data;
+      result->m_first_row_buffered = true;
+      return ret;
+    }
   case SQLITE_DONE: /* Valid but no results */
     {
       sqlite3_reset(data->m_raw_stmt);
@@ -701,7 +714,15 @@ Variant HHVM_METHOD(SQLite3Result, fetcharray,
   SYNC_VM_REGS_SCOPED();
   data->validate();
 
-  switch (sqlite3_step(data->m_stmt->m_raw_stmt)) {
+  int step_result;
+  if (data->m_first_row_buffered) {
+    data->m_first_row_buffered = false;
+    step_result = SQLITE_ROW;
+  } else {
+    step_result = sqlite3_step(data->m_stmt->m_raw_stmt);
+  }
+
+  switch (step_result) {
   case SQLITE_ROW:
     if (mode & PHP_SQLITE3_BOTH) {
       Array ret = Array::CreateDict();
@@ -729,12 +750,14 @@ Variant HHVM_METHOD(SQLite3Result, fetcharray,
 bool HHVM_METHOD(SQLite3Result, reset) {
   auto *data = Native::data<SQLite3Result>(this_);
   data->validate();
+  data->m_first_row_buffered = false;
   return sqlite3_reset(data->m_stmt->m_raw_stmt) == SQLITE_OK;
 }
 
 bool HHVM_METHOD(SQLite3Result, finalize) {
   auto *data = Native::data<SQLite3Result>(this_);
   data->validate();
+  data->m_first_row_buffered = false;
   data->m_stmt_obj.reset();
   data->m_stmt = nullptr;
   return true;

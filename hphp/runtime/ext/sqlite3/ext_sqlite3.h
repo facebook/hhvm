@@ -82,6 +82,7 @@ struct SQLite3Result : SystemLib::ClassLoader<"SQLite3Result"> {
 public:
   Object m_stmt_obj;
   SQLite3Stmt *m_stmt; // XXX why not scanned?
+  bool m_first_row_buffered{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

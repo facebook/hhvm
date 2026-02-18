@@ -19,8 +19,12 @@ let of_json_opt = function
 
 let of_yojson_opt (json : Yojson.Safe.t) : t option =
   match json with
-  | `Assoc kvs -> Some kvs
+  | `Assoc kvs ->
+    Some (List.map kvs ~f:(fun (k, v) -> (k, Hh_json.of_yojson v)))
   | _ -> None
+
+let to_yojson (telemetry : t) : Yojson.Safe.t =
+  `Assoc (List.map telemetry ~f:(fun (k, v) -> (k, Hh_json.to_yojson v)))
 
 (* Ignore - we only use the generated `pp_key_value_pair` in deriving `show` for t *)
 let _ = show_key_value_pair

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <fizz/experimental/psp/PSP.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/security/AsyncStopTLS.h>
@@ -60,7 +61,8 @@ class ThriftParametersContext;
  */
 class ThriftFizzAcceptorHandshakeHelper
     : public wangle::FizzAcceptorHandshakeHelper,
-      private AsyncStopTLS::Callback {
+      private AsyncStopTLS::Callback,
+      private fizz::psp::Callback {
  public:
   ThriftFizzAcceptorHandshakeHelper(
       std::shared_ptr<apache::thrift::ThriftParametersServerExtension>
@@ -101,8 +103,14 @@ class ThriftFizzAcceptorHandshakeHelper
     callback_->connectionError(transport_.get(), ew, sslError_);
   }
 
+  void pspSuccess(folly::NetworkSocket fd) noexcept override;
+  void pspError(const folly::exception_wrapper& ew) noexcept override;
+
   std::shared_ptr<apache::thrift::ThriftParametersServerExtension>
       thriftExtension_;
+
+  // Post TLS handshake operations.
   AsyncStopTLS::UniquePtr stopTLSAsyncFrame_;
+  std::unique_ptr<fizz::psp::AsyncPSPUpgradeFrame> pspUpgradeFrame_;
 };
 } // namespace apache::thrift

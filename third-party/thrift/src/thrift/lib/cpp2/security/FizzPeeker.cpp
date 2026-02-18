@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <fizz/experimental/psp/PSP.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/security/FizzPeeker.h>
@@ -80,22 +81,39 @@ void ThriftFizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
     loggingCallback_->logFizzHandshakeSuccess(*transport, tinfo_);
   }
 
-  if (thriftExtension_ && thriftExtension_->getNegotiatedStopTLS()) {
-    VLOG(5) << "Beginning StopTLS negotiation";
-    stopTLSAsyncFrame_.reset(new AsyncStopTLS(*this));
+  if (thriftExtension_) {
+    // The client and server may negotiate some "post handshake" transport
+    // operation to be performed prior to returning the transport to
+    // the Thrift server. This negotiation occurs through the usage of the
+    // Thrift extension sent in TLS.
 
-    // We are running as part of a wangle::ManagedConnection. The timeout
-    // is managed by wangle; wangle will close() the underlying transport
-    // (which will trigger an error) when its own timer elapses.
-    stopTLSAsyncFrame_->start(
-        transport, AsyncStopTLS::Role::Server, std::chrono::milliseconds(0));
-  } else {
-    callback_->connectionReady(
-        std::move(transport_),
-        std::move(appProto),
-        SecureTransportType::TLS,
-        wangle::SSLErrorEnum::NO_ERROR);
+    // PSP is mutually exclusive with StopTLS.
+    uint64_t pspHandshakeVersion = thriftExtension_->getNegotiatedPSPUpgrade();
+    if (pspHandshakeVersion == PSPNegotiationVersion::THRIFT_PSP_V0) {
+      // TODO: PSPVersion currently hardcoded to AES-128-GCM
+      pspUpgradeFrame_ = fizz::psp::pspUpgradeV0(
+          transport,
+          fizz::psp::PSPVersion::VER0,
+          fizz::psp::KernelPSP::make(folly::getGlobalCPUExecutor()));
+      return pspUpgradeFrame_->start(this);
+    }
+
+    if (thriftExtension_->getNegotiatedStopTLS()) {
+      VLOG(5) << "Beginning StopTLS negotiation";
+      stopTLSAsyncFrame_.reset(new AsyncStopTLS(*this));
+
+      // We are running as part of a wangle::ManagedConnection. The timeout
+      // is managed by wangle; wangle will close() the underlying transport
+      // (which will trigger an error) when its own timer elapses.
+      return stopTLSAsyncFrame_->start(
+          transport, AsyncStopTLS::Role::Server, std::chrono::milliseconds(0));
+    }
   }
+  callback_->connectionReady(
+      std::move(transport_),
+      std::move(appProto),
+      SecureTransportType::TLS,
+      wangle::SSLErrorEnum::NO_ERROR);
 }
 
 void ThriftFizzAcceptorHandshakeHelper::stopTLSSuccess(
@@ -123,4 +141,28 @@ void ThriftFizzAcceptorHandshakeHelper::stopTLSSuccess(
       SecureTransportType::TLS,
       wangle::SSLErrorEnum::NO_ERROR);
 }
+
+void ThriftFizzAcceptorHandshakeHelper::pspSuccess(
+    folly::NetworkSocket) noexcept {
+  auto applicationProtocol = transport_->getApplicationProtocol();
+
+  auto plaintextTransport =
+      toFDSocket(transport_.get(), kSecurityProtocolPSPV0);
+  plaintextTransport->cacheAddresses();
+  transport_.reset();
+
+  tinfo_.securityType = kSecurityProtocolPSPV0;
+
+  return callback_->connectionReady(
+      std::move(plaintextTransport),
+      std::move(applicationProtocol),
+      SecureTransportType::TLS,
+      wangle::SSLErrorEnum::NO_ERROR);
+}
+
+void ThriftFizzAcceptorHandshakeHelper::pspError(
+    const folly::exception_wrapper& ew) noexcept {
+  return callback_->connectionError(transport_.get(), ew, sslError_);
+}
+
 } // namespace apache::thrift

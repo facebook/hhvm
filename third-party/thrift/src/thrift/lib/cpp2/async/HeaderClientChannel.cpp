@@ -205,6 +205,8 @@ void HeaderClientChannel::sendRequestNoResponse(
   addRpcOptionHeaders(header.get(), rpcOptions);
   attachMetadataOnce(header.get());
 
+  DestructorGuard dg(this);
+
   // Both cb and buf are allowed to be null.
   uint32_t oldSeqId = sendSeqId_;
   sendSeqId_ = ResponseChannel::ONEWAY_REQUEST_ID;

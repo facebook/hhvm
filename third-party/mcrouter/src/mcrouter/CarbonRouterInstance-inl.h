@@ -465,7 +465,6 @@ void CarbonRouterInstance<RouterInfo>::spawnAuxiliaryThreads() {
   startObservingRuntimeVarsFile();
   registerOnUpdateCallbackForRxmits();
   registerForStatsUpdates();
-  registerForPreprocessedConfigDumps();
   spawnStatLoggerThread();
 }
 
@@ -524,7 +523,6 @@ void CarbonRouterInstance<RouterInfo>::joinAuxiliaryThreads() noexcept {
   }
 
   deregisterForStatsUpdates();
-  deregisterForPreprocessedConfigDumps();
 
   if (mcrouterLogger_) {
     mcrouterLogger_->stop();
@@ -663,6 +661,12 @@ CarbonRouterInstance<RouterInfo>::configure(const ProxyConfigBuilder& builder) {
       << newConfigs[0]->getPools().size() << " pools, "
       << newConfigs[0]->calcNumClients() << " clients "
       << newConfigs[0]->getConfigMd5Digest() << ")";
+
+  try {
+    dumpPreprocessedConfigToDisk();
+  } catch (const std::exception& e) {
+    LOG(ERROR) << "Error dumping preprocessed config: " << e.what();
+  }
 
   return folly::Unit();
 }

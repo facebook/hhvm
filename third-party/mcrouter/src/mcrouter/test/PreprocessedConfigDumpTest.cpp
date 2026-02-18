@@ -101,7 +101,7 @@ class PreprocessedConfigDumpTest : public ::testing::Test {
     opts.router_name = "test_router";
     opts.flavor_name = "test_flavor";
     opts.config_dump_root = tempDir_->path().string();
-    opts.dump_preprocessed_config_interval_sec = 300; // 5 minutes in seconds
+    opts.dump_preprocessed_config_enabled = true;
     opts.config_str = R"({
       "pools": {
         "test_pool": {
@@ -369,18 +369,13 @@ TEST_F(PreprocessedConfigDumpTest, EndToEndCorrectFilenameFormat) {
 // Test that missing config_dump_root prevents dumping
 TEST_F(PreprocessedConfigDumpTest, EndToEndMissingConfigDumpRoot) {
   auto mockConfigApi = std::make_unique<MockConfigApi>();
-  auto* mockPtr = mockConfigApi.get();
 
   auto opts = createTestOptions();
   opts.config_dump_root = ""; // Empty config dump root
 
-  // Function still attempts to load config but should fail early
-  EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
-      .WillOnce(::testing::Return(false));
-
   TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
 
-  // Call should not do anything when config_dump_root is empty
+  // Should return early without doing anything when config_dump_root is empty
   instance.dumpPreprocessedConfigToDiskForTesting();
 }
 

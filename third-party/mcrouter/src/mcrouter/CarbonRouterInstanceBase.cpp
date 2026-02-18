@@ -72,7 +72,7 @@ std::string statsUpdateFunctionName(folly::StringPiece routerName) {
 }
 
 bool isDumpPreprocessedConfigEnabled(const McrouterOptions& opts) {
-  if (opts.dump_preprocessed_config_interval_sec == 0) {
+  if (!opts.dump_preprocessed_config_enabled) {
     return false;
   }
   if (opts.config_dump_root.empty()) {
@@ -195,10 +195,6 @@ CarbonRouterInstanceBase::CarbonRouterInstanceBase(McrouterOptions inputOptions)
       rtVarsData_(std::make_shared<ObservableRuntimeVars>()),
       leaseTokenMap_(globalFunctionScheduler.try_get()),
       statsUpdateFunctionHandle_(statsUpdateFunctionName(opts_.router_name)),
-      preprocessedConfigDumpExecutor_(
-          isDumpPreprocessedConfigEnabled(opts_)
-              ? std::make_unique<folly::ScopedEventBaseThread>("mcr-ppc-dump")
-              : nullptr),
       statsApi_(gMakeStatsApiHook ? gMakeStatsApiHook(*this) : nullptr) {
   if (auto statsLogger = statsLogWriter()) {
     if (opts_.stats_async_queue_length) {
@@ -288,17 +284,6 @@ void CarbonRouterInstanceBase::deregisterForStatsUpdates() {
   }
 }
 
-void CarbonRouterInstanceBase::deregisterForPreprocessedConfigDumps() {
-  if (preprocessedConfigDumpExecutor_) {
-    preprocessedConfigDumpExecutor_->getEventBase()->runInEventBaseThread(
-        [this]() {
-          if (periodicTimeout_) {
-            periodicTimeout_->cancelTimeout();
-          }
-        });
-  }
-}
-
 void CarbonRouterInstanceBase::updateStats() {
   const int BIN_NUM =
       (MOVING_AVERAGE_WINDOW_SIZE_IN_SECOND /
@@ -359,34 +344,12 @@ int32_t CarbonRouterInstanceBase::getStatsEnabledPoolIndex(
 }
 
 struct PreprocessedConfigDumpTag;
-struct PreprocessedConfigTouchTag;
 
-void CarbonRouterInstanceBase::registerForPreprocessedConfigDumps() {
-  if (!preprocessedConfigDumpExecutor_) {
+void CarbonRouterInstanceBase::dumpPreprocessedConfigToDisk() {
+  if (!isDumpPreprocessedConfigEnabled(opts_)) {
     return;
   }
 
-  periodicTimeout_ = folly::AsyncTimeout::make(
-      *preprocessedConfigDumpExecutor_->getEventBase(), [&]() mutable noexcept {
-        try {
-          dumpPreprocessedConfigToDisk();
-        } catch (const std::exception& e) {
-          LOG(ERROR) << "Error dumping preprocessed config: " << e.what();
-        }
-        // Reschedule
-        periodicTimeout_->scheduleTimeout(
-            opts().dump_preprocessed_config_interval_sec * 1000);
-      });
-
-  // Schedule the first task
-  preprocessedConfigDumpExecutor_->getEventBase()->runInEventBaseThread(
-      [this]() {
-        periodicTimeout_->scheduleTimeout(
-            opts().dump_preprocessed_config_interval_sec * 1000);
-      });
-}
-
-void CarbonRouterInstanceBase::dumpPreprocessedConfigToDisk() {
   std::string confFile;
   std::string path;
   if (!configApi_->getConfigFile(confFile, path)) {
@@ -474,17 +437,6 @@ void CarbonRouterInstanceBase::dumpPreprocessedConfigToDisk() {
                 "Error while dumping preprocessed config to disk. "
                 "Failed to write file {}.",
                 filePath),
-            1000);
-        ensureConfigDirectoryExists(directory);
-      }
-    } else {
-      // Content hasn't changed, just touch the file
-      if (!touchFile(filePath)) {
-        logFailureEveryN<PreprocessedConfigTouchTag>(
-            opts_,
-            memcache::failure::Category::kOther,
-            fmt::format(
-                "Error while touching preprocessed config file {}", filePath),
             1000);
         ensureConfigDirectoryExists(directory);
       }

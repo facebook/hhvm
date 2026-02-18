@@ -272,6 +272,12 @@ struct FactsStore : public AutoloadMap {
   virtual Array getMethodsWithAttribute(const String& attr) = 0;
 
   /**
+   * Return the methods of a given type that have any indexed attribute,
+   * mapped to their attribute names.
+   */
+  virtual Array getTypeMethodAttributes(const String& type) = 0;
+
+  /**
    * Return all files decorated with the given attribute.
    */
   virtual Array getFilesWithAttribute(const String& attr) = 0;

@@ -520,7 +520,14 @@ struct TypeStmts {
             " FROM type_details"
             "  JOIN method_attributes USING (typeid)"
             "  JOIN all_paths USING (pathid)"
-            " WHERE attribute_name = @attribute_name")} {}
+            " WHERE attribute_name = @attribute_name")},
+        m_getTypeMethodAttributes{db.prepare(
+            "SELECT DISTINCT method, attribute_name"
+            " FROM method_attributes"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE name = @type"
+            " AND path = @path")} {}
 
   SQLiteStmt m_insertDetails;
   SQLiteStmt m_getTypePath;
@@ -540,6 +547,7 @@ struct TypeStmts {
   SQLiteStmt m_getTypeAliasesWithAttribute;
   SQLiteStmt m_getMethodsInPath;
   SQLiteStmt m_getMethodsWithAttribute;
+  SQLiteStmt m_getTypeMethodAttributes;
 };
 
 struct FileStmts {
@@ -1176,6 +1184,20 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
               .m_type = std::string{query.getString(0)},
               .m_method = std::string{query.getString(1)},
               .m_path = fs::path{std::string{query.getString(2)}}});
+    }
+    return results;
+  }
+
+  std::vector<std::pair<std::string, std::string>> getTypeMethodAttributes(
+      std::string_view type,
+      const fs::path& path) override {
+    auto query = m_txn.query(m_typeStmts.m_getTypeMethodAttributes);
+    query.bindString("@type", type);
+    query.bindString("@path", path.native());
+    std::vector<std::pair<std::string, std::string>> results;
+    XLOGF(DBG9, "Running {}", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      results.emplace_back(query.getString(0), query.getString(1));
     }
     return results;
   }

@@ -816,6 +816,46 @@ std::vector<MethodDecl> SymbolMap::getMethodsWithAttribute(
   return getMethodsWithAttribute(Symbol<SymKind::Type>{attr});
 }
 
+std::vector<std::pair<Symbol<SymKind::Method>, Symbol<SymKind::Type>>>
+SymbolMap::getTypeMethodAttributes(Symbol<SymKind::Type> type) {
+  auto path = getSymbolPath(type);
+  if (path == nullptr) {
+    return {};
+  }
+  // This uses a DB-only strategy (like getFilesAndAttrValsWithAttribute)
+  // because the in-memory m_methodAttrs map is keyed by MethodDecl, not by
+  // type, so we can't efficiently query it without iterating all methods.
+  // The DB query is a direct point lookup.
+  using PairVec =
+      std::vector<std::pair<Symbol<SymKind::Method>, Symbol<SymKind::Type>>>;
+  return readOrUpdate<PairVec>(
+      [&](const UNUSED Data& data) -> Optional<PairVec> {
+        return std::nullopt;
+      },
+      [&](std::shared_ptr<AutoloadDB> db) -> PairVec {
+        if (m_enableBlockingDbWait) {
+          waitForDBUpdate(std::chrono::milliseconds(m_blockingDbWaitTimeout));
+        }
+        auto const dbPairs = db->getTypeMethodAttributes(
+            type.slice(), fs::path{std::string{path.slice()}});
+        PairVec result;
+        result.reserve(dbPairs.size());
+        for (auto const& [method, attr] : dbPairs) {
+          result.emplace_back(
+              Symbol<SymKind::Method>{method}, Symbol<SymKind::Type>{attr});
+        }
+        return result;
+      },
+      [&](Data& UNUSED data, PairVec resultFromDB) -> PairVec {
+        return resultFromDB;
+      });
+}
+
+std::vector<std::pair<Symbol<SymKind::Method>, Symbol<SymKind::Type>>>
+SymbolMap::getTypeMethodAttributes(const StringData& type) {
+  return getTypeMethodAttributes(Symbol<SymKind::Type>{type});
+}
+
 std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfFile(Path path) {
   if (path == nullptr) {
     return {};

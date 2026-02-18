@@ -336,6 +336,12 @@ Array FactsLogger::getMethodsWithAttribute(const String& name) {
   });
 }
 
+Array FactsLogger::getTypeMethodAttributes(const String& type) {
+  return logPerf(__func__, type.slice(), [&]() {
+    return m_inner->getTypeMethodAttributes(type);
+  });
+}
+
 Array FactsLogger::getFilesWithAttribute(const String& name) {
   return logPerf(__func__, name.slice(), [&]() {
     return m_inner->getFilesWithAttribute(name);

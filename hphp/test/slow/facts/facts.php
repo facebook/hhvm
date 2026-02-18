@@ -195,6 +195,22 @@ function print_attr_methods(
   print "Methods decorated with $attr: $methods_json\n";
 }
 
+function print_type_methods_with_attr(
+  string $type,
+): void {
+  try {
+    $method_attrs = HH\Facts\type_method_attributes($type);
+  } catch (Exception $e) {
+    print HH\Lib\Str\format(
+      'Threw %s:"%s" trying to get methods with attributes for %s%s',
+      get_class($e), $e->getMessage(), $type, "\n");
+    return;
+  }
+  \ksort(inout $method_attrs);
+  $method_attrs_json = \json_encode($method_attrs);
+  print "Methods with attributes for $type: $method_attrs_json\n";
+}
+
 function print_attr_files(
   classname<\HH\FileAttribute> $attr,
 ): void {
@@ -622,6 +638,10 @@ function facts(): void {
   print_attr_methods(NoArgMethodAttr::class);
   print_attr_methods(TwoArgMethodAttr::class);
   print_attr_methods(DontIndexThisMethodAttr::class);
+
+  print "\nGetting type methods with attribute\n";
+  print_type_methods_with_attr(ClassWithMethodAttrs::class);
+  print_type_methods_with_attr('AnnoyingNS\\TerribleClass');
 
   print "\nGetting type aliases with attribute\n";
   print_attr_type_aliases(TypeAliasAttr::class);

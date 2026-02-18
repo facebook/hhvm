@@ -211,6 +211,11 @@ struct AutoloadDB {
   virtual std::vector<MethodPath> getMethodsWithAttribute(
       std::string_view attributeName) = 0;
 
+  virtual std::vector<std::pair<std::string, std::string>>
+  getTypeMethodAttributes(
+      std::string_view type,
+      const std::filesystem::path& path) = 0;
+
   virtual std::vector<std::filesystem::path> getFilesWithAttribute(
       std::string_view attributeName) = 0;
   virtual std::vector<std::filesystem::path> getFilesWithAttributeAndAnyValue(

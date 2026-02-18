@@ -47,6 +47,7 @@ using ::testing::IsEmpty;
 using ::testing::IsFalse;
 using ::testing::IsTrue;
 using ::testing::NiceMock;
+using ::testing::Pair;
 using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::SizeIs;
@@ -279,6 +280,12 @@ struct MockAutoloadDB : public AutoloadDB {
       std::vector<MethodPath>,
       getMethodsWithAttribute,
       (std::string_view attributeName),
+      (override));
+
+  MOCK_METHOD(
+      (std::vector<std::pair<std::string, std::string>>),
+      getTypeMethodAttributes,
+      (std::string_view type, const std::filesystem::path& path),
       (override));
 
   MOCK_METHOD(
@@ -2008,6 +2015,94 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
   auto m2 = make("/var/www");
   update(m2, "1", "1", {}, {}, {});
   testMap(m2);
+}
+
+TEST_F(SymbolMapTest, GetTypeMethodAttributes) {
+  auto m1 = make("/var/www");
+
+  FileFacts ff1{
+      .types = {
+          {.name = "C1",
+           .methods =
+               {MethodFacts{
+                    .name = "m1",
+                    .attributes = {{.name = "A1", .args = {"1"}}}},
+                MethodFacts{
+                    .name = "m2",
+                    .attributes = {{.name = "A1", .args = {"2"}}},
+                },
+                MethodFacts{
+                    .name = "m3",
+                    .attributes = {{.name = "A2", .args = {}}},
+                }}},
+      }};
+  FileFacts ff2{
+      .types = {
+          {.name = "C2",
+           .methods = {MethodFacts{
+               .name = "m4", .attributes = {{.name = "A1", .args = {"3"}}}}}},
+      }};
+  fs::path p1{"some/path1.php"};
+  fs::path p2{"some/path2.php"};
+  update(m1, "", "1", {p1, p2}, {}, {ff1, ff2});
+
+  // This uses a DB-only strategy, so flush to DB first
+  m1.waitForDBUpdate();
+
+  auto testMap = [](auto& m) {
+    // C1: m1 has A1, m2 has A1, m3 has A2
+    auto c1result = m.getTypeMethodAttributes("C1");
+    EXPECT_EQ(c1result.size(), 3);
+    EXPECT_THAT(
+        c1result,
+        UnorderedElementsAre(
+            Pair("m1", "A1"), Pair("m2", "A1"), Pair("m3", "A2")));
+
+    // C2: m4 has A1
+    auto c2result = m.getTypeMethodAttributes("C2");
+    EXPECT_THAT(c2result, ElementsAre(Pair("m4", "A1")));
+
+    // Nonexistent type returns empty
+    auto noType = m.getTypeMethodAttributes("DoesNotExist");
+    EXPECT_THAT(noType, IsEmpty());
+  };
+  testMap(m1);
+
+  // Also test from a fresh SymbolMap reading from DB
+  auto m2 = make("/var/www");
+  update(m2, "1", "1", {}, {}, {});
+  testMap(m2);
+}
+
+TEST_F(SymbolMapTest, GetTypeMethodAttributesOnlyIndexedAttrs) {
+  // Index A2 but not A1
+  auto m1 = make("/var/www", /* useManualExecutor = */ false, {"A2"});
+
+  FileFacts ff1{
+      .types = {
+          {.name = "C1",
+           .methods = {
+               MethodFacts{
+                   .name = "m1",
+                   .attributes = {{.name = "A1"}, {.name = "A2"}}},
+           }}}};
+  fs::path p1{"some/path1.php"};
+  update(m1, "", "1", {p1}, {}, {ff1});
+
+  // DB-only strategy, flush first
+  m1.waitForDBUpdate();
+
+  auto check = [&](SymbolMap& m) {
+    auto result = m.getTypeMethodAttributes("C1");
+    // Only A2 is indexed, so m1 should only show A2
+    EXPECT_THAT(result, ElementsAre(Pair("m1", "A2")));
+  };
+
+  check(m1);
+
+  auto m2 = make("/var/www", /* useManualExecutor = */ false, {"A2"});
+  update(m2, "1", "1", {}, {}, {});
+  check(m2);
 }
 
 TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {

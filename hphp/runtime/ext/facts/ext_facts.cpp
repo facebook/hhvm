@@ -818,6 +818,10 @@ Array HHVM_FUNCTION(facts_methods_with_attribute, const String& attr) {
   return Facts::getFactsOrThrow().getMethodsWithAttribute(attr);
 }
 
+Array HHVM_FUNCTION(facts_type_method_attributes, const String& type) {
+  return Facts::getFactsOrThrow().getTypeMethodAttributes(type);
+}
+
 Array HHVM_FUNCTION(facts_files_with_attribute, const String& attr) {
   return Facts::getFactsOrThrow().getFilesWithAttribute(attr);
 }
@@ -960,6 +964,8 @@ void FactsExtension::moduleRegisterNative() {
       HHVM_FN(facts_type_aliases_with_attribute));
   HHVM_NAMED_FE(
       HH\\Facts\\methods_with_attribute, HHVM_FN(facts_methods_with_attribute));
+  HHVM_NAMED_FE(
+      HH\\Facts\\type_method_attributes, HHVM_FN(facts_type_method_attributes));
   HHVM_NAMED_FE(
       HH\\Facts\\files_with_attribute, HHVM_FN(facts_files_with_attribute));
   HHVM_NAMED_FE(

@@ -237,6 +237,16 @@ namespace HH\Facts {
   )[]: vec<(classname<nonnull>, string)>;
 
   /**
+   * Get all methods of a given type that have any indexed attribute,
+   * returning a dict mapping method name to its attribute names.
+   *
+   * Throws InvalidOperationException if Facts is not enabled.
+   */
+  function type_method_attributes(
+    classname<nonnull> $type,
+  )[]: dict<string, vec<string>>;
+
+  /**
    * Get all files matching the given filters.
    *
    * Throws InvalidOperationException if Facts is not enabled.

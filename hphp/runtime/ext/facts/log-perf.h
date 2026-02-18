@@ -104,6 +104,7 @@ struct FactsLogger final : public FactsStore,
   Array getTypesWithAttribute(const String&) override;
   Array getTypeAliasesWithAttribute(const String&) override;
   Array getMethodsWithAttribute(const String&) override;
+  Array getTypeMethodAttributes(const String&) override;
   Array getFilesWithAttribute(const String&) override;
   Array getFilesAndAttrValsWithAttribute(const String&) override;
   Array getFilesWithAttributeAndAnyValue(const String&, const folly::dynamic&)

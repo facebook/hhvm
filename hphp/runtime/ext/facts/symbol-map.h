@@ -267,6 +267,15 @@ struct SymbolMap {
   std::vector<MethodDecl> getMethodsWithAttribute(const StringData& attr);
 
   /**
+   * Return the methods of a given type that have any indexed attribute,
+   * as (method, attribute) pairs.
+   */
+  std::vector<std::pair<Symbol<SymKind::Method>, Symbol<SymKind::Type>>>
+  getTypeMethodAttributes(Symbol<SymKind::Type> type);
+  std::vector<std::pair<Symbol<SymKind::Method>, Symbol<SymKind::Type>>>
+  getTypeMethodAttributes(const StringData& type);
+
+  /**
    * Return the attributes of a file
    */
   std::vector<Symbol<SymKind::Type>> getAttributesOfFile(Path path);

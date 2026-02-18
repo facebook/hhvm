@@ -461,6 +461,31 @@ Array makeVecOfDynamic(DynamicIterable&& vector) {
 }
 
 /**
+ * Convert (method, attribute) pairs into a Hack `dict<string, vec<string>>`,
+ * grouping attribute names by method name.
+ */
+Array makeDictOfStringVecString(
+    const std::vector<
+        std::pair<Symbol<SymKind::Method>, Symbol<SymKind::Type>>>& pairs) {
+  std::map<std::string_view, std::vector<const StringData*>> grouped;
+  std::map<std::string_view, const StringData*> methodKeys;
+  for (auto const& [method, attr] : pairs) {
+    auto sv = method.slice();
+    grouped[sv].push_back(attr.get());
+    methodKeys[sv] = method.get();
+  }
+  auto ret = DictInit{grouped.size()};
+  for (auto const& [sv, attrs] : grouped) {
+    auto attrVec = VecInit{attrs.size()};
+    for (auto const* attr : attrs) {
+      attrVec.append(VarNR{StrNR{attr}}.tv());
+    }
+    ret.set(StrNR{methodKeys[sv]}, attrVec.toArray());
+  }
+  return ret.toArray();
+}
+
+/**
  * Converts a vector of FileAttrVals (each of which is one path and one
  * attr val for a particular file attr) into a vector of two-item vectors
  * each of which will be represented as a hack dynamic.
@@ -937,6 +962,11 @@ struct FactsStoreImpl final
     }
     return makeVecOfStringString(
         m_symbolMap.getMethodsWithAttribute(*attr.get()));
+  }
+
+  Array getTypeMethodAttributes(const String& type) override {
+    return makeDictOfStringVecString(
+        m_symbolMap.getTypeMethodAttributes(*type.get()));
   }
 
   Array getFilesWithAttribute(const String& attr) override {

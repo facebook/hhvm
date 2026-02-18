@@ -58,7 +58,7 @@ abstract class ThriftClientBase implements IThriftClient {
     ?IThriftMigrationAsyncChannel $channel = null,
   )[leak_safe] {
     $this->input_ = $input;
-    $this->output_ = $output ?: $input;
+    $this->output_ = $output is nonnull ? $output : $input;
     $this->channel_ = $channel;
     $this->asyncHandler_ = new TClientAsyncHandler();
     $this->eventHandler_ = new TClientEventHandler();

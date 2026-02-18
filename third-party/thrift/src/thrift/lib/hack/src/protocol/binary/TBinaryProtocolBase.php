@@ -244,7 +244,7 @@ abstract class TBinaryProtocolBase extends TProtocol {
   public function writeString(string $value)[zoned_shallow]: int {
     $len = Str\length($value);
     $result = $this->writeI32($len);
-    if ($len) {
+    if ($len !== 0) {
       $this->trans_->write($value);
     }
     return $result + $len;
@@ -567,12 +567,12 @@ abstract class TBinaryProtocolBase extends TProtocol {
       // Force 32bit words in excess of 2G to pe positive - we deal wigh sign
       // explicitly below
 
-      if ($hi & (int)0x80000000) {
+      if (($hi & (int)0x80000000) !== 0) {
         $hi &= (int)0x7fffffff;
         $hi += 0x80000000;
       }
 
-      if ($lo & (int)0x80000000) {
+      if (($lo & (int)0x80000000) !== 0) {
         $lo &= (int)0x7fffffff;
         $lo += 0x80000000;
       }
@@ -584,12 +584,12 @@ abstract class TBinaryProtocolBase extends TProtocol {
       }
     } else {
       // Upcast negatives in LSB bit
-      if ($arr[2] & 0x80000000) {
+      if (($arr[2] & 0x80000000) !== 0) {
         $arr[2] = $arr[2] & 0xffffffff;
       }
 
       // Check for a negative
-      if ($arr[1] & 0x80000000) {
+      if (($arr[1] & 0x80000000) !== 0) {
         $arr[1] = $arr[1] & 0xffffffff;
         $arr[1] = $arr[1] ^ 0xffffffff;
         $arr[2] = $arr[2] ^ 0xffffffff;
@@ -632,7 +632,7 @@ abstract class TBinaryProtocolBase extends TProtocol {
   public function readString(inout string $value)[zoned_shallow]: int {
     $len = 0;
     $result = $this->readI32(inout $len);
-    if ($len) {
+    if ($len !== 0) {
       $value = $this->trans_->readAll($len);
     } else {
       $value = '';

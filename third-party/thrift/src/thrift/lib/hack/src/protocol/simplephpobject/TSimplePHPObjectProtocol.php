@@ -236,7 +236,7 @@ class TSimplePHPObjectProtocol extends TProtocol {
 
   <<__Override>>
   public function readBool(inout bool $value)[write_props]: int {
-    $value = (bool)$this->stackTopIterCurrent();
+    $value = HH\legacy_is_truthy($this->stackTopIterCurrent());
     $this->stackTopIterNext();
     return 0;
   }

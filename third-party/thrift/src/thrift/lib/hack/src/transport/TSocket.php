@@ -326,7 +326,7 @@ class TSocket
     /* END_STRIP */
 
     // Connect failed?
-    if (!$handle) {
+    if (!($handle is nonnull && HH\legacy_is_truthy($handle))) {
       $error = 'TSocket: could not connect to '.$this->host_.':'.$this->port_;
       $error .= ' ('.(string)$this->errstr_.' ['.(string)$this->errno_.'])';
       throw
@@ -510,7 +510,7 @@ class TSocket
           ),
         );
         $md = $this->getMetaData();
-        if ($md['timed_out']) {
+        if (HH\legacy_is_truthy($md['timed_out'])) {
           throw new TTransportException(
             'TSocket: timeout while reading '.$read_err_detail,
             TTransportException::TIMED_OUT,
@@ -525,7 +525,7 @@ class TSocket
         $sz = Str\length($buf);
         if ($sz < $len) {
           $md = $this->getMetaData();
-          if ($md['timed_out']) {
+          if (HH\legacy_is_truthy($md['timed_out'])) {
             $read_err_detail = Str\format(
               '%d bytes from %s:%d to localhost:%d. Spent %2.2f ms.',
               $len,
@@ -585,7 +585,7 @@ class TSocket
         ),
       );
       $md = $this->getMetaData();
-      if ($md['timed_out']) {
+      if (HH\legacy_is_truthy($md['timed_out'])) {
         throw new TTransportException(
           'TSocket: timeout while reading '.$read_err_detail,
           TTransportException::TIMED_OUT,
@@ -616,7 +616,9 @@ class TSocket
     // If the stream is currently blocking, we will set to nonblocking
     // first
     if (
-      $is_blocking && !PHP\stream_set_blocking($this->handle_ as nonnull, false)
+      $is_blocking is nonnull &&
+      HH\legacy_is_truthy($is_blocking) &&
+      !PHP\stream_set_blocking($this->handle_ as nonnull, false)
     ) {
       throw
         new TTransportException('TSocket: cannot set stream to non-blocking');
@@ -630,7 +632,9 @@ class TSocket
 
     // Switch back to blocking mode is necessary
     if (
-      $is_blocking && !PHP\stream_set_blocking($this->handle_ as nonnull, true)
+      $is_blocking is nonnull &&
+      HH\legacy_is_truthy($is_blocking) &&
+      !PHP\stream_set_blocking($this->handle_ as nonnull, true)
     ) {
       throw new TTransportException(
         'TSocket: cannot swtich stream back to blocking',
@@ -696,7 +700,7 @@ class TSocket
           ),
         );
         $md = $this->getMetaData();
-        if ($md['timed_out']) {
+        if (HH\legacy_is_truthy($md['timed_out'])) {
           throw new TTransportException(
             'TSocket: timeout while writing '.$read_err_detail,
             TTransportException::TIMED_OUT,

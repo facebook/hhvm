@@ -234,7 +234,7 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
         list($encoded_ex, $is_application_ex) = $payload_encode(null, $ex);
 
         // Invoke appropriate event handler based on exception type
-        if ($is_application_ex) {
+        if ($is_application_ex is nonnull && $is_application_ex) {
           $this->eventHandler_
             ->postStreamPayloadError($handler_ctx, $request_name, $ex);
         } else {
@@ -245,7 +245,7 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
           $encoded_ex,
           $ex->getMessage(),
           Classnames::get($ex) as nonnull,
-          !$is_application_ex,
+          !($is_application_ex is nonnull && $is_application_ex),
         );
         return;
       }

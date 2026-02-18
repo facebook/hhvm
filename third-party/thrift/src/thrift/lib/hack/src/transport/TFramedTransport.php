@@ -81,7 +81,8 @@ class TFramedTransport
     bool $read = true,
     bool $write = true,
   )[] {
-    $this->transport_ = $transport ?: new TNullTransport();
+    $this->transport_ =
+      $transport is nonnull ? $transport : new TNullTransport();
     $this->read_ = $read;
     $this->write_ = $write;
   }

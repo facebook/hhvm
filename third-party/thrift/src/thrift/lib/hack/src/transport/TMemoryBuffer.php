@@ -106,7 +106,7 @@ final class TMemoryBuffer
     if ($len !== 1) {
       return Str\slice($this->buf_, $this->index_ + $start, $len);
     }
-    if (Str\length($this->buf_)) {
+    if (Str\length($this->buf_) !== 0) {
       return $this->buf_[$this->index_ + $start];
     }
     return '';

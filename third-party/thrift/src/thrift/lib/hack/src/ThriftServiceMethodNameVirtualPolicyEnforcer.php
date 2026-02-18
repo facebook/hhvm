@@ -85,7 +85,7 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
       $caller,
       $context,
     );
-    if ($pl_failure) {
+    if ($pl_failure is nonnull && HH\legacy_is_truthy($pl_failure)) {
       $exception = $pl_failure->getException();
     }
 

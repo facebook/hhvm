@@ -95,7 +95,9 @@ final class THeaderTransport
         self::UNFRAMED_DEPRECATED,
         self::HTTP_CLIENT_TYPE,
       ],
-      $protocols ? vec($protocols) : vec[],
+      $protocols is nonnull && HH\legacy_is_truthy($protocols)
+        ? vec($protocols)
+        : vec[],
     );
   }
 
@@ -536,7 +538,10 @@ final class THeaderTransport
       }
 
       $infoData = '';
-      if ($this->writeHeaders || $this->persistentWriteHeaders) {
+      if (
+        !C\is_empty($this->writeHeaders) ||
+        !C\is_empty($this->persistentWriteHeaders)
+      ) {
         $infoData .= $this->getVarint(self::INFO_KEYVALUE);
         $infoData .= $this->getVarint(
           C\count($this->writeHeaders) + C\count($this->persistentWriteHeaders),

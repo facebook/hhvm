@@ -211,7 +211,7 @@ final class TCompactSerializer extends TProtocolWritePropsSerializer {
     }
     $remaining = $transport->available();
     invariant(
-      !$remaining,
+      $remaining === 0,
       "Deserialization didn't consume the whole input string (%d bytes left)".
       "Are you sure this was serialized as a '%s'?",
       $remaining,
@@ -280,7 +280,7 @@ final class TCompactSerializer extends TProtocolWritePropsSerializer {
         ()[defaults] ==> {
           $result = -1;
           $protocol->readByte(inout $result);
-          return (bool)$result;
+          return $result !== 0;
         },
         '[T133628451] Compact with memory buffer would have write_props, but Hack doesn\'t '.
         'have a way to express this atm.',

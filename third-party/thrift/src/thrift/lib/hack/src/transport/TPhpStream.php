@@ -45,8 +45,8 @@ final class TPhpStream extends TTransport {
   private ?int $maxReadChunkSize_ = null;
 
   public function __construct(int $mode)[] {
-    $this->read_ = (bool)($mode & self::MODE_R);
-    $this->write_ = (bool)($mode & self::MODE_W);
+    $this->read_ = ($mode & self::MODE_R) !== 0;
+    $this->write_ = ($mode & self::MODE_W) !== 0;
   }
 
   <<__Override>>

@@ -394,7 +394,7 @@ abstract class TCompactProtocolBase extends TProtocol {
     $value = (string)$value;
     $len = Str\length($value);
     $result = $this->writeVarint($len);
-    if ($len) {
+    if ($len !== 0) {
       $this->trans_->write($value);
     }
     return $result + $len;
@@ -681,7 +681,7 @@ abstract class TCompactProtocolBase extends TProtocol {
   public function readString(inout string $value)[zoned_shallow]: int {
     $len = 0;
     $result = $this->readVarint(inout $len);
-    if ($len) {
+    if ($len !== 0) {
       $value = $this->trans_->readAll($len);
     } else {
       $value = '';
@@ -729,7 +729,7 @@ abstract class TCompactProtocolBase extends TProtocol {
 
     // Now, unzig it.
     $xorer = 0;
-    if ($lo & 1) {
+    if (($lo & 1) !== 0) {
       $xorer = 0xffffffff;
     }
     $lo = ($lo >> 1) & 0x7fffffff;
@@ -756,12 +756,12 @@ abstract class TCompactProtocolBase extends TProtocol {
     // Force 32bit words in excess of 2G to be positive - we deal with sign
     // explicitly below
 
-    if ($hi & (int)0x80000000) {
+    if (($hi & (int)0x80000000) !== 0) {
       $hi &= (int)0x7fffffff;
       $hi += 0x80000000;
     }
 
-    if ($lo & (int)0x80000000) {
+    if (($lo & (int)0x80000000) !== 0) {
       $lo &= (int)0x7fffffff;
       $lo += 0x80000000;
     }

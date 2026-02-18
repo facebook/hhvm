@@ -111,7 +111,6 @@ let default =
     warnings_default_all = false;
     warnings_in_sandcastle = true;
     package_config_strict_validation = false;
-    fanout_strip_class_location = false;
     (* Fields primarily for hh_conf equivalence testing *)
     hackfmt_version = 0;
     sharedmem_dep_table_pow = 0;
@@ -891,12 +890,6 @@ let load_
       ~default:default.package_config_strict_validation
       config
   in
-  let fanout_strip_class_location =
-    bool_
-      "fanout_strip_class_location"
-      ~default:default.fanout_strip_class_location
-      config
-  in
   (* Fields primarily for hh_conf equivalence testing *)
   let hackfmt_version =
     int_ "hackfmt.version" ~default:default.hackfmt_version config
@@ -1091,7 +1084,6 @@ let load_
     warnings_default_all;
     warnings_in_sandcastle;
     package_config_strict_validation;
-    fanout_strip_class_location;
     hackfmt_version;
     sharedmem_dep_table_pow;
     sharedmem_global_size;
@@ -1180,5 +1172,4 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         options.edenfs_file_watcher.sync_queries_obey_deferral;
       edenfs_file_watcher_state_tracking =
         options.edenfs_file_watcher.state_tracking;
-      fanout_strip_class_location = options.fanout_strip_class_location;
     }

@@ -640,10 +640,6 @@ impl HhConfig {
                 .get_bool_or("poly_function_pointers", default.tco_poly_function_pointers)?,
             tco_check_packages: hhconfig
                 .get_bool_or("check_packages", default.tco_check_packages)?,
-            fanout_strip_class_location: hhconfig.get_bool_or(
-                "fanout_strip_class_location",
-                default.fanout_strip_class_location,
-            )?,
             tco_package_config_disable_transitivity_check: hhconfig.get_bool_or(
                 "package_config_disable_transitivity_check",
                 default.tco_package_config_disable_transitivity_check,

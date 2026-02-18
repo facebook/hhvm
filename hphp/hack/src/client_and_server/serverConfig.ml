@@ -558,7 +558,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_poly_function_pointers:
       (bool_opt Config_keys.poly_function_pointers config)
     ?tco_check_packages:(bool_opt Config_keys.check_packages config)
-    ?fanout_strip_class_location:(bool_opt "fanout_strip_class_location" config)
     ?tco_package_config_disable_transitivity_check:
       (bool_opt Config_keys.package_config_disable_transitivity_check config)
     ?tco_allow_require_package_on_interface_methods:
@@ -675,7 +674,6 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
           (string_list Config_keys.warnings_generated_files ~default:[] config)
         ~hh_distc_exponential_backoff_num_retries:
           local_config.hh_distc_exponential_backoff_num_retries
-        ~fanout_strip_class_location:local_config.fanout_strip_class_location
         GlobalOptions.default
     in
     load_config config local_config_opts

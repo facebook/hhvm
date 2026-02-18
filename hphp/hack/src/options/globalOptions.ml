@@ -202,7 +202,6 @@ type t = {
   class_pointer_ban_class_array_key: bool;
   tco_poly_function_pointers: bool;
   tco_check_packages: bool;
-  fanout_strip_class_location: bool;
   tco_package_config_disable_transitivity_check: bool;
   tco_allow_require_package_on_interface_methods: bool;
 }
@@ -325,7 +324,6 @@ let default =
     class_pointer_ban_class_array_key = false;
     tco_poly_function_pointers = true;
     tco_check_packages = true;
-    fanout_strip_class_location = false;
     tco_package_config_disable_transitivity_check = false;
     tco_allow_require_package_on_interface_methods = true;
   }
@@ -445,7 +443,6 @@ let set
     ?class_pointer_ban_class_array_key
     ?tco_poly_function_pointers
     ?tco_check_packages
-    ?fanout_strip_class_location
     ?tco_package_config_disable_transitivity_check
     ?tco_allow_require_package_on_interface_methods
     options =
@@ -768,8 +765,6 @@ let set
     tco_poly_function_pointers =
       setting tco_poly_function_pointers options.tco_poly_function_pointers;
     tco_check_packages = setting tco_check_packages options.tco_check_packages;
-    fanout_strip_class_location =
-      setting fanout_strip_class_location options.fanout_strip_class_location;
     tco_package_config_disable_transitivity_check =
       setting
         tco_package_config_disable_transitivity_check

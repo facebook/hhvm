@@ -364,8 +364,6 @@ type t = {
   warnings_in_sandcastle: bool;
   package_config_strict_validation: bool;
       (** POC: @fzn, if true, `hh` fatals if paths specified in PACAKGES.toml `include_paths` do not exists *)
-  fanout_strip_class_location: bool;
-  (* POC: @fzn, if true fanout strips class location when comparing shallow classes for minor changes *)
   (* Fields below are primarily for hh_conf equivalence testing *)
   hackfmt_version: int;  (** hackfmt.version config key *)
   sharedmem_dep_table_pow: int;  (** sharedmem_dep_table_pow config key *)

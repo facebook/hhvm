@@ -11,7 +11,8 @@ namespace fizz {
 
 namespace {
 
-void tryWriteCert(
+Status tryWriteCert(
+    Error& err,
     const CertificateSerialization& serializer,
     const fizz::Cert* cert,
     io::Appender& appender) {
@@ -24,10 +25,13 @@ void tryWriteCert(
   }
 
   if (serializedCert) {
-    fizz::detail::writeBuf<uint32_t>(serializedCert, appender);
+    FIZZ_RETURN_ON_ERROR(
+        fizz::detail::writeBuf<uint32_t>(err, serializedCert, appender));
   } else {
-    fizz::detail::writeBuf<uint32_t>(nullptr, appender);
+    FIZZ_RETURN_ON_ERROR(
+        fizz::detail::writeBuf<uint32_t>(err, nullptr, appender));
   }
+  return Status::Success;
 }
 
 std::shared_ptr<const fizz::Cert> tryReadCert(
@@ -66,7 +70,9 @@ std::chrono::system_clock::time_point clampTimePoint(uint64_t value) {
       Duration(std::min(value, kMaxValue)));
 }
 
-std::string serializePsk(
+Status serializePsk(
+    std::string& ret,
+    Error& err,
     const CertificateSerialization& serializer,
     const fizz::client::CachedPsk& psk) {
   uint64_t ticketIssueTime =
@@ -84,30 +90,41 @@ std::string serializePsk(
 
   auto serialized = IOBuf::create(0);
   io::Appender appender(serialized.get(), 512);
-  fizz::detail::writeBuf<uint16_t>(
-      folly::IOBuf::wrapBuffer(StringPiece(psk.psk)), appender);
-  fizz::detail::writeBuf<uint16_t>(
-      folly::IOBuf::wrapBuffer(StringPiece(psk.secret)), appender);
-  fizz::detail::write(psk.version, appender);
-  fizz::detail::write(psk.cipher, appender);
+  FIZZ_RETURN_ON_ERROR(
+      fizz::detail::writeBuf<uint16_t>(
+          err, folly::IOBuf::wrapBuffer(StringPiece(psk.psk)), appender));
+  FIZZ_RETURN_ON_ERROR(
+      fizz::detail::writeBuf<uint16_t>(
+          err, folly::IOBuf::wrapBuffer(StringPiece(psk.secret)), appender));
+  FIZZ_RETURN_ON_ERROR(fizz::detail::write(err, psk.version, appender));
+  FIZZ_RETURN_ON_ERROR(fizz::detail::write(err, psk.cipher, appender));
   if (psk.group.has_value()) {
-    fizz::detail::write(static_cast<uint8_t>(1), appender);
-    fizz::detail::write(*psk.group, appender);
+    FIZZ_RETURN_ON_ERROR(
+        fizz::detail::write(err, static_cast<uint8_t>(1), appender));
+    FIZZ_RETURN_ON_ERROR(fizz::detail::write(err, *psk.group, appender));
   } else {
-    fizz::detail::write(static_cast<uint8_t>(0), appender);
+    FIZZ_RETURN_ON_ERROR(
+        fizz::detail::write(err, static_cast<uint8_t>(0), appender));
   }
-  fizz::detail::writeBuf<uint8_t>(
-      psk.alpn ? folly::IOBuf::wrapBuffer(StringPiece(*psk.alpn)) : nullptr,
-      appender);
-  fizz::detail::write(psk.ticketAgeAdd, appender);
-  fizz::detail::write(ticketIssueTime, appender);
-  fizz::detail::write(ticketExpirationTime, appender);
-  tryWriteCert(serializer, psk.serverCert.get(), appender);
-  tryWriteCert(serializer, psk.clientCert.get(), appender);
-  fizz::detail::write(psk.maxEarlyDataSize, appender);
-  fizz::detail::write(ticketHandshakeTime, appender);
+  FIZZ_RETURN_ON_ERROR(
+      fizz::detail::writeBuf<uint8_t>(
+          err,
+          psk.alpn ? folly::IOBuf::wrapBuffer(StringPiece(*psk.alpn)) : nullptr,
+          appender));
+  FIZZ_RETURN_ON_ERROR(fizz::detail::write(err, psk.ticketAgeAdd, appender));
+  FIZZ_RETURN_ON_ERROR(fizz::detail::write(err, ticketIssueTime, appender));
+  FIZZ_RETURN_ON_ERROR(
+      fizz::detail::write(err, ticketExpirationTime, appender));
+  FIZZ_RETURN_ON_ERROR(
+      tryWriteCert(err, serializer, psk.serverCert.get(), appender));
+  FIZZ_RETURN_ON_ERROR(
+      tryWriteCert(err, serializer, psk.clientCert.get(), appender));
+  FIZZ_RETURN_ON_ERROR(
+      fizz::detail::write(err, psk.maxEarlyDataSize, appender));
+  FIZZ_RETURN_ON_ERROR(fizz::detail::write(err, ticketHandshakeTime, appender));
 
-  return serialized->to<std::string>();
+  ret = serialized->to<std::string>();
+  return Status::Success;
 }
 
 Status deserializePsk(

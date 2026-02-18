@@ -102,7 +102,10 @@ TEST_F(PskSerializationTest, TestSerializationWithMock) {
         }
       }));
   Error err;
-  std::string serializedPsk = fizz::client::serializePsk(mockSerializer, psk);
+  std::string serializedPsk;
+  EXPECT_EQ(
+      fizz::client::serializePsk(serializedPsk, err, mockSerializer, psk),
+      Status::Success);
   EXPECT_TRUE(serializedPsk.find("serialized: ") != std::string::npos);
   CachedPsk psk2;
   EXPECT_EQ(
@@ -131,8 +134,11 @@ TEST_F(PskSerializationTest, TestSerializationThatFails) {
 
   // When serialization fails, then we expect that deserialize is not called
   EXPECT_CALL(mockSerializer, deserialize(_)).Times(0);
+  std::string serializedPsk;
   Error err;
-  std::string serializedPsk = fizz::client::serializePsk(mockSerializer, psk);
+  EXPECT_EQ(
+      fizz::client::serializePsk(serializedPsk, err, mockSerializer, psk),
+      Status::Success);
 
   fizz::client::CachedPsk psk2;
   EXPECT_EQ(
@@ -161,7 +167,10 @@ TEST_F(PskSerializationTest, TestDeserializationThatFails) {
       .InSequence(s)
       .WillOnce(Throw(std::runtime_error("failed deserialization")));
   Error err;
-  std::string serializedPsk = fizz::client::serializePsk(mockSerializer, psk);
+  std::string serializedPsk;
+  EXPECT_EQ(
+      fizz::client::serializePsk(serializedPsk, err, mockSerializer, psk),
+      Status::Success);
   CachedPsk psk2;
   EXPECT_EQ(
       fizz::client::deserializePsk(
@@ -174,8 +183,11 @@ TEST_F(PskSerializationTest, TestDeserializationThatFails) {
 TEST_F(PskSerializationTest, TestSerialization) {
   auto psk = getCachedPsk("SomePsk");
   Error err;
-  std::string serializedPsk =
-      fizz::client::serializePsk(fizz::openssl::certificateSerializer(), psk);
+  std::string serializedPsk;
+  EXPECT_EQ(
+      fizz::client::serializePsk(
+          serializedPsk, err, fizz::openssl::certificateSerializer(), psk),
+      Status::Success);
   EXPECT_FALSE(serializedPsk.empty());
   CachedPsk psk2;
   EXPECT_EQ(
@@ -236,8 +248,11 @@ TEST_F(PskSerializationTest, TestTimestampOverflow) {
 TEST_F(PskSerializationTest, TestInvalidSerializationThrows) {
   auto psk = getCachedPsk("SomePsk");
   Error err;
-  std::string serializedPsk =
-      fizz::client::serializePsk(fizz::openssl::certificateSerializer(), psk);
+  std::string serializedPsk;
+  EXPECT_EQ(
+      fizz::client::serializePsk(
+          serializedPsk, err, fizz::openssl::certificateSerializer(), psk),
+      Status::Success);
   EXPECT_FALSE(serializedPsk.empty());
   serializedPsk.insert(10, "HI!");
   CachedPsk psk2;

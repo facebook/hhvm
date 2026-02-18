@@ -15,19 +15,20 @@ namespace fizz {
 template <>
 inline Status encodeExtension(
     Extension& ret,
-    Error& /* err */,
+    Error& err,
     const ech::OuterECHClientHello& clientECH) {
   Extension ext;
   ext.extension_type = ExtensionType::encrypted_client_hello;
   ext.extension_data = folly::IOBuf::create(0);
 
   folly::io::Appender appender(ext.extension_data.get(), 20);
-  detail::write(clientECH.ech_type, appender);
-  detail::write(clientECH.cipher_suite, appender);
-  detail::write(clientECH.config_id, appender);
-  detail::writeBuf<uint16_t>(clientECH.enc, appender);
-  detail::writeBuf<uint16_t>(clientECH.payload, appender);
-
+  FIZZ_RETURN_ON_ERROR(detail::write(err, clientECH.ech_type, appender));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, clientECH.cipher_suite, appender));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, clientECH.config_id, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<uint16_t>(err, clientECH.enc, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<uint16_t>(err, clientECH.payload, appender));
   ret = std::move(ext);
   return Status::Success;
 }
@@ -35,7 +36,7 @@ inline Status encodeExtension(
 template <>
 inline Status encodeExtension(
     Extension& ret,
-    Error& /* err */,
+    Error& err,
     const ech::ECHEncryptedExtensions& serverECH) {
   Extension ext;
   ext.extension_type = ExtensionType::encrypted_client_hello;
@@ -43,7 +44,8 @@ inline Status encodeExtension(
 
   folly::io::Appender appender(ext.extension_data.get(), 20);
 
-  detail::writeVector<uint16_t>(serverECH.retry_configs, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, serverECH.retry_configs, appender));
   ret = std::move(ext);
   return Status::Success;
 }
@@ -51,14 +53,14 @@ inline Status encodeExtension(
 template <>
 inline Status encodeExtension(
     Extension& ret,
-    Error& /* err */,
+    Error& err,
     const ech::InnerECHClientHello& innerECH) {
   Extension ext;
   ext.extension_type = ExtensionType::encrypted_client_hello;
   ext.extension_data = folly::IOBuf::create(0);
 
   folly::io::Appender appender(ext.extension_data.get(), 4);
-  detail::write(innerECH.ech_type, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, innerECH.ech_type, appender));
   ret = std::move(ext);
   return Status::Success;
 }
@@ -66,14 +68,15 @@ inline Status encodeExtension(
 template <>
 inline Status encodeExtension(
     Extension& ret,
-    Error& /* err */,
+    Error& err,
     const ech::OuterExtensions& outerExts) {
   Extension ext;
   ext.extension_type = ExtensionType::ech_outer_extensions;
   ext.extension_data = folly::IOBuf::create(0);
 
   folly::io::Appender appender(ext.extension_data.get(), 20);
-  detail::writeVector<uint8_t>(outerExts.types, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint8_t>(err, outerExts.types, appender));
 
   ret = std::move(ext);
   return Status::Success;

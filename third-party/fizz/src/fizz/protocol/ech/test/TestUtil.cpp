@@ -85,7 +85,8 @@ bool isEqual(const ParsedECHConfig& l, const ParsedECHConfig& r) {
   auto toBuf = [](const ParsedECHConfig& config) {
     auto buf = folly::IOBuf::create(detail::getSize(config));
     folly::io::Appender out(buf.get(), 0);
-    detail::write(config, out);
+    Error err;
+    FIZZ_THROW_ON_ERROR(detail::write(err, config, out), err);
     return buf;
   };
   return folly::IOBufEqualTo()(toBuf(l), toBuf(r));

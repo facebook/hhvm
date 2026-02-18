@@ -101,8 +101,13 @@ class PersistentFizzPskCache : public fizz::client::PskCache {
   void putPsk(const std::string& identity,
               fizz::client::CachedPsk psk) override {
     PersistentCachedPsk serialized;
-    serialized.serialized =
-        fizz::client::serializePsk(fizz::openssl::certificateSerializer(), psk);
+    fizz::Error err;
+    FIZZ_THROW_ON_ERROR(
+        fizz::client::serializePsk(serialized.serialized,
+                                   err,
+                                   fizz::openssl::certificateSerializer(),
+                                   psk),
+        err);
     serialized.uses = 0;
     cache_.put(identity, serialized);
   }

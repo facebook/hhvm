@@ -63,11 +63,16 @@ Extension encodeExtension(const DelegatedCredential& cred) {
   ext.extension_type = ExtensionType::delegated_credential;
   ext.extension_data = folly::IOBuf::create(10);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::write(cred.valid_time, appender);
-  detail::write(cred.expected_verify_scheme, appender);
-  detail::writeBuf<detail::bits24>(cred.public_key, appender);
-  detail::write(cred.credential_scheme, appender);
-  detail::writeBuf<uint16_t>(cred.signature, appender);
+  Error err;
+  FIZZ_THROW_ON_ERROR(detail::write(err, cred.valid_time, appender), err);
+  FIZZ_THROW_ON_ERROR(
+      detail::write(err, cred.expected_verify_scheme, appender), err);
+  FIZZ_THROW_ON_ERROR(
+      detail::writeBuf<detail::bits24>(err, cred.public_key, appender), err);
+  FIZZ_THROW_ON_ERROR(
+      detail::write(err, cred.credential_scheme, appender), err);
+  FIZZ_THROW_ON_ERROR(
+      detail::writeBuf<uint16_t>(err, cred.signature, appender), err);
   return ext;
 }
 
@@ -76,7 +81,11 @@ Extension encodeExtension(const DelegatedCredentialSupport& supp) {
   ext.extension_type = ExtensionType::delegated_credential;
   ext.extension_data = folly::IOBuf::create(10);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint16_t>(supp.supported_signature_algorithms, appender);
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      detail::writeVector<uint16_t>(
+          err, supp.supported_signature_algorithms, appender),
+      err);
   return ext;
 }
 } // namespace extensions

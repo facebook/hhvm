@@ -466,8 +466,12 @@ class BasicPersistentPskCache : public BasicPskCache {
     if (saveFile_.empty()) {
       return;
     }
-    std::string serializedPsk =
-        serializePsk(fizz::openssl::certificateSerializer(), psk);
+    std::string serializedPsk;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        serializePsk(
+            serializedPsk, err, fizz::openssl::certificateSerializer(), psk),
+        err);
     if (writeFile(serializedPsk, saveFile_.c_str())) {
       FIZZ_LOG(INFO) << "\n Saved PSK to " << saveFile_ << " \n";
     } else {

@@ -66,10 +66,14 @@ Buf DelegatedCredentialUtils::prepareSignatureBuffer(
   auto toSign = folly::IOBuf::create(0);
   folly::io::Appender appender(toSign.get(), 10);
   appender.pushAtMost(certData->data(), certData->length());
-  detail::write(cred.valid_time, appender);
-  detail::write(cred.expected_verify_scheme, appender);
-  detail::writeBuf<detail::bits24>(cred.public_key, appender);
-  detail::write(cred.credential_scheme, appender);
+  Error err;
+  FIZZ_THROW_ON_ERROR(detail::write(err, cred.valid_time, appender), err);
+  FIZZ_THROW_ON_ERROR(
+      detail::write(err, cred.expected_verify_scheme, appender), err);
+  FIZZ_THROW_ON_ERROR(
+      detail::writeBuf<detail::bits24>(err, cred.public_key, appender), err);
+  FIZZ_THROW_ON_ERROR(
+      detail::write(err, cred.credential_scheme, appender), err);
   return toSign;
 }
 

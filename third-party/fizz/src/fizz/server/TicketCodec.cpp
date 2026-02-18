@@ -56,9 +56,11 @@ void appendClientCertificate(
   } else {
     serializeIdentity();
   }
-  fizz::detail::write(selectedStorage, appender);
+  Error err;
+  FIZZ_THROW_ON_ERROR(fizz::detail::write(err, selectedStorage, appender), err);
   if (selectedStorage != CertificateStorage::None) {
-    fizz::detail::writeBuf<uint16_t>(clientCertBuf, appender);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::writeBuf<uint16_t>(err, clientCertBuf, appender), err);
   }
 }
 

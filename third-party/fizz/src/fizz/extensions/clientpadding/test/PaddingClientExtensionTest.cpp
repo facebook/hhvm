@@ -26,7 +26,8 @@ class PaddingClientExtensionTest : public ::fizz::test::ExtensionsTest {
     auto ext = padding.getClientHelloExtensions()[0].clone();
     auto buf = folly::IOBuf::create(0);
     folly::io::Appender appender(buf.get(), 10);
-    detail::write(ext, appender);
+    Error err;
+    FIZZ_THROW_ON_ERROR(detail::write(err, ext, appender), err);
     EXPECT_EQ(hexlify(buf->coalesce()), expectedHex);
   }
 };

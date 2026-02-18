@@ -82,17 +82,25 @@ quic::Optional<quic::QuicCachedPsk> PersistentQuicPskCache::getPsk(
 void PersistentQuicPskCache::putPsk(const std::string& identity,
                                     quic::QuicCachedPsk quicCachedPsk) {
   PersistentQuicCachedPsk cachedPsk;
-  cachedPsk.fizzPsk = fizz::client::serializePsk(
-      fizz::openssl::certificateSerializer(), quicCachedPsk.cachedPsk);
+  fizz::Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::client::serializePsk(cachedPsk.fizzPsk,
+                                 err,
+                                 fizz::openssl::certificateSerializer(),
+                                 quicCachedPsk.cachedPsk),
+      err);
 
   auto quicParams = folly::IOBuf::create(0);
   folly::io::Appender appender(quicParams.get(), 512);
   quic::writeCachedServerTransportParameters(quicCachedPsk.transportParams,
                                              appender);
 
-  fizz::detail::writeBuf<uint16_t>(
-      folly::IOBuf::wrapBuffer(folly::StringPiece(quicCachedPsk.appParams)),
-      appender);
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::writeBuf<uint16_t>(
+          err,
+          folly::IOBuf::wrapBuffer(folly::StringPiece(quicCachedPsk.appParams)),
+          appender),
+      err);
   cachedPsk.quicParams = quicParams->to<std::string>();
   cachedPsk.uses = 0;
   cache_.put(identity, cachedPsk);

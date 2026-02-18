@@ -27,8 +27,9 @@ class TokenBindingUtils {
         sizeof(TokenBindingType));
     folly::io::Appender appender(concatenatedBuf.get(), 20);
 
-    detail::write(type, appender);
-    detail::write(keyParams, appender);
+    Error err;
+    FIZZ_THROW_ON_ERROR(detail::write(err, type, appender), err);
+    FIZZ_THROW_ON_ERROR(detail::write(err, keyParams, appender), err);
     appender.push(ekm->coalesce());
     return concatenatedBuf;
   }

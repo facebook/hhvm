@@ -7,7 +7,9 @@
 
 namespace fizz {
 namespace client {
-std::string serializePsk(
+Status serializePsk(
+    std::string& ret,
+    Error& err,
     const CertificateSerialization& serializer,
     const fizz::client::CachedPsk& psk);
 Status deserializePsk(

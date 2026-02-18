@@ -68,12 +68,14 @@ class BatchSignature {
         sig_->computeChainDataLength();
     auto batchSig = folly::IOBuf::create(batchSigLen);
     folly::io::Appender appender(batchSig.get(), 0);
+    Error err;
     // index, uint32
-    detail::write(path_.index, appender);
+    FIZZ_THROW_ON_ERROR(detail::write(err, path_.index, appender), err);
     // path, each element's length is HashLen
-    detail::writeBuf<uint16_t>(path_.path, appender);
+    FIZZ_THROW_ON_ERROR(
+        detail::writeBuf<uint16_t>(err, path_.path, appender), err);
     // root_signature
-    detail::writeBuf<uint16_t>(sig_, appender);
+    FIZZ_THROW_ON_ERROR(detail::writeBuf<uint16_t>(err, sig_, appender), err);
     return batchSig;
   }
 
@@ -104,8 +106,10 @@ class BatchSignature {
     folly::io::Appender appender(toBeSigned.get(), 0);
     // octet 32 (0x20) repeated 64 times, context string, single 0 byte
     detail::writeBufWithoutLength(folly::IOBuf::wrapBuffer(prefix), appender);
+    Error err;
     // signature scheme code point
-    detail::write(static_cast<uint16_t>(scheme), appender);
+    FIZZ_THROW_ON_ERROR(
+        detail::write(err, static_cast<uint16_t>(scheme), appender), err);
     // root value of the tree
     detail::writeBufWithoutLength(rootValue, appender);
     return toBeSigned;

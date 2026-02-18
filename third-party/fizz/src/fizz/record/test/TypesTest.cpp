@@ -24,7 +24,8 @@ TEST(TestTypes, WriteAndRead24BitsNormal) {
   uint32_t len = 0x102030;
   auto buf = IOBuf::create(3);
   Appender appender(buf.get(), 0);
-  detail::writeBits24(len, appender);
+  Error err;
+  EXPECT_EQ(detail::writeBits24(err, len, appender), Status::Success);
 
   EXPECT_EQ(0x10, buf->data()[0]);
   EXPECT_EQ(0x20, buf->data()[1]);
@@ -39,7 +40,10 @@ TEST(TestTypes, Write24BitsOverflow) {
   uint32_t len = 0x10203040;
   auto buf = IOBuf::create(3);
   Appender appender(buf.get(), 0);
-  EXPECT_THROW(detail::writeBits24(len, appender), std::runtime_error);
+  Error err;
+  EXPECT_THROW(
+      FIZZ_THROW_ON_ERROR(detail::writeBits24(err, len, appender), err),
+      std::runtime_error);
 }
 
 TEST(TestTypes, Write24BitsBuffer) {
@@ -48,7 +52,9 @@ TEST(TestTypes, Write24BitsBuffer) {
 
   auto out = IOBuf::create(10);
   Appender appender(out.get(), 10);
-  detail::writeBuf<detail::bits24>(buf, appender);
+  Error err;
+  EXPECT_EQ(
+      detail::writeBuf<detail::bits24>(err, buf, appender), Status::Success);
   EXPECT_EQ(buf->length() + 3, out->computeChainDataLength());
 }
 
@@ -58,8 +64,11 @@ TEST(TestTypes, Write24BitsBufferOverflow) {
 
   auto out = IOBuf::create(10);
   Appender appender(out.get(), 0);
+  Error err;
   EXPECT_THROW(
-      detail::writeBuf<detail::bits24>(buf, appender), std::runtime_error);
+      FIZZ_THROW_ON_ERROR(
+          detail::writeBuf<detail::bits24>(err, buf, appender), err),
+      std::runtime_error);
 }
 
 TEST(TestTypes, WriteBuf) {
@@ -68,12 +77,13 @@ TEST(TestTypes, WriteBuf) {
 
   auto out1 = IOBuf::create(10);
   Appender appender1(out1.get(), 10);
-  detail::writeBuf<uint16_t>(buf, appender1);
+  Error err;
+  EXPECT_EQ(detail::writeBuf<uint16_t>(err, buf, appender1), Status::Success);
   EXPECT_EQ(2 + buf->length(), out1->computeChainDataLength());
 
   auto out2 = IOBuf::create(10);
   Appender appender2(out2.get(), 10);
-  detail::writeBuf<uint64_t>(buf, appender2);
+  EXPECT_EQ(detail::writeBuf<uint64_t>(err, buf, appender2), Status::Success);
   EXPECT_EQ(8 + buf->length(), out2->computeChainDataLength());
 }
 

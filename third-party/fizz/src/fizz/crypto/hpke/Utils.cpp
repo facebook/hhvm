@@ -19,9 +19,10 @@ generateHpkeSuiteId(NamedGroup group, HashFunction hash, CipherSuite suite) {
 HpkeSuiteId generateHpkeSuiteId(KEMId kem, KDFId kdf, AeadId aead) {
   std::unique_ptr<folly::IOBuf> suiteId = folly::IOBuf::copyBuffer("HPKE");
   folly::io::Appender appender(suiteId.get(), 6);
-  detail::write(kem, appender);
-  detail::write(kdf, appender);
-  detail::write(aead, appender);
+  Error err;
+  FIZZ_THROW_ON_ERROR(detail::write(err, kem, appender), err);
+  FIZZ_THROW_ON_ERROR(detail::write(err, kdf, appender), err);
+  FIZZ_THROW_ON_ERROR(detail::write(err, aead, appender), err);
   return suiteId;
 }
 

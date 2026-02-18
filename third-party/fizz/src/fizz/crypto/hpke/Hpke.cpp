@@ -18,7 +18,9 @@ static std::unique_ptr<folly::IOBuf> writeKeyScheduleContext(
     const std::vector<uint8_t>& infoHash) {
   std::unique_ptr<folly::IOBuf> keyScheduleContext = folly::IOBuf::create(0);
   folly::io::Appender appender(keyScheduleContext.get(), 20);
-  detail::write<uint8_t>((uint8_t)mode, appender);
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      detail::write<uint8_t>(err, (uint8_t)mode, appender), err);
 
   detail::writeBufWithoutLength(folly::IOBuf::copyBuffer(pskIdHash), appender);
   detail::writeBufWithoutLength(folly::IOBuf::copyBuffer(infoHash), appender);

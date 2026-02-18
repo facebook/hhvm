@@ -13,39 +13,51 @@
 namespace fizz {
 
 template <>
-inline void detail::write<ech::HpkeSymmetricCipherSuite>(
+inline Status detail::write<ech::HpkeSymmetricCipherSuite>(
+    Error& err,
     const ech::HpkeSymmetricCipherSuite& suite,
     folly::io::Appender& out) {
-  detail::write(suite.kdf_id, out);
-  detail::write(suite.aead_id, out);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, suite.kdf_id, out));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, suite.aead_id, out));
+  return Status::Success;
 }
 
 template <>
-inline void detail::write<ech::HpkeKeyConfig>(
+inline Status detail::write<ech::HpkeKeyConfig>(
+    Error& err,
     const ech::HpkeKeyConfig& config,
     folly::io::Appender& out) {
-  detail::write(config.config_id, out);
-  detail::write(config.kem_id, out);
-  detail::writeBuf<uint16_t>(config.public_key, out);
-  detail::writeVector<uint16_t>(config.cipher_suites, out);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, config.config_id, out));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, config.kem_id, out));
+  FIZZ_RETURN_ON_ERROR(detail::writeBuf<uint16_t>(err, config.public_key, out));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, config.cipher_suites, out));
+  return Status::Success;
 }
 
 template <>
-inline void detail::write<ech::ECHConfigContentDraft>(
+inline Status detail::write<ech::ECHConfigContentDraft>(
+    Error& err,
     const ech::ECHConfigContentDraft& echConfigContent,
     folly::io::Appender& out) {
-  detail::write(echConfigContent.key_config, out);
-  detail::write(echConfigContent.maximum_name_length, out);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, echConfigContent.key_config, out));
+  FIZZ_RETURN_ON_ERROR(
+      detail::write(err, echConfigContent.maximum_name_length, out));
   detail::writeString<uint8_t>(echConfigContent.public_name, out);
-  detail::writeVector<uint16_t>(echConfigContent.extensions, out);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, echConfigContent.extensions, out));
+  return Status::Success;
 }
 
 template <>
-inline void detail::write<ech::ECHConfig>(
+inline Status detail::write<ech::ECHConfig>(
+    Error& err,
     const ech::ECHConfig& echConfig,
     folly::io::Appender& out) {
-  detail::write(echConfig.version, out);
-  detail::writeBuf<uint16_t>(echConfig.ech_config_content, out);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, echConfig.version, out));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<uint16_t>(err, echConfig.ech_config_content, out));
+  return Status::Success;
 }
 
 template <>
@@ -204,11 +216,11 @@ struct detail::Reader<ech::ECHConfig> {
 template <>
 inline Status encode<const ech::ECHConfigContentDraft&>(
     Buf& ret,
-    Error& /* err */,
+    Error& err,
     const ech::ECHConfigContentDraft& echConfigContent) {
   auto buf = folly::IOBuf::create(detail::getSize(echConfigContent));
   folly::io::Appender appender(buf.get(), 20);
-  detail::write(echConfigContent, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, echConfigContent, appender));
   ret = std::move(buf);
   return Status::Success;
 }
@@ -224,11 +236,11 @@ inline Status encode<ech::ECHConfigContentDraft>(
 template <>
 inline Status encode<const ech::ECHConfig&>(
     Buf& ret,
-    Error& /* err */,
+    Error& err,
     const ech::ECHConfig& echConfig) {
   auto buf = folly::IOBuf::create(detail::getSize(echConfig));
   folly::io::Appender appender(buf.get(), 20);
-  detail::write(echConfig, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, echConfig, appender));
   ret = std::move(buf);
   return Status::Success;
 }
@@ -273,7 +285,7 @@ decode(ech::ECHConfigList& ret, Error& err, folly::io::Cursor& cursor) {
 template <>
 inline Status encode<const ech::ECHConfigList&>(
     Buf& ret,
-    Error& /* err */,
+    Error& err,
     const ech::ECHConfigList& echConfigList) {
   size_t len = sizeof(uint16_t);
   for (const auto& config : echConfigList.configs) {
@@ -282,7 +294,8 @@ inline Status encode<const ech::ECHConfigList&>(
 
   auto buf = folly::IOBuf::create(len);
   folly::io::Appender appender(buf.get(), 20);
-  detail::writeVector<uint16_t>(echConfigList.configs, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, echConfigList.configs, appender));
   ret = std::move(buf);
   return Status::Success;
 }

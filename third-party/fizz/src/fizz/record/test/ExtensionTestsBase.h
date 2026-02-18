@@ -46,7 +46,7 @@ class ExtensionsTest : public testing::Test {
         encodeExtension(encoded, err, std::forward<T>(ext)), Status::Success);
     auto buf = folly::IOBuf::create(0);
     folly::io::Appender appender(buf.get(), 10);
-    detail::write(encoded, appender);
+    EXPECT_EQ(detail::write(err, encoded, appender), Status::Success);
     EXPECT_TRUE(folly::IOBufEqualTo()(buf, getBuf(expectedHex)));
   }
 };

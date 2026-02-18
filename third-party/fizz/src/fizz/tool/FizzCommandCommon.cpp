@@ -92,7 +92,8 @@ std::vector<Extension> getExtensions(folly::StringPiece hex) {
   auto outBuf = folly::IOBuf::create(0);
   {
     folly::io::Appender appender(outBuf.get(), 16);
-    detail::writeBuf<uint16_t>(buf, appender);
+    Error err;
+    FIZZ_THROW_ON_ERROR(detail::writeBuf<uint16_t>(err, buf, appender), err);
   }
   folly::io::Cursor cursor(outBuf.get());
   std::vector<Extension> extensions;

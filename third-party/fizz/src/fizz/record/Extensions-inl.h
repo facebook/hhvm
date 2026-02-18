@@ -238,53 +238,53 @@ inline Status getExtension(
 }
 
 template <>
-inline Status encodeExtension(
-    Extension& ret,
-    Error& /* err */,
-    const SignatureAlgorithms& sig) {
+inline Status
+encodeExtension(Extension& ret, Error& err, const SignatureAlgorithms& sig) {
   Extension ext;
   ext.extension_type = ExtensionType::signature_algorithms;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint16_t>(sig.supported_signature_algorithms, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(
+          err, sig.supported_signature_algorithms, appender));
   ret = std::move(ext);
   return Status::Success;
 }
 
 template <>
-inline Status encodeExtension(
-    Extension& ret,
-    Error& /* err */,
-    const SupportedGroups& groups) {
+inline Status
+encodeExtension(Extension& ret, Error& err, const SupportedGroups& groups) {
   Extension ext;
   ext.extension_type = ExtensionType::supported_groups;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint16_t>(groups.named_group_list, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, groups.named_group_list, appender));
   ret = std::move(ext);
   return Status::Success;
 }
 
 template <>
 inline Status
-encodeExtension(Extension& ret, Error& /* err */, const ClientKeyShare& share) {
+encodeExtension(Extension& ret, Error& err, const ClientKeyShare& share) {
   Extension ext;
   ext.extension_type = ExtensionType::key_share;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint16_t>(share.client_shares, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, share.client_shares, appender));
   ret = std::move(ext);
   return Status::Success;
 }
 
 template <>
 inline Status
-encodeExtension(Extension& ret, Error& /* err */, const ServerKeyShare& share) {
+encodeExtension(Extension& ret, Error& err, const ServerKeyShare& share) {
   Extension ext;
   ext.extension_type = ExtensionType::key_share;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::write(share.server_share, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, share.server_share, appender));
   ret = std::move(ext);
   return Status::Success;
 }
@@ -292,42 +292,40 @@ encodeExtension(Extension& ret, Error& /* err */, const ServerKeyShare& share) {
 template <>
 inline Status encodeExtension(
     Extension& ret,
-    Error& /* err */,
+    Error& err,
     const HelloRetryRequestKeyShare& share) {
   Extension ext;
   ext.extension_type = ExtensionType::key_share;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::write(share.selected_group, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, share.selected_group, appender));
   ret = std::move(ext);
   return Status::Success;
 }
 
 template <>
-inline Status encodeExtension(
-    Extension& ret,
-    Error& /* err */,
-    const ClientPresharedKey& share) {
+inline Status
+encodeExtension(Extension& ret, Error& err, const ClientPresharedKey& share) {
   Extension ext;
   ext.extension_type = ExtensionType::pre_shared_key;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint16_t>(share.identities, appender);
-  detail::writeVector<uint16_t>(share.binders, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, share.identities, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, share.binders, appender));
   ret = std::move(ext);
   return Status::Success;
 }
 
 template <>
-inline Status encodeExtension(
-    Extension& ret,
-    Error& /* err */,
-    const ServerPresharedKey& share) {
+inline Status
+encodeExtension(Extension& ret, Error& err, const ServerPresharedKey& share) {
   Extension ext;
   ext.extension_type = ExtensionType::pre_shared_key;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::write(share.selected_identity, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, share.selected_identity, appender));
   ret = std::move(ext);
   return Status::Success;
 }
@@ -353,41 +351,39 @@ encodeExtension(Extension& ret, Error& /* err */, const ServerEarlyData&) {
 }
 
 template <>
-inline Status encodeExtension(
-    Extension& ret,
-    Error& /* err */,
-    const TicketEarlyData& early) {
+inline Status
+encodeExtension(Extension& ret, Error& err, const TicketEarlyData& early) {
   Extension ext;
   ext.extension_type = ExtensionType::early_data;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::write(early.max_early_data_size, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, early.max_early_data_size, appender));
   ret = std::move(ext);
   return Status::Success;
 }
 
 template <>
 inline Status
-encodeExtension(Extension& ret, Error& /* err */, const Cookie& cookie) {
+encodeExtension(Extension& ret, Error& err, const Cookie& cookie) {
   Extension ext;
   ext.extension_type = ExtensionType::cookie;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeBuf<uint16_t>(cookie.cookie, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<uint16_t>(err, cookie.cookie, appender));
   ret = std::move(ext);
   return Status::Success;
 }
 
 template <>
-inline Status encodeExtension(
-    Extension& ret,
-    Error& /* err */,
-    const SupportedVersions& versions) {
+inline Status
+encodeExtension(Extension& ret, Error& err, const SupportedVersions& versions) {
   Extension ext;
   ext.extension_type = ExtensionType::supported_versions;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint8_t>(versions.versions, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint8_t>(err, versions.versions, appender));
   ret = std::move(ext);
   return Status::Success;
 }
@@ -395,53 +391,52 @@ inline Status encodeExtension(
 template <>
 inline Status encodeExtension(
     Extension& ret,
-    Error& /* err */,
+    Error& err,
     const ServerSupportedVersions& versions) {
   Extension ext;
   ext.extension_type = ExtensionType::supported_versions;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::write(versions.selected_version, appender);
-  ret = std::move(ext);
-  return Status::Success;
-}
-
-template <>
-inline Status encodeExtension(
-    Extension& ret,
-    Error& /* err */,
-    const PskKeyExchangeModes& modes) {
-  Extension ext;
-  ext.extension_type = ExtensionType::psk_key_exchange_modes;
-  ext.extension_data = folly::IOBuf::create(0);
-  folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint8_t>(modes.modes, appender);
-  ret = std::move(ext);
-  return Status::Success;
-}
-
-template <>
-inline Status encodeExtension(
-    Extension& ret,
-    Error& /* err */,
-    const ProtocolNameList& names) {
-  Extension ext;
-  ext.extension_type = ExtensionType::application_layer_protocol_negotiation;
-  ext.extension_data = folly::IOBuf::create(0);
-  folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint16_t>(names.protocol_name_list, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, versions.selected_version, appender));
   ret = std::move(ext);
   return Status::Success;
 }
 
 template <>
 inline Status
-encodeExtension(Extension& ret, Error& /* err */, const ServerNameList& names) {
+encodeExtension(Extension& ret, Error& err, const PskKeyExchangeModes& modes) {
+  Extension ext;
+  ext.extension_type = ExtensionType::psk_key_exchange_modes;
+  ext.extension_data = folly::IOBuf::create(0);
+  folly::io::Appender appender(ext.extension_data.get(), 10);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint8_t>(err, modes.modes, appender));
+  ret = std::move(ext);
+  return Status::Success;
+}
+
+template <>
+inline Status
+encodeExtension(Extension& ret, Error& err, const ProtocolNameList& names) {
+  Extension ext;
+  ext.extension_type = ExtensionType::application_layer_protocol_negotiation;
+  ext.extension_data = folly::IOBuf::create(0);
+  folly::io::Appender appender(ext.extension_data.get(), 10);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, names.protocol_name_list, appender));
+  ret = std::move(ext);
+  return Status::Success;
+}
+
+template <>
+inline Status
+encodeExtension(Extension& ret, Error& err, const ServerNameList& names) {
   Extension ext;
   ext.extension_type = ExtensionType::server_name;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint16_t>(names.server_name_list, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, names.server_name_list, appender));
   ret = std::move(ext);
   return Status::Success;
 }
@@ -449,13 +444,14 @@ encodeExtension(Extension& ret, Error& /* err */, const ServerNameList& names) {
 template <>
 inline Status encodeExtension(
     Extension& ret,
-    Error& /* err */,
+    Error& err,
     const CertificateAuthorities& authorities) {
   Extension ext;
   ext.extension_type = ExtensionType::certificate_authorities;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint16_t>(authorities.authorities, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, authorities.authorities, appender));
   ret = std::move(ext);
   return Status::Success;
 }
@@ -463,13 +459,14 @@ inline Status encodeExtension(
 template <>
 inline Status encodeExtension(
     Extension& ret,
-    Error& /* err */,
+    Error& err,
     const CertificateCompressionAlgorithms& cca) {
   Extension ext;
   ext.extension_type = ExtensionType::compress_certificate;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint8_t>(cca.algorithms, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint8_t>(err, cca.algorithms, appender));
   ret = std::move(ext);
   return Status::Success;
 }
@@ -477,13 +474,14 @@ inline Status encodeExtension(
 template <>
 inline Status encodeExtension(
     Extension& ret,
-    Error& /* err */,
+    Error& err,
     const EchOuterExtensions& outerExt) {
   Extension ext;
   ext.extension_type = outerExt.extension_type;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::writeVector<uint8_t>(outerExt.extensionTypes, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint8_t>(err, outerExt.extensionTypes, appender));
   ret = std::move(ext);
   return Status::Success;
 }
@@ -529,9 +527,12 @@ struct Reader<KeyShareEntry> {
 template <>
 struct Writer<KeyShareEntry> {
   template <class T>
-  void write(const KeyShareEntry& share, folly::io::Appender& out) {
-    detail::write(share.group, out);
-    detail::writeBuf<uint16_t>(share.key_exchange, out);
+  Status
+  write(Error& err, const KeyShareEntry& share, folly::io::Appender& out) {
+    FIZZ_RETURN_ON_ERROR(detail::write(err, share.group, out));
+    FIZZ_RETURN_ON_ERROR(
+        detail::writeBuf<uint16_t>(err, share.key_exchange, out));
+    return Status::Success;
   }
 };
 
@@ -562,9 +563,10 @@ struct Reader<PskIdentity> {
 template <>
 struct Writer<PskIdentity> {
   template <class T>
-  void write(const PskIdentity& ident, folly::io::Appender& out) {
-    writeBuf<uint16_t>(ident.psk_identity, out);
-    detail::write(ident.obfuscated_ticket_age, out);
+  Status write(Error& err, const PskIdentity& ident, folly::io::Appender& out) {
+    FIZZ_RETURN_ON_ERROR(writeBuf<uint16_t>(err, ident.psk_identity, out));
+    FIZZ_RETURN_ON_ERROR(detail::write(err, ident.obfuscated_ticket_age, out));
+    return Status::Success;
   }
 };
 
@@ -592,8 +594,9 @@ struct Reader<PskBinder> {
 template <>
 struct Writer<PskBinder> {
   template <class T>
-  void write(const PskBinder& binder, folly::io::Appender& out) {
-    writeBuf<uint8_t>(binder.binder, out);
+  Status write(Error& err, const PskBinder& binder, folly::io::Appender& out) {
+    FIZZ_RETURN_ON_ERROR(writeBuf<uint8_t>(err, binder.binder, out));
+    return Status::Success;
   }
 };
 
@@ -621,8 +624,9 @@ struct Reader<ProtocolName> {
 template <>
 struct Writer<ProtocolName> {
   template <class T>
-  void write(const ProtocolName& name, folly::io::Appender& out) {
-    writeBuf<uint8_t>(name.name, out);
+  Status write(Error& err, const ProtocolName& name, folly::io::Appender& out) {
+    FIZZ_RETURN_ON_ERROR(writeBuf<uint8_t>(err, name.name, out));
+    return Status::Success;
   }
 };
 
@@ -652,9 +656,10 @@ struct Reader<ServerName> {
 template <>
 struct Writer<ServerName> {
   template <class T>
-  void write(const ServerName& name, folly::io::Appender& out) {
-    detail::write(name.name_type, out);
-    writeBuf<uint16_t>(name.hostname, out);
+  Status write(Error& err, const ServerName& name, folly::io::Appender& out) {
+    FIZZ_RETURN_ON_ERROR(detail::write(err, name.name_type, out));
+    FIZZ_RETURN_ON_ERROR(writeBuf<uint16_t>(err, name.hostname, out));
+    return Status::Success;
   }
 };
 
@@ -682,8 +687,10 @@ struct Reader<DistinguishedName> {
 template <>
 struct Writer<DistinguishedName> {
   template <class T>
-  void write(const DistinguishedName& dn, folly::io::Appender& out) {
-    writeBuf<uint16_t>(dn.encoded_name, out);
+  Status
+  write(Error& err, const DistinguishedName& dn, folly::io::Appender& out) {
+    FIZZ_RETURN_ON_ERROR(writeBuf<uint16_t>(err, dn.encoded_name, out));
+    return Status::Success;
   }
 };
 

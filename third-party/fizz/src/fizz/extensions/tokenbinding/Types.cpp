@@ -31,9 +31,13 @@ Status read<TokenBindingID>(
 }
 
 template <>
-void write<TokenBindingID>(const TokenBindingID& id, folly::io::Appender& out) {
-  write(id.key_parameters, out);
-  writeBuf<uint16_t>(id.key, out);
+Status write<TokenBindingID>(
+    Error& err,
+    const TokenBindingID& id,
+    folly::io::Appender& out) {
+  FIZZ_RETURN_ON_ERROR(write(err, id.key_parameters, out));
+  FIZZ_RETURN_ON_ERROR(writeBuf<uint16_t>(err, id.key, out));
+  return Status::Success;
 }
 
 template <>
@@ -59,13 +63,15 @@ Status read<TokenBinding>(
 }
 
 template <>
-void write<TokenBinding>(
+Status write<TokenBinding>(
+    Error& err,
     const TokenBinding& tokenBinding,
     folly::io::Appender& out) {
-  write(tokenBinding.tokenbinding_type, out);
-  write(tokenBinding.tokenbindingid, out);
-  writeBuf<uint16_t>(tokenBinding.signature, out);
-  writeBuf<uint16_t>(tokenBinding.extensions, out);
+  FIZZ_RETURN_ON_ERROR(write(err, tokenBinding.tokenbinding_type, out));
+  FIZZ_RETURN_ON_ERROR(write(err, tokenBinding.tokenbindingid, out));
+  FIZZ_RETURN_ON_ERROR(writeBuf<uint16_t>(err, tokenBinding.signature, out));
+  FIZZ_RETURN_ON_ERROR(writeBuf<uint16_t>(err, tokenBinding.extensions, out));
+  return Status::Success;
 }
 
 template <>
@@ -124,38 +130,35 @@ namespace extensions {
 
 Status encodeExtension(
     Extension& ret,
-    Error& /* err */,
+    Error& err,
     const TokenBindingParameters& params) {
   Extension ext;
   ext.extension_type = ExtensionType::token_binding;
   ext.extension_data = folly::IOBuf::create(0);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  detail::write(params.version, appender);
-  detail::writeVector<uint8_t>(params.key_parameters_list, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, params.version, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint8_t>(err, params.key_parameters_list, appender));
   ret = std::move(ext);
   return Status::Success;
 }
 } // namespace extensions
 
 template <>
-Status encode(Buf& ret, Error& /* err */, TokenBindingMessage&& message) {
+Status encode(Buf& ret, Error& err, TokenBindingMessage&& message) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
-  detail::writeVector<uint16_t>(message.tokenbindings, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, message.tokenbindings, appender));
   ret = std::move(buf);
   return Status::Success;
 }
 
 template <>
-Status decode<TokenBindingMessage>(
-    TokenBindingMessage& ret,
-    Error& err,
-    folly::io::Cursor& cursor) {
-  TokenBindingMessage message;
+Status decode(TokenBindingMessage& ret, Error& err, folly::io::Cursor& cursor) {
   size_t len;
   FIZZ_RETURN_ON_ERROR(
-      detail::readVector<uint16_t>(len, err, message.tokenbindings, cursor));
-  ret = std::move(message);
+      detail::readVector<uint16_t>(len, err, ret.tokenbindings, cursor));
   return Status::Success;
 }
 } // namespace fizz

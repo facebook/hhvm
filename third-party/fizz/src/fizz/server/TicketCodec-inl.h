@@ -30,24 +30,34 @@ Buf TicketCodec<Storage>::encode(ResumptionState resState) {
   auto buf = folly::IOBuf::create(60);
   folly::io::Appender appender(buf.get(), 60);
 
-  fizz::detail::write(resState.version, appender);
-  fizz::detail::write(resState.cipher, appender);
-  fizz::detail::writeBuf<uint16_t>(resState.resumptionSecret, appender);
-  fizz::detail::writeBuf<uint16_t>(selfIdentity, appender);
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::write(err, resState.version, appender), err);
+  FIZZ_THROW_ON_ERROR(fizz::detail::write(err, resState.cipher, appender), err);
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::writeBuf<uint16_t>(
+          err, resState.resumptionSecret, appender),
+      err);
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::writeBuf<uint16_t>(err, selfIdentity, appender), err);
   appendClientCertificate(Storage, resState.clientCert, appender);
-  fizz::detail::write(resState.ticketAgeAdd, appender);
-  fizz::detail::write(ticketIssueTime, appender);
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::write(err, resState.ticketAgeAdd, appender), err);
+  FIZZ_THROW_ON_ERROR(fizz::detail::write(err, ticketIssueTime, appender), err);
   if (resState.alpn) {
     auto alpnBuf = folly::IOBuf::copyBuffer(*resState.alpn);
-    fizz::detail::writeBuf<uint8_t>(alpnBuf, appender);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::writeBuf<uint8_t>(err, alpnBuf, appender), err);
   } else {
-    fizz::detail::writeBuf<uint8_t>(nullptr, appender);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::writeBuf<uint8_t>(err, nullptr, appender), err);
   }
-  fizz::detail::writeBuf<uint16_t>(resState.appToken, appender);
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::writeBuf<uint16_t>(err, resState.appToken, appender), err);
   uint64_t handshakeTime = std::chrono::duration_cast<std::chrono::seconds>(
                                resState.handshakeTime.time_since_epoch())
                                .count();
-  fizz::detail::write(handshakeTime, appender);
+  FIZZ_THROW_ON_ERROR(fizz::detail::write(err, handshakeTime, appender), err);
   return buf;
 }
 

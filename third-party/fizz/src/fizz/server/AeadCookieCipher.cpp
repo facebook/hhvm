@@ -27,26 +27,36 @@ inline Buf encodeCookie(const CookieState& state) {
   auto buf = folly::IOBuf::create(100);
   folly::io::Appender appender(buf.get(), 100);
 
-  fizz::detail::write(state.version, appender);
-  fizz::detail::write(state.cipher, appender);
+  Error err;
+  FIZZ_THROW_ON_ERROR(fizz::detail::write(err, state.version, appender), err);
+  FIZZ_THROW_ON_ERROR(fizz::detail::write(err, state.cipher, appender), err);
 
   if (state.group) {
-    fizz::detail::write(CookieHasGroup::Yes, appender);
-    fizz::detail::write(*state.group, appender);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, CookieHasGroup::Yes, appender), err);
+    FIZZ_THROW_ON_ERROR(fizz::detail::write(err, *state.group, appender), err);
   } else {
-    fizz::detail::write(CookieHasGroup::No, appender);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, CookieHasGroup::No, appender), err);
   }
 
-  fizz::detail::writeBuf<uint16_t>(state.chloHash, appender);
-  fizz::detail::writeBuf<uint16_t>(state.appToken, appender);
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::writeBuf<uint16_t>(err, state.chloHash, appender), err);
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::writeBuf<uint16_t>(err, state.appToken, appender), err);
 
   if (state.echCipherSuite) {
-    fizz::detail::write(CookieHasEch::Yes, appender);
-    fizz::detail::write(*state.echCipherSuite, appender);
-    fizz::detail::write(*state.echConfigId, appender);
-    fizz::detail::writeBuf<uint16_t>(state.echEnc, appender);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, CookieHasEch::Yes, appender), err);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, *state.echCipherSuite, appender), err);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, *state.echConfigId, appender), err);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::writeBuf<uint16_t>(err, state.echEnc, appender), err);
   } else {
-    fizz::detail::write(CookieHasEch::No, appender);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, CookieHasEch::No, appender), err);
   }
   return buf;
 }

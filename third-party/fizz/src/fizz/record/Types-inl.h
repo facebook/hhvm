@@ -76,7 +76,8 @@ struct Sizer<CertificateEntry> {
 template <class U>
 struct Writer {
   template <class T>
-  void write(
+  Status write(
+      Error& /* err */,
       const typename std::enable_if<
           std::is_enum<T>::value && std::is_same<U, T>::value,
           T>::type& in,
@@ -86,48 +87,57 @@ struct Writer {
         std::is_unsigned<UT>::value,
         "enums meant to be serialized should be unsigned");
     appender.writeBE<UT>(static_cast<UT>(in));
+    return Status::Success;
   }
 
   template <class T>
-  void write(
+  Status write(
+      Error& /* err */,
       const typename std::enable_if<
           !std::is_enum<T>::value && std::is_unsigned<T>::value &&
               std::is_same<U, T>::value,
           T>::type& in,
       folly::io::Appender& appender) {
     appender.writeBE<U>(in);
+    return Status::Success;
   }
 };
 
 template <class T>
-void checkWithin24bits(
+Status checkWithin24bits(
+    Error& err,
     const typename std::enable_if<
         std::is_integral<T>::value && !std::is_signed<T>::value,
         T>::type& value) {
   const uint32_t UINT24_MAX = 0xFFFFFF;
   if (value > UINT24_MAX) {
-    throw std::runtime_error("Overflow 24 bit type");
+    return err.error("Overflow 24 bit type");
   }
+  return Status::Success;
 }
 
 template <class T>
-void writeBits24(T len, folly::io::Appender& out) {
+Status writeBits24(Error& err, T len, folly::io::Appender& out) {
   static_assert(sizeof(T) > 3, "Type is too short");
-  checkWithin24bits<T>(len);
+  FIZZ_RETURN_ON_ERROR(checkWithin24bits<T>(err, len));
   T lenBE = folly::Endian::big(len);
   uint8_t* addr = reinterpret_cast<uint8_t*>(&lenBE);
   uint8_t offset = sizeof(T) - 3;
   out.push(addr + offset, bits24::size);
+  return Status::Success;
 }
 
 template <class T>
-void write(const T& in, folly::io::Appender& appender) {
-  Writer<T>().template write<T>(in, appender);
+Status write(Error& err, const T& in, folly::io::Appender& appender) {
+  return Writer<T>().template write<T>(err, in, appender);
 }
 
 template <class N, class T>
 struct WriterVector {
-  void writeVector(const std::vector<T>& data, folly::io::Appender& out) {
+  Status writeVector(
+      Error& err,
+      const std::vector<T>& data,
+      folly::io::Appender& out) {
     // First do a pass to compute the size of the data
     size_t len = 0;
     for (const auto& t : data) {
@@ -136,30 +146,36 @@ struct WriterVector {
 
     out.writeBE<N>(folly::to<N>(len));
     for (const auto& t : data) {
-      write(t, out);
+      FIZZ_RETURN_ON_ERROR(write(err, t, out));
     }
+    return Status::Success;
   }
 };
 
 template <class T>
 struct WriterVector<bits24, T> {
-  void writeVector(const std::vector<T>& data, folly::io::Appender& out) {
+  Status writeVector(
+      Error& err,
+      const std::vector<T>& data,
+      folly::io::Appender& out) {
     // First do a pass to compute the size of the data
     size_t len = 0;
     for (const auto& t : data) {
       len += getSize<T>(t);
     }
 
-    writeBits24(len, out);
+    FIZZ_RETURN_ON_ERROR(writeBits24(err, len, out));
     for (const auto& t : data) {
-      write(t, out);
+      FIZZ_RETURN_ON_ERROR(write(err, t, out));
     }
+    return Status::Success;
   }
 };
 
 template <class N, class T>
-void writeVector(const std::vector<T>& data, folly::io::Appender& out) {
-  return WriterVector<N, T>().writeVector(data, out);
+Status
+writeVector(Error& err, const std::vector<T>& data, folly::io::Appender& out) {
+  return WriterVector<N, T>().writeVector(err, data, out);
 }
 
 inline void writeBufWithoutLength(const Buf& buf, folly::io::Appender& out) {
@@ -174,13 +190,14 @@ inline void writeBufWithoutLength(const Buf& buf, folly::io::Appender& out) {
 }
 
 template <class N>
-void writeBuf(const Buf& buf, folly::io::Appender& out) {
+Status writeBuf(Error& /* err */, const Buf& buf, folly::io::Appender& out) {
   if (!buf) {
     out.writeBE<N>(folly::to<N>(0));
-    return;
+    return Status::Success;
   }
   out.writeBE<N>(folly::to<N>(buf->computeChainDataLength()));
   writeBufWithoutLength(buf, out);
+  return Status::Success;
 }
 
 template <class N>
@@ -192,37 +209,45 @@ void writeString(const std::string& str, folly::io::Appender& out) {
 template <>
 struct Writer<Random> {
   template <class T>
-  void write(const Random& random, folly::io::Appender& out) {
+  Status
+  write(Error& /* err */, const Random& random, folly::io::Appender& out) {
     out.push(random.data(), random.size());
+    return Status::Success;
   }
 };
 
 template <>
-inline void writeBuf<bits24>(const Buf& buf, folly::io::Appender& out) {
+inline Status
+writeBuf<bits24>(Error& err, const Buf& buf, folly::io::Appender& out) {
   if (!buf) {
-    writeBits24(static_cast<size_t>(0), out);
-    return;
+    FIZZ_RETURN_ON_ERROR(writeBits24(err, static_cast<size_t>(0), out));
+    return Status::Success;
   }
-  writeBits24(buf->computeChainDataLength(), out);
+  FIZZ_RETURN_ON_ERROR(writeBits24(err, buf->computeChainDataLength(), out));
   writeBufWithoutLength(buf, out);
+  return Status::Success;
 }
 
 template <>
-inline void write<Extension>(
+inline Status write<Extension>(
+    Error& err,
     const Extension& extension,
     folly::io::Appender& out) {
   out.writeBE(
       static_cast<typename std::underlying_type<ExtensionType>::type>(
           extension.extension_type));
-  writeBuf<uint16_t>(extension.extension_data, out);
+  FIZZ_RETURN_ON_ERROR(writeBuf<uint16_t>(err, extension.extension_data, out));
+  return Status::Success;
 }
 
 template <>
-inline void write<CertificateEntry>(
+inline Status write<CertificateEntry>(
+    Error& err,
     const CertificateEntry& entry,
     folly::io::Appender& out) {
-  writeBuf<detail::bits24>(entry.cert_data, out);
-  writeVector<uint16_t>(entry.extensions, out);
+  FIZZ_RETURN_ON_ERROR(writeBuf<detail::bits24>(err, entry.cert_data, out));
+  FIZZ_RETURN_ON_ERROR(writeVector<uint16_t>(err, entry.extensions, out));
+  return Status::Success;
 }
 
 inline uint32_t readBits24(folly::io::Cursor& cursor) {
@@ -405,39 +430,43 @@ struct Reader<CertificateEntry> {
 } // namespace detail
 
 template <>
-inline Status
-encode<ServerHello>(Buf& ret, Error& /* err */, ServerHello&& shlo) {
+inline Status encode<ServerHello>(Buf& ret, Error& err, ServerHello&& shlo) {
   auto buf = folly::IOBuf::create(
       sizeof(ProtocolVersion) + sizeof(Random) + sizeof(CipherSuite) + 20);
   folly::io::Appender appender(buf.get(), 20);
-  detail::write(shlo.legacy_version, appender);
-  detail::write(shlo.random, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, shlo.legacy_version, appender));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, shlo.random, appender));
   if (shlo.legacy_session_id_echo) {
-    detail::writeBuf<uint8_t>(shlo.legacy_session_id_echo, appender);
+    FIZZ_RETURN_ON_ERROR(
+        detail::writeBuf<uint8_t>(err, shlo.legacy_session_id_echo, appender));
   }
-  detail::write(shlo.cipher_suite, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, shlo.cipher_suite, appender));
   if (shlo.legacy_session_id_echo) {
-    detail::write(shlo.legacy_compression_method, appender);
+    FIZZ_RETURN_ON_ERROR(
+        detail::write(err, shlo.legacy_compression_method, appender));
   }
-  detail::writeVector<uint16_t>(shlo.extensions, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, shlo.extensions, appender));
   ret = std::move(buf);
   return Status::Success;
 }
 
 template <>
-inline Status encode<HelloRetryRequest>(
-    Buf& ret,
-    Error& /* err */,
-    HelloRetryRequest&& shlo) {
+inline Status
+encode<HelloRetryRequest>(Buf& ret, Error& err, HelloRetryRequest&& shlo) {
   auto buf = folly::IOBuf::create(
       sizeof(ProtocolVersion) + sizeof(Random) + sizeof(CipherSuite) + 20);
   folly::io::Appender appender(buf.get(), 20);
-  detail::write(shlo.legacy_version, appender);
-  detail::write(HelloRetryRequest::HrrRandom, appender);
-  detail::writeBuf<uint8_t>(shlo.legacy_session_id_echo, appender);
-  detail::write(shlo.cipher_suite, appender);
-  detail::write(shlo.legacy_compression_method, appender);
-  detail::writeVector<uint16_t>(shlo.extensions, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, shlo.legacy_version, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::write(err, HelloRetryRequest::HrrRandom, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<uint8_t>(err, shlo.legacy_session_id_echo, appender));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, shlo.cipher_suite, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::write(err, shlo.legacy_compression_method, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, shlo.extensions, appender));
   ret = std::move(buf);
   return Status::Success;
 }
@@ -452,24 +481,25 @@ encode<EndOfEarlyData>(Buf& ret, Error& /* err */, EndOfEarlyData&&) {
 template <>
 inline Status encode<EncryptedExtensions>(
     Buf& ret,
-    Error& /* err */,
+    Error& err,
     EncryptedExtensions&& extensions) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
-  detail::writeVector<uint16_t>(extensions.extensions, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, extensions.extensions, appender));
   ret = std::move(buf);
   return Status::Success;
 }
 
 template <>
-inline Status encode<CertificateRequest>(
-    Buf& ret,
-    Error& /* err */,
-    CertificateRequest&& cr) {
+inline Status
+encode<CertificateRequest>(Buf& ret, Error& err, CertificateRequest&& cr) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
-  detail::writeBuf<uint8_t>(cr.certificate_request_context, appender);
-  detail::writeVector<uint16_t>(cr.extensions, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<uint8_t>(err, cr.certificate_request_context, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, cr.extensions, appender));
   ret = std::move(buf);
   return Status::Success;
 }
@@ -477,12 +507,16 @@ inline Status encode<CertificateRequest>(
 template <>
 inline Status encode<const CertificateMsg&>(
     Buf& ret,
-    Error& /* err */,
+    Error& err,
     const CertificateMsg& cert) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
-  detail::writeBuf<uint8_t>(cert.certificate_request_context, appender);
-  detail::writeVector<detail::bits24>(cert.certificate_list, appender);
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<uint8_t>(
+          err, cert.certificate_request_context, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<detail::bits24>(
+          err, cert.certificate_list, appender));
   ret = std::move(buf);
   return Status::Success;
 }
@@ -502,13 +536,16 @@ encode<CertificateMsg>(Buf& ret, Error& err, CertificateMsg&& cert) {
 template <>
 inline Status encode<CompressedCertificate&>(
     Buf& ret,
-    Error& /* err */,
+    Error& err,
     CompressedCertificate& cc) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
-  detail::write(cc.algorithm, appender);
-  detail::writeBits24(cc.uncompressed_length, appender);
-  detail::writeBuf<detail::bits24>(cc.compressed_certificate_message, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, cc.algorithm, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBits24(err, cc.uncompressed_length, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<detail::bits24>(
+          err, cc.compressed_certificate_message, appender));
   ret = std::move(buf);
   return Status::Success;
 }
@@ -524,41 +561,45 @@ inline Status encode<CompressedCertificate>(
 template <>
 inline Status encode<CertificateVerify>(
     Buf& ret,
-    Error& /* err */,
+    Error& err,
     CertificateVerify&& certVerify) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
-  detail::write(certVerify.algorithm, appender);
-  detail::writeBuf<uint16_t>(certVerify.signature, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, certVerify.algorithm, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<uint16_t>(err, certVerify.signature, appender));
   ret = std::move(buf);
   return Status::Success;
 }
 
 template <>
-inline Status encode<Alert>(Buf& ret, Error& /* err */, Alert&& alert) {
+inline Status encode<Alert>(Buf& ret, Error& err, Alert&& alert) {
   auto buf = folly::IOBuf::create(2);
   folly::io::Appender appender(buf.get(), 2);
-  detail::write(alert.level, appender);
-  detail::write(alert.description, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, alert.level, appender));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, alert.description, appender));
   ret = std::move(buf);
   return Status::Success;
 }
 
 template <>
-inline Status encode<const ClientHello&>(
-    Buf& ret,
-    Error& /* err */,
-    const ClientHello& chlo) {
+inline Status
+encode<const ClientHello&>(Buf& ret, Error& err, const ClientHello& chlo) {
   auto buf = folly::IOBuf::create(
       sizeof(ProtocolVersion) + sizeof(Random) + sizeof(uint8_t) +
       sizeof(CipherSuite) * chlo.cipher_suites.size() + sizeof(uint8_t) + 20);
   folly::io::Appender appender(buf.get(), 20);
-  detail::write(chlo.legacy_version, appender);
-  detail::write(chlo.random, appender);
-  detail::writeBuf<uint8_t>(chlo.legacy_session_id, appender);
-  detail::writeVector<uint16_t>(chlo.cipher_suites, appender);
-  detail::writeVector<uint8_t>(chlo.legacy_compression_methods, appender);
-  detail::writeVector<uint16_t>(chlo.extensions, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, chlo.legacy_version, appender));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, chlo.random, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<uint8_t>(err, chlo.legacy_session_id, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, chlo.cipher_suites, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint8_t>(
+          err, chlo.legacy_compression_methods, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, chlo.extensions, appender));
   ret = std::move(buf);
   return Status::Success;
 }
@@ -581,42 +622,44 @@ inline Status encode<Finished>(Buf& ret, Error& /* err */, Finished&& fin) {
 
 template <>
 inline Status
-encode<NewSessionTicket>(Buf& ret, Error& /* err */, NewSessionTicket&& nst) {
+encode<NewSessionTicket>(Buf& ret, Error& err, NewSessionTicket&& nst) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
-  detail::write(nst.ticket_lifetime, appender);
-  detail::write(nst.ticket_age_add, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, nst.ticket_lifetime, appender));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, nst.ticket_age_add, appender));
   if (nst.ticket_nonce) {
-    detail::writeBuf<uint8_t>(nst.ticket_nonce, appender);
+    FIZZ_RETURN_ON_ERROR(
+        detail::writeBuf<uint8_t>(err, nst.ticket_nonce, appender));
   }
-  detail::writeBuf<uint16_t>(nst.ticket, appender);
-  detail::writeVector<uint16_t>(nst.extensions, appender);
+  FIZZ_RETURN_ON_ERROR(detail::writeBuf<uint16_t>(err, nst.ticket, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeVector<uint16_t>(err, nst.extensions, appender));
   ret = std::move(buf);
   return Status::Success;
 }
 
 inline Status encodeHkdfLabel(
     Buf& ret,
-    Error& /* err */,
+    Error& err,
     HkdfLabel&& label,
     folly::StringPiece hkdfLabelPrefix) {
   auto labelBuf = folly::IOBuf::copyBuffer(
       folly::to<std::string>(hkdfLabelPrefix, label.label));
   auto buf = folly::IOBuf::create(sizeof(label.length) + label.label.size());
   folly::io::Appender appender(buf.get(), 20);
-  detail::write(label.length, appender);
-  detail::writeBuf<uint8_t>(labelBuf, appender);
-  detail::writeBuf<uint8_t>(label.hash_value, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, label.length, appender));
+  FIZZ_RETURN_ON_ERROR(detail::writeBuf<uint8_t>(err, labelBuf, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<uint8_t>(err, label.hash_value, appender));
   ret = std::move(buf);
   return Status::Success;
 }
 
 template <>
-inline Status
-encode<KeyUpdate>(Buf& ret, Error& /* err */, KeyUpdate&& keyUpdate) {
+inline Status encode<KeyUpdate>(Buf& ret, Error& err, KeyUpdate&& keyUpdate) {
   auto buf = folly::IOBuf::create(20);
   folly::io::Appender appender(buf.get(), 20);
-  detail::write(keyUpdate.request_update, appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, keyUpdate.request_update, appender));
   ret = std::move(buf);
   return Status::Success;
 }
@@ -635,8 +678,9 @@ Status encodeHandshake(Buf& ret, Error& err, T&& handshakeMsg) {
   auto buf = folly::IOBuf::create(sizeof(HandshakeType) + detail::bits24::size);
   folly::io::Appender appender(buf.get(), 0);
   constexpr auto handshakeType = std::remove_reference<T>::type::handshake_type;
-  detail::write(handshakeType, appender);
-  detail::writeBits24(body->computeChainDataLength(), appender);
+  FIZZ_RETURN_ON_ERROR(detail::write(err, handshakeType, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBits24(err, body->computeChainDataLength(), appender));
   buf->prependChain(std::move(body));
   ret = std::move(buf);
   return Status::Success;

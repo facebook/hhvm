@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <atomic>
 #include <cstddef>
 
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/minstr-state.h"
 
@@ -107,24 +107,8 @@ struct Header {
   /*
    * Combination of surprise flags and the limit (lowest address) of the
    * evaluation stack.  May be written to by other threads.
-   *
-   * At various points, the runtime will check whether this word contains a
-   * higher number than what it believes the evaluation stack needs to be
-   * (remember the eval stack grows down), which combines a stack overflow
-   * check and a check for unusual conditions.  If this check triggers, the
-   * runtime will do more detailed checks to see if it's actually dealing with
-   * a stack overflow, or a surprise condition.
-   *
-   * All the surprise flag bits are in the upper 16 bits of this value, which
-   * must be zero if it is actually a pointer to the lowest address of the
-   * evaluation stack (the normal, "unsurprised" situation)---if one of the
-   * surprise flags is set, the pointer will be higher than any legal eval
-   * stack pointer and we'll go to a slow path to handle possible unusual
-   * conditions (e.g. OOM).  (This is making use of the x64 property that
-   * "canonical form" addresses have all their upper bits the same as bit 47,
-   * and that this is zero for linux userland pointers.)
    */
-  std::atomic<size_t> stackLimitAndSurprise;
+  StackLimitAndSurpriseFlags stackLimitAndSurprise;
 
 #ifndef NDEBUG
   /*
@@ -146,6 +130,10 @@ struct Header {
   /* Register dirtiness. */
   VMRegState regState;
   GenNumber  currentGen;
+
+  static constexpr ptrdiff_t stackLimitAndSurpriseOffset() {
+    return offsetof(Header, stackLimitAndSurprise);
+  }
 };
 
 /*
@@ -155,8 +143,6 @@ inline Header* header() {
   return static_cast<Header*>(tl_base);
 }
 
-constexpr ptrdiff_t kSurpriseFlagsOff  = offsetof(Header,
-                                                  stackLimitAndSurprise);
 constexpr ptrdiff_t kVmRegsOff         = offsetof(Header, vmRegs);
 constexpr ptrdiff_t kVmspOff           = kVmRegsOff + offsetof(VMRegs, stack) +
                                            Stack::topOfStackOffset();
@@ -172,4 +158,13 @@ constexpr ptrdiff_t kVmRegStateOff     = offsetof(Header, regState);
 static_assert((kVmMInstrStateOff % 16) == 0,
               "MInstrState should be 16-byte aligned in rds::Header");
 
-} }
+} // namespace rds
+
+/*
+ * Return the StackLimitAndSurpriseFlags for the current thread.
+ */
+inline StackLimitAndSurpriseFlags& stackLimitAndSurprise() {
+  return rds::header()->stackLimitAndSurprise;
+}
+
+} // namespace HPHP

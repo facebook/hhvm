@@ -72,50 +72,50 @@ const StaticString
 RDS_LOCAL_NO_CHECK(uint64_t, rl_func_sequence_id){0};
 
 void EventHook::Enable() {
-  setSurpriseFlag(EventHookFlag);
+  stackLimitAndSurprise().setFlag(EventHookFlag);
 }
 
 void EventHook::Disable() {
   if (g_context->m_internalEventHookCallback == nullptr) {
-    clearSurpriseFlag(EventHookFlag);
+    stackLimitAndSurprise().clearFlag(EventHookFlag);
   }
 }
 
 void EventHook::EnableInternal(ExecutionContext::InternalEventHookCallbackType
                               callback) {
   g_context->m_internalEventHookCallback = callback;
-  setSurpriseFlag(EventHookFlag);
+  stackLimitAndSurprise().setFlag(EventHookFlag);
 }
 
 void EventHook::DisableInternal() {
   if (g_context->m_setprofileCallback.isNull()) {
-    clearSurpriseFlag(EventHookFlag);
+    stackLimitAndSurprise().clearFlag(EventHookFlag);
   }
   g_context->m_internalEventHookCallback = nullptr;
 }
 
 void EventHook::EnableAsync() {
-  setSurpriseFlag(AsyncEventHookFlag);
+  stackLimitAndSurprise().setFlag(AsyncEventHookFlag);
 }
 
 void EventHook::DisableAsync() {
-  clearSurpriseFlag(AsyncEventHookFlag);
+  stackLimitAndSurprise().clearFlag(AsyncEventHookFlag);
 }
 
 void EventHook::EnableDebug() {
-  setSurpriseFlag(DebuggerHookFlag);
+  stackLimitAndSurprise().setFlag(DebuggerHookFlag);
 }
 
 void EventHook::DisableDebug() {
-  clearSurpriseFlag(DebuggerHookFlag);
+  stackLimitAndSurprise().clearFlag(DebuggerHookFlag);
 }
 
 void EventHook::EnableIntercept() {
-  setSurpriseFlag(InterceptFlag);
+  stackLimitAndSurprise().setFlag(InterceptFlag);
 }
 
 void EventHook::DisableIntercept() {
-  clearSurpriseFlag(InterceptFlag);
+  stackLimitAndSurprise().clearFlag(InterceptFlag);
 }
 
 struct ExecutingSetprofileCallbackGuard {
@@ -129,7 +129,7 @@ struct ExecutingSetprofileCallbackGuard {
 };
 
 void EventHook::DoMemoryThresholdCallback() {
-  clearSurpriseFlag(MemThresholdFlag);
+  stackLimitAndSurprise().clearFlag(MemThresholdFlag);
   if (!g_context->m_memThresholdCallback.isNull()) {
     VMRegAnchor _;
     try {
@@ -1078,7 +1078,7 @@ void EventHook::onFunctionUnwind(ActRec* ar,
 
   // TODO(#2329497) can't handle_request_surprise() yet, unwinder unable to
   // replace fault
-  auto const flags = stackLimitAndSurprise().load() & kSurpriseFlagMask;
+  auto const flags = stackLimitAndSurprise().fetchFlags();
   onFunctionExit(ar, nullptr, true, phpException, flags, false, EventHook::Source::Unwinder);
 }
 

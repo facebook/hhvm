@@ -206,7 +206,7 @@ void MemoryManager::resetExternalStats() {
 }
 
 void MemoryManager::refreshStatsHelperExceeded() {
-  setSurpriseFlag(MemExceededFlag);
+  stackLimitAndSurprise().setFlag(MemExceededFlag);
   RID().setRequestOOMFlag();
   m_couldOOM = false;
   if (Cfg::ErrorHandling::LogNativeStackOnOOM) {
@@ -298,7 +298,7 @@ void MemoryManager::refreshStats() {
     refreshStatsHelperExceeded();
   } else if (usage >= 0 && usage > m_memThresholdCallbackPeakUsage) {
     m_memThresholdCallbackPeakUsage = SIZE_MAX;
-    setSurpriseFlag(MemThresholdFlag);
+    stackLimitAndSurprise().setFlag(MemThresholdFlag);
   }
 }
 
@@ -1012,7 +1012,7 @@ Sweepable::Sweepable() {
 //////////////////////////////////////////////////////////////////////
 
 void MemoryManager::resetCouldOOM(bool state) {
-  clearSurpriseFlag(MemExceededFlag);
+  stackLimitAndSurprise().clearFlag(MemExceededFlag);
   RID().clearRequestOOMFlag();
   m_couldOOM = state;
 }

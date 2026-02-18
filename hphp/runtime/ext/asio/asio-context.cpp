@@ -63,13 +63,13 @@ namespace {
     // early to avoid further execution of PHP code.  We limit I/O waiting to
     // the time currently remaining in the request (see
     // AsioSession::getLatestWakeTime).
-    if (UNLIKELY(checkSurpriseFlags())) {
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) {
       c_WaitableWaitHandle* wait_handle = context->getBlamedWaitHandle();
 
       // First, process the Xenon event. If we are going to time out, we want
       // to attribute the time spent towards the time out to the I/O operation
       // before the fatal exception is thrown.
-      if (getSurpriseFlag(XenonSignalFlag)) {
+      if (stackLimitAndSurprise().getFlag(XenonSignalFlag)) {
         if (Strobelight::active()) {
           Strobelight::getInstance().log(Xenon::IOWaitSample, wait_handle);
         } else {

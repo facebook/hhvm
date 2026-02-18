@@ -78,7 +78,7 @@ void IntervalTimer::RunCallbacks(
   IntervalTimer::SampleType type,
   c_WaitableWaitHandle* wh
 ) {
-  clearSurpriseFlag(IntervalTimerFlag);
+  stackLimitAndSurprise().clearFlag(IntervalTimerFlag);
 
   auto const timers = s_timer_pool->timers(); // makes a copy!
   for (auto timer : timers) {

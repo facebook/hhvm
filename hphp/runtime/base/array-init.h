@@ -286,7 +286,7 @@ struct VecInit final : ArrayInitBase<detail::Vec, KindOfVec> {
       // doesn't exceed our max capacity. The error message is a bit misleading
       // (OOM) but it's better than a crash later on.
       if (UNLIKELY(!VanillaVec::checkCapacity(n))) {
-        setSurpriseFlag(MemExceededFlag);
+        stackLimitAndSurprise().setFlag(MemExceededFlag);
         RID().setRequestOOMFlag();
         check_non_safepoint_surprise();
       }

@@ -547,12 +547,10 @@ static void handle_exception_helper(bool& ret,
                                     bool& error,
                                     bool richErrorMsg) {
   // Clear oom/timeout while handling exception and restore them afterwards.
-  auto& flags = stackLimitAndSurprise();
-  auto const origFlags = flags.fetch_and(~ResourceFlags) & ResourceFlags;
-
-  SCOPE_EXIT {
-    flags.fetch_or(origFlags);
-  };
+  StackLimitAndSurpriseFlags::FlagSaver saver(
+    stackLimitAndSurprise(),
+    ResourceFlags
+  );
 
   try {
     bump_counter_and_rethrow(false /* isPsp */, context);
@@ -673,7 +671,7 @@ static void handle_resource_exceeded_exception() {
   } catch (RequestCPUTimeoutException&) {
     RID().triggerTimeout(TimeoutCPUTime);
   } catch (RequestMemoryExceededException&) {
-    setSurpriseFlag(MemExceededFlag);
+    stackLimitAndSurprise().setFlag(MemExceededFlag);
     RID().setRequestOOMFlag();
   } catch (...) {}
 }
@@ -3030,7 +3028,7 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
     // Enable memory access sampling for this request.
     perf_event_enable(
       Cfg::Eval::PerfMemEventSampleFreq,
-      [] (PerfEvent) { setSurpriseFlag(PendingPerfEventFlag); }
+      [] (PerfEvent) { stackLimitAndSurprise().setFlag(PendingPerfEventFlag); }
     );
   }
 }

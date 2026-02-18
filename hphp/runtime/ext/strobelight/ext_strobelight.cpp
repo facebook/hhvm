@@ -62,7 +62,7 @@ void onStrobelightSignal(int signo) {
       // Ignore threads that are not serving requests, otherwise this segfaults
       if (!Strobelight::isXenonActive()) {
         // Do not set the flag if Xenon is actively profiling this request
-        setSurpriseFlag(XenonSignalFlag);
+        stackLimitAndSurprise().setFlag(XenonSignalFlag);
       }
     }
   }
@@ -181,9 +181,9 @@ void Strobelight::log(Xenon::SampleType t,
     return;
   }
 
-  if (getSurpriseFlag(XenonSignalFlag)) {
+  if (stackLimitAndSurprise().getFlag(XenonSignalFlag)) {
     // TODO remove this when strobelight has its own surpriseFlag
-    clearSurpriseFlag(XenonSignalFlag);
+    stackLimitAndSurprise().clearFlag(XenonSignalFlag);
   }
 
   TRACE(1, "Strobelight::log\n");

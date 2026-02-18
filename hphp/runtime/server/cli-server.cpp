@@ -265,7 +265,7 @@ struct CLIClientGuardedFile : PlainFile {
 
  private:
   void assertClientAlive() {
-    if (stackLimitAndSurprise().load() & CLIClientTerminated) {
+    if (stackLimitAndSurprise().getFlag(CLIClientTerminated)) {
       raise_fatal_error("File I/O blocked as CLI client terminated");
     }
   }
@@ -635,7 +635,7 @@ struct CliStdoutHook final : ExecutionContext::StdoutHook {
   int fd;
   explicit CliStdoutHook(int fd) : fd(fd) {}
   void operator()(const char* s, int len) override {
-    if (!(stackLimitAndSurprise().load() & CLIClientTerminated)) {
+    if (!stackLimitAndSurprise().getFlag(CLIClientTerminated)) {
       if (is_hphp_session_initialized() && !MemoryManager::exiting()) {
         write(fd, s, len);
       }
@@ -648,7 +648,7 @@ struct CliLoggerHook final : LoggerHook {
   explicit CliLoggerHook(int fd) : fd(fd) {}
   void operator()(const char* /*hdr*/, const char* msg, const char* ending)
        override {
-    if (!(stackLimitAndSurprise().load() & CLIClientTerminated)) {
+    if (!stackLimitAndSurprise().getFlag(CLIClientTerminated)) {
       if (is_hphp_session_initialized() && !MemoryManager::exiting()) {
         write(fd, msg, strlen(msg));
         if (ending) write(fd, ending, strlen(ending));
@@ -793,7 +793,7 @@ MonitorThread::MonitorThread(int client) {
                  client);
           Logger::Info("CLIWorker::doJob(%i): monitor thread aborting request",
                        client);
-          flags->fetch_or(CLIClientTerminated);
+          flags->setFlag(CLIClientTerminated);
           return;
         }
         if (pfd[1].revents) {

@@ -181,9 +181,9 @@ void Xenon::run() {
 void Xenon::log(SampleType t,
                 EventHook::Source sourceType,
                 c_WaitableWaitHandle* wh) const {
-  if (getSurpriseFlag(XenonSignalFlag)) {
+  if (stackLimitAndSurprise().getFlag(XenonSignalFlag)) {
     if (!Cfg::Xenon::ForceAlwaysOn) {
-      clearSurpriseFlag(XenonSignalFlag);
+      stackLimitAndSurprise().clearFlag(XenonSignalFlag);
     }
     TRACE(1, "Xenon::log %s\n", show(t));
     s_xenonData->log(
@@ -320,11 +320,11 @@ void XenonRequestLocalData::requestInit() {
   assertx(!m_isProfiledRequest);
   assertx(m_stackSnapshots.get() == nullptr);
   if (Cfg::Xenon::ForceAlwaysOn) {
-    setSurpriseFlag(XenonSignalFlag);
+    stackLimitAndSurprise().setFlag(XenonSignalFlag);
   } else {
     // Clear any Xenon flags that might still be on in this thread so that we do
     // not have a bias towards the first function.
-    clearSurpriseFlag(XenonSignalFlag);
+    stackLimitAndSurprise().clearFlag(XenonSignalFlag);
   }
 
   uint32_t freq = Cfg::Xenon::RequestFreq;
@@ -335,7 +335,7 @@ void XenonRequestLocalData::requestShutdown() {
   TRACE(1, "XenonRequestLocalData::requestShutdown\n");
 
   m_isProfiledRequest = false;
-  clearSurpriseFlag(XenonSignalFlag);
+  stackLimitAndSurprise().clearFlag(XenonSignalFlag);
   Xenon::getInstance().incrementMissedSampleCount(m_stackSnapshots.size());
   m_stackSnapshots.reset();
 }

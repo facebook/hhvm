@@ -80,10 +80,10 @@ struct EventHook {
 
   static inline bool checkSurpriseFlagsAndIntercept(const Func* func) {
     if (Cfg::Eval::FastMethodIntercept) {
-      return checkSurpriseFlags() ||
+      return stackLimitAndSurprise().hasSurprise() ||
         (func->maybeIntercepted() && is_intercepted(func));
     } else {
-      return checkSurpriseFlags();
+      return stackLimitAndSurprise().hasSurprise();
     }
   }
 
@@ -100,14 +100,14 @@ struct EventHook {
   static inline void FunctionResumeAwait(const ActRec* ar,
                                          EventHook::Source sourceType) {
     ringbufferEnter(ar);
-    if (UNLIKELY(checkSurpriseFlags())) {
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) {
       onFunctionResumeAwait(ar, sourceType);
     }
   }
   static inline void FunctionResumeYield(const ActRec* ar,
                                          EventHook::Source sourceType) {
     ringbufferEnter(ar);
-    if (UNLIKELY(checkSurpriseFlags())) {
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) {
       onFunctionResumeYield(ar, sourceType);
     }
   }
@@ -115,14 +115,14 @@ struct EventHook {
                                      const ActRec* resumableAR,
                                      EventHook::Source sourceType) {
     ringbufferExit(resumableAR);
-    if (UNLIKELY(checkSurpriseFlags())) {
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) {
       onFunctionSuspendAwaitEF(suspending, resumableAR, sourceType);
     }
   }
   static void FunctionSuspendAwaitEG(ActRec* suspending,
                                      EventHook::Source sourceType) {
     ringbufferExit(suspending);
-    if (UNLIKELY(checkSurpriseFlags())) {
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) {
       onFunctionSuspendAwaitEG(suspending, sourceType);
     }
   }
@@ -130,7 +130,7 @@ struct EventHook {
                                     ObjectData* child,
                                     EventHook::Source sourceType) {
     ringbufferExit(suspending);
-    if (UNLIKELY(checkSurpriseFlags())) {
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) {
       onFunctionSuspendAwaitR(suspending, child, sourceType);
     }
   }
@@ -138,14 +138,14 @@ struct EventHook {
                                         const ActRec* resumableAR,
                                         EventHook::Source sourceType) {
     ringbufferExit(resumableAR);
-    if (UNLIKELY(checkSurpriseFlags())) {
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) {
       onFunctionSuspendCreateCont(suspending, resumableAR, sourceType);
     }
   }
   static void FunctionSuspendYield(ActRec* suspending,
                                    EventHook::Source sourceType) {
     ringbufferExit(suspending);
-    if (UNLIKELY(checkSurpriseFlags())) {
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) {
       onFunctionSuspendYield(suspending, sourceType);
     }
   }
@@ -153,13 +153,13 @@ struct EventHook {
                                     TypedValue retval,
                                     EventHook::Source sourceType) {
     ringbufferExit(ar);
-    if (UNLIKELY(checkSurpriseFlags())) {
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) {
       onFunctionReturn(ar, retval, sourceType);
     }
   }
   static inline void FunctionUnwind(ActRec* ar, ObjectData* phpException) {
     ringbufferExit(ar);
-    if (UNLIKELY(checkSurpriseFlags())) { onFunctionUnwind(ar, phpException); }
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) { onFunctionUnwind(ar, phpException); }
   }
 
   /**

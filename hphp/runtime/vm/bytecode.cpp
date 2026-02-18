@@ -407,8 +407,7 @@ void Stack::requestInit() {
     reinterpret_cast<char*>(m_elms) + sSurprisePageSize +
       stackCheckPadding() * sizeof(TypedValue)
   );
-  assertx(!(limit & kSurpriseFlagMask));
-  rds::header()->stackLimitAndSurprise.store(limit, std::memory_order_release);
+  rds::header()->stackLimitAndSurprise.initialize(limit);
 
   // Because of the surprise page at the bottom of the stack we lose an
   // additional 256 elements which must be taken into account when checking for
@@ -1882,7 +1881,7 @@ OPTBLD_INLINE void iopStaticAnalysisError() {
 }
 
 OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
-  if (offset <= 0 && UNLIKELY(checkSurpriseFlags())) {
+  if (offset <= 0 && UNLIKELY(stackLimitAndSurprise().hasSurprise())) {
     auto const flags = handle_request_surprise();
 
     // Memory Threhsold callback should also be fired here

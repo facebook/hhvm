@@ -215,7 +215,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh = nullptr,
  * unserialization or JSON decoding.
  */
 inline void check_non_safepoint_surprise() {
-  if (UNLIKELY(getSurpriseFlag(NonSafepointFlags))) {
+  if (UNLIKELY(stackLimitAndSurprise().getFlag(NonSafepointFlags))) {
     handle_request_surprise(nullptr, NonSafepointFlags);
   }
 }

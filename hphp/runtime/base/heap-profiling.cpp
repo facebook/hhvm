@@ -51,7 +51,7 @@ void MemoryManager::checkSampling(size_t bytes) {
     m_nextSample += Cfg::GC::HeapAllocSampleBytes;
   } while (m_nextSample < allocated);
   // Gather PHP stack later.
-  setSurpriseFlag(SurpriseFlag::HeapSamplingFlag);
+  stackLimitAndSurprise().setFlag(SurpriseFlag::HeapSamplingFlag);
 }
 
 void AllocSamples::addStack(bool skipTop) {
@@ -105,7 +105,7 @@ void AllocSamples::logSamples() {
 
 void gather_alloc_stack(bool skipTop) {
   s_samples->addStack(skipTop);
-  clearSurpriseFlag(HeapSamplingFlag);
+  stackLimitAndSurprise().clearFlag(HeapSamplingFlag);
 }
 
 void reset_alloc_sampling() {

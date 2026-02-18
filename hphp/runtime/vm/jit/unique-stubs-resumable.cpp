@@ -106,7 +106,7 @@ constexpr ptrdiff_t agToAr(ptrdiff_t off) {
  * is none (or if surprise flags are set), return nullptr.
  */
 c_AsyncFunctionWaitHandle* getFastRunnableAFWH() {
-  if (checkSurpriseFlags()) return nullptr;
+  if (stackLimitAndSurprise().hasSurprise()) return nullptr;
   auto const ctx = AsioSession::Get()->getCurrentContext();
 
   auto const afwh = ctx->maybePopFast();

@@ -430,7 +430,7 @@ private:
   bool m_requestOOM{false};
 
   /* Pointer to surprise flags stored in RDS. */
-  std::atomic<size_t>* m_sflagsAndStkPtr{nullptr};
+  StackLimitAndSurpriseFlags* m_stackLimitAndSurprise{nullptr};
 
   std::stack<int> m_activeLineBreaks;
 

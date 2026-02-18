@@ -184,7 +184,7 @@ static void testLeak(size_t alloc_size) {
 
   tl_heap->collect("testLeak");
   tl_heap->setGCEnabled(true);
-  clearSurpriseFlag(MemExceededFlag);
+  stackLimitAndSurprise().clearFlag(MemExceededFlag);
   tl_heap->setMemoryLimit(100 << 20);
 
   auto const target_alloc = int64_t{5} << 30;
@@ -206,7 +206,7 @@ static void testLeak(size_t alloc_size) {
     if (tl_heap->getStatsRaw().mmAllocated() - start_alloc > target_alloc) {
       break;
     }
-    if (UNLIKELY(checkSurpriseFlags())) handle_request_surprise();
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) handle_request_surprise();
   }
 }
 

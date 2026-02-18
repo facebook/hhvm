@@ -37,7 +37,7 @@ namespace HPHP {
 
 void HHVM_FUNCTION(trigger_oom, bool oom) {
   if (oom) {
-    setSurpriseFlag(MemExceededFlag);
+    stackLimitAndSurprise().setFlag(MemExceededFlag);
     RID().setRequestOOMFlag();
   }
 }

@@ -424,7 +424,7 @@ void RequestInjectionData::onSessionInit() {
   }();
 
   rds::requestInit();
-  m_sflagsAndStkPtr = &rds::header()->stackLimitAndSurprise;
+  m_stackLimitAndSurprise = &rds::header()->stackLimitAndSurprise;
   m_allowedDirectoriesInfo.reset();
   m_open_basedir_separator = s_PATH_SEPARATOR.toCppString();
   m_safeFileAccess = Cfg::Server::SafeFileAccess;
@@ -563,7 +563,7 @@ void RequestInjectionData::resetUserTimeoutTimer(int seconds /* = 0 */) {
 }
 
 void RequestInjectionData::reset() {
-  m_sflagsAndStkPtr->fetch_and(kSurpriseFlagStackMask, std::memory_order_acq_rel);
+  m_stackLimitAndSurprise->clearFlags();
   m_timeoutFlags.fetch_and(TimeoutNone, std::memory_order_acq_rel);
   m_hostOutOfMemory.store(false, std::memory_order_release);
   m_OOMAbort = false;
@@ -596,16 +596,14 @@ void RequestInjectionData::updateJit() {
 }
 
 void RequestInjectionData::clearFlag(SurpriseFlag flag) {
-  assertx(flag >= 1ull << 48);
-  if (m_sflagsAndStkPtr != nullptr) {
-    m_sflagsAndStkPtr->fetch_and(~flag, std::memory_order_acq_rel);
+  if (m_stackLimitAndSurprise != nullptr) {
+    m_stackLimitAndSurprise->clearFlag(flag);
   }
 }
 
 void RequestInjectionData::setFlag(SurpriseFlag flag) {
-  assertx(flag >= 1ull << 48);
-  if (m_sflagsAndStkPtr != nullptr) {
-    m_sflagsAndStkPtr->fetch_or(flag, std::memory_order_acq_rel);
+  if (m_stackLimitAndSurprise != nullptr) {
+    m_stackLimitAndSurprise->setFlag(flag);
   }
 }
 

@@ -659,14 +659,14 @@ void MemoryManager::resetEagerGC() {
 void MemoryManager::requestEagerGC() {
   if (Cfg::GC::Eager && rds::header()) {
     t_eager_gc = true;
-    setSurpriseFlag(PendingGCFlag);
+    stackLimitAndSurprise().setFlag(PendingGCFlag);
   }
 }
 
 void MemoryManager::checkGC() {
   if (m_stats.mmUsage() > m_nextGC) {
     assertx(rds::header());
-    setSurpriseFlag(PendingGCFlag);
+    stackLimitAndSurprise().setFlag(PendingGCFlag);
     if (rl_gcdata->t_trigger_allocated == -1) {
       rl_gcdata->t_trigger_allocated = m_stats.mmAllocated();
     }

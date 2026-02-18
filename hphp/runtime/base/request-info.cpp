@@ -272,18 +272,18 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   auto& info = RI();
   auto& p = info.m_reqInjectionData;
 
-  auto flags = fetchSurpriseFlags() & mask;
+  auto flags = stackLimitAndSurprise().fetchFlags() & mask;
   auto const debugging = p.getDebuggerAttached();
 
   // Start with any pending exception that might be on the request.
-  clearSurpriseFlag(PendingExceptionFlag);
+  stackLimitAndSurprise().clearFlag(PendingExceptionFlag);
   auto pendingException = info.m_pendingException;
   info.m_pendingException = nullptr;
 
   if (auto cbFlags =
       flags & (MemThresholdFlag | IntervalTimerFlag)) {
     if (!callbacksOk()) {
-      setSurpriseFlag(static_cast<SurpriseFlag>(cbFlags));
+      stackLimitAndSurprise().setFlag(static_cast<SurpriseFlag>(cbFlags));
       flags -= cbFlags;
     }
   }
@@ -296,7 +296,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       if (p.checkTimeoutKind(TimeoutTime)) {
         p.setCPUTimeout(0);  // Stop CPU timer so we won't time out twice.
         if (pendingException) {
-          setSurpriseFlag(TimedOutFlag);
+          stackLimitAndSurprise().setFlag(TimedOutFlag);
         } else {
           pendingException = generate_request_timeout_exception(wh);
         }
@@ -305,14 +305,14 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
         // timeout.
         p.setTimeout(0);  // Stop wall timer so we won't time out twice.
         if (pendingException) {
-          setSurpriseFlag(TimedOutFlag);
+          stackLimitAndSurprise().setFlag(TimedOutFlag);
         } else {
           pendingException = generate_request_cpu_timeout_exception(wh);
         }
       } else if (p.checkTimeoutKind(TimeoutSoft)) {
         p.setUserTimeout(0); // Stop wall timer so we won't time out twice.
         if (!callbacksOk()) {
-          setSurpriseFlag(TimedOutFlag);
+          stackLimitAndSurprise().setFlag(TimedOutFlag);
         } else {
           flags += TimedOutFlag;
         }
@@ -353,24 +353,24 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
     // we'll disable specific flags to make sure Xenon (or other)
     // re-entrant code doesn't interfere with debugging.
     if (flags & XenonSignalFlag) {
-      clearSurpriseFlag(XenonSignalFlag);
+      stackLimitAndSurprise().clearFlag(XenonSignalFlag);
     }
     if (flags & HeapSamplingFlag) {
-      clearSurpriseFlag(HeapSamplingFlag);
+      stackLimitAndSurprise().clearFlag(HeapSamplingFlag);
     }
     if (flags & IntervalTimerFlag) {
-      clearSurpriseFlag(IntervalTimerFlag);
+      stackLimitAndSurprise().clearFlag(IntervalTimerFlag);
     }
   }
   if (flags & CLIClientTerminated) {
     if (pendingException) {
-      setSurpriseFlag(CLIClientTerminated);
+      stackLimitAndSurprise().setFlag(CLIClientTerminated);
     } else {
       pendingException = generate_cli_client_terminated_exception(wh);
     }
   }
   if (flags & PendingGCFlag) {
-    clearSurpriseFlag(PendingGCFlag);
+    stackLimitAndSurprise().clearFlag(PendingGCFlag);
     if (tl_heap->isGCEnabled()) {
       tl_heap->collect("surprise");
     } else {
@@ -378,12 +378,12 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
     }
   }
   if (flags & SignaledFlag) {
-    clearSurpriseFlag(SignaledFlag);
+    stackLimitAndSurprise().clearFlag(SignaledFlag);
     HHVM_FN(pcntl_signal_dispatch)();
   }
 
   if (flags & PendingPerfEventFlag) {
-    clearSurpriseFlag(PendingPerfEventFlag);
+    stackLimitAndSurprise().clearFlag(PendingPerfEventFlag);
     perf_event_consume(record_perf_mem_event);
   }
 

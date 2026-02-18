@@ -48,9 +48,12 @@ TRACE_SET_MOD(irlower)
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitCheckSurpriseFlags(Vout& v, Vreg fp, Vlabel handleSurprise) {
+  auto constexpr surpriseFlagsOff =
+    rds::Header::stackLimitAndSurpriseOffset() +
+    StackLimitAndSurpriseFlags::valueOffset();
   auto const done = v.makeBlock();
   auto const sf = v.makeReg();
-  v << cmpqm{fp, rvmtl()[rds::kSurpriseFlagsOff], sf};
+  v << cmpqm{fp, rvmtl()[surpriseFlagsOff], sf};
   v << jcc{CC_NBE, sf, {done, handleSurprise}};
   v = done;
 }
@@ -124,7 +127,10 @@ void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
   if (extra->checkStackOverflow) {
     v << lea{fp[-cellsToBytes(extra->func->maxStackCells())], neededTop};
   }
-  v << cmpqm{neededTop, rvmtl()[rds::kSurpriseFlagsOff], sf};
+  auto constexpr surpriseFlagsOff =
+    rds::Header::stackLimitAndSurpriseOffset() +
+    StackLimitAndSurpriseFlags::valueOffset();
+  v << cmpqm{neededTop, rvmtl()[surpriseFlagsOff], sf};
 
   auto const done = v.makeBlock();
   auto const handleSurprise = label(env, inst->taken());

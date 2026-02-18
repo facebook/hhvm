@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/base/surprise-flags.h"
 
+#include "hphp/util/rds-local.h"
+
 #include <type_traits>
 
 namespace HPHP {

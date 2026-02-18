@@ -96,6 +96,14 @@ find_package(Threads)
 find_package(c-ares REQUIRED)
 find_package(Glog REQUIRED)
 
+# Propagate glog's required compile definition to all proxygen targets.
+# glog 0.7+ requires GLOG_USE_GLOG_EXPORT but since glog::glog is linked
+# PRIVATE on the monolithic library, OBJECT libraries don't inherit it.
+get_target_property(_glog_defs glog::glog INTERFACE_COMPILE_DEFINITIONS)
+if(_glog_defs)
+  add_compile_definitions(${_glog_defs})
+endif()
+
 list(APPEND
     _PROXYGEN_COMMON_COMPILE_OPTIONS
     -Wall

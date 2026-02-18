@@ -489,6 +489,7 @@ List deserialize(
                   .template new_object<detail::ConcreteList<elemDatumType>>(
                       type, alloc)
             : new detail::ConcreteList<elemDatumType>(type, alloc);
+        detail::IList::Ptr implPtr(impl);
 
         DCHECK_EQ(impl->size(), 0);
         auto& data = impl->elements();
@@ -508,11 +509,11 @@ List deserialize(
             }
           }
           reader.readListEnd();
-          return List(detail::IList::Ptr(impl));
+          return List(std::move(implPtr));
         } else {
           if (!size) {
             reader.readListEnd();
-            return List(detail::IList::Ptr(impl));
+            return List(std::move(implPtr));
           }
 
           // T_VOID indicates protocol doesn't encode type information
@@ -550,7 +551,7 @@ List deserialize(
             }
           }
           reader.readListEnd();
-          return List(detail::IList::Ptr(impl));
+          return List(std::move(implPtr));
         }
       });
 }

@@ -137,31 +137,34 @@ void ConnectionManager::scheduleTimeout(
 }
 
 void ConnectionManager::removeConnection(ManagedConnection* connection) {
+  if (connection->getConnectionManager() != this) {
+    return;
+  }
+
   if (connection->getActivationState() ==
       ManagedConnection::ActivationState::IDLE) {
     CHECK_GT(idleConnections_, 0);
     --idleConnections_;
   }
-  if (connection->getConnectionManager() == this) {
-    connection->cancelTimeout();
-    connection->setConnectionManager(nullptr);
 
-    // Un-link the connection from our list, being careful to keep the iterator
-    // that we're using for idle shedding valid
-    auto it = conns_.iterator_to(*connection);
-    if (it == drainIterator_) {
-      ++drainIterator_;
-    }
-    if (it == idleIterator_) {
-      ++idleIterator_;
-    }
-    conns_.erase(it);
+  connection->cancelTimeout();
+  connection->setConnectionManager(nullptr);
 
-    if (callback_) {
-      callback_->onConnectionRemoved(connection);
-      if (getNumConnections() == 0) {
-        callback_->onEmpty(*this);
-      }
+  // Un-link the connection from our list, being careful to keep the iterator
+  // that we're using for idle shedding valid
+  auto it = conns_.iterator_to(*connection);
+  if (it == drainIterator_) {
+    ++drainIterator_;
+  }
+  if (it == idleIterator_) {
+    ++idleIterator_;
+  }
+  conns_.erase(it);
+
+  if (callback_) {
+    callback_->onConnectionRemoved(connection);
+    if (getNumConnections() == 0) {
+      callback_->onEmpty(*this);
     }
   }
 }

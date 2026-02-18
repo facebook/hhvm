@@ -821,4 +821,48 @@ TEST_F(ConnectionManagerTest, testAddDuringCloseWhenIdleActive) {
 TEST_F(ConnectionManagerTest, testAddDuringCloseWhenIdleInactive) {
   testAddDuringCloseWhenIdle(true);
 }
+
+// Test that removeConnection does not corrupt idleConnections_ counter
+// when called with a connection that belongs to a different ConnectionManager.
+// This regression test verifies that idleConnections_ is only decremented
+// when the connection actually belongs to the ConnectionManager being called.
+TEST_F(ConnectionManagerTest, testRemoveConnectionFromWrongManager) {
+  // Create a second ConnectionManager
+  auto cm2 = ConnectionManager::makeUnique(
+      &eventBase_, std::chrono::milliseconds(100), nullptr);
+
+  // Create a connection and add it to cm2 (not cm_)
+  auto conn = MockConnection::makeUnique(this);
+  cm2->addConnection(conn.get());
+
+  // Mark the connection as idle in cm2
+  cm2->onDeactivated(*conn);
+  EXPECT_EQ(cm2->getNumIdleConnections(), 1);
+
+  // Verify cm_ has connections from setUp but no idle connections yet
+  EXPECT_EQ(cm_->getNumConnections(), 65);
+  EXPECT_EQ(cm_->getNumIdleConnections(), 0);
+
+  // Now try to remove the connection using cm_ (the wrong manager).
+  // Before the fix, this would decrement cm_'s idleConnections_ counter
+  // even though the connection doesn't belong to cm_, causing it to
+  // wrap around to a very large number or fail the CHECK_GT assertion.
+  cm_->removeConnection(conn.get());
+
+  // The connection should still belong to cm2
+  EXPECT_EQ(conn->getConnectionManager(), cm2.get());
+
+  // cm_ should be unaffected - still 0 idle connections
+  EXPECT_EQ(cm_->getNumIdleConnections(), 0);
+  EXPECT_EQ(cm_->getNumConnections(), 65);
+
+  // cm2 should still have 1 idle connection
+  EXPECT_EQ(cm2->getNumIdleConnections(), 1);
+  EXPECT_EQ(cm2->getNumConnections(), 1);
+
+  // Properly clean up: remove the connection from cm2
+  cm2->removeConnection(conn.get());
+  EXPECT_EQ(cm2->getNumIdleConnections(), 0);
+  EXPECT_EQ(cm2->getNumConnections(), 0);
+}
 } // namespace

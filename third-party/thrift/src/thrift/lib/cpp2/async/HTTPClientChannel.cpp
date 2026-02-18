@@ -460,16 +460,16 @@ void HTTPClientChannel::setRequestHeaderOptions(THeader* header) {
 
 void HTTPClientChannel::setHeaders(
     proxygen::HTTPHeaders& dstHeaders,
-    const transport::THeader::StringToStringMap& srcHeaders) {
-  for (const auto& header : srcHeaders) {
-    if (header.first.find(":") != std::string::npos) {
-      auto name = folly::base64URLEncode(header.first);
-      auto value = folly::base64URLEncode(header.second);
-      dstHeaders.rawSet(
-          folly::to<std::string>("encode_", name),
-          folly::to<std::string>(name, "_", value));
+    transport::THeader::StringToStringMap&& srcHeaders) {
+  for (auto&& [header, value] : srcHeaders) {
+    if (header.find(':') != std::string::npos) {
+      const auto encodedHeader = folly::base64URLEncode(header);
+      const auto encodedValue = folly::base64URLEncode(value);
+      dstHeaders.add(
+          folly::to<std::string>("encode_", encodedHeader),
+          folly::to<std::string>(encodedHeader, '_', encodedValue));
     } else {
-      dstHeaders.rawSet(header.first, header.second);
+      dstHeaders.add(header, std::move(value));
     }
   }
 }
@@ -482,19 +482,9 @@ proxygen::HTTPMessage HTTPClientChannel::buildHTTPMessage(THeader* header) {
   msg.setURL(httpUrl_);
   msg.setHTTPVersion(1, 1);
   msg.setIsChunked(false);
+
   auto& headers = msg.getHeaders();
-
-  {
-    auto wh = header->releaseWriteHeaders();
-    setHeaders(headers, wh);
-  }
-
-  {
-    auto eh = header->getExtraWriteHeaders();
-    if (eh) {
-      setHeaders(headers, *eh);
-    }
-  }
+  setHeaders(headers, header->extractAllWriteHeaders());
 
   headers.set(proxygen::HTTPHeaderCode::HTTP_HEADER_HOST, httpHost_);
   headers.set(

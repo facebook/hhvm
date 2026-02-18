@@ -18,10 +18,16 @@ namespace fizz {
 namespace detail {
 
 template <>
-size_t read<TokenBindingID>(TokenBindingID& id, folly::io::Cursor& cursor) {
-  auto len = read(id.key_parameters, cursor);
+Status read<TokenBindingID>(
+    size_t& ret,
+    Error& err,
+    TokenBindingID& id,
+    folly::io::Cursor& cursor) {
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(read(len, err, id.key_parameters, cursor));
   len += readBuf<uint16_t>(id.key, cursor);
-  return len;
+  ret = len;
+  return Status::Success;
 }
 
 template <>
@@ -36,14 +42,20 @@ size_t getSize<TokenBindingID>(const TokenBindingID& id) {
 }
 
 template <>
-size_t read<TokenBinding>(
+Status read<TokenBinding>(
+    size_t& ret,
+    Error& err,
     TokenBinding& tokenBinding,
     folly::io::Cursor& cursor) {
-  auto len = read(tokenBinding.tokenbinding_type, cursor);
-  len += read(tokenBinding.tokenbindingid, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(read(len, err, tokenBinding.tokenbinding_type, cursor));
+  size_t idLen;
+  FIZZ_RETURN_ON_ERROR(read(idLen, err, tokenBinding.tokenbindingid, cursor));
+  len += idLen;
   len += readBuf<uint16_t>(tokenBinding.signature, cursor);
   len += readBuf<uint16_t>(tokenBinding.extensions, cursor);
-  return len;
+  ret = len;
+  return Status::Success;
 }
 
 template <>
@@ -90,7 +102,7 @@ std::string extensions::toString(TokenBindingKeyParameters keyParams) {
 template <>
 Status getExtension(
     folly::Optional<TokenBindingParameters>& ret,
-    Error& /* err */,
+    Error& err,
     const std::vector<Extension>& extensions) {
   auto it = findExtension(extensions, ExtensionType::token_binding);
   if (it == extensions.end()) {
@@ -99,8 +111,11 @@ Status getExtension(
   }
   TokenBindingParameters params;
   folly::io::Cursor cursor(it->extension_data.get());
-  detail::read(params.version, cursor);
-  detail::readVector<uint8_t>(params.key_parameters_list, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, params.version, cursor));
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint8_t>(
+          len, err, params.key_parameters_list, cursor));
   ret = params;
   return Status::Success;
 }
@@ -134,10 +149,12 @@ Status encode(Buf& ret, Error& /* err */, TokenBindingMessage&& message) {
 template <>
 Status decode<TokenBindingMessage>(
     TokenBindingMessage& ret,
-    Error& /* err */,
+    Error& err,
     folly::io::Cursor& cursor) {
   TokenBindingMessage message;
-  detail::readVector<uint16_t>(message.tokenbindings, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint16_t>(len, err, message.tokenbindings, cursor));
   ret = std::move(message);
   return Status::Success;
 }

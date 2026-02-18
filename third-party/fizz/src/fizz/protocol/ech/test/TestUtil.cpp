@@ -20,7 +20,10 @@ std::vector<Extension> getExtensions(folly::StringPiece hex) {
   auto buf = folly::IOBuf::copyBuffer(folly::unhexlify((hex.toString())));
   folly::io::Cursor cursor(buf.get());
   Extension ext;
-  FIZZ_CHECK_EQ(detail::read(ext, cursor), buf->computeChainDataLength());
+  size_t len;
+  Error err;
+  FIZZ_THROW_ON_ERROR(detail::read(len, err, ext, cursor), err);
+  FIZZ_CHECK_EQ(len, buf->computeChainDataLength());
   CHECK(cursor.isAtEnd());
   std::vector<Extension> exts;
   exts.push_back(std::move(ext));

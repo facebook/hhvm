@@ -53,9 +53,15 @@ class PersistentFizzPskCache : public fizz::client::PskCache {
     auto serialized = cache_.get(identity);
     if (serialized) {
       try {
-        return fizz::client::deserializePsk(
-            fizz::openssl::certificateSerializer(),
-            folly::ByteRange(serialized->serialized));
+        fizz::client::CachedPsk deserialized;
+        fizz::Error err;
+        FIZZ_THROW_ON_ERROR(fizz::client::deserializePsk(
+                                deserialized,
+                                err,
+                                fizz::openssl::certificateSerializer(),
+                                folly::ByteRange(serialized->serialized)),
+                            err);
+        return deserialized;
       } catch (const std::exception& ex) {
         LOG(ERROR) << "Error deserializing PSK: " << ex.what();
         cache_.remove(identity);
@@ -69,9 +75,14 @@ class PersistentFizzPskCache : public fizz::client::PskCache {
     auto serialized = cache_.get(identity);
     if (serialized) {
       try {
-        auto deserialized = fizz::client::deserializePsk(
-            fizz::openssl::certificateSerializer(),
-            folly::ByteRange(serialized->serialized));
+        fizz::client::CachedPsk deserialized;
+        fizz::Error err;
+        FIZZ_THROW_ON_ERROR(fizz::client::deserializePsk(
+                                deserialized,
+                                err,
+                                fizz::openssl::certificateSerializer(),
+                                folly::ByteRange(serialized->serialized)),
+                            err);
         serialized->uses++;
         if (maxPskUses_ != 0 && serialized->uses >= maxPskUses_) {
           cache_.remove(identity);

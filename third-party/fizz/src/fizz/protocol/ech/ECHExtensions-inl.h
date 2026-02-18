@@ -99,13 +99,14 @@ template <>
 inline Status
 getExtension(ech::OuterECHClientHello& ret, Error& err, folly::io::Cursor& cs) {
   ech::ECHClientHelloType type;
-  detail::read(type, cs);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, type, cs));
   if (type != ech::ECHClientHelloType::Outer) {
     return err.error("wrong ech variant");
   }
   ech::OuterECHClientHello clientECH;
-  detail::read(clientECH.cipher_suite, cs);
-  detail::read(clientECH.config_id, cs);
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, clientECH.cipher_suite, cs));
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, clientECH.config_id, cs));
   detail::readBuf<uint16_t>(clientECH.enc, cs);
   detail::readBuf<uint16_t>(clientECH.payload, cs);
   ret = std::move(clientECH);
@@ -115,11 +116,12 @@ getExtension(ech::OuterECHClientHello& ret, Error& err, folly::io::Cursor& cs) {
 template <>
 inline Status getExtension(
     ech::ECHEncryptedExtensions& ret,
-    Error& /* err */,
+    Error& err,
     folly::io::Cursor& cs) {
+  size_t len;
   ech::ECHEncryptedExtensions serverECH;
-  detail::readVector<uint16_t>(serverECH.retry_configs, cs);
-
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint16_t>(len, err, serverECH.retry_configs, cs));
   ret = std::move(serverECH);
   return Status::Success;
 }
@@ -128,7 +130,8 @@ template <>
 inline Status
 getExtension(ech::InnerECHClientHello& ret, Error& err, folly::io::Cursor& cs) {
   ech::ECHClientHelloType type;
-  detail::read(type, cs);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, type, cs));
   if (type != ech::ECHClientHelloType::Inner) {
     return err.error("wrong ech variant");
   }
@@ -137,12 +140,12 @@ getExtension(ech::InnerECHClientHello& ret, Error& err, folly::io::Cursor& cs) {
 }
 
 template <>
-inline Status getExtension(
-    ech::OuterExtensions& ret,
-    Error& /* err */,
-    folly::io::Cursor& cs) {
+inline Status
+getExtension(ech::OuterExtensions& ret, Error& err, folly::io::Cursor& cs) {
+  size_t len;
   ech::OuterExtensions outerExts;
-  detail::readVector<uint8_t>(outerExts.types, cs);
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint8_t>(len, err, outerExts.types, cs));
   ret = std::move(outerExts);
   return Status::Success;
 }

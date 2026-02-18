@@ -483,9 +483,16 @@ class BasicPersistentPskCache : public BasicPskCache {
     std::string serializedPsk;
     readFile(loadFile_.c_str(), serializedPsk);
     try {
-      return deserializePsk(
-          fizz::openssl::certificateSerializer(),
-          folly::ByteRange(serializedPsk));
+      fizz::client::CachedPsk psk;
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          deserializePsk(
+              psk,
+              err,
+              fizz::openssl::certificateSerializer(),
+              folly::ByteRange(serializedPsk)),
+          err);
+      return psk;
     } catch (const std::exception& e) {
       FIZZ_LOG(ERROR) << "Error deserializing: " << loadFile_ << "\n"
                       << e.what();

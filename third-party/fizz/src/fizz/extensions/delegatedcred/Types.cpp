@@ -17,7 +17,7 @@ namespace fizz {
 template <>
 Status getExtension(
     folly::Optional<DelegatedCredential>& ret,
-    Error& /* err */,
+    Error& err,
     const std::vector<Extension>& extensions) {
   auto it = findExtension(extensions, ExtensionType::delegated_credential);
   if (it == extensions.end()) {
@@ -26,10 +26,12 @@ Status getExtension(
   }
   DelegatedCredential cred;
   folly::io::Cursor cursor(it->extension_data.get());
-  detail::read(cred.valid_time, cursor);
-  detail::read(cred.expected_verify_scheme, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, cred.valid_time, cursor));
+  FIZZ_RETURN_ON_ERROR(
+      detail::read(len, err, cred.expected_verify_scheme, cursor));
   detail::readBuf<detail::bits24>(cred.public_key, cursor);
-  detail::read(cred.credential_scheme, cursor);
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, cred.credential_scheme, cursor));
   detail::readBuf<uint16_t>(cred.signature, cursor);
   ret = std::move(cred);
   return Status::Success;
@@ -38,7 +40,7 @@ Status getExtension(
 template <>
 Status getExtension(
     folly::Optional<DelegatedCredentialSupport>& ret,
-    Error& /* err */,
+    Error& err,
     const std::vector<Extension>& extensions) {
   auto it = findExtension(extensions, ExtensionType::delegated_credential);
   if (it == extensions.end()) {
@@ -47,7 +49,10 @@ Status getExtension(
   }
   DelegatedCredentialSupport supp;
   folly::io::Cursor cursor(it->extension_data.get());
-  detail::readVector<uint16_t>(supp.supported_signature_algorithms, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint16_t>(
+          len, err, supp.supported_signature_algorithms, cursor));
   ret = supp;
   return Status::Success;
 }

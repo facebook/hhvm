@@ -48,7 +48,9 @@ class BatchSignature {
   static BatchSignature decode(folly::io::Cursor& wire) {
     MerkleTreePath path;
     // index, uint32
-    detail::read(path.index, wire);
+    size_t len;
+    Error err;
+    FIZZ_THROW_ON_ERROR(detail::read(len, err, path.index, wire), err);
     // path, each element's length is HashLen
     detail::readBuf<uint16_t>(path.path, wire);
     // root_signature

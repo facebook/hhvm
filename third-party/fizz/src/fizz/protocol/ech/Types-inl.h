@@ -110,55 +110,94 @@ struct detail::Sizer<ech::ECHConfig> {
 template <>
 struct detail::Reader<ech::HpkeSymmetricCipherSuite> {
   template <class T>
-  size_t read(ech::HpkeSymmetricCipherSuite& suite, folly::io::Cursor& cursor) {
-    size_t len = detail::read(suite.kdf_id, cursor) +
-        detail::read(suite.aead_id, cursor);
-    return len;
+  Status read(
+      size_t& ret,
+      Error& err,
+      ech::HpkeSymmetricCipherSuite& suite,
+      folly::io::Cursor& cursor) {
+    size_t len = 0;
+    size_t lenRead;
+    FIZZ_RETURN_ON_ERROR(detail::read(lenRead, err, suite.kdf_id, cursor));
+    len += lenRead;
+    FIZZ_RETURN_ON_ERROR(detail::read(lenRead, err, suite.aead_id, cursor));
+    len += lenRead;
+    ret = len;
+    return Status::Success;
   }
 };
 
 template <>
 struct detail::Reader<ech::HpkeKeyConfig> {
   template <class T>
-  size_t read(ech::HpkeKeyConfig& keyConfig, folly::io::Cursor& cursor) {
+  Status read(
+      size_t& ret,
+      Error& err,
+      ech::HpkeKeyConfig& keyConfig,
+      folly::io::Cursor& cursor) {
     size_t len = 0;
-    len += detail::read(keyConfig.config_id, cursor);
-    len += detail::read(keyConfig.kem_id, cursor);
+    size_t lenRead;
+    FIZZ_RETURN_ON_ERROR(
+        detail::read(lenRead, err, keyConfig.config_id, cursor));
+    len += lenRead;
+    FIZZ_RETURN_ON_ERROR(detail::read(lenRead, err, keyConfig.kem_id, cursor));
+    len += lenRead;
     len += readBuf<uint16_t>(keyConfig.public_key, cursor);
     if (!keyConfig.public_key) {
-      throw std::runtime_error("Invalid public key length");
+      return err.error("Invalid public key length");
     }
-    len += readVector<uint16_t>(keyConfig.cipher_suites, cursor);
-    return len;
+    FIZZ_RETURN_ON_ERROR(
+        readVector<uint16_t>(lenRead, err, keyConfig.cipher_suites, cursor));
+    len += lenRead;
+    ret = len;
+    return Status::Success;
   }
 };
 
 template <>
 struct detail::Reader<ech::ECHConfigContentDraft> {
   template <class T>
-  size_t read(
+  Status read(
+      size_t& ret,
+      Error& err,
       ech::ECHConfigContentDraft& echConfigContent,
       folly::io::Cursor& cursor) {
     size_t len = 0;
-    len += detail::read(echConfigContent.key_config, cursor);
-    len += detail::read(echConfigContent.maximum_name_length, cursor);
+    size_t lenRead;
+    FIZZ_RETURN_ON_ERROR(
+        detail::read(lenRead, err, echConfigContent.key_config, cursor));
+    len += lenRead;
+    FIZZ_RETURN_ON_ERROR(
+        detail::read(
+            lenRead, err, echConfigContent.maximum_name_length, cursor));
+    len += lenRead;
     len += detail::readString<uint8_t>(echConfigContent.public_name, cursor);
     if (echConfigContent.public_name.empty()) {
-      throw std::runtime_error("Invalid public name length");
+      return err.error("Invalid public name length");
     }
-    len += detail::readVector<uint16_t>(echConfigContent.extensions, cursor);
-    return len;
+    FIZZ_RETURN_ON_ERROR(
+        detail::readVector<uint16_t>(
+            lenRead, err, echConfigContent.extensions, cursor));
+    len += lenRead;
+    ret = len;
+    return Status::Success;
   }
 };
 
 template <>
 struct detail::Reader<ech::ECHConfig> {
   template <class T>
-  size_t read(ech::ECHConfig& echConfig, folly::io::Cursor& cursor) {
+  Status read(
+      size_t& ret,
+      Error& err,
+      ech::ECHConfig& echConfig,
+      folly::io::Cursor& cursor) {
     size_t len = 0;
-    len += detail::read(echConfig.version, cursor);
+    size_t lenRead;
+    FIZZ_RETURN_ON_ERROR(detail::read(lenRead, err, echConfig.version, cursor));
+    len += lenRead;
     len += detail::readBuf<uint16_t>(echConfig.ech_config_content, cursor);
-    return len;
+    ret = len;
+    return Status::Success;
   }
 };
 
@@ -201,30 +240,32 @@ encode<ech::ECHConfig>(Buf& ret, Error& err, ech::ECHConfig&& echConfig) {
 }
 
 template <>
-inline Status decode(
-    ech::ECHConfigContentDraft& ret,
-    Error& /* err */,
-    folly::io::Cursor& cursor) {
+inline Status
+decode(ech::ECHConfigContentDraft& ret, Error& err, folly::io::Cursor& cursor) {
   ech::ECHConfigContentDraft echConfigContent;
-  detail::read(echConfigContent, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, echConfigContent, cursor));
   ret = std::move(echConfigContent);
   return Status::Success;
 }
 
 template <>
 inline Status
-decode(ech::ECHConfig& ret, Error& /* err */, folly::io::Cursor& cursor) {
+decode(ech::ECHConfig& ret, Error& err, folly::io::Cursor& cursor) {
   ech::ECHConfig echConfig;
-  detail::read(echConfig, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, echConfig, cursor));
   ret = std::move(echConfig);
   return Status::Success;
 }
 
 template <>
 inline Status
-decode(ech::ECHConfigList& ret, Error& /* err */, folly::io::Cursor& cursor) {
+decode(ech::ECHConfigList& ret, Error& err, folly::io::Cursor& cursor) {
   ech::ECHConfigList echConfigList;
-  detail::readVector<uint16_t>(echConfigList.configs, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint16_t>(len, err, echConfigList.configs, cursor));
   ret = std::move(echConfigList);
   return Status::Success;
 }

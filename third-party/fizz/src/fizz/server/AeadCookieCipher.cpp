@@ -55,14 +55,16 @@ inline CookieState decodeCookie(Buf cookie) {
   folly::io::Cursor cursor(cookie.get());
 
   CookieState state;
-  fizz::detail::read(state.version, cursor);
-  fizz::detail::read(state.cipher, cursor);
+  size_t len;
+  Error err;
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, state.version, cursor), err);
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, state.cipher, cursor), err);
 
   CookieHasGroup hasGroup;
-  fizz::detail::read(hasGroup, cursor);
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, hasGroup, cursor), err);
   if (hasGroup == CookieHasGroup::Yes) {
     NamedGroup group;
-    fizz::detail::read(group, cursor);
+    FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, group, cursor), err);
     state.group = group;
   }
 
@@ -70,13 +72,13 @@ inline CookieState decodeCookie(Buf cookie) {
   fizz::detail::readBuf<uint16_t>(state.appToken, cursor);
 
   CookieHasEch hasEch;
-  fizz::detail::read(hasEch, cursor);
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, hasEch, cursor), err);
   if (hasEch == CookieHasEch::Yes) {
     ech::HpkeSymmetricCipherSuite cs;
-    fizz::detail::read(cs, cursor);
+    FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, cs, cursor), err);
     state.echCipherSuite = std::move(cs);
     uint8_t configId;
-    fizz::detail::read(configId, cursor);
+    FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, configId, cursor), err);
     state.echConfigId = configId;
     fizz::detail::readBuf<uint16_t>(state.echEnc, cursor);
   }

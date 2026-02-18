@@ -59,17 +59,22 @@ ResumptionState TicketCodec<Storage>::decode(
   folly::io::Cursor cursor(encoded.get());
 
   ResumptionState resState;
-  fizz::detail::read(resState.version, cursor);
-  fizz::detail::read(resState.cipher, cursor);
+  Error err;
+  size_t len;
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::read(len, err, resState.version, cursor), err);
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::read(len, err, resState.cipher, cursor), err);
   fizz::detail::readBuf<uint16_t>(resState.resumptionSecret, cursor);
   Buf selfIdentity;
   fizz::detail::readBuf<uint16_t>(selfIdentity, cursor);
 
   resState.clientCert = readClientCertificate(cursor, factory);
 
-  fizz::detail::read(resState.ticketAgeAdd, cursor);
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::read(len, err, resState.ticketAgeAdd, cursor), err);
   uint64_t seconds;
-  fizz::detail::read(seconds, cursor);
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, seconds, cursor), err);
   Buf alpnBuf;
   fizz::detail::readBuf<uint8_t>(alpnBuf, cursor);
   if (!alpnBuf->empty()) {
@@ -91,7 +96,7 @@ ResumptionState TicketCodec<Storage>::decode(
   if (cursor.isAtEnd()) {
     return resState;
   }
-  fizz::detail::read(seconds, cursor);
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, seconds, cursor), err);
   resState.handshakeTime = std::chrono::time_point<std::chrono::system_clock>(
       std::chrono::seconds(seconds));
 

@@ -10,7 +10,9 @@ namespace client {
 std::string serializePsk(
     const CertificateSerialization& serializer,
     const fizz::client::CachedPsk& psk);
-fizz::client::CachedPsk deserializePsk(
+Status deserializePsk(
+    fizz::client::CachedPsk& ret,
+    Error& err,
     const CertificateSerialization& serializer,
     folly::ByteRange psk);
 } // namespace client

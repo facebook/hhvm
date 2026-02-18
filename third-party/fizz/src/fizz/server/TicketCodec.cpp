@@ -66,7 +66,9 @@ std::shared_ptr<const Cert> readClientCertificate(
     folly::io::Cursor& cursor,
     const Factory& factory) {
   CertificateStorage storage;
-  fizz::detail::read(storage, cursor);
+  size_t len;
+  Error err;
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, storage, cursor), err);
   switch (storage) {
     case CertificateStorage::None:
       return nullptr;

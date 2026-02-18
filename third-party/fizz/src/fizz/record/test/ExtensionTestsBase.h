@@ -28,7 +28,10 @@ class ExtensionsTest : public testing::Test {
     auto buf = ExtensionsTest::getBuf(hex);
     folly::io::Cursor cursor(buf.get());
     Extension ext;
-    EXPECT_EQ(detail::read(ext, cursor), buf->computeChainDataLength());
+    size_t len;
+    Error err;
+    EXPECT_EQ(detail::read(len, err, ext, cursor), Status::Success);
+    EXPECT_EQ(len, buf->computeChainDataLength());
     EXPECT_TRUE(cursor.isAtEnd());
     std::vector<Extension> exts;
     exts.push_back(std::move(ext));

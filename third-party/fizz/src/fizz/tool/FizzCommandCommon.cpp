@@ -97,7 +97,10 @@ std::vector<Extension> getExtensions(folly::StringPiece hex) {
   folly::io::Cursor cursor(outBuf.get());
   std::vector<Extension> extensions;
   if (!cursor.isAtEnd()) {
-    detail::readVector<uint16_t>(extensions, cursor);
+    size_t len;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        detail::readVector<uint16_t>(len, err, extensions, cursor), err);
   }
   CHECK(cursor.isAtEnd());
   return extensions;

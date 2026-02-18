@@ -258,7 +258,9 @@ size_t readString(std::string& str, folly::io::Cursor& cursor) {
 template <class U>
 struct Reader {
   template <class T>
-  size_t read(
+  Status read(
+      size_t& ret,
+      Error& /* err */,
       typename std::enable_if<
           std::is_enum<T>::value && std::is_same<U, T>::value,
           T>::type& out,
@@ -268,98 +270,136 @@ struct Reader {
         std::is_unsigned<UT>::value,
         "enums meant to be deserialized should be unsigned");
     out = static_cast<U>(cursor.readBE<UT>());
-    return sizeof(U);
+    ret = sizeof(U);
+    return Status::Success;
   }
 
   template <class T>
-  size_t read(
+  Status read(
+      size_t& ret,
+      Error& /* err */,
       typename std::enable_if<
           !std::is_enum<T>::value && std::is_unsigned<T>::value &&
               std::is_same<U, T>::value,
           T>::type& out,
       folly::io::Cursor& cursor) {
     out = cursor.readBE<U>();
-    return sizeof(U);
+    ret = sizeof(U);
+    return Status::Success;
   }
 };
 
 template <class T>
-size_t read(T& out, folly::io::Cursor& cursor) {
-  return Reader<T>().template read<T>(out, cursor);
+Status read(size_t& ret, Error& err, T& out, folly::io::Cursor& cursor) {
+  return Reader<T>().template read<T>(ret, err, out, cursor);
 }
 
 template <class N, class T>
 struct ReadVector {
-  size_t readVector(std::vector<T>& out, folly::io::Cursor& cursor) {
+  Status readVector(
+      size_t& ret,
+      Error& err,
+      std::vector<T>& out,
+      folly::io::Cursor& cursor) {
     auto len = cursor.readBE<N>();
     if (cursor.totalLength() < len) {
-      throw std::out_of_range("Not enough data");
+      return err.error(
+          "Not enough data", folly::none, Error::Category::StdOutOfRange);
     }
 
     size_t consumed = 0;
+    size_t lenRead;
     while (consumed < len) {
       out.push_back(T());
-      consumed += read(*out.rbegin(), cursor);
+      FIZZ_RETURN_ON_ERROR(read(lenRead, err, *out.rbegin(), cursor));
+      consumed += lenRead;
     }
     if (consumed != len) {
-      throw std::runtime_error("Invalid data length supplied");
+      return err.error("Invalid data length supplied");
     }
-    return len + sizeof(N);
+    ret = len + sizeof(N);
+    return Status::Success;
   }
 };
 
 template <class T>
 struct ReadVector<bits24, T> {
-  size_t readVector(std::vector<T>& out, folly::io::Cursor& cursor) {
+  Status readVector(
+      size_t& ret,
+      Error& err,
+      std::vector<T>& out,
+      folly::io::Cursor& cursor) {
     auto len = readBits24(cursor);
     if (cursor.totalLength() < len) {
-      throw std::out_of_range("Not enough data");
+      return err.error(
+          "Not enough data", folly::none, Error::Category::StdOutOfRange);
     }
 
     size_t consumed = 0;
+    size_t lenRead;
     while (consumed < len) {
       out.push_back(T());
-      consumed += read(*out.rbegin(), cursor);
+      FIZZ_RETURN_ON_ERROR(read(lenRead, err, *out.rbegin(), cursor));
+      consumed += lenRead;
     }
     if (consumed != len) {
-      throw std::runtime_error("Invalid data length supplied");
+      return err.error("Invalid data length supplied");
     }
-    return len + bits24::size;
+    ret = len + bits24::size;
+    return Status::Success;
   }
 };
 
 template <class N, class T>
-size_t readVector(std::vector<T>& out, folly::io::Cursor& cursor) {
-  return ReadVector<N, T>().readVector(out, cursor);
+Status readVector(
+    size_t& ret,
+    Error& err,
+    std::vector<T>& out,
+    folly::io::Cursor& cursor) {
+  return ReadVector<N, T>().readVector(ret, err, out, cursor);
 }
 
 template <>
 struct Reader<Random> {
   template <class T>
-  size_t read(Random& out, folly::io::Cursor& cursor) {
+  Status
+  read(size_t& ret, Error& /* err */, Random& out, folly::io::Cursor& cursor) {
     cursor.pull(out.data(), out.size());
-    return out.size();
+    ret = out.size();
+    return Status::Success;
   }
 };
 
 template <>
 struct Reader<Extension> {
   template <class T>
-  size_t read(Extension& extension, folly::io::Cursor& cursor) {
+  Status read(
+      size_t& ret,
+      Error& /* err */,
+      Extension& extension,
+      folly::io::Cursor& cursor) {
     extension.extension_type = static_cast<ExtensionType>(
         cursor.readBE<typename std::underlying_type<ExtensionType>::type>());
     auto len = readBuf<uint16_t>(extension.extension_data, cursor);
-    return sizeof(ExtensionType) + len;
+    ret = sizeof(ExtensionType) + len;
+    return Status::Success;
   }
 };
 
 template <>
 struct Reader<CertificateEntry> {
   template <class T>
-  size_t read(CertificateEntry& entry, folly::io::Cursor& cursor) {
+  Status read(
+      size_t& ret,
+      Error& err,
+      CertificateEntry& entry,
+      folly::io::Cursor& cursor) {
     auto len = readBuf<bits24>(entry.cert_data, cursor);
-    len += readVector<uint16_t>(entry.extensions, cursor);
-    return len;
+    size_t lenVec;
+    FIZZ_RETURN_ON_ERROR(
+        readVector<uint16_t>(lenVec, err, entry.extensions, cursor));
+    ret = len + lenVec;
+    return Status::Success;
   }
 };
 } // namespace detail
@@ -603,34 +643,40 @@ Status encodeHandshake(Buf& ret, Error& err, T&& handshakeMsg) {
 }
 
 template <>
-inline Status
-decode(ClientHello& ret, Error& /* err */, folly::io::Cursor& cursor) {
+inline Status decode(ClientHello& ret, Error& err, folly::io::Cursor& cursor) {
   ClientHello chlo;
-  detail::read(chlo.legacy_version, cursor);
-  detail::read(chlo.random, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, chlo.legacy_version, cursor));
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, chlo.random, cursor));
   detail::readBuf<uint8_t>(chlo.legacy_session_id, cursor);
-  detail::readVector<uint16_t>(chlo.cipher_suites, cursor);
-  detail::readVector<uint8_t>(chlo.legacy_compression_methods, cursor);
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint16_t>(len, err, chlo.cipher_suites, cursor));
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint8_t>(
+          len, err, chlo.legacy_compression_methods, cursor));
   // Before TLS 1.3 clients could omit the extensions section entirely. If we're
   // already at the end of the client hello we won't try and read extensions so
   // that this isn't treated as a parse error.
   if (!cursor.isAtEnd()) {
-    detail::readVector<uint16_t>(chlo.extensions, cursor);
+    FIZZ_RETURN_ON_ERROR(
+        detail::readVector<uint16_t>(len, err, chlo.extensions, cursor));
   }
   ret = std::move(chlo);
   return Status::Success;
 }
 
 template <>
-inline Status
-decode(ServerHello& ret, Error& /* err */, folly::io::Cursor& cursor) {
+inline Status decode(ServerHello& ret, Error& err, folly::io::Cursor& cursor) {
   ServerHello shlo;
-  detail::read(shlo.legacy_version, cursor);
-  detail::read(shlo.random, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, shlo.legacy_version, cursor));
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, shlo.random, cursor));
   detail::readBuf<uint8_t>(shlo.legacy_session_id_echo, cursor);
-  detail::read(shlo.cipher_suite, cursor);
-  detail::read(shlo.legacy_compression_method, cursor);
-  detail::readVector<uint16_t>(shlo.extensions, cursor);
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, shlo.cipher_suite, cursor));
+  FIZZ_RETURN_ON_ERROR(
+      detail::read(len, err, shlo.legacy_compression_method, cursor));
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint16_t>(len, err, shlo.extensions, cursor));
   ret = std::move(shlo);
   return Status::Success;
 }
@@ -644,40 +690,46 @@ decode(EndOfEarlyData& ret, Error& /* err */, folly::io::Cursor&) {
 
 template <>
 inline Status
-decode(EncryptedExtensions& ret, Error& /* err */, folly::io::Cursor& cursor) {
+decode(EncryptedExtensions& ret, Error& err, folly::io::Cursor& cursor) {
   EncryptedExtensions ee;
-  detail::readVector<uint16_t>(ee.extensions, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint16_t>(len, err, ee.extensions, cursor));
   ret = std::move(ee);
   return Status::Success;
 }
 
 template <>
 inline Status
-decode(CertificateRequest& ret, Error& /* err */, folly::io::Cursor& cursor) {
+decode(CertificateRequest& ret, Error& err, folly::io::Cursor& cursor) {
   CertificateRequest cr;
   detail::readBuf<uint8_t>(cr.certificate_request_context, cursor);
-  detail::readVector<uint16_t>(cr.extensions, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint16_t>(len, err, cr.extensions, cursor));
   ret = std::move(cr);
   return Status::Success;
 }
 
 template <>
 inline Status
-decode(CertificateMsg& ret, Error& /* err */, folly::io::Cursor& cursor) {
+decode(CertificateMsg& ret, Error& err, folly::io::Cursor& cursor) {
   CertificateMsg cert;
   detail::readBuf<uint8_t>(cert.certificate_request_context, cursor);
-  detail::readVector<detail::bits24>(cert.certificate_list, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<detail::bits24>(
+          len, err, cert.certificate_list, cursor));
   ret = std::move(cert);
   return Status::Success;
 }
 
 template <>
-inline Status decode(
-    CompressedCertificate& ret,
-    Error& /* err */,
-    folly::io::Cursor& cursor) {
+inline Status
+decode(CompressedCertificate& ret, Error& err, folly::io::Cursor& cursor) {
   CompressedCertificate cc;
-  detail::read(cc.algorithm, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, cc.algorithm, cursor));
   cc.uncompressed_length = detail::readBits24(cursor);
   detail::readBuf<detail::bits24>(cc.compressed_certificate_message, cursor);
   ret = std::move(cc);
@@ -686,9 +738,10 @@ inline Status decode(
 
 template <>
 inline Status
-decode(CertificateVerify& ret, Error& /* err */, folly::io::Cursor& cursor) {
+decode(CertificateVerify& ret, Error& err, folly::io::Cursor& cursor) {
   CertificateVerify certVerify;
-  detail::read(certVerify.algorithm, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, certVerify.algorithm, cursor));
   detail::readBuf<uint16_t>(certVerify.signature, cursor);
   ret = std::move(certVerify);
   return Status::Success;
@@ -697,23 +750,26 @@ decode(CertificateVerify& ret, Error& /* err */, folly::io::Cursor& cursor) {
 template <>
 inline Status decode<NewSessionTicket>(
     NewSessionTicket& ret,
-    Error& /* err */,
+    Error& err,
     folly::io::Cursor& cursor) {
   NewSessionTicket nst;
-  detail::read(nst.ticket_lifetime, cursor);
-  detail::read(nst.ticket_age_add, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, nst.ticket_lifetime, cursor));
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, nst.ticket_age_add, cursor));
   detail::readBuf<uint8_t>(nst.ticket_nonce, cursor);
   detail::readBuf<uint16_t>(nst.ticket, cursor);
-  detail::readVector<uint16_t>(nst.extensions, cursor);
+  FIZZ_RETURN_ON_ERROR(
+      detail::readVector<uint16_t>(len, err, nst.extensions, cursor));
   ret = std::move(nst);
   return Status::Success;
 }
 
 template <>
-inline Status decode(Alert& ret, Error& /* err */, folly::io::Cursor& cursor) {
+inline Status decode(Alert& ret, Error& err, folly::io::Cursor& cursor) {
   Alert alert;
-  detail::read(alert.level, cursor);
-  detail::read(alert.description, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, alert.level, cursor));
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, alert.description, cursor));
   ret = std::move(alert);
   return Status::Success;
 }
@@ -731,9 +787,10 @@ inline Status decode<Finished>(
 
 template <>
 inline Status
-decode<KeyUpdate>(KeyUpdate& ret, Error& /* err */, folly::io::Cursor& cursor) {
+decode<KeyUpdate>(KeyUpdate& ret, Error& err, folly::io::Cursor& cursor) {
   KeyUpdate update;
-  detail::read(update.request_update, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(detail::read(len, err, update.request_update, cursor));
   ret = std::move(update);
   return Status::Success;
 }

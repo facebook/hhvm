@@ -110,7 +110,9 @@ std::string serializePsk(
   return serialized->to<std::string>();
 }
 
-fizz::client::CachedPsk deserializePsk(
+Status deserializePsk(
+    fizz::client::CachedPsk& ret,
+    Error& err,
     const CertificateSerialization& serializer,
     folly::ByteRange serializedPsk) {
   auto buf = IOBuf::wrapBuffer(serializedPsk.data(), serializedPsk.size());
@@ -126,13 +128,14 @@ fizz::client::CachedPsk deserializePsk(
   fizz::detail::readBuf<uint16_t>(secretData, cursor);
   psk.secret = secretData->to<std::string>();
 
-  fizz::detail::read(psk.version, cursor);
-  fizz::detail::read(psk.cipher, cursor);
+  size_t len;
+  FIZZ_RETURN_ON_ERROR(fizz::detail::read(len, err, psk.version, cursor));
+  FIZZ_RETURN_ON_ERROR(fizz::detail::read(len, err, psk.cipher, cursor));
   uint8_t hasGroup;
-  fizz::detail::read(hasGroup, cursor);
+  FIZZ_RETURN_ON_ERROR(fizz::detail::read(len, err, hasGroup, cursor));
   if (hasGroup == 1) {
     fizz::NamedGroup group;
-    fizz::detail::read(group, cursor);
+    FIZZ_RETURN_ON_ERROR(fizz::detail::read(len, err, group, cursor));
     psk.group = group;
   }
 
@@ -142,26 +145,29 @@ fizz::client::CachedPsk deserializePsk(
     psk.alpn = alpnData->to<std::string>();
   }
 
-  fizz::detail::read(psk.ticketAgeAdd, cursor);
+  FIZZ_RETURN_ON_ERROR(fizz::detail::read(len, err, psk.ticketAgeAdd, cursor));
 
   uint64_t ticketIssueTime;
-  fizz::detail::read(ticketIssueTime, cursor);
+  FIZZ_RETURN_ON_ERROR(fizz::detail::read(len, err, ticketIssueTime, cursor));
   psk.ticketIssueTime =
       clampTimePoint<std::chrono::milliseconds>(ticketIssueTime);
 
   uint64_t ticketExpirationTime;
-  fizz::detail::read(ticketExpirationTime, cursor);
+  FIZZ_RETURN_ON_ERROR(
+      fizz::detail::read(len, err, ticketExpirationTime, cursor));
   psk.ticketExpirationTime =
       clampTimePoint<std::chrono::seconds>(ticketExpirationTime);
 
   psk.serverCert = tryReadCert(serializer, cursor);
   psk.clientCert = tryReadCert(serializer, cursor);
 
-  fizz::detail::read(psk.maxEarlyDataSize, cursor);
+  FIZZ_RETURN_ON_ERROR(
+      fizz::detail::read(len, err, psk.maxEarlyDataSize, cursor));
 
   if (!cursor.isAtEnd()) {
     uint64_t ticketHandshakeTime;
-    fizz::detail::read(ticketHandshakeTime, cursor);
+    FIZZ_RETURN_ON_ERROR(
+        fizz::detail::read(len, err, ticketHandshakeTime, cursor));
     psk.ticketHandshakeTime =
         clampTimePoint<std::chrono::milliseconds>(ticketHandshakeTime);
   } else {
@@ -169,7 +175,8 @@ fizz::client::CachedPsk deserializePsk(
     psk.ticketHandshakeTime = std::chrono::system_clock::now();
   }
 
-  return psk;
+  ret = std::move(psk);
+  return Status::Success;
 }
 
 } // namespace client

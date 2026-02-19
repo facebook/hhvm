@@ -17,7 +17,7 @@
 #include <thrift/lib/cpp2/server/IOUringUtil.h>
 
 #if FOLLY_HAS_LIBURING
-#include <folly/experimental/io/IoUringEventBaseLocal.h>
+#include <folly/io/async/IoUringEventBaseLocal.h>
 #include <folly/system/HardwareConcurrency.h>
 
 namespace apache::thrift::io_uring_util {

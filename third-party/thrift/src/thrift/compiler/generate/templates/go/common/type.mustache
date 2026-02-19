@@ -53,7 +53,7 @@ map[
 }}
 {{#let export partial go_zero_value |type|}}
   {{#pragma ignore-newlines}}
-{{#if type.typedef?}}{{#partial go_zero_value type=type.resolved}}
+{{#if type.typedef?}}{{#partial go_zero_value type=type.true_type}}
 {{#else if type.string?}}""
 {{#else if type.binary?}}nil
 {{#else if type.bool?}}false

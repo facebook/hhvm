@@ -16,10 +16,12 @@
 
 package com.facebook.thrift.type;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.netty.buffer.ByteBufUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class UniversalNameTest {
 
@@ -34,17 +36,17 @@ public class UniversalNameTest {
     assertEquals("b7f183390eaa9c1a", un.getHashPrefix(4));
     assertEquals("b7f183390eaa9c1a", ByteBufUtil.hexDump(un.getHashPrefixBytes(4)));
     // assertEquals(UniversalHashAlgorithm.SHA256, un.getAlgorithm());
-    assertEquals(true, un.toString().contains("foo.com/storage/cloud/bucket"));
-    assertEquals(true, un.toString().contains("b7f183390eaa9c1abef2f452c05bd4b2"));
-    assertEquals(true, un.toString().contains("SHA256"));
+    assertTrue(un.toString().contains("foo.com/storage/cloud/bucket"));
+    assertTrue(un.toString().contains("b7f183390eaa9c1abef2f452c05bd4b2"));
+    assertTrue(un.toString().contains("SHA256"));
   }
 
   private void checkUri(String uri, boolean valid) {
     try {
       UniversalName un = new UniversalName(uri);
-      assertEquals("URI validation should pass, " + uri, true, valid);
+      assertTrue(valid, "URI validation should pass, " + uri);
     } catch (InvalidUniversalNameURIException expected) {
-      assertEquals("URI validation should fail, " + uri, false, valid);
+      assertFalse(valid, "URI validation should fail, " + uri);
     }
   }
 
@@ -90,28 +92,28 @@ public class UniversalNameTest {
     assertEquals("56f66fc99e84b522", un.getHashPrefix(5));
     assertEquals("56f66fc99e84b522", un.getHashPrefix(1));
     assertEquals("56f66fc99e84b522", un.getHashPrefix(0));
-    assertEquals(true, un.preferHash());
-    assertEquals(true, un.preferHash());
+    assertTrue(un.preferHash());
+    assertTrue(un.preferHash());
   }
 
   @Test
   public void testShortUri() throws Exception {
     UniversalName un = new UniversalName("a.co/b/c");
     assertEquals("a.co/b/c", un.getUri());
-    assertEquals(false, un.preferHash());
-    assertEquals(false, un.preferHash(12));
-    assertEquals(false, un.preferHash(8));
-    assertEquals(false, un.preferHash(7));
+    assertFalse(un.preferHash());
+    assertFalse(un.preferHash(12));
+    assertFalse(un.preferHash(8));
+    assertFalse(un.preferHash(7));
   }
 
   @Test
   public void testPreferHashSize() throws Exception {
     UniversalName un = new UniversalName("foo.com/ab/c");
     assertEquals("foo.com/ab/c", un.getUri());
-    assertEquals(false, un.preferHash());
-    assertEquals(true, un.preferHash(10));
-    assertEquals(false, un.preferHash(13));
-    assertEquals(true, un.preferHash(8));
-    assertEquals(true, un.preferHash(5));
+    assertFalse(un.preferHash());
+    assertTrue(un.preferHash(10));
+    assertFalse(un.preferHash(13));
+    assertTrue(un.preferHash(8));
+    assertTrue(un.preferHash(5));
   }
 }

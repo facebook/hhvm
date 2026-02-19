@@ -16,8 +16,11 @@
 
 package com.facebook.thrift.type;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -32,11 +35,9 @@ import java.util.Timer;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class TypeRegistryTest {
 
@@ -63,8 +64,6 @@ public class TypeRegistryTest {
    * e4def5c5ad3f845943e7627163991b7d=UniversalName{uri='facebook.com/thrift/conformance/Object13'},
    * fb582ea2a9513a558c6d3de31e416ace=UniversalName{uri='facebook.com/thrift/conformance/Object0'}
    */
-  @Rule public ExpectedException expectedException = ExpectedException.none();
-
   private final Class[] classes =
       new Class[] {
         Object.class, UniversalName.class, Type.class, Exception.class, Throwable.class,
@@ -73,7 +72,7 @@ public class TypeRegistryTest {
         Timer.class, Thread.class, Math.class, AtomicInteger.class, AtomicLong.class
       };
 
-  @Before
+  @BeforeEach
   public void init() {
     for (int i = 0; i < 20; i++) {
       TypeRegistry.add(
@@ -84,7 +83,7 @@ public class TypeRegistryTest {
     }
   }
 
-  @After
+  @AfterEach
   public void clear() {
     TypeRegistry.clear();
   }
@@ -131,54 +130,73 @@ public class TypeRegistryTest {
 
   @Test
   public void testAmbiguousPrefix() throws Exception {
-    expectedException.expect(AmbiguousUniversalNameException.class);
-    expectedException.expectMessage("21");
-    Type t = TypeRegistry.findByHashPrefix("21");
+    AmbiguousUniversalNameException exception =
+        assertThrows(
+            AmbiguousUniversalNameException.class,
+            () -> {
+              TypeRegistry.findByHashPrefix("21");
+            });
+    assertTrue(exception.getMessage().contains("21"));
   }
 
   @Test
   public void testExist() throws Exception {
-    assertEquals(true, TypeRegistry.exist(UniversalName.class));
-    assertEquals(true, TypeRegistry.exist(Map.class));
-    assertEquals(false, TypeRegistry.exist(Method.class));
+    assertTrue(TypeRegistry.exist(UniversalName.class));
+    assertTrue(TypeRegistry.exist(Map.class));
+    assertFalse(TypeRegistry.exist(Method.class));
 
-    assertEquals(
-        true, TypeRegistry.exist(new UniversalName("facebook.com/thrift/conformance/Object12")));
-    assertEquals(
-        false, TypeRegistry.exist(new UniversalName("facebook.com/thrift/conformance/Object120")));
+    assertTrue(TypeRegistry.exist(new UniversalName("facebook.com/thrift/conformance/Object12")));
+    assertFalse(TypeRegistry.exist(new UniversalName("facebook.com/thrift/conformance/Object120")));
   }
 
   @Test
   public void testExistingUniversalNameAndClass() throws Exception {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Universal name already registered with another class");
-    TypeRegistry.add(
-        new Type(
-            new UniversalName("facebook.com/thrift/conformance/Object12"),
-            UniversalName.class,
-            null));
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              TypeRegistry.add(
+                  new Type(
+                      new UniversalName("facebook.com/thrift/conformance/Object12"),
+                      UniversalName.class,
+                      null));
+            });
+    assertTrue(
+        exception.getMessage().contains("Universal name already registered with another class"));
   }
 
   @Test
   public void testExistingUniversalName() throws Exception {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Universal name already registered with another class");
-    TypeRegistry.add(
-        new Type(
-            new UniversalName("facebook.com/thrift/conformance/Object12"),
-            Constructor.class,
-            null));
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              TypeRegistry.add(
+                  new Type(
+                      new UniversalName("facebook.com/thrift/conformance/Object12"),
+                      Constructor.class,
+                      null));
+            });
+    assertTrue(
+        exception.getMessage().contains("Universal name already registered with another class"));
   }
 
   @Test
   public void testExistingClass() throws Exception {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Class name already registered with another universal name");
-    TypeRegistry.add(
-        new Type(
-            new UniversalName("facebook.com/thrift/conformance/Object100"),
-            UniversalName.class,
-            null));
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              TypeRegistry.add(
+                  new Type(
+                      new UniversalName("facebook.com/thrift/conformance/Object100"),
+                      UniversalName.class,
+                      null));
+            });
+    assertTrue(
+        exception
+            .getMessage()
+            .contains("Class name already registered with another universal name"));
   }
 
   @Test
@@ -246,8 +264,12 @@ public class TypeRegistryTest {
 
   @Test
   public void testTypeListAmbiguousPrefix() throws Exception {
-    expectedException.expect(AmbiguousUniversalNameException.class);
-    expectedException.expectMessage("0577");
-    Type t = TypeRegistry.findByHashPrefix("0577");
+    AmbiguousUniversalNameException exception =
+        assertThrows(
+            AmbiguousUniversalNameException.class,
+            () -> {
+              TypeRegistry.findByHashPrefix("0577");
+            });
+    assertTrue(exception.getMessage().contains("0577"));
   }
 }

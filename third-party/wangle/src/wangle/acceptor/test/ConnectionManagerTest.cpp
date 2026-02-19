@@ -865,4 +865,39 @@ TEST_F(ConnectionManagerTest, testRemoveConnectionFromWrongManager) {
   EXPECT_EQ(cm2->getNumIdleConnections(), 0);
   EXPECT_EQ(cm2->getNumConnections(), 0);
 }
+
+class MockCallback : public ConnectionManager::Callback {
+ public:
+  MOCK_METHOD1(onConnectionAdded, void(const ManagedConnection*));
+  MOCK_METHOD1(onConnectionRemoved, void(const ManagedConnection*));
+  MOCK_METHOD1(onEmpty, void(const ConnectionManager&));
+};
+
+TEST(ConnectionManagerCallbackTest, testRemoveConnectionCalledTwice) {
+  folly::EventBase eventBase;
+  StrictMock<MockCallback> callback;
+
+  // Create a ConnectionManager with the callback
+  auto cm = ConnectionManager::makeUnique(
+      &eventBase, std::chrono::milliseconds(100), &callback);
+
+  // Create a mock connection (without the test fixture helper)
+  auto conn = folly::DelayedDestructionUniquePtr<StrictMock<MockConnection>>(
+      new StrictMock<MockConnection>(nullptr, 0));
+  EXPECT_CALL(*conn, isBusy()).WillRepeatedly(Return(false));
+  EXPECT_CALL(*conn, dumpConnectionState(testing::_)).WillRepeatedly(Return());
+
+  EXPECT_CALL(callback, onConnectionAdded(conn.get()));
+  cm->addConnection(conn.get());
+
+  // Expect onConnectionRemoved to be called exactly once, even though
+  // removeConnection is called twice
+  EXPECT_CALL(callback, onConnectionRemoved(conn.get())).Times(1);
+  EXPECT_CALL(callback, onEmpty(_)).Times(1);
+
+  // First call should trigger the callback
+  cm->removeConnection(conn.get());
+  // Second call should be a no-op since connection is already unlinked
+  cm->removeConnection(conn.get());
+}
 } // namespace

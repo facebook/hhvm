@@ -151,20 +151,24 @@ void ConnectionManager::removeConnection(ManagedConnection* connection) {
   connection->setConnectionManager(nullptr);
 
   // Un-link the connection from our list, being careful to keep the iterator
-  // that we're using for idle shedding valid
-  auto it = conns_.iterator_to(*connection);
-  if (it == drainIterator_) {
-    ++drainIterator_;
-  }
-  if (it == idleIterator_) {
-    ++idleIterator_;
-  }
-  conns_.erase(it);
+  // that we're using for idle shedding valid. Check is_linked() first to handle
+  // the case where the connection was already removed (e.g., due to hitting the
+  // max connection age lifetime limit).
+  if (connection->listHook_.is_linked()) {
+    auto it = conns_.iterator_to(*connection);
+    if (it == drainIterator_) {
+      ++drainIterator_;
+    }
+    if (it == idleIterator_) {
+      ++idleIterator_;
+    }
+    conns_.erase(it);
 
-  if (callback_) {
-    callback_->onConnectionRemoved(connection);
-    if (getNumConnections() == 0) {
-      callback_->onEmpty(*this);
+    if (callback_) {
+      callback_->onConnectionRemoved(connection);
+      if (getNumConnections() == 0) {
+        callback_->onEmpty(*this);
+      }
     }
   }
 }

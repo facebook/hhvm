@@ -45,6 +45,7 @@ cdef extern from *:
     #endif
     static CYTHON_INLINE void SetMetaClass(PyTypeObject* t, PyTypeObject* m)
     {
+        Py_INCREF((PyObject*)m);
         APACHE_THRIFT_DETAIL_Py_SET_TYPE(t, m);
         PyType_Modified(t);
     }

@@ -52,6 +52,8 @@ DEFINE_int64(
     10,
     "How often to poll in secs stats when running continuously");
 DEFINE_bool(io_uring, false, "Flag to enable io_uring on the client");
+DEFINE_int32(
+    mss, 0, "TCP Maximum Segment Size to set on client sockets. 0 disables.");
 DEFINE_bool(quic, false, "Flag to enable quic on the client");
 DEFINE_int64(runtime_s, 10, "Runtime of test in seconds");
 DEFINE_int64(warmup_s, 2, "Warmup time of test in seconds");
@@ -168,6 +170,7 @@ protocol::PROTOCOL_TYPES createThriftProtocolFromFlags() {
   connCfg.ioUring = FLAGS_io_uring;
   connCfg.ioUringZcrx = FLAGS_io_zcrx;
   connCfg.ioUringZcrxSocketBind = FLAGS_io_zcrx_socket_bind;
+  connCfg.mss = FLAGS_mss;
   connCfg.useQuic = FLAGS_quic;
   connCfg.stopTLSv1 = FLAGS_stopTLSv1 && (security == ClientSecurity::FIZZ);
   connCfg.stopTLSv2 = FLAGS_stopTLSv2 && (security == ClientSecurity::FIZZ);

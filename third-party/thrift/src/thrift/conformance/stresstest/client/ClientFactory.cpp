@@ -44,6 +44,14 @@ namespace apache::thrift::stress {
 
 namespace {
 
+folly::SocketOptionMap getSocketOptions(const ClientConnectionConfig& cfg) {
+  folly::SocketOptionMap opts;
+  if (cfg.mss > 0) {
+    opts[{IPPROTO_TCP, TCP_MAXSEG}] = cfg.mss;
+  }
+  return opts;
+}
+
 std::function<std::shared_ptr<folly::SSLContext>()> customSslContextFn;
 std::function<std::shared_ptr<fizz::client::FizzClientContext>()>
     customFizzClientContextFn;
@@ -232,14 +240,14 @@ folly::AsyncTransport::UniquePtr createSocket(
 folly::AsyncTransport::UniquePtr createEPollSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = folly::AsyncSocket::newSocket(evb);
-  sock->connect(cfg.connectCb, cfg.serverHost);
+  sock->connect(cfg.connectCb, cfg.serverHost, 0, getSocketOptions(cfg));
   return sock;
 }
 
 folly::AsyncTransport::UniquePtr createTLSSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = folly::AsyncSSLSocket::newSocket(getSslContext(cfg), evb);
-  sock->connect(cfg.connectCb, cfg.serverHost);
+  sock->connect(cfg.connectCb, cfg.serverHost, 0, getSocketOptions(cfg));
   return sock;
 }
 
@@ -274,7 +282,14 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
                     std::move(extensions))));
 
   fizzClient->connect(
-      cfg.serverHost, cfg.connectCb, getFizzVerifier(cfg), {}, {});
+      cfg.serverHost,
+      cfg.connectCb,
+      getFizzVerifier(cfg),
+      {},
+      {},
+      std::chrono::milliseconds(0),
+      std::chrono::milliseconds(0),
+      getSocketOptions(cfg));
   return fizzClient;
 }
 
@@ -294,7 +309,11 @@ folly::AsyncTransport::UniquePtr createIOUring(
     folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
         *ring, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
   }
-  ring->connect(cfg.connectCb, cfg.serverHost);
+  ring->connect(
+      cfg.connectCb,
+      cfg.serverHost,
+      std::chrono::milliseconds(0),
+      getSocketOptions(cfg));
   return folly::AsyncTransport::UniquePtr(ring);
 }
 
@@ -307,7 +326,11 @@ folly::AsyncTransport::UniquePtr createIOUringTLS(
     folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
         *ring, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
   }
-  ring->connect(cfg.connectCb, cfg.serverHost);
+  ring->connect(
+      cfg.connectCb,
+      cfg.serverHost,
+      std::chrono::milliseconds(0),
+      getSocketOptions(cfg));
   return folly::AsyncTransport::UniquePtr(ring);
 }
 
@@ -322,7 +345,14 @@ folly::AsyncTransport::UniquePtr createIOUringFizz(
       new fizz::client::AsyncFizzClient(
           folly::AsyncTransport::UniquePtr(sock), getFizzContext(cfg)));
   fizzClient->connect(
-      cfg.serverHost, cfg.connectCb, getFizzVerifier(cfg), {}, {});
+      cfg.serverHost,
+      cfg.connectCb,
+      getFizzVerifier(cfg),
+      {},
+      {},
+      std::chrono::milliseconds(0),
+      std::chrono::milliseconds(0),
+      getSocketOptions(cfg));
   return fizzClient;
 }
 #endif

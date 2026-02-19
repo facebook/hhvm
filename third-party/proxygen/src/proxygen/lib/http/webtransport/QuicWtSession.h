@@ -55,11 +55,11 @@ class QuicWtSession
   folly::Expected<folly::Unit, ErrorCode> sendDatagram(
       std::unique_ptr<folly::IOBuf> datagram) noexcept override;
 
-  const folly::SocketAddress& getLocalAddress() const override {
+  [[nodiscard]] const folly::SocketAddress& getLocalAddress() const override {
     return quicSocket_->getLocalAddress();
   }
 
-  const folly::SocketAddress& getPeerAddress() const override {
+  [[nodiscard]] const folly::SocketAddress& getPeerAddress() const override {
     return quicSocket_->getPeerAddress();
   }
 

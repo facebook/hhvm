@@ -115,19 +115,19 @@ class WtBufferedStreamData {
   DequeueResult dequeue(uint64_t atMost) noexcept;
 
   // returns true if there's only a pending fin
-  bool onlyFinPending() const;
+  [[nodiscard]] bool onlyFinPending() const;
 
   bool grant(uint64_t offset) noexcept {
     return window_.grant(offset);
   }
 
-  bool hasData() const {
+  [[nodiscard]] bool hasData() const {
     return !pendingWrites_.empty();
   }
 
   // we can send data if there is either data & available stream fc, or only fin
   // pending
-  bool canSendData() const {
+  [[nodiscard]] bool canSendData() const {
     return (hasData() && window_.getAvailable()) || onlyFinPending();
   }
 

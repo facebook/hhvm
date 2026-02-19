@@ -82,6 +82,7 @@ type t = {
       (** When true, plain <<__Memoize>> will be treated as <<__Memoize(#KeyedByIC)>>. **)
   ignore_string_methods: bool;
       (** Ignore the methods defined in the string class in string.hhi *)
+  enable_intrinsics_extension: bool;
 }
 [@@deriving show, eq]
 
@@ -108,6 +109,7 @@ type ffi_t =
   * bool
   * bool
   * Experimental_features.feature_status SMap.t
+  * bool
   * bool
   * bool
   * bool

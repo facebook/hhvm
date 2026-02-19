@@ -83,5 +83,19 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
         "Hack.Lang.TreatNonAnnotatedMemoizeAsKBIC",
     )?;
 
+    init(
+        &mut flags.use_legacy_experimental_feature_config,
+        "Hack.Lang.UseLegacyExperimentalFeatureConfig",
+    )?;
+
+    init(
+        &mut flags.consider_unspecified_experimental_features_released,
+        "Hack.Lang.ConsiderUnspecifiedExperimentalFeaturesReleased",
+    )?;
+
+    // Note: ExperimentalFeatures map config is not supported via CLI HhvmConfig
+    // since HhvmConfig lacks a map-reading method. The map is read through the
+    // HHVM C++ config path (RepoOptionsFlags::initExperimentalFeatures).
+
     Ok(flags)
 }

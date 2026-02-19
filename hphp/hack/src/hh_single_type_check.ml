@@ -843,6 +843,7 @@ let parse_options () =
         treat_non_annotated_memoize_as_kbic =
           !treat_non_annotated_memoize_as_kbic;
         ignore_string_methods = default.ignore_string_methods;
+        enable_intrinsics_extension = default.enable_intrinsics_extension;
       }
   in
 

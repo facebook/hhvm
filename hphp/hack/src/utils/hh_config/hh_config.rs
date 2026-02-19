@@ -339,6 +339,7 @@ impl HhConfig {
             )?,
             ignore_string_methods: hhconfig
                 .get_bool_or("ignore_string_methods", default.ignore_string_methods)?,
+            enable_intrinsics_extension: default.enable_intrinsics_extension,
         };
         let rollouts = SavedStateRollouts::make(
             current_rolled_out_flag_idx,

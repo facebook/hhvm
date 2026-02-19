@@ -110,6 +110,7 @@ CompilerResult hackc_compile(
     }
   };
   options.initAliasedNamespaces(native_env);
+  options.initExperimentalFeatures(native_env);
   options.initHhbcFlags(native_env.hhbc_flags);
   options.initParserFlags(native_env.parser_flags);
   if (Cfg::Eval::HackCompilerInheritConfig) {

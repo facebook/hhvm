@@ -46,6 +46,7 @@ type t = {
   disallow_non_annotated_memoize: bool;
   treat_non_annotated_memoize_as_kbic: bool;
   ignore_string_methods: bool;
+  enable_intrinsics_extension: bool;
 }
 [@@deriving show, eq]
 
@@ -88,6 +89,7 @@ let default =
     disallow_non_annotated_memoize = false;
     treat_non_annotated_memoize_as_kbic = false;
     ignore_string_methods = true;
+    enable_intrinsics_extension = false;
   }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
@@ -114,6 +116,7 @@ type ffi_t =
   * bool
   * bool
   * bool
+  * bool
 
 let to_rust_ffi_t po =
   ( po.hhvm_compat_mode,
@@ -137,4 +140,5 @@ let to_rust_ffi_t po =
     po.experimental_features,
     po.consider_unspecified_experimental_features_released,
     po.enable_class_pointer_hint,
-    po.ignore_string_methods )
+    po.ignore_string_methods,
+    po.enable_intrinsics_extension )

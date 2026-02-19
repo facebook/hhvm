@@ -116,6 +116,7 @@ SECTIONS_FOR_REPOOPTIONSFLAGS()
   void initHhbcFlags(hackc::HhbcFlags&) const;
   void initParserFlags(hackc::ParserFlags&) const;
   void initAliasedNamespaces(hackc::NativeEnv&) const;
+  void initExperimentalFeatures(hackc::NativeEnv&) const;
 
   std::string autoloadQuery() const { return Query; }
   std::vector<std::string> autoloadIncludePaths() const { return IncludePaths; }

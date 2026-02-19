@@ -400,6 +400,7 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         ignore_string_methods =
           bool_opt Config_keys.ignore_string_methods config
           >?? po_opt.ignore_string_methods;
+        enable_intrinsics_extension = po_opt.enable_intrinsics_extension;
       }
   in
   GlobalOptions.set

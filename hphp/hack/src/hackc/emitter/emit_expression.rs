@@ -628,6 +628,14 @@ fn emit_id<'a>(emitter: &mut Emitter, env: &Env<'a>, id: &ast::Sid) -> Result<In
             env.namespace.name.as_ref().map_or("", |s| &s[..]),
         )),
         pseudo_consts::EXIT => emit_exit(emitter, env, None),
+        "\\__EXPERIMENTAL_TEST_FEATURE_STATUS__"
+            if emitter.options().hhbc.enable_intrinsics_extension =>
+        {
+            use oxidized::experimental_features::FeatureName;
+            let po = &emitter.options().hhvm.parser_options;
+            let status = FeatureName::TestFeature.get_feature_status(po);
+            Ok(instr::string(format!("{:?}", status)))
+        }
         _ => {
             let cid = hhbc::ConstName::from_ast_name(s);
             emitter.add_constant_ref(cid.clone());

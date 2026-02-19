@@ -292,6 +292,14 @@ void RepoOptionsFlags::initAliasedNamespaces(hackc::NativeEnv& env) const {
   }
 }
 
+void RepoOptionsFlags::initExperimentalFeatures(hackc::NativeEnv& env) const {
+  for (auto& [k, v] : ExperimentalFeatures) {
+    env.experimental_features.emplace_back(hackc::StringMapEntry{k, v});
+  }
+  env.use_legacy_experimental_feature_config = UseLegacyExperimentalFeatureConfig;
+  env.consider_unspecified_experimental_features_released = ConsiderUnspecifiedExperimentalFeaturesReleased;
+}
+
 void RepoOptionsFlags::initDeclConfig(hackc::DeclParserConfig& config) const {
   for (auto& [k, v] : AliasedNamespaces) {
     config.aliased_namespaces.emplace_back(hackc::StringMapEntry{k, v});

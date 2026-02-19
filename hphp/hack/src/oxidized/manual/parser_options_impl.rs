@@ -47,6 +47,7 @@ impl Default for ParserOptions {
             disallow_non_annotated_memoize: false,
             treat_non_annotated_memoize_as_kbic: false,
             ignore_string_methods: true,
+            enable_intrinsics_extension: false,
         }
     }
 }

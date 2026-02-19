@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7bbd2f0047cda5cab3cd07ae7e0d6018>>
+// @generated SignedSource<<79e06242bac941ea1a63be43d5782ee4>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -147,6 +147,7 @@ pub enum FeatureName {
     AllowExtendedAwaitSyntax,
     AllowConditionalAwaitSyntax,
     ShapeFieldPunning,
+    TestFeature,
 }
 impl TrivialDrop for FeatureName {}
 arena_deserializer::impl_deserialize_in_arena!(FeatureName);

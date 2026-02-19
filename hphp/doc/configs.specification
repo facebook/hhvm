@@ -1598,6 +1598,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Disables PHP's constant function
   Valid values are 0 => enabled (default), 1 => warning, 2 => error
 
+- std::map<std::string,std::string> Hack.Lang.ExperimentalFeatures = {}, paulbiss, repooptionsflag(Parser)
+- bool Hack.Lang.UseLegacyExperimentalFeatureConfig = true, paulbiss, repooptionsflag(Parser)
+- bool Hack.Lang.ConsiderUnspecifiedExperimentalFeaturesReleased = false, paulbiss, repooptionsflag(Parser)
+
 - bool Hack.Lang.EmitCheckedUnsafeCast = true, akenn, repooptionsflag(Parser)|hackc(hhbc)
 
   Control HackC emitting of VerifyTypeTS for UNSAFE_CAST

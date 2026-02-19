@@ -112,6 +112,7 @@ let parse_options () =
           Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
         allow_unstable_features = true;
         ignore_string_methods = !ignore_string_methods;
+        enable_intrinsics_extension = false;
       }
   in
   let tcopt =

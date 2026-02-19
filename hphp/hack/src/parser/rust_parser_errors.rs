@@ -5745,6 +5745,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             ClassPtrTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &FeatureName::ClassType);
             }
+            Token(t)
+                if t.kind() == TokenKind::Name
+                    && self.env.parser_options.enable_intrinsics_extension
+                    && self.token_text(t) == "__EXPERIMENTAL_TEST_FEATURE_STATUS__" =>
+            {
+                self.check_can_use_feature(node, &FeatureName::TestFeature);
+            }
             _ => {}
         }
         self.lval_errors(node);

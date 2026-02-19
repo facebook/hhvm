@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5a63c4f476fb44eef7556afc64ab46ba>>
+// @generated SignedSource<<be8627f7695d4c0127dbe3ec602ba76c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -118,6 +118,7 @@ pub struct ParserOptions {
     pub treat_non_annotated_memoize_as_kbic: bool,
     /// Ignore the methods defined in the string class in string.hhi
     pub ignore_string_methods: bool,
+    pub enable_intrinsics_extension: bool,
 }
 
 #[derive(
@@ -156,6 +157,7 @@ pub struct FfiT(
     pub bool,
     pub bool,
     pub s_map::SMap<experimental_features::FeatureStatus>,
+    pub bool,
     pub bool,
     pub bool,
     pub bool,

@@ -63,13 +63,14 @@ impl FeatureName {
             AllowExtendedAwaitSyntax => Unstable,
             AllowConditionalAwaitSyntax => Unstable,
             ShapeFieldPunning => Unstable,
+            TestFeature => Unstable,
         }
     }
 
     pub fn parse_experimental_feature(
         (name, status): (String, String),
     ) -> Result<(String, FeatureStatus), anyhow::Error> {
-        let n = FeatureName::from_str(&name).map_err(|_| ExperimentalFeatureError {
+        let _n = FeatureName::from_str(&name).map_err(|_| ExperimentalFeatureError {
             kind: "name".to_string(),
             bad_name: name.to_string(),
         })?;
@@ -78,22 +79,10 @@ impl FeatureName {
                 kind: "status".to_string(),
                 bad_name: status.to_string(),
             })?;
-        let hard_coded_status = n.get_feature_status_deprecated();
-        // For now, force the config to be consistent with the hard coded status.
-        if feature_more_restrictive_or_eq(config_status, hard_coded_status) {
-            Ok((name, config_status))
-        } else {
-            Err(anyhow::Error::new(ExperimentalFeatureError {
-                kind: "mismatch".to_string(),
-                bad_name: format!(
-                    "for feature {}: {} in config must be {:?} (or more restrictive) during experimental feature config roll-out",
-                    name, status, hard_coded_status
-                ),
-            }))
-        }
+        Ok((name, config_status))
     }
 
-    fn get_feature_status(&self, po: &ParserOptions) -> FeatureStatus {
+    pub fn get_feature_status(&self, po: &ParserOptions) -> FeatureStatus {
         if po.use_legacy_experimental_feature_config {
             self.get_feature_status_deprecated()
         } else {
@@ -136,17 +125,6 @@ impl FeatureName {
             ))
         }
     }
-}
-
-fn feature_more_restrictive(more: FeatureStatus, less: FeatureStatus) -> bool {
-    match (more, less) {
-        (Unstable, Preview) | (Unstable, OngoingRelease) | (Preview, OngoingRelease) => true,
-        _ => false,
-    }
-}
-
-fn feature_more_restrictive_or_eq(more: FeatureStatus, less: FeatureStatus) -> bool {
-    more == less || feature_more_restrictive(more, less)
 }
 
 fn get_unspecified_feature(po: &ParserOptions) -> &FeatureStatus {

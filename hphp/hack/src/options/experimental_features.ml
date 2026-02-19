@@ -78,6 +78,7 @@ type feature_name =
   | AllowExtendedAwaitSyntax
   | AllowConditionalAwaitSyntax
   | ShapeFieldPunning
+  | TestFeature
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -132,24 +133,10 @@ let feature_name_map =
       ("allow_extended_await_syntax", AllowExtendedAwaitSyntax);
       ("allow_conditional_await_syntax", AllowConditionalAwaitSyntax);
       ("shape_field_punning", ShapeFieldPunning);
+      ("test_feature", TestFeature);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map
-
-(** Return the hard-coded status of the feature. This information will be moved to configuration. *)
-external get_feature_status_deprecated : feature_name -> feature_status
-  = "get_feature_status_deprecated"
-
-let feature_more_restrictive ~more ~less =
-  match (more, less) with
-  | (Unstable, Preview)
-  | (Unstable, OngoingRelease)
-  | (Preview, OngoingRelease) ->
-    true
-  | _ -> false
-
-let feature_more_restrictive_or_eq ~more ~less =
-  equal_feature_status more less || feature_more_restrictive ~more ~less
 
 let parse_experimental_feature (name_string, status_json) =
   let status_string = Hh_json.get_string_exn status_json in
@@ -157,18 +144,7 @@ let parse_experimental_feature (name_string, status_json) =
     ( feature_name_from_string name_string,
       feature_status_from_string status_string )
   with
-  | (Some name, Some status) ->
-    let hard_coded_status = get_feature_status_deprecated name in
-    (* For now, force the config to be consistent with the hard coded status. *)
-    if feature_more_restrictive_or_eq ~more:status ~less:hard_coded_status then
-      (name_string, status)
-    else
-      failwith
-        (Format.sprintf
-           "Experimental feature status mismatch for feature %s: %s in config must be %s (or more restrictive) during experimental feature config roll-out"
-           name_string
-           status_string
-           (show_feature_status hard_coded_status))
+  | (Some _name, Some status) -> (name_string, status)
   | (None, _) -> failwith ("Invalid experimental feature name: " ^ name_string)
   | (_, None) ->
     failwith ("Invalid experimental feature status: " ^ status_string)

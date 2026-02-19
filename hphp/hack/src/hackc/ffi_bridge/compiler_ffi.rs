@@ -12,6 +12,7 @@ use std::ffi::OsStr;
 use std::ffi::c_void;
 use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
+use std::str::FromStr;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -25,6 +26,7 @@ use external_decl_provider::ExternalDeclProvider;
 use hhbc::Unit;
 use options::Hhvm;
 use options::ParserOptions;
+use oxidized::experimental_features::FeatureStatus;
 use parser_core_types::source_text::SourceText;
 use relative_path::Prefix;
 use relative_path::RelativePath;
@@ -42,10 +44,14 @@ mod ffi {
         filepath: String,
         aliased_namespaces: Vec<StringMapEntry>,
         include_roots: Vec<StringMapEntry>,
+        experimental_features: Vec<StringMapEntry>,
 
         hhbc_flags: HhbcFlags,
         parser_flags: ParserFlags,
         flags: EnvFlags,
+
+        use_legacy_experimental_feature_config: bool,
+        consider_unspecified_experimental_features_released: bool,
     }
 
     struct StringMapEntry {
@@ -551,6 +557,18 @@ impl ffi::NativeEnv {
                     auto_namespace_map: (self.aliased_namespaces.iter())
                         .map(|e| (e.key.clone(), e.value.clone()))
                         .collect(),
+                    experimental_features: (self.experimental_features.iter())
+                        .filter_map(|e| {
+                            FeatureStatus::from_str(&e.value)
+                                .ok()
+                                .map(|status| (e.key.clone(), status))
+                        })
+                        .collect(),
+                    use_legacy_experimental_feature_config: self
+                        .use_legacy_experimental_feature_config,
+                    consider_unspecified_experimental_features_released: self
+                        .consider_unspecified_experimental_features_released,
+                    enable_intrinsics_extension: self.hhbc_flags.enable_intrinsics_extension,
                     ..self.parser_flags.to_parser_options()
                 },
             },

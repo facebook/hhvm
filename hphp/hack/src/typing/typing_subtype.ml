@@ -11028,6 +11028,19 @@ let is_sub_type env ty1 ty2 =
     (LoclType ty2)
   = Some true
 
+let is_maybe_sub_type env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
+  not
+    (Subtype_ask.is_sub_type_alt_i
+       ~require_completeness:false
+       ~no_top_bottom:false
+       ~is_dynamic_aware:false
+       ~sub_supportdyn:None
+       env
+       (LoclType ty1)
+       (LoclType ty2)
+    = Some false)
+
 (* -- is_dynamic_aware_sub_type entry point --------------------------------- *)
 let is_dynamic_aware_sub_type env ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in

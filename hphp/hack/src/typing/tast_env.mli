@@ -242,6 +242,10 @@ val assert_subtype :
     regardless of the values of unbound type variables in both types (if any). *)
 val is_sub_type : env -> Tast.ty -> Tast.ty -> bool
 
+(** Return {false} when the first type is not a subtype of the second type
+    regardless of the values of unbound type variables in both types (if any). *)
+val is_maybe_sub_type : env -> Tast.ty -> Tast.ty -> bool
+
 val is_dynamic_aware_sub_type : env -> Tast.ty -> Tast.ty -> bool
 
 (** Return {true} when the first type can be considered a subtype of the second

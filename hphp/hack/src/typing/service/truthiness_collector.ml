@@ -112,7 +112,7 @@ let get_types
   let normal = get_map tast_normal in
   let dynamic = get_map tast_dynamic in
   let is_sub_like_bool env ty =
-    Tast_env.is_sub_type
+    Tast_env.is_maybe_sub_type
       env
       ty
       (Typing_make_type.union

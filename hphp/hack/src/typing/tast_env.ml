@@ -356,6 +356,9 @@ let assert_subtype p reason env ty_have ty_expect on_error =
 let is_sub_type env ty_sub ty_super =
   Typing_subtype.is_sub_type env ty_sub ty_super
 
+let is_maybe_sub_type env ty_sub ty_super =
+  Typing_subtype.is_maybe_sub_type env ty_sub ty_super
+
 let is_dynamic_aware_sub_type env ty_sub ty_super =
   Typing_subtype.is_dynamic_aware_sub_type env ty_sub ty_super
 

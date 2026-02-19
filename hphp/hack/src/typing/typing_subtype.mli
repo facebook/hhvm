@@ -8,6 +8,12 @@ open Typing_env_types
 *)
 val is_sub_type : env -> locl_ty -> locl_ty -> bool
 
+(** Non-side-effecting test for subtypes.
+    result = true implies ty1 <: ty2 OR we don't know
+    result = false implies NOT ty1 <: ty2
+*)
+val is_maybe_sub_type : env -> locl_ty -> locl_ty -> bool
+
 val is_dynamic_aware_sub_type : env -> locl_ty -> locl_ty -> bool
 
 val is_sub_type_ignore_generic_params : env -> locl_ty -> locl_ty -> bool

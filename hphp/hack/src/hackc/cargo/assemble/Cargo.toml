@@ -11,14 +11,14 @@ license = "MIT"
 path = "../../assemble/lib.rs"
 
 [dependencies]
-anyhow = "1.0.98"
+anyhow = "1.0.100"
 assemble_opcode_macro = { version = "0.0.0", path = "../assemble_opcode_macro" }
 escaper = { version = "0.0.0", path = "../../../utils/escaper" }
 ffi = { version = "0.0.0", path = "../../ffi/ffi" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../hhbc/cargo/hhbc" }
 hhvm_types_ffi = { version = "0.0.0", path = "../../hhvm_cxx/hhvm_types" }
-log = { version = "0.4.27", features = ["kv_unstable", "kv_unstable_std"] }
+log = { version = "0.4.28", features = ["kv_unstable", "kv_unstable_std"] }
 naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }
 parse_macro = { version = "0.0.0", path = "../parse_macro" }

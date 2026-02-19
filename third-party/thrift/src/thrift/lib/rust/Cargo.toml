@@ -10,7 +10,7 @@ license = "Apache-2.0"
 publish = false
 
 [dependencies]
-anyhow = "1.0.98"
+anyhow = "1.0.100"
 async-trait = "0.1.86"
 base64 = { version = "0.22.1", features = ["alloc"] }
 bufsize = "1.0.10"
@@ -21,7 +21,7 @@ num-derive = "0.4.2"
 num-traits = { version = "0.2.19", default-features = false }
 ordered-float = { version = "3.7", features = ["serde"] }
 panic-message = "0.3"
-serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
+serde_json = { version = "1.0.145", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 thiserror = "2.0.18"
 
 [dev-dependencies]

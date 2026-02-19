@@ -29,7 +29,7 @@ bool readProcStat(std::vector<uint64_t>& curArray) {
   if (sscanf(
           buf.data(),
           "cpu %lu %lu %lu %lu %lu %lu %lu %lu",
-          &curArray[0],
+          curArray.data(),
           &curArray[1],
           &curArray[2],
           &curArray[3],

@@ -43,8 +43,8 @@ uintptr_t lowArenaMinAddr() {
     return 2ull << 30;
 #endif
 
-    // 1GB for pure low-mem, steal extra 256MB for roar.
-    if (use_roar) return 0x50000000; // 1GB + 256MB
+    // 1GB for pure low-mem, steal extra 128MB for roar.
+    if (use_roar) return (1ull << 30) + (128ull << 20); // 1GB + 128MB
     return 1ull << 30; // 1GB
   }
 

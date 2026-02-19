@@ -18,13 +18,14 @@
 
   This template defines the mapping from a Thrift primitive type to codec primitive type.
 
-}}{{#type:bool?}}CODEC_PRIMITIVE_TYPE_BOOL{{/type:bool?}}{{!
-}}{{#type:byte?}}CODEC_PRIMITIVE_TYPE_BYTE{{/type:byte?}}{{!
-}}{{#type:i16?}}CODEC_PRIMITIVE_TYPE_I16{{/type:i16?}}{{!
-}}{{#type:i32?}}CODEC_PRIMITIVE_TYPE_I32{{/type:i32?}}{{!
-}}{{#type:i64?}}CODEC_PRIMITIVE_TYPE_I64{{/type:i64?}}{{!
-}}{{#type:float?}}CODEC_PRIMITIVE_TYPE_FLOAT{{/type:float?}}{{!
-}}{{#type:double?}}CODEC_PRIMITIVE_TYPE_DOUBLE{{/type:double?}}{{!
-}}{{#type:string?}}CODEC_PRIMITIVE_TYPE_STRING{{/type:string?}}{{!
-}}{{#type:binary?}}CODEC_PRIMITIVE_TYPE_BINARY{{/type:binary?}}{{!
-}}{{#type:void?}}CODEC_PRIMITIVE_TYPE_VOID{{/type:void?}}
+}}{{#if type:bool?}}CODEC_PRIMITIVE_TYPE_BOOL{{!
+}}{{#else if type:byte?}}CODEC_PRIMITIVE_TYPE_BYTE{{!
+}}{{#else if type:i16?}}CODEC_PRIMITIVE_TYPE_I16{{!
+}}{{#else if type:i32?}}CODEC_PRIMITIVE_TYPE_I32{{!
+}}{{#else if type:i64?}}CODEC_PRIMITIVE_TYPE_I64{{!
+}}{{#else if type:float?}}CODEC_PRIMITIVE_TYPE_FLOAT{{!
+}}{{#else if type:double?}}CODEC_PRIMITIVE_TYPE_DOUBLE{{!
+}}{{#else if type:string?}}CODEC_PRIMITIVE_TYPE_STRING{{!
+}}{{#else if type:binary?}}CODEC_PRIMITIVE_TYPE_BINARY{{!
+}}{{#else if type:void?}}CODEC_PRIMITIVE_TYPE_VOID{{!
+}}{{/if type:bool?}}

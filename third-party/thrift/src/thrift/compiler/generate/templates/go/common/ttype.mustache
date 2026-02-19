@@ -16,19 +16,19 @@
 
 }}{{!
 
-  This template defines the mapping of a thrift type to the go thrift.TType value.
+  Defines the mapping of a thrift type to the go thrift.TType value.
 
-}}{{#type:string?}}thrift.STRING{{/type:string?}}{{!
-}}{{#type:binary?}}thrift.STRING{{/type:binary?}}{{!
-}}{{#type:bool?}}thrift.BOOL{{/type:bool?}}{{!
-}}{{#type:byte?}}thrift.BYTE{{/type:byte?}}{{!
-}}{{#type:i16?}}thrift.I16{{/type:i16?}}{{!
-}}{{#type:i32?}}thrift.I32{{/type:i32?}}{{!
-}}{{#type:i64?}}thrift.I64{{/type:i64?}}{{!
-}}{{#type:double?}}thrift.DOUBLE{{/type:double?}}{{!
-}}{{#type:float?}}thrift.FLOAT{{/type:float?}}{{!
-}}{{#type:enum?}}thrift.I32{{/type:enum?}}{{!
-}}{{#type:structured?}}thrift.STRUCT{{/type:structured?}}{{!
-}}{{#type:list?}}thrift.LIST{{/type:list?}}{{!
-}}{{#type:set?}}thrift.SET{{/type:set?}}{{!
-}}{{#type:map?}}thrift.MAP{{/type:map?}}
+}}{{#if type:string_or_binary?}}thrift.STRING{{!
+}}{{#else if type:bool?}}thrift.BOOL{{!
+}}{{#else if type:byte?}}thrift.BYTE{{!
+}}{{#else if type:i16?}}thrift.I16{{!
+}}{{#else if type:i32?}}thrift.I32{{!
+}}{{#else if type:i64?}}thrift.I64{{!
+}}{{#else if type:double?}}thrift.DOUBLE{{!
+}}{{#else if type:float?}}thrift.FLOAT{{!
+}}{{#else if type:enum?}}thrift.I32{{!
+}}{{#else if type:structured?}}thrift.STRUCT{{!
+}}{{#else if type:list?}}thrift.LIST{{!
+}}{{#else if type:set?}}thrift.SET{{!
+}}{{#else if type:map?}}thrift.MAP{{!
+}}{{/if type:string_or_binary?}}

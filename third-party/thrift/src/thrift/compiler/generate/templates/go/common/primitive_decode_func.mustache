@@ -19,12 +19,13 @@
   This file defines the decoding/read function for a given primitive type.
   These functions come from Format interface in thrift/lib/go/thrift/format.go
 
-}}{{#type:string?}}ReadString{{/type:string?}}{{!
-}}{{#type:binary?}}ReadBinary{{/type:binary?}}{{!
-}}{{#type:bool?}}ReadBool{{/type:bool?}}{{!
-}}{{#type:byte?}}ReadByte{{/type:byte?}}{{!
-}}{{#type:i16?}}ReadI16{{/type:i16?}}{{!
-}}{{#type:i32?}}ReadI32{{/type:i32?}}{{!
-}}{{#type:i64?}}ReadI64{{/type:i64?}}{{!
-}}{{#type:double?}}ReadDouble{{/type:double?}}{{!
-}}{{#type:float?}}ReadFloat{{/type:float?}}
+}}{{#if type:string?}}ReadString{{!
+}}{{#else if type:binary?}}ReadBinary{{!
+}}{{#else if type:bool?}}ReadBool{{!
+}}{{#else if type:byte?}}ReadByte{{!
+}}{{#else if type:i16?}}ReadI16{{!
+}}{{#else if type:i32?}}ReadI32{{!
+}}{{#else if type:i64?}}ReadI64{{!
+}}{{#else if type:double?}}ReadDouble{{!
+}}{{#else if type:float?}}ReadFloat{{!
+}}{{/if type:string?}}

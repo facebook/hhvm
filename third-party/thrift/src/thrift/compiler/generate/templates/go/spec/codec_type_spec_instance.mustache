@@ -26,20 +26,17 @@
     UnderlyingTypeSpec: {{#type:typedef_type}}{{type:codec_type_spec_getter}}{{/type:typedef_type}},
 },
 {{/type:typedef}}
-{{#else}}
-{{#type:primitive?}}
+{{#else if type:primitive?}}
 &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.{{> spec/codec_primitive_type}},
 },
-{{/type:primitive?}}
-{{#type:enum?}}
+{{#else if type:enum?}}
 {{#type:enum}}
 &thrift.CodecEnumSpec{
     ScopedName: "{{enum:scoped_name}}",
 },
 {{/type:enum}}
-{{/type:enum?}}
-{{#type:structured?}}
+{{#else if type:structured?}}
 {{#type:structured}}
 &thrift.CodecStructSpec{
     ScopedName: "{{struct:scoped_name}}",
@@ -47,25 +44,21 @@
     NewFunc:    func() thrift.Struct { return {{struct:go_qualified_new_func}}() },
 },
 {{/type:structured}}
-{{/type:structured?}}
-{{#type:list?}}
+{{#else if type:list?}}
 &thrift.CodecListSpec{
     ElementWireType: {{#type:list_elem_type}}{{> common/ttype}}{{/type:list_elem_type}},
     ElementTypeSpec: {{#type:list_elem_type}}{{type:codec_type_spec_getter}}{{/type:list_elem_type}},
 },
-{{/type:list?}}
-{{#type:map?}}
+{{#else if type:map?}}
 &thrift.CodecMapSpec{
     KeyTypeSpec:   {{#type:key_type}}{{type:codec_type_spec_getter}}{{/type:key_type}},
     ValueTypeSpec: {{#type:value_type}}{{type:codec_type_spec_getter}}{{/type:value_type}},
     KeyWireType:   {{#type:key_type}}{{> common/ttype}}{{/type:key_type}},
     ValueWireType: {{#type:value_type}}{{> common/ttype}}{{/type:value_type}},
 },
-{{/type:map?}}
-{{#type:set?}}
+{{#else if type:set?}}
 &thrift.CodecSetSpec{
     ElementWireType: {{#type:set_elem_type}}{{> common/ttype}}{{/type:set_elem_type}},
     ElementTypeSpec: {{#type:set_elem_type}}{{type:codec_type_spec_getter}}{{/type:set_elem_type}},
 },
-{{/type:set?}}
 {{/if (and type:typedef? type:typedef.typedef:defined_kind?)}}

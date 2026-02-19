@@ -164,7 +164,7 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
     irgen::assertTypeLocation(irgs, Location::Local { loc }, t);
   }
 
-  // Non-passed parameters contain uninitialized garbage.
+  // Non-passed positional parameters contain uninitialized garbage.
   auto const numNonVariadicParams = func->numNonVariadicParams();
   loc = numNonVariadicParams;
 

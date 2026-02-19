@@ -867,6 +867,9 @@ struct Func {
   uint32_t minNonVariadicParams() const;
   uint32_t maxNonVariadicParams() const;
 
+  /* Whether this function may have named params. */
+  bool mightHaveNamedParams() const;
+
   /*
    * Return if the function supports async eager return.
    */

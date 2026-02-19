@@ -1,0 +1,6 @@
+Caught InvalidOperationException: Expected 2 named arguments, got 1 in call to foo
+Function did not throw
+Caught InvalidOperationException: Expected 2 named arguments, got 3 in call to foo
+Caught InvalidOperationException: Expected 2 named arguments, got 1 in call to foo
+Function did not throw
+Caught RuntimeException: foo() expects at least 3 positional parameters, 2 given

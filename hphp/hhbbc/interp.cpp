@@ -3848,6 +3848,11 @@ bool fcallOptimizeChecks(
   bool maybeNullsafe,
   uint32_t numExtraInputs
 ) {
+  // TODO(named_params) we don't optimize away checks if named params
+  // or args exists right now and can do better.
+  if (fca.namedArgNames() != nullptr || func.mightHaveNamedParams()) {
+    return false;
+  }
   // Don't optimize away in-out checks if we might use the null safe
   // operator. If we do so, we need the in-out bits to shuffle the
   // stack properly.

@@ -757,13 +757,11 @@ Array getDefinedVariables(const ActRec* fp) {
   return ret.toArray();
 }
 
-// Unpack or repack arguments as needed to match the function signature.
+// Unpack or repack positionals as needed to match the function signature.
 // The stack contains numArgs arguments plus an extra cell containing
 // arguments to unpack.
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
                            bool checkInOutAnnot) {
-  // TODO(named_params) this needs to be made named_params-aware.
-  assertx(func->numNamedParams() == 0);
   auto& stack = vmStack();
   auto unpackArgs = *stack.topC();
   if (!isContainer(unpackArgs)) throwInvalidUnpackArgs();

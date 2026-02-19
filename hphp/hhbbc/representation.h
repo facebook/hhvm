@@ -430,6 +430,7 @@ struct Func : FuncBase {
   bool fromModuleLevelTrait : 1;
   bool requiresFromOriginalModule : 1;
 
+  bool hasNamedParams : 1;
 
   /*
    * Return type specified in the source code (ex. "function foo(): Bar").

@@ -123,6 +123,7 @@ template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
   SERDE_BITFIELD(isMemoizeWrapperLSB, sd);
   SERDE_BITFIELD(isMemoizeImpl, sd);
   SERDE_BITFIELD(isReified, sd);
+  SERDE_BITFIELD(hasNamedParams, sd);
   SERDE_BITFIELD(noContextSensitiveAnalysis, sd);
   SERDE_BITFIELD(hasInOutArgs, sd);
   SERDE_BITFIELD(sampleDynamicCalls, sd);

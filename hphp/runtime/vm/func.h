@@ -542,7 +542,7 @@ public:
   uint32_t numNonVariadicParams() const;
 
   /*
-   * Number of required parameters, i.e. all arguments starting from
+   * Number of required parameters, i.e. all parameters starting from
    * the returned position have default value.
    */
   uint32_t numRequiredParams() const;

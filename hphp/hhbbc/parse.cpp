@@ -753,6 +753,10 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
     for (auto& a : fe.params) if (a.isInOut()) return true;
     return false;
   }();
+  ret->hasNamedParams = [&] {
+    for (auto& a : fe.params) if (a.isNamed()) return true;
+    return false;
+  }();
 
   // Assume true, will be updated in build_cfg().
   ret->hasCreateCl = true;

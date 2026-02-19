@@ -799,6 +799,7 @@ struct res::Func::FuncFamily {
     bool m_maybeReified : 1;
     bool m_maybeCaresAboutDynCalls : 1;
     bool m_maybeBuiltin : 1;
+    bool m_mayHaveNamedParams : 1;
 
     bool operator==(const StaticInfo& o) const;
     size_t hash() const;
@@ -846,13 +847,13 @@ bool FuncFamily::StaticInfo::operator==(const FuncFamily::StaticInfo& o) const {
              m_maxNonVariadicParams,
              m_isReadonlyReturn, m_isReadonlyThis, m_supportsAER,
              m_maybeReified, m_maybeCaresAboutDynCalls,
-             m_maybeBuiltin) ==
+             m_maybeBuiltin, m_mayHaveNamedParams) ==
     std::tie(o.m_numInOut, o.m_requiredCoeffects, o.m_coeffectRules,
              o.m_paramPreps, o.m_minNonVariadicParams,
              o.m_maxNonVariadicParams,
              o.m_isReadonlyReturn, o.m_isReadonlyThis, o.m_supportsAER,
              o.m_maybeReified, o.m_maybeCaresAboutDynCalls,
-             o.m_maybeBuiltin);
+             o.m_maybeBuiltin, o.m_mayHaveNamedParams);
 }
 
 size_t FuncFamily::StaticInfo::hash() const {
@@ -866,7 +867,8 @@ size_t FuncFamily::StaticInfo::hash() const {
     m_supportsAER,
     m_maybeReified,
     m_maybeCaresAboutDynCalls,
-    m_maybeBuiltin
+    m_maybeBuiltin,
+    m_mayHaveNamedParams
   );
   hash = folly::hash::hash_range(
     m_paramPreps.begin(),
@@ -1008,6 +1010,7 @@ struct FuncFamily2 {
     bool m_maybeReified;
     bool m_maybeCaresAboutDynCalls;
     bool m_maybeBuiltin;
+    bool m_mayHaveNamedParams;
 
     StaticInfo& operator|=(const StaticInfo& o) {
       if (m_numInOut != o.m_numInOut) {
@@ -1045,6 +1048,7 @@ struct FuncFamily2 {
       m_maybeReified |= o.m_maybeReified;
       m_maybeCaresAboutDynCalls |= o.m_maybeCaresAboutDynCalls;
       m_maybeBuiltin |= o.m_maybeBuiltin;
+      m_mayHaveNamedParams |= o.m_mayHaveNamedParams;
 
       return *this;
     }
@@ -1062,6 +1066,7 @@ struct FuncFamily2 {
         (m_maybeReified)
         (m_maybeCaresAboutDynCalls)
         (m_maybeBuiltin)
+        (m_mayHaveNamedParams)
         ;
     }
   };
@@ -1230,6 +1235,7 @@ struct FuncFamilyEntry {
     bool m_isReified : 1;
     bool m_caresAboutDyncalls : 1;
     bool m_builtin : 1;
+    bool m_hasNamedParams : 1;
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(m_prepKinds)
@@ -1244,6 +1250,7 @@ struct FuncFamilyEntry {
       SERDE_BITFIELD(m_isReified, sd);
       SERDE_BITFIELD(m_caresAboutDyncalls, sd);
       SERDE_BITFIELD(m_builtin, sd);
+      SERDE_BITFIELD(m_hasNamedParams, sd);
     }
   };
 
@@ -5639,6 +5646,40 @@ bool Func::mightBeBuiltin() const {
     [] (const Isect2& i) {
       for (auto const ff : i.families) {
         if (!ff->infoFor(i.regularOnly).m_maybeBuiltin) return false;
+      }
+      return true;
+    }
+  );
+}
+
+bool Func::mightHaveNamedParams() const {
+  return match<bool>(
+    val,
+    [] (FuncName s) { return true; },
+    [] (MethodName) { return true; },
+    [] (Fun f) { return f.finfo->func->hasNamedParams; },
+    [] (Fun2 f) { return f.finfo->func->hasNamedParams; },
+    [] (Method m) { return m.finfo->func->hasNamedParams; },
+    [] (Method2 m) { return m.finfo->func->hasNamedParams; },
+    [] (MethodFamily fa) {
+      return fa.family->infoFor(fa.regularOnly).m_static->m_mayHaveNamedParams;
+    },
+    [] (MethodFamily2 fa) {
+      return fa.family->infoFor(fa.regularOnly).m_mayHaveNamedParams;
+    },
+    [] (MethodOrMissing m) { return m.finfo->func->hasNamedParams; },
+    [] (MethodOrMissing2 m) { return m.finfo->func->hasNamedParams; },
+    [] (MissingFunc m) { return false; },
+    [] (MissingMethod m) { return false; },
+    [] (const Isect& i) {
+      for (auto const ff : i.families) {
+        if (!ff->infoFor(i.regularOnly).m_static->m_mayHaveNamedParams) return false;
+      }
+      return true;
+    },
+    [] (const Isect2& i) {
+      for (auto const ff : i.families) {
+        if (!ff->infoFor(i.regularOnly).m_mayHaveNamedParams) return false;
       }
       return true;
     }
@@ -10748,6 +10789,7 @@ private:
     meta.m_isReified = meth.isReified;
     meta.m_caresAboutDyncalls = (dyn_call_error_level(&meth) > 0);
     meta.m_builtin = meth.attrs & AttrBuiltin;
+    meta.m_hasNamedParams = meth.hasNamedParams;
 
     if (is_regular_class(cls)) {
       entry.m_meths =
@@ -14631,6 +14673,7 @@ protected:
     info.m_maybeReified = meta.m_isReified;
     info.m_maybeCaresAboutDynCalls = meta.m_caresAboutDyncalls;
     info.m_maybeBuiltin = meta.m_builtin;
+    info.m_mayHaveNamedParams = meta.m_hasNamedParams;
     return info;
   }
 
@@ -15180,6 +15223,7 @@ protected:
     meta.m_isReified = info.m_maybeReified;
     meta.m_caresAboutDyncalls = info.m_maybeCaresAboutDynCalls;
     meta.m_builtin = info.m_maybeBuiltin;
+    meta.m_hasNamedParams = info.m_mayHaveNamedParams;
     return meta;
   }
 
@@ -18975,6 +19019,7 @@ void make_class_infos_local(
         out.m_maybeReified = in.m_maybeReified;
         out.m_maybeCaresAboutDynCalls = in.m_maybeCaresAboutDynCalls;
         out.m_maybeBuiltin = in.m_maybeBuiltin;
+        out.m_mayHaveNamedParams = in.m_mayHaveNamedParams;
 
         auto const it = index.funcFamilyStaticInfos.find(out);
         if (it != end(index.funcFamilyStaticInfos)) return it->first.get();

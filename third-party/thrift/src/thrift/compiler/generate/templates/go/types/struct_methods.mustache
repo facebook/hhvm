@@ -19,19 +19,19 @@
   Creates the following methods for Thrift structs:
   Get*, Set*, IsSet*, writeField*, readField*, String
 
-}}{{!
+}}{{#import "types/field_methods" as m_field_methods}}{{!
 
   Get method.
 
 }}{{#struct:fields_sorted}}
-{{> types/field_method_get}}
+{{#partial m_field_methods.get struct=struct:self field=field:self}}
 
 {{/struct:fields_sorted}}{{!
 
   Set method.
 
 }}{{#struct:fields_sorted}}
-{{> types/field_method_set}}
+{{#partial m_field_methods.set struct=struct:self field=field:self}}
 
 {{/struct:fields_sorted}}{{!
 
@@ -39,7 +39,7 @@
 
 }}{{#struct:fields_sorted}}
 {{#field:nilable?}}
-{{> types/field_method_is_set}}
+{{#partial m_field_methods.is_set struct=struct:self field=field:self}}
 
 {{/field:nilable?}}
 {{/struct:fields_sorted}}{{!
@@ -67,7 +67,7 @@
 }}{{#struct:fields_sorted}}
 {{#field:pointer?}}
 {{#program:gen_default_get?}}
-{{> types/field_method_default_get}}
+{{#partial m_field_methods.default_get struct=struct:self field=field:self}}
 {{/program:gen_default_get?}}
 
 {{/field:pointer?}}

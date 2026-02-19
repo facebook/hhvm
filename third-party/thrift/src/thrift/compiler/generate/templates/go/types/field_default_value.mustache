@@ -26,6 +26,6 @@
 }}{{#if (object.notnull? field:default_value)}}{{!
   }}{{#partial constants.const_value value=field:default_value root_const=null}}{{!
 }}{{#else}}{{!
-  }}{{> common/natural_default_value}}{{!
+  }}{{#partial types.natural_default_value type=type:self}}{{!
 }}{{/if (object.notnull? field:default_value)}}{{!
 }}{{/field:type}}

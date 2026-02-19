@@ -22,7 +22,7 @@
 
 }}
 if err := p.WriteListBegin({{!
-  }}{{#type:list_elem_type}}{{> common/ttype}}{{/type:list_elem_type}}, {{!
+  }}{{#type:list_elem_type}}{{#partial codec.ttype type=type:self}}{{/type:list_elem_type}}, {{!
   }}len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }

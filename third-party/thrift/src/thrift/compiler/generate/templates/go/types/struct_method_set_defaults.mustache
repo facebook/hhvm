@@ -41,7 +41,7 @@ func (x *{{struct:go_name}}) setDefaults() *{{struct:go_name}} {
         }}{{^field:optional?}}.
         {{field:go_setter_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}({{!
           }}{{#field:type}}{{!
-            }}{{> common/natural_default_value}}{{!
+            }}{{#partial types.natural_default_value type=type:self}}{{!
           }}{{/field:type}}{{!
         }}){{/field:optional?}}{{!
         }}{{/if (object.notnull? field:default_value)}}{{!

@@ -24,7 +24,7 @@
 // Deprecated: Use {{struct:go_qualified_new_func}}().Get{{field:go_name}}() instead.
 func (x *{{struct:go_name}}) DefaultGet{{field:go_name}}() *{{#partial types.go_type type=type:self}} {
     if !x.IsSet{{field:go_name}}() {
-        return {{> common/natural_default_value}}
+        return {{#partial types.natural_default_value type=type:self}}
     }
     return x.{{field:go_name}}
 }

@@ -43,3 +43,56 @@ map[
 []{{#if elem_type.structured?}}*{{/if}}{{#partial go_type type=elem_type}}
   {{/if type.typedef?}}
 {{/let partial}}
+
+{{! Defines a Go zero-value representation for a given Thrift type.
+
+  The following templates have complete type parity:
+    * const/value.mustache
+    * common/natural_default_value.mustache
+    * common/type.mustache (go_zero_value partial)
+}}
+{{#let export partial go_zero_value |type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.typedef?}}{{#partial go_zero_value type=type.resolved}}
+{{#else if type.string?}}""
+{{#else if type.binary?}}nil
+{{#else if type.bool?}}false
+{{#else if type.byte?}}0
+{{#else if type.any_int?}}0
+{{#else if type.floating_point?}}0.0
+{{#else if type.enum?}}0
+{{#else if (or type.container? type.structured?)}}nil
+{{/if type.typedef?}}
+{{/let partial}}
+
+{{! Defines a Thrift natural default value for a given type.
+
+  Natural default values are values assigned to Thrift fields/variables
+  by default in the abscence of explicit user-provided default values.
+  Natural default values are based on Thrift specification.
+
+  All type values are rendered as "concrete" values, except for structs - which
+  are rendered as struct pointers. Callers are responsible for dereferencing
+  appropriately if needed.
+
+  The following templates have complete type parity:
+    * const/value.mustache
+    * common/natural_default_value.mustache
+    * common/type.mustache (go_zero_value partial)
+}}
+{{#let export partial natural_default_value |type| captures |go_type| }}
+  {{#pragma ignore-newlines}}
+{{#if (and type.typedef? type.defined_kind?)}}{{type.go_qualified_new_func}}()
+{{#else if type.typedef?}}{{#partial natural_default_value type=type.resolved}}
+{{#else if type.string?}}""
+{{#else if type.binary?}}[]byte("")
+{{#else if type.bool?}}false
+{{#else if type.byte?}}0
+{{#else if type.any_int?}}0
+{{#else if type.floating_point?}}0.0
+{{#else if type.enum?}}0
+{{#else if (or type.list? type.set?)}}make({{#partial go_type type=type}}, 0)
+{{#else if type.map?}}make({{#partial go_type type=type}})
+{{#else if type.structured?}}{{type.true_type.go_qualified_new_func}}()
+{{/if (and type.typedef? type.defined_kind?)}}
+{{/let partial}}

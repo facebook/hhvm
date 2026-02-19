@@ -84,9 +84,9 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
         fbthriftFinalResp := newRespFinal{{service:go_name}}{{function:go_name}}()
         fbthriftFinalErr := fbthriftSinkFn(sinkPayloadSeq, fbthriftFinalResp)
         if fbthriftFinalErr != nil {
-            return {{> common/go_zero_value}}, fbthriftFinalErr
+            return {{#partial types.go_zero_value type=type:self}}, fbthriftFinalErr
         } else if fbthriftFinalEx := fbthriftFinalResp.Exception(); fbthriftFinalEx != nil {
-            return {{> common/go_zero_value}}, fbthriftFinalEx
+            return {{#partial types.go_zero_value type=type:self}}, fbthriftFinalEx
         }
         return fbthriftFinalResp.Get{{function:retval_field_name}}(), nil
     }

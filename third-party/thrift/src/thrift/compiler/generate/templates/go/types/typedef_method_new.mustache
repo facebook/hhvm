@@ -21,7 +21,7 @@
 }}
 {{#typedef:type}}
 func {{typedef:go_qualified_new_func}}() {{#type:structured?}}*{{/type:structured?}}{{typedef:go_name}} {
-    return {{> common/natural_default_value}}
+    return {{#partial types.natural_default_value type=type:self}}
 }
 {{/typedef:type}}
 {{!newline}}

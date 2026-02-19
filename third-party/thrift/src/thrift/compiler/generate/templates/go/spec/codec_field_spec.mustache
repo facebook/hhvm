@@ -21,7 +21,7 @@
 }}
 {
     ID:                   {{field:id}},
-    WireType:             {{#field:type}}{{> common/ttype}}{{/field:type}},
+    WireType:             {{#field:type}}{{#partial codec.ttype type=type:self}}{{/field:type}},
     Name:                 "{{field:name}}",
     ReflectIndex:         {{index}},
     IsOptional:           {{field:optional?}},

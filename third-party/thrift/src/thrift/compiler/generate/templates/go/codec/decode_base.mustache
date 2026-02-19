@@ -24,11 +24,11 @@
 
 }}
 {{#type:byte?}}
-resultByte, err := p.{{> common/primitive_decode_func}}()
+resultByte, err := p.{{#partial codec.primitive_decode_func type=type:self}}()
 result := int8(resultByte)
 {{/type:byte?}}
 {{^type:byte?}}
-result, err := p.{{> common/primitive_decode_func}}()
+result, err := p.{{#partial codec.primitive_decode_func type=type:self}}()
 {{/type:byte?}}
 if err != nil {
     return err

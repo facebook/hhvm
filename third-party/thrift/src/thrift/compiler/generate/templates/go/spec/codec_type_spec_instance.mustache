@@ -46,19 +46,19 @@
 {{/type:structured}}
 {{#else if type:list?}}
 &thrift.CodecListSpec{
-    ElementWireType: {{#type:list_elem_type}}{{> common/ttype}}{{/type:list_elem_type}},
+    ElementWireType: {{#type:list_elem_type}}{{#partial codec.ttype type=type:self}}{{/type:list_elem_type}},
     ElementTypeSpec: {{#type:list_elem_type}}{{type:codec_type_spec_getter}}{{/type:list_elem_type}},
 },
 {{#else if type:map?}}
 &thrift.CodecMapSpec{
     KeyTypeSpec:   {{#type:key_type}}{{type:codec_type_spec_getter}}{{/type:key_type}},
     ValueTypeSpec: {{#type:value_type}}{{type:codec_type_spec_getter}}{{/type:value_type}},
-    KeyWireType:   {{#type:key_type}}{{> common/ttype}}{{/type:key_type}},
-    ValueWireType: {{#type:value_type}}{{> common/ttype}}{{/type:value_type}},
+    KeyWireType:   {{#type:key_type}}{{#partial codec.ttype type=type:self}}{{/type:key_type}},
+    ValueWireType: {{#type:value_type}}{{#partial codec.ttype type=type:self}}{{/type:value_type}},
 },
 {{#else if type:set?}}
 &thrift.CodecSetSpec{
-    ElementWireType: {{#type:set_elem_type}}{{> common/ttype}}{{/type:set_elem_type}},
+    ElementWireType: {{#type:set_elem_type}}{{#partial codec.ttype type=type:self}}{{/type:set_elem_type}},
     ElementTypeSpec: {{#type:set_elem_type}}{{type:codec_type_spec_getter}}{{/type:set_elem_type}},
 },
 {{/if (and type:typedef? type:typedef.typedef:defined_kind?)}}

@@ -22,8 +22,8 @@
 
 }}
 if err := p.WriteMapBegin({{!
-  }}{{#type:key_type}}{{> common/ttype}}{{/type:key_type}}, {{!
-  }}{{#type:value_type}}{{> common/ttype}}{{/type:value_type}}, {{!
+  }}{{#type:key_type}}{{#partial codec.ttype type=type:self}}{{/type:key_type}}, {{!
+  }}{{#type:value_type}}{{#partial codec.ttype type=type:self}}{{/type:value_type}}, {{!
   }}len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }

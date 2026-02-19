@@ -66,7 +66,7 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
     fbthriftStreamSeqAdapter := func(yield func({{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, error) bool) {
         for elem, err := range fbthriftStreamSeq {
             if err != nil {
-                yield({{> common/go_zero_value}}, err)
+                yield({{#partial types.go_zero_value type=type:self}}, err)
                 return
             }
             fbthriftRes := elem.(*stream{{service:go_name}}{{function:go_name}})

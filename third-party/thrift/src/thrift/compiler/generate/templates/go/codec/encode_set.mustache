@@ -22,7 +22,7 @@
 
 }}
 if err := p.WriteSetBegin({{!
-  }}{{#type:set_elem_type}}{{> common/ttype}}{{/type:set_elem_type}}, {{!
+  }}{{#type:set_elem_type}}{{#partial codec.ttype type=type:self}}{{/type:set_elem_type}}, {{!
   }}len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }

@@ -24,10 +24,10 @@
 
 }}
 {{#type:byte?}}
-if err := p.{{> common/primitive_encode_func}}(byte(item)); err != nil {
+if err := p.{{#partial codec.primitive_encode_func type=type:self}}(byte(item)); err != nil {
 {{/type:byte?}}
 {{^type:byte?}}
-if err := p.{{> common/primitive_encode_func}}(item); err != nil {
+if err := p.{{#partial codec.primitive_encode_func type=type:self}}(item); err != nil {
 {{/type:byte?}}
     return err
 }

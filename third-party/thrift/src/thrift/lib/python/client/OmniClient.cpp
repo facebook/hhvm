@@ -146,7 +146,8 @@ OmniClient::~OmniClient() {
 
   auto* eb = channel_->getEventBase();
   if (eb != nullptr) {
-    eb->runInEventBaseThread([channel = std::move(channel_)] {});
+    folly::getKeepAliveToken(eb).add(
+        [channel = std::move(channel_)](auto&&) {});
   }
 }
 

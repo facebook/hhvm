@@ -28,6 +28,7 @@ type saved_state_loading = {
   use_manifold_cython_client: bool;
   zstd_decompress_by_file: bool;
   use_compressed_dep_graph: bool;
+  saved_state_cache_limit: int;
 }
 [@@deriving show, eq]
 
@@ -38,6 +39,7 @@ let default_saved_state_loading =
     use_manifold_cython_client = false;
     zstd_decompress_by_file = true;
     use_compressed_dep_graph = true;
+    saved_state_cache_limit = 20;
   }
 
 type saved_state = {

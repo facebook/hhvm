@@ -136,7 +136,11 @@ let load_saved_state ~(env : env) ~(local_config : ServerLocalConfig.t) :
               : _ replay_info) =
       get_replay_info replay_token
     in
-    let download_dir = State_loader_lwt.prepare_download_dir () in
+    let download_dir =
+      State_loader_lwt.prepare_download_dir
+        ~saved_state_cache_limit:
+          ssopt.GlobalOptions.loading.saved_state_cache_limit
+    in
     let target_path =
       State_loader_lwt.get_saved_state_target_path ~download_dir ~manifold_path
     in

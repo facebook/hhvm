@@ -19,6 +19,9 @@ type saved_state_loading = {
       (** When decompressing a saved state folder, pass specific files into zstd *)
   use_compressed_dep_graph: bool;
       (** When unpacking a saved state, decompress the dep graph from a .zhhdg file to a .hhdg file  *)
+  saved_state_cache_limit: int;
+      (** Maximum number of saved states to keep in the download directory.
+        Older saved states beyond this limit are cleaned up. *)
 }
 
 val default_saved_state_loading : saved_state_loading

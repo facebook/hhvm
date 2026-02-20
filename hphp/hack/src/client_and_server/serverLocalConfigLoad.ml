@@ -875,6 +875,13 @@ let load_
         GlobalOptions.(default_saved_state_loading.zstd_decompress_by_file)
       config
   in
+  let saved_state_cache_limit =
+    int_
+      "saved_state_cache_limit"
+      ~default:
+        GlobalOptions.(default_saved_state_loading.saved_state_cache_limit)
+      config
+  in
   let warnings_default_all =
     bool_ "warnings_default_all" ~default:default.warnings_default_all config
   in
@@ -980,6 +987,7 @@ let load_
             use_manifold_cython_client;
             zstd_decompress_by_file;
             use_compressed_dep_graph;
+            saved_state_cache_limit;
           };
         rollouts = saved_state_flags;
         project_metadata_w_flags;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<187e717c64f94e6e7ee456db720a7829>>
+// @generated SignedSource<<2b5a410cf57a72df2d863656c8d1ff89>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -47,6 +47,9 @@ pub struct SavedStateLoading {
     pub zstd_decompress_by_file: bool,
     /// When unpacking a saved state, decompress the dep graph from a .zhhdg file to a .hhdg file
     pub use_compressed_dep_graph: bool,
+    /// Maximum number of saved states to keep in the download directory.
+    /// Older saved states beyond this limit are cleaned up.
+    pub saved_state_cache_limit: isize,
 }
 
 #[derive(

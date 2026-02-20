@@ -16,7 +16,7 @@
 
 #include <fizz/record/Types.h>
 #include <fizz/server/State.h>
-#include <folly/experimental/io/AsyncIoUringSocketFactory.h>
+#include <folly/io/async/AsyncIoUringSocketFactory.h>
 #if !defined(_WIN32) // No FD-passing on Windows, don't try to make it build.
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
 #endif

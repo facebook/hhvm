@@ -19,7 +19,7 @@
 #include <fizz/extensions/tokenbinding/TokenBindingContext.h>
 #include <fizz/extensions/tokenbinding/TokenBindingServerExtension.h>
 #include <fizz/server/AsyncFizzServer.h>
-#include <folly/experimental/io/AsyncIoUringSocket.h>
+#include <folly/io/async/AsyncIoUringSocket.h>
 #include <wangle/acceptor/AcceptorHandshakeManager.h>
 #include <wangle/acceptor/PeekingAcceptorHandshakeHelper.h>
 

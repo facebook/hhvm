@@ -97,6 +97,7 @@ class CommonTestDriver(TestDriver):
         changed_files: Optional[List[str]] = None,
         saved_state_path: Optional[str] = None,
         args: Optional[List[str]] = None,
+        wait_for_server: bool = True,
     ) -> None:
         """Start an hh_server. changed_files is ignored here (as it
         has no meaning) and is only exposed in this API for the derived
@@ -108,7 +109,8 @@ class CommonTestDriver(TestDriver):
             args = []
         cmd = [hh_server, "--daemon", "--max-procs", "2", self.repo_dir] + args
         self.proc_call(cmd)
-        self.wait_until_server_ready()
+        if wait_for_server:
+            self.wait_until_server_ready()
 
     def stop_hh_server(self, retries: int = 3) -> None:
         (_, _, exit_code) = self.proc_call([hh_client, "stop", self.repo_dir])

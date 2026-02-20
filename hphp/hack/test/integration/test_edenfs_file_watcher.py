@@ -370,6 +370,7 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
         changed_files: Optional[List[str]] = None,
         saved_state_path: Optional[str] = None,
         args: Optional[List[str]] = None,
+        wait_for_server: bool = True,
     ) -> None:
         args = args or []
         if DEBUG_EDENFS_WATCHER_TEST_HH_SERVER_FOREGROUND:
@@ -381,9 +382,12 @@ class EdenfsWatcherTestDriver(common_tests.CommonTestDriver):
                 stderr=sys.stderr,
                 universal_newlines=True,
             )
-            self.wait_until_server_ready()
+            if wait_for_server:
+                self.wait_until_server_ready()
         else:
-            super().start_hh_server(changed_files, saved_state_path, args)
+            super().start_hh_server(
+                changed_files, saved_state_path, args, wait_for_server
+            )
 
     def commitAllChanges(
         self, message: str = "test commit", allow_empty: bool = True

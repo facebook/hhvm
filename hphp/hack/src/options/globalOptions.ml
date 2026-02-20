@@ -39,7 +39,7 @@ let default_saved_state_loading =
     use_manifold_cython_client = false;
     zstd_decompress_by_file = true;
     use_compressed_dep_graph = true;
-    saved_state_cache_limit = 20;
+    saved_state_cache_limit = 5;
   }
 
 type saved_state = {

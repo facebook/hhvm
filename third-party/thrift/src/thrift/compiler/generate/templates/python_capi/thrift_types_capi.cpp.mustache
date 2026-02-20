@@ -82,14 +82,13 @@ Extractor<{{> common/wrapped_struct }}>::operator()(PyObject* obj) {
     return extractorError<{{struct:cpp_name}}>(
         "Thrift serialize error: {{struct:py_name}}");
   }
-  {{#struct:cpp_adapter?}}
+  {{#if (object.notnull? struct:cpp_adapter_name)}}
   return detail::deserialize_iobuf_to_adapted<
-      {{struct:cpp_name}}, {{cpp_adapter:name}}
+      {{struct:cpp_name}}, {{struct:cpp_adapter_name}}
     >(std::move(val));
-  {{/struct:cpp_adapter?}}
-  {{^struct:cpp_adapter?}}
+  {{#else}}
   return detail::deserialize_iobuf<{{struct:cpp_name}}>(std::move(val));
-  {{/struct:cpp_adapter?}}
+  {{/if (object.notnull? struct:cpp_adapter_name)}}
 }
 {{/struct:marshal_capi?}}
 
@@ -188,12 +187,11 @@ PyObject* Constructor<{{> common/wrapped_struct }}>::operator()(
   {{^struct:marshal_capi?}}
   ::std::unique_ptr<::folly::IOBuf> serialized;
   try {
-  {{#struct:cpp_adapter?}}
-    serialized = detail::serialize_adapted_to_iobuf<{{cpp_adapter:name}}>(val);
-  {{/struct:cpp_adapter?}}
-  {{^struct:cpp_adapter?}}
+  {{#if (object.notnull? struct:cpp_adapter_name)}}
+    serialized = detail::serialize_adapted_to_iobuf<{{struct:cpp_adapter_name}}>(val);
+  {{#else}}
     serialized = detail::serialize_to_iobuf(val);
-  {{/struct:cpp_adapter?}}
+  {{/if (object.notnull? struct:cpp_adapter_name)}}
   } catch (const apache::thrift::TProtocolException& e) {
     detail::handle_protocol_error(e);
     return nullptr;

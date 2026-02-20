@@ -458,17 +458,11 @@ class python_capi_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
-            {"struct:py_name", &python_capi_mstch_struct::py_name},
             {"struct:marshal_capi?", &python_capi_mstch_struct::marshal_capi},
-            {"struct:cpp_name", &python_capi_mstch_struct::cpp_name},
-            {"struct:cpp_adapter?", &python_capi_mstch_struct::cpp_adapter},
-            {"struct:num_fields", &python_capi_mstch_struct::num_fields},
             {"struct:tuple_positions",
              &python_capi_mstch_struct::tuple_positions},
         });
   }
-
-  mstch::node py_name() { return python::get_py3_name(*struct_); }
 
   mstch::node tuple_positions() {
     std::vector<std::pair<int, int>> index_keys;
@@ -593,26 +587,6 @@ class python_capi_mstch_struct : public mstch_struct {
     }
     return true;
   }
-
-  mstch::node cpp_adapter() {
-    if (auto adapter_annotation =
-            struct_->find_structured_annotation_or_null(kCppAdapterUri)) {
-      return mstch::map{
-          {"cpp_adapter:name",
-           get_annotation_property(adapter_annotation, "name")},
-      };
-    }
-    return false;
-  }
-
-  mstch::node cpp_name() {
-    return cpp_resolver_.get_underlying_namespaced_name(*struct_);
-  }
-
-  mstch::node num_fields() { return struct_->fields().size(); }
-
- private:
-  cpp_name_resolver cpp_resolver_;
 };
 
 class t_mstch_python_capi_generator : public t_mstch_generator {
@@ -642,6 +616,10 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
   std::filesystem::path generate_root_path_;
 
  private:
+  // Mutable as it contains caches, but needs to be accessed from `const`
+  // contexts
+  mutable cpp_name_resolver cpp_resolver_;
+
   prototype<t_named>::ptr make_prototype_for_named(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_named(proto);
@@ -650,6 +628,7 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
 
     def.property(
         "cpp_name", [](const t_named& self) { return cpp2::get_name(&self); });
+    def.property("py_name", &python::get_py3_name);
 
     return std::move(def).make();
   }
@@ -666,6 +645,31 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
     def.property("iobuf?", [](const t_field& self) {
       const t_type* ttype = self.type()->get_true_type();
       return ttype->is_binary() && is_type_iobuf(ttype);
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_structured>::ptr make_prototype_for_structured(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_structured(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_structured>::extends(std::move(base));
+
+    // Override of `cpp_name` for structured types
+    def.property("cpp_name", [this](const t_structured& self) {
+      return cpp_resolver_.get_underlying_namespaced_name(self);
+    });
+    def.property("num_fields", [](const t_structured& self) {
+      return whisker::make::i64(static_cast<int64_t>(self.fields().size()));
+    });
+    def.property("cpp_adapter_name", [](const t_structured& self) {
+      if (const t_const* adapter_annotation =
+              self.find_structured_annotation_or_null(kCppAdapterUri)) {
+        return whisker::make::string(
+            get_annotation_property(adapter_annotation, "name"));
+      }
+      return whisker::make::null;
     });
 
     return std::move(def).make();

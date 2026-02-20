@@ -536,10 +536,25 @@ public:
    */
   uint32_t numNamedParams() const;
 
+  /**
+   * Number of positional parameters accepted by the function.
+   */
+  uint32_t numPositionalParams() const;
+
   /*
    * Number of parameters, not including `...', accepted by the function.
    */
   uint32_t numNonVariadicParams() const;
+
+  /*
+   * Number of required named parameters.
+   */
+  uint32_t numRequiredNamedParams() const;
+
+  /*
+   * Number of required positional parameters.
+   */
+  uint32_t numRequiredPositionalParams() const;  
 
   /*
    * Number of required parameters, i.e. all parameters starting from

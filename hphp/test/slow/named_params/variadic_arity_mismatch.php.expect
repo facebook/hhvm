@@ -1,6 +1,6 @@
-Caught InvalidOperationException: Expected 2 named arguments, got 1 in call to foo
+Caught RuntimeException: foo() expects 2 required named parameters, 1 given
 Function did not throw
-Caught InvalidOperationException: Expected 2 named arguments, got 3 in call to foo
-Caught InvalidOperationException: Expected 2 named arguments, got 1 in call to foo
+Caught RuntimeException: Named argument c does not match any named parameter in call to foo
+Caught RuntimeException: foo() expects 2 required named parameters, 1 given
 Function did not throw
-Caught RuntimeException: foo() expects at least 3 positional parameters, 2 given
+Caught RuntimeException: foo() expects at least 1 positional parameter, 0 given

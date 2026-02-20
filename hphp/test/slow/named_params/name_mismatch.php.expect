@@ -1,4 +1,4 @@
-Caught InvalidOperationException: Named argument x does not match any named parameter in call to foo
-Caught InvalidOperationException: Named argument c does not match any named parameter in call to foo
-Caught InvalidOperationException: Named argument missing does not match any named parameter in call to foo
-Caught InvalidOperationException: Named argument missing does not match any named parameter in call to foo
+Caught RuntimeException: Named argument x does not match any named parameter in call to foo
+Caught RuntimeException: Named argument c does not match any named parameter in call to foo
+Caught RuntimeException: Named argument missing does not match any named parameter in call to foo
+Caught RuntimeException: Named argument missing does not match any named parameter in call to foo

@@ -685,6 +685,7 @@ Array getDefinedVariables(const ActRec*);
 void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack);
 void enterVMAtCurPC();
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
+                           uint32_t numNamedArgs,
                            bool checkInOutAnnot);
 
 ///////////////////////////////////////////////////////////////////////////////

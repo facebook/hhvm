@@ -231,6 +231,50 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
   checkFunReifiedGenericMismatch(callee, val(generics).parr);
 }
 
+inline void initFuncNamedParamDefaults(const Func* callee, uint32_t& numArgsInclUnpack,
+                                       const ArrayData* namedArgNames) {
+  auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
+  assertx(callee->numNamedParams() >= numNamedArgs);
+  if (callee->numNamedParams() == numNamedArgs) {
+    return;
+  }
+
+  auto numPositionalArgs = numArgsInclUnpack - numNamedArgs;
+  auto numPositionalParams = callee->numNonVariadicParams() - callee->numNamedParams();
+  auto const hasVariadics = numPositionalArgs > numPositionalParams ? 1 : 0;
+
+  CoeffectsSaver cs{callee->hasCoeffectsLocal()};
+  GenericsSaver gs{callee->hasReifiedGenerics()};
+  PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
+  auto stackPos =
+    [&](const size_t argPos) { return numArgsInclUnpack - argPos - 1; };
+  std::vector<TypedValue> values(numArgsInclUnpack + callee->numNamedParams() - numNamedArgs);
+  if (hasVariadics) {
+    assertx(numPositionalArgs == numPositionalParams + 1);
+    values.back() = *vmStack().indC(0);
+  }
+  auto argIdx = 0;
+  for (auto paramIdx = 0; paramIdx < values.size() - hasVariadics; ++paramIdx) {
+    auto const& param = callee->params()[paramIdx];
+    if (paramIdx < callee->numNamedParams()) {
+      auto paramName = namedParamNames[paramIdx];
+      if (argIdx < numNamedArgs && paramName == namedArgNames->at(argIdx).val().pstr) {
+        values[paramIdx] = *vmStack().indC(stackPos(argIdx++));
+      } else {
+        values[paramIdx] = param.defaultValue;
+      }
+    } else {
+      values[paramIdx] = *vmStack().indC(stackPos(argIdx++));
+    }
+  }
+
+  vmStack().nalloc(values.size() - numArgsInclUnpack);
+  numArgsInclUnpack = values.size();
+  for (size_t i = 0; i < values.size(); ++i) {
+    *vmStack().indTV(stackPos(i)) = values[i];
+  }
+}
+
 /*
  * Ensure that all passed named arguments match a named parameter, and that
  * there are no missing required named parameters.
@@ -240,37 +284,44 @@ inline void calleeNamedArgChecks(const Func* callee,
                                  const ArrayData* namedArgNames) {
   uint32_t namedParamCount = callee->numNamedParams();
   int namedArgNamesSize = namedArgNames ? namedArgNames->size() : 0;
-  if (namedParamCount != namedArgNamesSize) {
-    auto error_msg = Strings::NAMED_ARGUMENT_ARITY_MISMATCH;
-    std::string msg;
-    string_printf(msg, error_msg, namedParamCount, namedArgNamesSize,
-                  callee->fullName()->data());
-    throw_invalid_operation_exception(makeStaticString(msg));
-  }
-  if (namedParamCount == 0) return;
-
   PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
-  for (uint32_t i = 0; i < namedParamCount; ++i) {
-    auto name = namedArgNames->at(i).val().pstr;
-    if (namedParamNames[i] != name) {
-      auto error_msg = Strings::NAMED_ARGUMENT_NAME_MISMATCH;
-      std::string msg;
-      string_printf(msg, error_msg, name->toCppString().c_str(),
-                    callee->fullName()->data());
-      throw_invalid_operation_exception(makeStaticString(msg));
+
+  // Iterate and find the number of named arguments that were required
+  auto requiredNamedArgCount = callee->numRequiredNamedParams();
+  auto paramIdx = 0;
+  for (auto argIdx = 0; argIdx < namedArgNamesSize; ++argIdx) {
+    auto argName = namedArgNames->at(argIdx).val().pstr;
+
+    while (paramIdx < namedParamCount && namedParamNames[paramIdx] != argName) {
+      if (!callee->params()[paramIdx].hasDefaultValue()) --requiredNamedArgCount;
+      paramIdx++;
     }
+    if (paramIdx >= namedParamCount) {
+      throwNamedArgumentNameMismatch(callee, argName->toCppString());
+    }
+    paramIdx++;
   }
+
+  while (paramIdx < namedParamCount) {
+    if (!callee->params()[paramIdx].hasDefaultValue()) --requiredNamedArgCount;
+    paramIdx++;
+  }
+  if (callee->numRequiredNamedParams() != requiredNamedArgCount) {
+    throwMissingNamedArgument(callee, requiredNamedArgCount);
+  }
+
+  initFuncNamedParamDefaults(callee, numArgsInclUnpack, namedArgNames);
 }
 
 /*
  * Check for too few or too many arguments and trim extra args.
  */
 inline void calleeArgumentArityChecks(const Func* callee,
-                                      uint32_t& numArgsInclUnpack) {
-  if (numArgsInclUnpack < callee->numRequiredParams()) {
-    throwMissingArgument(callee, numArgsInclUnpack);
+                                      uint32_t& numArgsInclUnpack,
+                                      uint32_t numPositionalArgs) {
+  if (numPositionalArgs < callee->numRequiredPositionalParams()) {
+    throwMissingPositionalArgument(callee, numPositionalArgs);
   }
-
   if (numArgsInclUnpack > callee->numParams()) {
     assertx(!callee->hasVariadicCaptureParam());
     assertx(numArgsInclUnpack == callee->numNonVariadicParams() + 1);

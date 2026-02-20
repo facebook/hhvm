@@ -301,11 +301,34 @@ std::string formatArgumentErrMsg(const Func* func, const char* amount,
 
 }
 
-void throwMissingArgument(const Func* func, int got) {
-  auto const expected = func->numRequiredParams();
+void throwMissingPositionalArgument(const Func* func, int got) {
+  auto const expected = func->numRequiredPositionalParams();
   assertx(got < expected);
-  auto const amount = expected < func->numParams() ? "at least" : "exactly";
+  auto const amount = expected < func->numParams() - func->numNamedParams() ? "at least" : "exactly";
   auto const errMsg = formatArgumentErrMsg(func, amount, expected, got);
+  SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
+}
+
+void throwMissingNamedArgument(const Func* func, int got) {
+  auto const expected = func->numRequiredNamedParams();
+  assertx(got < expected);
+  auto const errMsg = folly::sformat(
+    "{}() expects {} required named parameter{}, {} given",
+    func->fullNameWithClosureName(),
+    expected,
+    expected == 1 ? "" : "s",
+    got
+  );
+
+  SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
+}
+
+void throwNamedArgumentNameMismatch(const Func* func, std::string argName) {
+  auto const errMsg = folly::sformat(
+    "Named argument {} does not match any named parameter in call to {}",
+    argName,
+    func->fullNameWithClosureName()
+  );
   SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
 }
 

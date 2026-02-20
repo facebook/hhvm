@@ -271,7 +271,7 @@ static CallMap s_callMap {
                           DNone, SSync, {}},
     {ThrowHasThisNeedStatic, throw_has_this_need_static,
                           DNone, SSync, {{SSA, 0}}},
-    {ThrowMissingArg,    throwMissingArgument, DNone, SSync,
+    {ThrowMissingArg,    throwMissingPositionalArgument, DNone, SSync,
                            {extra(&FuncArgData::func),
                             extra(&FuncArgData::argNum)}},
     {ThrowMissingThis,   throw_missing_this,

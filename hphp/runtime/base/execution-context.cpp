@@ -1576,7 +1576,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   // Callee checks and input initialization.
   calleeNamedArgChecks(f, numArgsInclUnpack, namedArgNames);
   calleeGenericsChecks(f, hasGenerics);
-  calleeArgumentArityChecks(f, numArgsInclUnpack);
+  calleeArgumentArityChecks(f, numArgsInclUnpack, numArgsInclUnpack - f->numNamedParams());
   calleeArgumentTypeChecks(f, numArgsInclUnpack, ctx);
   calleeDynamicCallChecks(f, dynamic, allowDynCallNoPointer);
   calleeCoeffectChecks(f, providedCoeffects, numArgsInclUnpack, ctx);
@@ -1682,7 +1682,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   if (numArgs > 0) {
     assertx(isContainer(args));
     tvDup(args, *vmStack().allocC());
-    numArgs = prepareUnpackArgs(f, 0, checkRefAnnot);
+    // TODO(named_params) support invoke with named args.
+    numArgs = prepareUnpackArgs(f, 0, 0, checkRefAnnot);
   }
 
   // Push generics.

@@ -459,7 +459,7 @@ bool Func::isDVEntry(Offset offset) const {
 
 bool Func::hasNonTrivialDVFuncEntry() const {
   auto const nparams = numNonVariadicParams();
-  for (auto i = numRequiredParams(); i < nparams; ++i) {
+  for (auto i = numNamedParams() + numRequiredPositionalParams(); i < nparams; ++i) {
     if (!params()[i].hasTrivialDefaultValue()) return true;
   }
   return false;

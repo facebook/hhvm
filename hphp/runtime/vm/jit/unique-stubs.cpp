@@ -244,7 +244,8 @@ uint32_t fcallRepackHelper(PrologueFlags prologueFlags, const Func* func,
 
     // Repack arguments while saving generics.
     GenericsSaver gs{prologueFlags.hasGenerics()};
-    return prepareUnpackArgs(func, numArgsInclUnpack - 1, true);
+    // TODO(named_params) fix JIT side once we thread calls with named args to fcallRepack
+    return prepareUnpackArgs(func, numArgsInclUnpack - 1, 0, true);
   });
 }
 

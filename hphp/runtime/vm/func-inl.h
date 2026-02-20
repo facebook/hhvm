@@ -401,17 +401,36 @@ inline uint32_t Func::numNamedParams() const {
   return ex->m_namedParamCount;
 }
 
+inline uint32_t Func::numPositionalParams() const {
+  return numNonVariadicParams() - numNamedParams();
+}
+
 inline uint32_t Func::numNonVariadicParams() const {
   assertx(bool(m_attrs & AttrVariadicParam) != bool(m_paramCounts & 1));
   assertx((m_paramCounts >> 1) == params().size());
   return (m_paramCounts - 1) >> 1;
 }
 
-inline uint32_t Func::numRequiredParams() const {
-  for (auto i = numNonVariadicParams(); i > 0; --i) {
-    if (!params()[i - 1].hasDefaultValue()) return i;
+inline uint32_t Func::numRequiredNamedParams() const {
+  auto numNamed = numNamedParams();
+  auto res = 0;
+  for (auto i = 0; i < numNamed; ++i) {
+    if (!params()[i].hasDefaultValue()) ++res;
+  }
+  return res;
+}
+
+inline uint32_t Func::numRequiredPositionalParams() const {
+  auto numNamed = numNamedParams();
+
+  for (auto i = numNonVariadicParams(); i > numNamed; --i) {
+    if (!params()[i - 1].hasDefaultValue()) return i - numNamed;
   }
   return 0;
+}
+
+inline uint32_t Func::numRequiredParams() const {
+  return numRequiredPositionalParams() + numRequiredNamedParams();
 }
 
 inline bool Func::hasVariadicCaptureParam() const {

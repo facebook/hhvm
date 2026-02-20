@@ -761,25 +761,27 @@ Array getDefinedVariables(const ActRec* fp) {
 // The stack contains numArgs arguments plus an extra cell containing
 // arguments to unpack.
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
-                           bool checkInOutAnnot) {
+                           uint32_t numNamedArgs, bool checkInOutAnnot) {
   auto& stack = vmStack();
   auto unpackArgs = *stack.topC();
   if (!isContainer(unpackArgs)) throwInvalidUnpackArgs();
   stack.discard();
   SCOPE_EXIT { tvDecRefGen(unpackArgs); };
-
+  
+  auto const numPositionalArgs = numArgs - numNamedArgs;
   auto const numUnpackArgs = getContainerSize(unpackArgs);
-  auto const numParams = func->numNonVariadicParams();
-  if (LIKELY(numArgs == numParams)) {
+  auto const numPositionalParams = func->numPositionalParams();
+
+  if (LIKELY(numPositionalArgs == numPositionalParams)) {
     // Convert unpack args to the proper type.
     tvCastToVecInPlace(&unpackArgs);
     stack.pushVec(unpackArgs.m_data.parr);
-    return numParams + 1;
+    return numNamedArgs + numPositionalParams + 1;
   }
 
   ArrayIter iter(unpackArgs);
-  if (LIKELY(numArgs < numParams)) {
-    for (auto i = numArgs; iter && (i < numParams); ++i, ++iter) {
+  if (LIKELY(numPositionalArgs < numPositionalParams)) {
+    for (auto i = numPositionalArgs; iter && (i < numPositionalParams); ++i, ++iter) {
       if (UNLIKELY(checkInOutAnnot && func->isInOut(i))) {
         throwParamInOutMismatch(func, i);
       }
@@ -792,25 +794,25 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
       // may be a deficit of non-variadic arguments, and the need to push an
       // empty array for the variadic argument ... that work is left to
       // initFuncInputs.
-      assertx(numArgs + numUnpackArgs <= numParams);
+      assertx(numPositionalArgs + numUnpackArgs <= numPositionalParams);
       return numArgs + numUnpackArgs;
     }
   }
 
   // there are "extra" arguments; passed as standard arguments prior to the
   // ... unpack operator and/or still remaining in argArray
-  assertx(numArgs + numUnpackArgs > numParams);
-  assertx(numArgs > numParams || !!iter);
+  assertx(numPositionalArgs + numUnpackArgs > numPositionalParams);
+  assertx(numPositionalArgs > numPositionalParams || !!iter);
 
-  auto const numNewUnpackArgs = numArgs + numUnpackArgs - numParams;
+  auto const numNewUnpackArgs = numPositionalArgs + numUnpackArgs - numPositionalParams;
   VecInit ai(numNewUnpackArgs);
-  if (UNLIKELY(numArgs > numParams)) {
+  if (UNLIKELY(numPositionalArgs > numPositionalParams)) {
     // The arguments are pushed in order, so we should start from the bottom.
-    auto ptr = stack.indTV(numArgs - numParams);
-    for (auto i = numParams; i < numArgs; ++i) {
+    auto ptr = stack.indTV(numPositionalArgs - numPositionalParams);
+    for (auto i = numPositionalParams; i < numPositionalArgs; ++i) {
       ai.append(*--ptr);
     }
-    for (auto i = numParams; i < numArgs; ++i) {
+    for (auto i = numPositionalParams; i < numPositionalArgs; ++i) {
       stack.popTV();
     }
   }
@@ -821,7 +823,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   assertx(ad->hasExactlyOneRef());
   assertx(ad->size() == numNewUnpackArgs);
   stack.pushArrayLikeNoRc(ad);
-  return numParams + 1;
+  return numNamedArgs + numPositionalParams + 1;
 }
 
 static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
@@ -3560,13 +3562,12 @@ void doFCall(PrologueFlags prologueFlags, const Func* func,
   assertx(kNumActRecCells == 2);
   ActRec* ar = vmStack().indA(
     numArgsInclUnpack + (prologueFlags.hasGenerics() ? 1 : 0));
-
   // Callee checks and input initialization.
   calleeNamedArgChecks(func, numArgsInclUnpack, namedArgNames);
   calleeGenericsChecks(func, prologueFlags.hasGenerics());
-  calleeArgumentArityChecks(func, numArgsInclUnpack);
+  calleeArgumentArityChecks(func, numArgsInclUnpack, numArgsInclUnpack - func->numNamedParams());
   calleeArgumentTypeChecks(func, numArgsInclUnpack, ctx);
-  calleeDynamicCallChecks(func, prologueFlags.isDynamicCall());
+  calleeDynamicCallChecks(func, prologueFlags.isDynamicCall());  
   calleeCoeffectChecks(func, prologueFlags.coeffects(), numArgsInclUnpack, ctx);
   func->recordCall();
   initFuncInputs(func, numArgsInclUnpack);
@@ -3612,25 +3613,29 @@ JitResumeAddr fcallImpl(PC origpc, PC& pc, const FCallArgs& fca,
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   checkStack(vmStack(), func, 0);
 
+  const ArrayData* nameArr = nullptr;
+  if (fca.hasNamedArgs()) {
+    nameArr = vmfp()->func()->unit()->lookupArrayId(fca.namedArgNames);
+  }
+
   auto const numArgsInclUnpack = [&] {
+    auto numNamedArgs = nameArr ? nameArr->size() : 0;
+    assertx(fca.numArgs >= numNamedArgs);
+    auto numPositionalArgs = fca.numArgs - numNamedArgs;
+    auto numPositionalParams = func->numNonVariadicParams() - func->numNamedParams();
     if (UNLIKELY(fca.hasUnpack())) {
       GenericsSaver gs{fca.hasGenerics()};
-      return prepareUnpackArgs(func, fca.numArgs, true);
+      return prepareUnpackArgs(func, fca.numArgs, numNamedArgs, true);
     }
-
-    if (UNLIKELY(fca.numArgs > func->numNonVariadicParams())) {
+    if (UNLIKELY(numPositionalArgs > numPositionalParams)) {
       GenericsSaver gs{fca.hasGenerics()};
-      iopNewVec(fca.numArgs - func->numNonVariadicParams());
-      return func->numNonVariadicParams() + 1;
+      uint32_t delta = numPositionalArgs - numPositionalParams;
+      iopNewVec(delta);
+      return fca.numArgs - delta + 1;
     }
 
     return fca.numArgs;
   }();
-  const ArrayData* nameArr = nullptr;
-  if (fca.namedArgNames != kInvalidId) {
-    auto unit = vmfp()->func()->unit();
-    nameArr = unit->lookupArrayId(fca.namedArgNames);
-  }
 
   auto const prologueFlags = PrologueFlags(
     fca.hasGenerics(),

@@ -154,11 +154,11 @@ external lutimes : string -> unit = "hh_lutimes"
 
 type touch_mode =
   | Touch_existing of { follow_symlinks: bool }
-      (** This won't open/close fds, which is important for some callers. *)
-  | Touch_existing_or_create_new of {
+      (** Can be used on files and folders. This won't open/close fds, which is important for some callers. *)
+  | Touch_existing_file_or_create_new of {
       mkdir_if_new: bool;
       perm_if_new: Unix.file_perm;
-    }
+    }  (** Only to be used for files, not folders *)
 
 val touch : touch_mode -> string -> unit
 

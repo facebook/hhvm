@@ -121,7 +121,7 @@ let test_read_empty () : bool Lwt.t =
     try_with_tmp (fun ~root ->
         let errors_file_path = ServerFiles.errors_file_path root in
         Sys_utils.touch
-          (Sys_utils.Touch_existing_or_create_new
+          (Sys_utils.Touch_existing_file_or_create_new
              { mkdir_if_new = false; perm_if_new = 0o666 })
           errors_file_path;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in

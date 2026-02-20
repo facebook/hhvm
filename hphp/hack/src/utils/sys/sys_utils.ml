@@ -384,7 +384,7 @@ external lutimes : string -> unit = "hh_lutimes"
 (** see .mli *)
 type touch_mode =
   | Touch_existing of { follow_symlinks: bool }
-  | Touch_existing_or_create_new of {
+  | Touch_existing_file_or_create_new of {
       mkdir_if_new: bool;
       perm_if_new: Unix.file_perm;
     }
@@ -393,7 +393,7 @@ let touch mode file =
   match mode with
   | Touch_existing { follow_symlinks = true } -> Unix.utimes file 0. 0.
   | Touch_existing { follow_symlinks = false } -> lutimes file
-  | Touch_existing_or_create_new { mkdir_if_new; perm_if_new } ->
+  | Touch_existing_file_or_create_new { mkdir_if_new; perm_if_new } ->
     with_umask 0o000 (fun () ->
         if mkdir_if_new then mkdir_no_fail (Filename.dirname file);
         let oc =

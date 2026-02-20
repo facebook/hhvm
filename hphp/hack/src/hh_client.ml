@@ -65,7 +65,7 @@ let set_up_logger ~command_name ~init_id ~root =
        to write to the file. Pending a fix, let's only set up Hh_logger
        to write to the file if we can indeed safely write to it. *)
     Sys_utils.touch
-      (Sys_utils.Touch_existing_or_create_new
+      (Sys_utils.Touch_existing_file_or_create_new
          { mkdir_if_new = false; perm_if_new = 0o666 })
       client_log_fn;
     Hh_logger.set_log client_log_fn

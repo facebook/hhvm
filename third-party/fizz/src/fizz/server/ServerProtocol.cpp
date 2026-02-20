@@ -1120,15 +1120,10 @@ static std::pair<std::shared_ptr<SelfCert>, SignatureScheme> chooseCert(
   return *certAndScheme;
 }
 
-static std::tuple<Buf, folly::Optional<CertificateCompressionAlgorithm>>
-getCertificate(
-    const std::shared_ptr<const SelfCert>& serverCert,
+static folly::Optional<CertificateCompressionAlgorithm>
+negotiateCertCompressionAlgo(
     const FizzServerContext& context,
-    const ClientHello& chlo,
-    HandshakeContext& handshakeContext) {
-  // Check for compression support first, and if so, send compressed.
-  Buf encodedCertificate;
-  folly::Optional<CertificateCompressionAlgorithm> algo;
+    const ClientHello& chlo) {
   folly::Optional<CertificateCompressionAlgorithms> compAlgos;
   Error err;
   FIZZ_THROW_ON_ERROR(
@@ -1136,10 +1131,18 @@ getCertificate(
           compAlgos, err, chlo.extensions),
       err);
   if (compAlgos && !context.getSupportedCompressionAlgorithms().empty()) {
-    algo = negotiate(
+    return negotiate(
         context.getSupportedCompressionAlgorithms(), compAlgos->algorithms);
   }
+  return folly::none;
+}
 
+static Buf getCertificate(
+    const std::shared_ptr<const SelfCert>& serverCert,
+    const folly::Optional<CertificateCompressionAlgorithm>& algo,
+    HandshakeContext& handshakeContext) {
+  Buf encodedCertificate;
+  Error err;
   if (algo) {
     FIZZ_THROW_ON_ERROR(
         encodeHandshake(
@@ -1151,7 +1154,7 @@ getCertificate(
         err);
   }
   handshakeContext.appendToTranscript(encodedCertificate);
-  return std::make_tuple(std::move(encodedCertificate), std::move(algo));
+  return encodedCertificate;
 }
 
 static Buf getCertificateVerify(
@@ -1905,12 +1908,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                 std::tie(originalSelfCert, sigScheme) =
                     chooseCert(*state.context(), chlo);
 
-                std::tie(encodedCertificate, certCompressionAlgo) =
-                    getCertificate(
-                        originalSelfCert,
-                        *state.context(),
-                        chlo,
-                        *handshakeContext);
+                certCompressionAlgo =
+                    negotiateCertCompressionAlgo(*state.context(), chlo);
+                encodedCertificate = getCertificate(
+                    originalSelfCert, certCompressionAlgo, *handshakeContext);
 
                 auto toBeSigned = handshakeContext->getHandshakeContext();
                 auto asyncSelfCert =

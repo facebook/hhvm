@@ -25,6 +25,7 @@
 #include <fizz/protocol/test/CertUtil.h>
 #include <fizz/protocol/test/Matchers.h>
 #include <fizz/server/AsyncFizzServer.h>
+#include <fizz/server/AsyncSelfCert.h>
 #include <fizz/server/CookieTypes.h>
 #include <fizz/server/DefaultCertManager.h>
 #include <fizz/server/TicketTypes.h>
@@ -39,6 +40,59 @@ using namespace folly::test;
 using namespace fizz::client;
 using namespace fizz::extensions;
 using namespace fizz::server;
+
+/**
+ * Wraps an existing SelfCert to implement AsyncSelfCert, delegating signFuture
+ * to the underlying SelfCert's synchronous sign method.
+ */
+class AsyncSelfCertWrapper : public AsyncSelfCert {
+ public:
+  explicit AsyncSelfCertWrapper(std::shared_ptr<SelfCert> cert)
+      : cert_(std::move(cert)) {}
+
+  std::string getIdentity() const override {
+    return cert_->getIdentity();
+  }
+
+  std::vector<std::string> getAltIdentities() const override {
+    return cert_->getAltIdentities();
+  }
+
+  std::vector<SignatureScheme> getSigSchemes() const override {
+    return cert_->getSigSchemes();
+  }
+
+  CertificateMsg getCertMessage(Buf certificateRequestContext) const override {
+    return cert_->getCertMessage(std::move(certificateRequestContext));
+  }
+
+  CompressedCertificate getCompressedCert(
+      CertificateCompressionAlgorithm algo) const override {
+    return cert_->getCompressedCert(algo);
+  }
+
+  Buf sign(
+      SignatureScheme scheme,
+      CertificateVerifyContext context,
+      folly::ByteRange toBeSigned) const override {
+    return cert_->sign(scheme, context, toBeSigned);
+  }
+
+  folly::SemiFuture<folly::Optional<Buf>> signFuture(
+      SignatureScheme scheme,
+      CertificateVerifyContext context,
+      std::unique_ptr<folly::IOBuf> toBeSigned) const override {
+    return folly::makeSemiFuture<folly::Optional<Buf>>(
+        cert_->sign(scheme, context, toBeSigned->coalesce()));
+  }
+
+  folly::ssl::X509UniquePtr getX509() const override {
+    return cert_->getX509();
+  }
+
+ private:
+  std::shared_ptr<SelfCert> cert_;
+};
 
 struct ExpectedParameters {
   ProtocolVersion version{ProtocolVersion::tls_1_3};

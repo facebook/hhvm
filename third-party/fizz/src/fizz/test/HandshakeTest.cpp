@@ -24,6 +24,23 @@ TEST_F(HandshakeTest, BasicHandshake) {
   sendAppData();
 }
 
+TEST_F(HandshakeTest, BasicHandshakeAsyncCert) {
+  auto certManager = std::make_shared<server::DefaultCertManager>();
+  std::vector<ssl::X509UniquePtr> p256Certs;
+  p256Certs.emplace_back(getCert(kP256Certificate));
+  certManager->addCertAndSetDefault(
+      std::make_shared<AsyncSelfCertWrapper>(
+          std::make_shared<
+              openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
+              getPrivateKey(kP256Key), std::move(p256Certs))));
+  serverContext_->setCertManager(std::move(certManager));
+
+  expectSuccess();
+  doHandshake();
+  verifyParameters();
+  sendAppData();
+}
+
 TEST_F(HandshakeTest, BasicHandshakeSynchronous) {
   evb_.runInLoop([this]() { startHandshake(); });
 

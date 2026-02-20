@@ -28,7 +28,7 @@
 }}
 {{#typedef:type}}
 func {{typedef:go_qualified_write_func}}(item {{#type:structured?}}*{{/type:structured?}}{{typedef:go_name}}, p thrift.Encoder) error {
-    {{> codec/encode}}
+    {{#partial codec.encode type=type:self}}
     return nil
 }
 {{/typedef:type}}

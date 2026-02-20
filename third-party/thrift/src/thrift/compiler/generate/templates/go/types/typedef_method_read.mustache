@@ -30,7 +30,7 @@ func {{typedef:go_qualified_read_func}}(p thrift.Decoder) ({{#typedef:type}}{{#t
     var decodeResult {{#typedef:type}}{{#type:structured?}}*{{/type:structured?}}{{/typedef:type}}{{typedef:go_name}}
     decodeErr := func() error {
         {{#typedef:type}}
-        {{> codec/decode}}
+        {{#partial codec.decode type=type:self}}
         {{/typedef:type}}
         decodeResult = result
         return nil

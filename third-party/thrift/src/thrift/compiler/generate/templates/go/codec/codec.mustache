@@ -15,9 +15,29 @@
   limitations under the License.
 
 }}
+{{#import "common/type" as types}}
 
-{{! Defines the decoding/read function for a given primitive type.
-    These functions come from Format interface in thrift/lib/go/thrift/format.go
+{{!
+  Defines the encoding/write function for a given primitive type.
+  These functions come from Format interface in thrift/lib/go/thrift/format.go
+}}
+{{#let export partial primitive_encode_func |type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.string?}}WriteString
+{{#else if type.binary?}}WriteBinary
+{{#else if type.bool?}}WriteBool
+{{#else if type.byte?}}WriteByte
+{{#else if type.i16?}}WriteI16
+{{#else if type.i32?}}WriteI32
+{{#else if type.i64?}}WriteI64
+{{#else if type.double?}}WriteDouble
+{{#else if type.float?}}WriteFloat
+{{/if type.string?}}
+{{/let partial}}
+
+{{!
+  Defines the decoding/read function for a given primitive type.
+  These functions come from Format interface in thrift/lib/go/thrift/format.go
 }}
 {{#let export partial primitive_decode_func |type|}}
   {{#pragma ignore-newlines}}
@@ -52,19 +72,245 @@
 {{/if type.string_or_binary?}}
 {{/let partial}}
 
-{{! Defines the encoding/write function for a given primitive type.
-    These functions come from Format interface in thrift/lib/go/thrift/format.go
+{{! Defines the decoding/read function for a given field type. }}
+{{#let export partial decode |type| captures |types primitive_decode_func|}}
+{{! Defines the decoding/read code for a base type. }}
+{{#let partial decode_primitive |type| captures |primitive_decode_func|}}
+{{#if type.byte?}}
+resultByte, err := p.{{#partial primitive_decode_func type=type}}()
+result := int8(resultByte)
+{{#else}}
+result, err := p.{{#partial primitive_decode_func type=type}}()
+{{/if type.byte?}}
+if err != nil {
+    return err
+}
+{{/let partial}}
+{{#let partial decode_enum |enum|}}
+enumResult, err := p.ReadI32()
+if err != nil {
+    return err
+}
+result := {{enum.go_qualified_name}}(enumResult)
+{{/let partial}}
+{{#let partial decode_struct |struct|}}
+result := {{struct.go_qualified_new_func}}()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+{{/let partial}}
+{{#let partial decode_typedef |typedef|}}
+result, err := {{typedef.go_qualified_read_func}}(p)
+if err != nil {
+    return err
+}
+{{/let partial}}
+{{#let partial decode_list |type| captures |types decode|}}
+_ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make({{#partial types.go_type type=type}}, 0, size)
+for i := 0; i < size; i++ {
+    var elem {{#if type.elem_type.structured?}}*{{/if type.elem_type.structured?}}{{#partial types.go_type type=type.elem_type}}
+    {{! Use scope to avoid multiple 'result' variable collisions }}
+    {
+        {{#partial decode type=type.elem_type}}
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+{{/let partial}}
+{{#let partial decode_set |type| captures |types decode|}}
+_ /* elemType */, size, err := p.ReadSetBegin()
+if err != nil {
+    return thrift.PrependError("error reading set begin: ", err)
+}
+
+setResult := make({{#partial types.go_type type=type}}, 0, size)
+for i := 0; i < size; i++ {
+    var elem {{#if type.elem_type.structured?}}*{{/if type.elem_type.structured?}}{{#partial types.go_type type=type.elem_type}}
+    {{! Use scope to avoid multiple 'result' variable collisions }}
+    {
+        {{#partial decode type=type.elem_type}}
+        elem = result
+    }
+    setResult = append(setResult, elem)
+}
+
+if err := p.ReadSetEnd(); err != nil {
+    return thrift.PrependError("error reading set end: ", err)
+}
+result := setResult
+{{/let partial}}
+{{#let partial decode_map |type| captures |types decode|}}
+_ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make({{#partial types.go_type type=type}}, size)
+for i := 0; i < size; i++ {
+    {{! Use scopes to avoid multiple 'result' variable collisions }}
+    var key {{#if (not type.key_type.go_comparable?)}}*{{/if (not type.key_type.go_comparable?)}}{{#partial types.go_type type=type.key_type}}
+    {
+        {{#partial decode type=type.key_type}}
+        key = {{#if (and type.key_type.go_comparable? type.key_type.structured?)}}{{!
+                }}*{{!  <- Dereference if 'result' is a comparable struct.
+              }}{{#else if (not (or type.key_type.go_comparable? type.key_type.structured?))}}{{!
+                }}&{{!  <- Take address if 'result' is non-comparable and not a struct.
+              }}{{/if (and type.key_type.go_comparable? type.key_type.structured?)}}result
+    }
+
+    var value {{#if type.val_type.structured?}}*{{/if type.val_type.structured?}}{{#partial types.go_type type=type.val_type}}
+    {
+        {{#partial decode type=type.val_type}}
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+{{/let partial}}
+{{! ACTUAL "decode" PARTIAL BELOW: }}
+{{#if (and type.typedef? type.defined_kind?)}}
+{{#partial decode_typedef typedef=type}}
+{{#else if type.typedef?}}
+{{#partial decode type=type.resolved}}
+{{#else if type.structured?}}
+{{#partial decode_struct struct=type}}
+{{#else if type.enum?}}
+{{#partial decode_enum enum=type}}
+{{#else if type.primitive?}}
+{{#partial decode_primitive type=type}}
+{{#else if type.list?}}
+{{#partial decode_list type=type}}
+{{#else if type.set?}}
+{{#partial decode_set type=type}}
+{{#else if type.map?}}
+{{#partial decode_map type=type}}
+{{/if (and type.typedef? type.defined_kind?)}}
+{{/let partial}}
+
+{{! Defines the encoding/write function for a given field type. }}
+{{#let export partial encode |type| captures |types ttype primitive_encode_func|}}
+{{! Defines the encoding/write code for a base type.
+
+    Note: byte type is special, it is sent/received on a Format object
+          as Go 'byte' type, but is represented in the generated code as
+          Go 'int8' type, so we need to do some type-converting here.
 }}
-{{#let export partial primitive_encode_func |type|}}
-  {{#pragma ignore-newlines}}
-{{#if type.string?}}WriteString
-{{#else if type.binary?}}WriteBinary
-{{#else if type.bool?}}WriteBool
-{{#else if type.byte?}}WriteByte
-{{#else if type.i16?}}WriteI16
-{{#else if type.i32?}}WriteI32
-{{#else if type.i64?}}WriteI64
-{{#else if type.double?}}WriteDouble
-{{#else if type.float?}}WriteFloat
-{{/if type.string?}}
+{{#let partial encode_primitive |type| captures |primitive_encode_func|}}
+if err := p.{{#partial primitive_encode_func type=type}}({{#if type.byte?}}byte(item){{#else}}item{{/if type.byte?}}); err != nil {
+    return err
+}
+{{/let partial}}
+{{#let partial encode_enum}}
+if err := p.WriteI32(int32(item)); err != nil {
+    return err
+}
+{{/let partial}}
+{{#let partial encode_struct}}
+if err := item.Write(p); err != nil {
+    return err
+}
+{{/let partial}}
+{{#let partial encode_typedef |typedef|}}
+err := {{typedef.go_qualified_write_func}}(item, p)
+if err != nil {
+    return err
+}
+{{/let partial}}
+{{#let partial encode_list |type| captures |ttype encode|}}
+if err := p.WriteListBegin({{!
+  }}{{#partial ttype type=type.elem_type}}, {{!
+  }}len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {{! Use scope to avoid multiple 'item' variable collisions }}
+    {
+        item := v
+        {{#partial encode type=type.elem_type}}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+{{/let partial}}
+{{#let partial encode_set |type| captures |ttype encode|}}
+if err := p.WriteSetBegin({{!
+  }}{{#partial ttype type=type.elem_type}}, {{!
+  }}len(item)); err != nil {
+    return thrift.PrependError("error writing set begin: ", err)
+}
+for _, v := range item {
+    {{! Use scope to avoid multiple 'item' variable collisions }}
+    {
+        item := v
+        {{#partial encode type=type.elem_type}}
+    }
+}
+if err := p.WriteSetEnd(); err != nil {
+    return thrift.PrependError("error writing set end: ", err)
+}
+{{/let partial}}
+{{#let partial encode_map |type| captures |ttype encode|}}
+if err := p.WriteMapBegin({{!
+  }}{{#partial ttype type=type.key_type}}, {{!
+  }}{{#partial ttype type=type.val_type}}, {{!
+  }}len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {{#if (not type.key_type.go_comparable?)}}
+    if k == nil {
+        return fmt.Errorf("%T write map: nil key is not allowed.", item)
+    }
+
+    {{/if (not type.key_type.go_comparable?)}}
+    {{! Use scopes to avoid multiple 'item' variable collisions }}
+    {
+        item := {{#if (not (or type.key_type.go_comparable? type.key_type.structured?))}}*{{/if (not (or type.key_type.go_comparable? type.key_type.structured?))}}k
+        {{#partial encode type=type.key_type}}
+    }
+
+    {
+        item := v
+        {{#partial encode type=type.val_type}}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+{{/let partial}}
+{{! ACTUAL "encode" PARTIAL BELOW: }}
+{{#if (and type.typedef? type.defined_kind?)}}
+{{#partial encode_typedef typedef=type}}
+{{#else if type.typedef?}}
+{{#partial encode type=type.resolved}}
+{{#else if type.structured?}}
+{{#partial encode_struct}}
+{{#else if type.enum?}}
+{{#partial encode_enum}}
+{{#else if type.primitive?}}
+{{#partial encode_primitive type=type}}
+{{#else if type.list?}}
+{{#partial encode_list type=type}}
+{{#else if type.set?}}
+{{#partial encode_set type=type}}
+{{#else if type.map?}}
+{{#partial encode_map type=type}}
+{{/if (and type.typedef? type.defined_kind?)}}
 {{/let partial}}

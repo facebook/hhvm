@@ -100,12 +100,12 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 {{#struct:fields?}}
   std::optional<std::string_view> error;
   {{^struct:union?}}
-  {{#struct:fields}}
-  Extractor<{{field:marshal_type}}>{}.extractInto(
-      cpp.{{field:cpp_name}}_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__{{struct:py_name}}__tuple_pos[{{field:index}}]),
+  {{#each (array.enumerate struct:self.fields) as |field_index field|}}
+  Extractor<{{field.marshal_type}}>{}.extractInto(
+      cpp.{{field.cpp_name}}_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__{{struct:py_name}}__tuple_pos[{{field_index}}]),
       error);
-  {{/struct:fields}}
+  {{/each}}
   {{/struct:union?}}
   {{#struct:union?}}
   auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
@@ -211,28 +211,28 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const {{struct:cpp_name}}& val) {
   {{^struct:union?}}
   StrongRef fbthrift_data(createStructTuple({{struct:num_fields}}));
-  {{#struct:fields}}
-  StrongRef _fbthrift__{{field:name}}(
-    Constructor<{{field:marshal_type}}>{}
-    .constructFrom(val.{{field:cpp_name}}_ref()));
-  {{#field:optional?}}
-  if (_fbthrift__{{field:name}}.isNone()) {
+  {{#each (array.enumerate struct:self.fields) as |field_index field|}}
+  StrongRef _fbthrift__{{field.name}}(
+    Constructor<{{field.marshal_type}}>{}
+    .constructFrom(val.{{field.cpp_name}}_ref()));
+  {{#field.optional?}}
+  if (_fbthrift__{{field.name}}.isNone()) {
     Py_INCREF(Py_None);
     PyTuple_SET_ITEM(
       *fbthrift_data,
-      _fbthrift__{{struct:py_name}}__tuple_pos[{{field:index}}],
+      _fbthrift__{{struct:py_name}}__tuple_pos[{{field_index}}],
       Py_None);
   } else
-  {{/field:optional?}}
-  if (!_fbthrift__{{field:name}} ||
+  {{/field.optional?}}
+  if (!_fbthrift__{{field.name}} ||
       setStructField(
           *fbthrift_data,
-          _fbthrift__{{struct:py_name}}__tuple_pos[{{field:index}}],
-          *_fbthrift__{{field:name}}) == -1) {
+          _fbthrift__{{struct:py_name}}__tuple_pos[{{field_index}}],
+          *_fbthrift__{{field.name}}) == -1) {
     {{! struct and previous fields auto-decref'd by StrongRef}}
     return nullptr;
   }
-  {{/struct:fields}}
+  {{/each}}
   return std::move(fbthrift_data).release();
   {{/struct:union?}}
   {{#struct:union?}}

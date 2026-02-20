@@ -20,21 +20,21 @@ Generated Cpp2 <-> thrift-python converters for Thrift structs
 {{> common/auto_generated_cython}}
 
 
-{{#program:structs}}
-{{#first?}}
+{{#each (array.enumerate program:self.structured_definitions with_first=true) as |i struct first?|}}
+  {{#if first?}}
 cdef extern from "{{program:include_prefix}}gen-cpp2/{{program:name}}_types.h":
-{{/first?}}
-    cdef cppclass c{{struct:py_name}} "{{struct:cpp_name}}":
-        c{{struct:py_name}}()
-{{/program:structs}}
+  {{/if first?}}
+    cdef cppclass c{{struct.py_name}} "{{struct.cpp_name}}":
+        c{{struct.py_name}}()
+{{/each}}
 
-{{#program:enums}}
-{{#first?}}
+{{#each (array.enumerate program:self.enums with_first=true) as |i enum first?|}}
+  {{#if first?}}
 cdef extern from "{{program:include_prefix}}gen-cpp2/{{program:name}}_types.h":
-{{/first?}}
-    cdef cppclass c{{enum:name}} "{{program:cpp_namespace}}::{{enum:cpp_name}}":
+  {{/if first?}}
+    cdef cppclass c{{enum.name}} "{{program:cpp_namespace}}::{{enum.cpp_name}}":
         pass
-{{/program:enums}}
+{{/each}}
 {{#program:structs}}
 cdef c{{struct:py_name}} {{struct:py_name}}_convert_to_cpp(object inst) except*
 cdef object {{struct:py_name}}_from_cpp(const c{{struct:py_name}}& c_struct)

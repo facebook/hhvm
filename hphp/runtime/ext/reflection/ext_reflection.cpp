@@ -1811,7 +1811,7 @@ static Array HHVM_METHOD(
 
 static Array HHVM_STATIC_METHOD(
   ReflectionClass,
-  getClassPropertyInfo,
+  getNonDynamicPropNames,
   const String& clsname) {
   /*
    * FIXME: This implementation is pretty horrible and should be rewritten
@@ -1819,24 +1819,15 @@ static Array HHVM_STATIC_METHOD(
    */
   auto const cls = get_class_from_name(clsname);
   auto const properties = cls->declProperties();
-  cls->initialize();
-  auto const& propInitVec = cls->getPropData()
-    ? *cls->getPropData()
-    : cls->declPropInit();
 
-  auto ret = Array::CreateDict();
+  auto ret = Array::CreateKeyset();
   for (auto const& declProp : properties) {
     auto slot = declProp.serializationIdx;
-    auto index = cls->propSlotToIndex(slot);
     auto const& prop = properties[slot];
-    auto const default_val = propInitVec[index].val.tv();
     if (((prop.attrs & AttrPrivate) == AttrPrivate) && (prop.cls != cls)) {
       continue;
     }
-
-    auto info = Array::CreateDict();
-    set_instance_prop_info(info, &prop, default_val);
-    ret.set(StrNR(prop.name), VarNR(info).tv());
+    ret.append(make_tv<KindOfPersistentString>(prop.name));
   }
 
   // static properties
@@ -1847,10 +1838,7 @@ static Array HHVM_STATIC_METHOD(
     if (((prop.attrs & AttrPrivate) == AttrPrivate) && (prop.cls != cls)) {
       continue;
     }
-
-    auto info = Array::CreateDict();
-    set_static_prop_info(info, &prop);
-    ret.set(StrNR(prop.name), VarNR(info).tv());
+    ret.append(make_tv<KindOfPersistentString>(prop.name));
   }
   return ret;
 }
@@ -2513,7 +2501,7 @@ struct ReflectionExtension final : Extension {
 
     HHVM_ME(ReflectionClass, getReifiedTypeParamInfo);
 
-    HHVM_STATIC_ME(ReflectionClass, getClassPropertyInfo);
+    HHVM_STATIC_ME(ReflectionClass, getNonDynamicPropNames);
     HHVM_ME(ReflectionClass, getDynamicPropertyInfos);
     HHVM_ME(ReflectionClass, getConstructorName);
     HHVM_ME(ReflectionClass, getTypeVarNames);

@@ -1870,36 +1870,30 @@ class ReflectionClass implements Reflector {
   // This calculations requires walking the preclasses in the hierarchy and
   // should not be getting performed repeatedly.
   <<__Native>>
-  // returns dict:
-  //   'properties'               => darray<string, prop_info_array>
-  //   'private_properties'       => darray<string, prop_info_array>
-  //   'properties_index'         => darray<string, int>
-  //   'private_properties_index' => darray<string, int>
-  private static function getClassPropertyInfo(string $clsname)[]: dict;
+  // returns keyset of instance and then static properties
+  private static function getNonDynamicPropNames(string $clsname)[]: keyset<string>;
 
   <<__Native>>
   private function getDynamicPropertyInfos(
     \HH\object $obj,
   )[]: dict<string, mixed>;
 
-  private function getOrderedPropertyInfos()[]: ConstMap<string, mixed> {
-    $props_map = self::getPropsMapCache($this->getName());
-    if (!$this->obj) { return $props_map; }
+  private function getOrderedPropertyNames()[]: keyset<string> {
+    $prop_names = self::getNonDynamicPropNamesMemoized($this->getName());
+    if (!$this->obj) { return $prop_names; }
 
     // caching cannot be well applied to an object's dynamic properties,
     // since they can be added and removed at any time between calls to
     // property methods.
     $dynamic_props = $this->getDynamicPropertyInfos($this->obj);
-    return (!$dynamic_props)
-      ? $props_map
-      : new Map(HH\Lib\Dict\merge($props_map, $dynamic_props));
+    return HH\Lib\Keyset\union($prop_names, HH\Lib\Keyset\keys($dynamic_props));
   }
 
   <<__Memoize>>
-  private static function getPropsMapCache(
+  private static function getNonDynamicPropNamesMemoized(
     string $clsname
-  )[]: ImmMap<string, mixed> {
-    return new ImmMap(self::getClassPropertyInfo($clsname));
+  )[]: keyset<string> {
+    return self::getNonDynamicPropNames($clsname);
   }
 
   /**
@@ -1935,7 +1929,7 @@ class ReflectionClass implements Reflector {
    * @return     bool   TRUE if it has the property, otherwise FALSE
    */
   public function hasProperty($name)[]: bool {
-    return $this->getOrderedPropertyInfos()->containsKey($name);
+    return HH\Lib\C\contains($this->getOrderedPropertyNames(), $name);
   }
 
   /**
@@ -1951,7 +1945,7 @@ class ReflectionClass implements Reflector {
    */
   public function getProperties($filter = 0xFFFF)[]: varray<ReflectionProperty> {
     $ret = vec[];
-    foreach ($this->getOrderedPropertyInfos() as $name => $prop_info) {
+    foreach ($this->getOrderedPropertyNames() as $name) {
       if ($this->obj) {
         $p = new ReflectionProperty($this->obj, $name);
       } else {

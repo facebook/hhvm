@@ -1,0 +1,12 @@
+bool(false)
+bool(true)
+vec(1) {
+  object(ReflectionProperty) (3) {
+    ["name"]=>
+    string(32) "withDefaultFromRequireImplements"
+    ["class"]=>
+    string(7) "MyTrait"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+}

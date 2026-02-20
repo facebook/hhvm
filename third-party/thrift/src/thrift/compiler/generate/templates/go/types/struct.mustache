@@ -38,14 +38,14 @@
 {{#if struct:use_reflect_codec?}}
 {{#partial struct_methods.write_v2 struct=struct:self}}
 {{#else}}
-{{> types/struct_method_write}}
+{{#partial struct_methods.write struct=struct:self}}
 {{/if struct:use_reflect_codec?}}
 
 {{! read (deserialize) }}
 {{#if struct:use_reflect_codec?}}
 {{#partial struct_methods.read_v2 struct=struct:self}}
 {{#else}}
-{{> types/struct_method_read}}
+{{#partial struct_methods.read struct=struct:self}}
 {{/if struct:use_reflect_codec?}}
 
 {{! string }}

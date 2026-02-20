@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "codec/codec" as codec}}
 {{#import "common/constants" as constants}}
 {{#import "common/type" as types}}
 
@@ -90,6 +91,80 @@ func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
     }
     {{/struct.union?}}
     return thrift.WriteStructSpec(p, x, x.getStructSpec())
+}
+{{/let partial}}
+
+{{! Write() }}
+{{#let export partial write |struct| captures |codec|}}
+func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
+    {{#if struct.union?}}
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("{{struct.go_name}} write union: no more than one field must be set (%d set).", countSet)
+    }
+    {{/if struct.union?}}
+    if err := p.WriteStructBegin("{{struct.name}}"); err != nil {
+        return thrift.PrependError("{{struct.go_name}} write struct begin error: ", err)
+    }
+
+    {{#each struct.fields_sorted as |field|}}
+    if err := x.writeField{{field.key_str}}(p); err != nil {
+        return err
+    }
+    {{/each}}
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("{{struct.go_name}} write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("{{struct.go_name}} write struct end error: ", err)
+    }
+    return nil
+}
+{{/let partial}}
+
+{{! Read() }}
+{{#let export partial read |struct| captures |codec|}}
+func (x *{{struct.go_name}}) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("{{struct.go_name}} read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("{{struct.go_name}} field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        {{#each struct.fields_sorted as |field|}}
+        {{#let type = field.type}}
+        case ((id == {{field.id}} && wireType == {{#partial codec.ttype type=type}}) || (id == thrift.NO_FIELD_ID && fieldName == "{{field.name}}")):  // {{field.name}}
+            fieldReadErr = x.readField{{field.key_str}}(p)
+        {{/each}}
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("{{struct.go_name}} read struct end error: ", err)
+    }
+
+    return nil
 }
 {{/let partial}}
 

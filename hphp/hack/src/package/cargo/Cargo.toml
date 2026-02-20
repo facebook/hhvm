@@ -19,4 +19,4 @@ toml = { version = "0.9.11", features = ["preserve_order"] }
 
 [dev-dependencies]
 lazy_static = "1.5"
-regex = "1.12.2"
+regex = "1.12.3"

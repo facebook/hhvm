@@ -13,7 +13,7 @@ path = "../multifile.rs"
 [dependencies]
 anyhow = "1.0.101"
 lazy_static = "1.5"
-regex = "1.12.2"
+regex = "1.12.3"
 
 [dev-dependencies]
 pretty_assertions = { version = "1.4.1", features = ["alloc"], default-features = false }

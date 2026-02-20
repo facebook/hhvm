@@ -25,6 +25,7 @@ using apache::thrift::compiler::t_program_bundle;
 using apache::thrift::compiler::codemod::file_manager;
 using apache::thrift::compiler::codemod::get_package;
 using apache::thrift::compiler::codemod::get_replacement_content;
+using apache::thrift::compiler::codemod::replacement_content;
 
 namespace {
 
@@ -42,7 +43,11 @@ class add_package {
       return;
     }
     auto offset = fm_.get_namespace_offset();
-    fm_.add({offset, offset, get_replacement_content(prog_, pkg)});
+    replacement_content replacement = get_replacement_content(prog_, pkg);
+    fm_.add(
+        {offset,
+         offset,
+         replacement.package_content + replacement.namespace_content});
 
     if (!prog_.namespaces().contains("cpp2") &&
         prog_.namespaces().contains("cpp")) {

@@ -458,6 +458,22 @@ inline std::string get_package(
   return gen.get_longest_package();
 }
 
+struct replacement_content {
+  /**
+   * The package declaration (e.g., `package "foo.bar/baz"\n\n`).
+   * Will always have two trailing new lines, to separate from other content.
+   */
+  std::string package_content;
+  /**
+   * Backwards-compatible namespace overrides to preserve existing codegen
+   * references. Empty if no overrides are needed.
+   * Will have a trailing new line to separate from a subsequent existing
+   * namespace declaration, or two trailing new lines to separate from other
+   * content if the file does not have any existing namespace declarations.
+   */
+  std::string namespace_content;
+};
+
 /**
  * Returns the Thrift IDL content to add a package declaration with the given
  * name to `program`.
@@ -469,9 +485,10 @@ inline std::string get_package(
  * Override the namespace from package by adding default namespaces.
  * This ensures that the existing references don't break.
  */
-inline std::string get_replacement_content(
+inline replacement_content get_replacement_content(
     const t_program& program, const std::string& pkg) {
-  std::string content = fmt::format("package \"{}\"\n\n", pkg);
+  replacement_content content;
+  content.package_content = fmt::format("package \"{}\"\n\n", pkg);
 
   // If there are no definitions in the thrift file, then namespace changes
   // cannot possibly break existing references. We can simply set the package
@@ -483,27 +500,26 @@ inline std::string get_replacement_content(
   const std::map<std::string, std::string>& namespaces = program.namespaces();
   if (!namespaces.contains("cpp2")) {
     if (!namespaces.contains("cpp")) {
-      content += fmt::format(
+      content.namespace_content += fmt::format(
           "namespace cpp2 \"cpp2\" {}\n", kBackwardsCompatibleNamespaceComment);
     } else {
-      content +=
+      content.namespace_content +=
           fmt::format("namespace cpp2 \"{}.cpp2\"\n", namespaces.at("cpp"));
     }
   }
 
   if (!namespaces.contains("hack") && !namespaces.contains("php")) {
-    content += fmt::format(
+    content.namespace_content += fmt::format(
         "namespace hack \"\" {}\n", kBackwardsCompatibleNamespaceComment);
-    ;
   }
 
   if (!namespaces.contains("py3")) {
-    content += fmt::format(
+    content.namespace_content += fmt::format(
         "namespace py3 \"\" {}\n", kBackwardsCompatibleNamespaceComment);
   }
 
   if (namespaces.empty()) {
-    content += "\n";
+    content.namespace_content += "\n";
   }
   return content;
 }

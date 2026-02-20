@@ -307,6 +307,73 @@ std::string format_marshal_type_unadapted(
   return "";
 }
 
+bool is_capi_eligible_type_annotation(const t_const* annotation) {
+  if (const auto* type_name =
+          annotation->get_value_from_structured_annotation_or_null("name")) {
+    return is_type_iobuf(type_name->get_string());
+  }
+  if (const auto* template_name =
+          annotation->get_value_from_structured_annotation_or_null(
+              "template")) {
+    return is_supported_template(template_name->get_string());
+  }
+  return false;
+}
+
+bool is_capi_eligible_type(const t_type* type) {
+  if (type->has_structured_annotation(kCppAdapterUri)) {
+    return false;
+  }
+
+  if (const auto* cpp_type_anno =
+          type->find_structured_annotation_or_null(kCppTypeUri)) {
+    if (!is_capi_eligible_type_annotation(cpp_type_anno)) {
+      return false;
+    }
+  }
+  // thrift currently lowers structured annotations to unstructured
+  // annotations so this will always be non-null if @cpp.Type annotation
+  // used on type or field
+  // TODO: delete these if structured annotation migration completed
+  if (const std::string* template_anno =
+          type->find_unstructured_annotation_or_null(
+              {"cpp.template", "cpp2.template"})) {
+    if (!is_supported_template(*template_anno)) {
+      return false;
+    }
+  }
+  if (const std::string* type_anno = type->find_unstructured_annotation_or_null(
+          {"cpp.type", "cpp2.type"})) {
+    return is_type_iobuf(*type_anno);
+  }
+  if (const t_list* list = type->try_as<t_list>();
+      list != nullptr && !is_capi_eligible_type(list->elem_type().get_type())) {
+    return false;
+  } else if (const t_set* set = type->try_as<t_set>(); set != nullptr &&
+             !is_capi_eligible_type(set->elem_type().get_type())) {
+    return false;
+  } else if (const t_map* map = type->try_as<t_map>(); map != nullptr &&
+             (!is_capi_eligible_type(&map->key_type().deref()) ||
+              !is_capi_eligible_type(&map->val_type().deref()))) {
+    return false;
+  }
+  if (const t_typedef* tdef = type->try_as<t_typedef>()) {
+    return is_capi_eligible_type(&tdef->type().deref());
+  }
+  return true;
+}
+
+bool is_capi_eligible_field(const t_field& field) {
+  if (field.has_structured_annotation(kCppAdapterUri)) {
+    return false;
+  }
+  if (const auto* cpp_type_anno =
+          field.find_structured_annotation_or_null(kCppTypeUri)) {
+    return is_capi_eligible_type_annotation(cpp_type_anno);
+  }
+  return true;
+}
+
 class python_capi_mstch_program : public mstch_program {
  public:
   python_capi_mstch_program(
@@ -450,145 +517,6 @@ class python_capi_mstch_program : public mstch_program {
   bool has_marshal_types_ = false;
 };
 
-class python_capi_mstch_struct : public mstch_struct {
- public:
-  python_capi_mstch_struct(
-      const t_structured* s, mstch_context& ctx, mstch_element_position pos)
-      : mstch_struct(s, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"struct:marshal_capi?", &python_capi_mstch_struct::marshal_capi},
-            {"struct:tuple_positions",
-             &python_capi_mstch_struct::tuple_positions},
-        });
-  }
-
-  mstch::node tuple_positions() {
-    std::vector<std::pair<int, int>> index_keys;
-    size_t cpp_index = 0;
-    for (const auto& f : struct_->fields()) {
-      index_keys.emplace_back(f.id(), cpp_index++);
-    }
-    // sort by key to match thrift-python tuple ordering
-    std::sort(index_keys.begin(), index_keys.end());
-    // replace key with python tuple index
-    for (size_t i = 0; i < index_keys.size(); ++i) {
-      // offset by 1 because tuple position 0 is isset indicator
-      index_keys[i].first = i + 1;
-    }
-    // now sort by cpp index
-    std::sort(
-        index_keys.begin(),
-        index_keys.end(),
-        [](const auto& tup_cpp1, const auto& tup_cpp2) {
-          return tup_cpp1.second < tup_cpp2.second;
-        });
-    mstch::array a;
-    for (size_t i = 0; i < index_keys.size(); ++i) {
-      a.emplace_back(
-          mstch::map{
-              {"tuple:index", index_keys[i].first},
-              {"tuple:comma", std::string_view(i == 0 ? "" : ", ")}});
-    }
-    return a;
-  }
-
-  bool capi_eligible_type_annotation(const t_const* annotation) {
-    if (const auto* type_name =
-            annotation->get_value_from_structured_annotation_or_null("name")) {
-      return is_type_iobuf(type_name->get_string());
-    }
-    if (const auto* template_name =
-            annotation->get_value_from_structured_annotation_or_null(
-                "template")) {
-      return is_supported_template(template_name->get_string());
-    }
-    return false;
-  }
-
-  bool capi_eligible_type(const t_type* type) {
-    if (type->has_structured_annotation(kCppAdapterUri)) {
-      return false;
-    }
-
-    if (const auto* cpp_type_anno =
-            type->find_structured_annotation_or_null(kCppTypeUri)) {
-      if (!capi_eligible_type_annotation(cpp_type_anno)) {
-        return false;
-      }
-    }
-    // thrift currently lowers structured annotations to unstructured
-    // annotations so this will always be non-null if @cpp.Type annotation
-    // used on type or field
-    // TODO: delete these if structured annotation migration completed
-    if (const std::string* template_anno =
-            type->find_unstructured_annotation_or_null(
-                {"cpp.template", "cpp2.template"})) {
-      if (!is_supported_template(*template_anno)) {
-        return false;
-      }
-    }
-    if (const std::string* type_anno =
-            type->find_unstructured_annotation_or_null(
-                {"cpp.type", "cpp2.type"})) {
-      return is_type_iobuf(*type_anno);
-    }
-    if (const t_list* list = type->try_as<t_list>();
-        list != nullptr && !capi_eligible_type(list->elem_type().get_type())) {
-      return false;
-    } else if (const t_set* set = type->try_as<t_set>(); set != nullptr &&
-               !capi_eligible_type(set->elem_type().get_type())) {
-      return false;
-    } else if (const t_map* map = type->try_as<t_map>(); map != nullptr &&
-               (!capi_eligible_type(&map->key_type().deref()) ||
-                !capi_eligible_type(&map->val_type().deref()))) {
-      return false;
-    }
-    if (const t_typedef* tdef = type->try_as<t_typedef>()) {
-      return capi_eligible_type(&tdef->type().deref());
-    }
-    return true;
-  }
-
-  bool capi_eligible_field(const t_field& field) {
-    if (field.has_structured_annotation(kCppAdapterUri)) {
-      return false;
-    }
-    if (const auto* cpp_type_anno =
-            field.find_structured_annotation_or_null(kCppTypeUri)) {
-      return capi_eligible_type_annotation(cpp_type_anno);
-    }
-    return true;
-  }
-
-  mstch::node marshal_capi() {
-    const auto marshal_override =
-        struct_->find_structured_annotation_or_null(kPythonUseCAPIUri);
-    auto force_serialize = [marshal_override]() {
-      const auto serialize_field = marshal_override
-          ? marshal_override->get_value_from_structured_annotation_or_null(
-                "serialize")
-          : nullptr;
-      return serialize_field && serialize_field->get_bool();
-    };
-
-    if (struct_->generated() || has_option("serialize_python_capi") ||
-        force_serialize()) {
-      return false;
-    }
-    if (has_option("marshal_python_capi") || marshal_override) {
-      return true;
-    }
-    for (const auto& f : struct_->fields()) {
-      if (!capi_eligible_field(f) || !capi_eligible_type(f.type().get_type())) {
-        return false;
-      }
-    }
-    return true;
-  }
-};
-
 class t_mstch_python_capi_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -672,13 +600,59 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
       return whisker::make::null;
     });
 
+    def.property("marshal_capi?", [this](const t_structured& self) {
+      const t_const* marshal_override =
+          self.find_structured_annotation_or_null(kPythonUseCAPIUri);
+      bool force_serialize = false;
+      if (marshal_override != nullptr) {
+        if (const t_const_value* serialize_field =
+                marshal_override->get_value_from_structured_annotation_or_null(
+                    "serialize")) {
+          force_serialize = serialize_field->get_bool();
+        }
+      }
+
+      if (force_serialize || self.generated() ||
+          has_compiler_option("serialize_python_capi")) {
+        return false;
+      }
+      if (marshal_override != nullptr ||
+          has_compiler_option("marshal_python_capi")) {
+        return true;
+      }
+      for (const t_field& f : self.fields()) {
+        if (!is_capi_eligible_field(f) ||
+            !is_capi_eligible_type(&f.type().deref())) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    def.property("tuple_positions", [](const t_structured& self) {
+      std::unordered_map<const t_field*, int64_t> field_tuple_indexes;
+      // Determine 1-based (0 is isset indicator) thrift-python tuple index for
+      // each field
+      int64_t tuple_index = 1;
+      for (const t_field* f : self.fields_id_order()) {
+        field_tuple_indexes[f] = tuple_index++;
+      }
+
+      // Now populate the tuple position array in definition order (to match C++
+      // index)
+      whisker::array::raw a;
+      for (const t_field& f : self.fields()) {
+        a.emplace_back(whisker::make::i64(field_tuple_indexes.at(&f)));
+      }
+      return whisker::make::array(std::move(a));
+    });
+
     return std::move(def).make();
   }
 };
 
 void t_mstch_python_capi_generator::set_mstch_factories() {
   mstch_context_.add<python_capi_mstch_program>();
-  mstch_context_.add<python_capi_mstch_struct>();
 }
 
 std::filesystem::path t_mstch_python_capi_generator::package_to_path() {

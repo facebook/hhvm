@@ -316,6 +316,16 @@ function openssl_pkcs7_verify(string $filename,
                               ?string $extracerts = null,
                               ?string $content = null): mixed;
 
+/* openssl_pkcs7_read() reads the PKCS#7 encoded data from the given string
+ * and returns the certificates from it.
+ * @param string $data - The PEM encoded PKCS#7 data.
+ * @return vec<string> - Returns a vec of PEM encoded certificates extracted
+ * from the PKCS#7 data.
+ * @throws Exception if the PKCS#7 data could not be parsed.
+ */
+<<__Native>>
+function openssl_pkcs7_read(string $data): vec<string>;
+
 /* openssl_pkey_export_to_file() saves an ascii-armoured (PEM encoded)
  * rendition of key into the file named by outfilename. You need to have a
  * valid openssl.cnf installed for this function to operate correctly. See the

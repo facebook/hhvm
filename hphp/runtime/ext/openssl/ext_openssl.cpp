@@ -465,8 +465,18 @@ struct php_x509_request {
 ///////////////////////////////////////////////////////////////////////////////
 // utilities
 struct OpenSSLException : SystemLib::ClassLoader<"OpenSSLException"> {};
-[[noreturn]] void throw_openssl_exception(const std::string& msg){
-  throw_object(OpenSSLException::classof(), make_vec_array(msg));
+[[noreturn]] void throw_openssl_exception(
+    const std::string& msg, int64_t code = 0) {
+  throw_object(OpenSSLException::classof(), make_vec_array(msg, code));
+}
+[[noreturn]] void throw_openssl_exception_with_error(const std::string& msg) {
+  char buf[512];
+  unsigned long err = ERR_get_error();
+  if (err) {
+    throw_openssl_exception(
+        msg + ": " + ERR_error_string(err, buf), static_cast<int64_t>(err));
+  }
+  throw_openssl_exception(msg);
 }
 
 static void add_assoc_name_entry(Array &ret, const char *key,
@@ -1848,6 +1858,55 @@ Variant HHVM_FUNCTION(openssl_pkcs7_verify, const String& filename, int64_t flag
                                const Variant& vcontent /* = null_string */) {
   return openssl_pkcs7_verify_core(filename, flags, voutfilename, vcainfo,
                                    vextracerts, vcontent, false);
+}
+
+Array HHVM_FUNCTION(openssl_pkcs7_read, const String& data) {
+  BIO *bio_in = BIO_new_mem_buf(data.data(), data.size());
+  if (bio_in == nullptr) {
+    throw_openssl_exception_with_error("Failed to create BIO for PKCS7 data");
+  }
+  SCOPE_EXIT { BIO_free(bio_in); };
+
+  PKCS7 *p7 = PEM_read_bio_PKCS7(bio_in, nullptr, nullptr, nullptr);
+  if (p7 == nullptr) {
+    throw_openssl_exception_with_error("Failed to parse PKCS7 data");
+  }
+  SCOPE_EXIT { PKCS7_free(p7); };
+
+  STACK_OF(X509) *cert_stack = nullptr;
+  switch (OBJ_obj2nid(p7->type)) {
+    case NID_pkcs7_signed:
+      if (p7->d.sign != nullptr) {
+        cert_stack = p7->d.sign->cert;
+      }
+      break;
+    case NID_pkcs7_signedAndEnveloped:
+      if (p7->d.signed_and_enveloped != nullptr) {
+        cert_stack = p7->d.signed_and_enveloped->cert;
+      }
+      break;
+    default:
+      break;
+  }
+
+  Array arr = Array::CreateVec();
+  if (cert_stack != nullptr) {
+    for (int i = 0; i < sk_X509_num(cert_stack); i++) {
+      X509 *cert = sk_X509_value(cert_stack, i);
+      BIO *bio_out = BIO_new(BIO_s_mem());
+      if (bio_out == nullptr) {
+        throw_openssl_exception("Failed to allocate BIO for certificate export");
+      }
+      SCOPE_EXIT { BIO_free(bio_out); };
+      if (!PEM_write_bio_X509(bio_out, cert)) {
+        throw_openssl_exception_with_error("Failed to export certificate as PEM");
+      }
+      BUF_MEM *bio_buf;
+      BIO_get_mem_ptr(bio_out, &bio_buf);
+      arr.append(String((char*)bio_buf->data, bio_buf->length, CopyString));
+    }
+  }
+  return arr;
 }
 
 static bool
@@ -3517,6 +3576,7 @@ struct opensslExtension final : Extension {
     HHVM_FE(openssl_pkcs12_read);
     HHVM_FE(openssl_pkcs7_decrypt);
     HHVM_FE(openssl_pkcs7_encrypt);
+    HHVM_FE(openssl_pkcs7_read);
     HHVM_FE(openssl_pkcs7_sign);
     HHVM_FE(openssl_pkcs7_verify);
     HHVM_FE(openssl_pkey_export_to_file);

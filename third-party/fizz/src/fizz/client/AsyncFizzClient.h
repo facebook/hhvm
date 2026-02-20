@@ -164,8 +164,12 @@ class AsyncFizzClientT : public AsyncFizzBase,
       Buf context,
       uint16_t length) const override;
 
-  Buf getEarlyEkm(folly::StringPiece label, const Buf& context, uint16_t length)
-      const;
+  Status getEarlyEkm(
+      Buf& ret,
+      Error& err,
+      folly::StringPiece label,
+      const Buf& context,
+      uint16_t length) const;
 
   bool pskResumed() const;
 

@@ -35,7 +35,11 @@ class ClientProtocolTest : public ProtocolTest<ClientTypes, Actions> {
  public:
   class ContextWithMockValidate : public FizzClientContext {
    public:
-    MOCK_METHOD(void, validate, (), (const override));
+    MOCK_METHOD(void, _validate, (), (const));
+    Status validate(Error& /* err */) const override {
+      _validate();
+      return Status::Success;
+    }
   };
 
   void SetUp() override {
@@ -286,7 +290,7 @@ class ClientProtocolTest : public ProtocolTest<ClientTypes, Actions> {
 
   void maybeExpectValidate() {
 #if FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS
-    EXPECT_CALL(*context_, validate()).Times(1);
+    EXPECT_CALL(*context_, _validate()).Times(1);
 #endif
   }
 
@@ -426,7 +430,7 @@ TEST_F(ClientProtocolTest, TestConnectFlow) {
 
 TEST_F(ClientProtocolTest, TestConnectInvalidContext) {
 #if FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS
-  EXPECT_CALL(*context_, validate()).Times(1).WillRepeatedly(Invoke([]() {
+  EXPECT_CALL(*context_, _validate()).Times(1).WillRepeatedly(Invoke([]() {
     throw std::runtime_error("unsupported parameter");
   }));
 

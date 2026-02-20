@@ -321,8 +321,13 @@ TEST_F(HandshakeTest, TestEkmSame) {
   auto serverEkm =
       server_->getExportedKeyingMaterial("EXPORTER-Some-Label", nullptr, 32);
   EXPECT_TRUE(IOBufEqualTo()(clientEkm, serverEkm));
+  Buf buf;
+  Error err;
   EXPECT_THROW(
-      client_->getEarlyEkm("EXPORTER-Some-Label", nullptr, 32), std::exception);
+      FIZZ_THROW_ON_ERROR(
+          client_->getEarlyEkm(buf, err, "EXPORTER-Some-Label", nullptr, 32),
+          err),
+      std::exception);
   EXPECT_THROW(
       server_->getEarlyEkm("EXPORTER-Some-Label", nullptr, 32), std::exception);
 }
@@ -333,7 +338,11 @@ TEST_F(HandshakeTest, TestEarlyEkmSame) {
 
   expectSuccess();
   doHandshake();
-  auto clientEkm = client_->getEarlyEkm("EXPORTER-Some-Label", nullptr, 32);
+  Buf clientEkm;
+  Error err;
+  EXPECT_EQ(
+      client_->getEarlyEkm(clientEkm, err, "EXPORTER-Some-Label", nullptr, 32),
+      Status::Success);
   auto serverEkm = server_->getEarlyEkm("EXPORTER-Some-Label", nullptr, 32);
   EXPECT_TRUE(IOBufEqualTo()(clientEkm, serverEkm));
 }

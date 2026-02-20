@@ -32,7 +32,8 @@ class FizzClientContextTest : public ::testing::Test {
 
   void expectValidateThrows(std::string msg) {
     try {
-      context_->validate();
+      Error err;
+      FIZZ_THROW_ON_ERROR(context_->validate(err), err);
     } catch (const std::exception& error) {
       EXPECT_THAT(error.what(), HasSubstr(msg));
       return;
@@ -115,7 +116,8 @@ TEST_F(FizzClientContextTest, TestValidateSuccess) {
 
   context_->setDefaultShares({static_cast<fizz::NamedGroup>(0x03)});
 
-  EXPECT_NO_THROW(context_->validate());
+  Error err;
+  EXPECT_NO_THROW(FIZZ_THROW_ON_ERROR(context_->validate(err), err));
 }
 } // namespace test
 } // namespace client

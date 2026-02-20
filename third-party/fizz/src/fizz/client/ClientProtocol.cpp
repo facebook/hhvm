@@ -933,10 +933,13 @@ static Status constructEncryptedClientHello(
   return Status::Success;
 }
 
-static void checkContext(std::shared_ptr<const FizzClientContext>& context) {
+static Status checkContext(
+    Error& err,
+    std::shared_ptr<const FizzClientContext>& context) {
 #if FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS
-  context->validate();
+  TRY(context->validate(err));
 #endif
+  return Status::Success;
 }
 
 Status
@@ -949,7 +952,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
 
   auto context = std::move(connect.context);
 
-  checkContext(context);
+  TRY(checkContext(ctx.err, context));
 
   // Set up SNI (including possible replacement ECH SNI)
   folly::Optional<std::string> echSni;

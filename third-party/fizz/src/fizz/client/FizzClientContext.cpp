@@ -17,7 +17,7 @@ FizzClientContext::FizzClientContext()
     : factory_(std::make_shared<DefaultFactory>()),
       clock_(std::make_shared<SystemClock>()) {}
 
-void FizzClientContext::validate() const {
+Status FizzClientContext::validate(Error& err) const {
   // TODO: check supported sig schemes
   for (auto& c : supportedCiphers_) {
     if (!FIZZ_CONTEXT_VALIDATION_SHOULD_CHECK_CIPHER(c)) {
@@ -35,9 +35,10 @@ void FizzClientContext::validate() const {
   for (auto& share : defaultShares_) {
     if (std::find(supportedGroups_.begin(), supportedGroups_.end(), share) ==
         supportedGroups_.end()) {
-      throw std::runtime_error("unsupported named group in default shares");
+      return err.error("unsupported named group in default shares");
     }
   }
+  return Status::Success;
 }
 
 } // namespace client

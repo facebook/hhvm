@@ -28,21 +28,24 @@ void FizzClient<ActionMoveVisitor, SM>::connect(
 }
 
 template <typename ActionMoveVisitor, typename SM>
-Buf FizzClient<ActionMoveVisitor, SM>::getEarlyEkm(
+Status FizzClient<ActionMoveVisitor, SM>::getEarlyEkm(
+    Buf& ret,
+    Error& err,
     const Factory& factory,
     folly::StringPiece label,
     const Buf& context,
     uint16_t length) const {
   if (!this->state_.earlyDataParams()) {
-    throw std::runtime_error("early ekm not available");
+    return err.error("early ekm not available");
   }
-  return Exporter::getExportedKeyingMaterial(
+  ret = Exporter::getExportedKeyingMaterial(
       factory,
       this->state_.earlyDataParams()->cipher,
       this->state_.earlyDataParams()->earlyExporterSecret->coalesce(),
       label,
       context ? context->clone() : nullptr,
       length);
+  return Status::Success;
 }
 
 template <typename ActionMoveVisitor, typename SM>

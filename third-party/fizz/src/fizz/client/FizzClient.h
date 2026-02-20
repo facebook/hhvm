@@ -37,9 +37,11 @@ class FizzClient : public FizzBase<
 
   /**
    * Returns an exported key material derived from the early secret of the TLS
-   * connection. Throws if the early secret is not available.
+   * connection. Returns error status if the early secret is not available.
    */
-  Buf getEarlyEkm(
+  Status getEarlyEkm(
+      Buf& ret,
+      Error& err,
       const Factory& factory,
       folly::StringPiece label,
       const Buf& context,

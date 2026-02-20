@@ -733,12 +733,14 @@ Buf AsyncFizzClientT<SM>::getExportedKeyingMaterial(
 }
 
 template <typename SM>
-Buf AsyncFizzClientT<SM>::getEarlyEkm(
+Status AsyncFizzClientT<SM>::getEarlyEkm(
+    Buf& ret,
+    Error& err,
     folly::StringPiece label,
     const Buf& context,
     uint16_t length) const {
   return fizzClient_.getEarlyEkm(
-      *fizzContext_->getFactory(), label, context, length);
+      ret, err, *fizzContext_->getFactory(), label, context, length);
 }
 
 template <typename SM>

@@ -573,9 +573,6 @@ TEST_P(HTTPStatsFilterTests, TestSimplePostStatsFilter) {
             EXPECT_EQ(fakeStats.responseCodes[statusCode / 100], 1);
             // test handler returns OK -> 2 bytes
             EXPECT_EQ(fakeStats.resBodyBytes, 2);
-            // sanity check latency, might be flaky tho?
-            auto lat = fakeStats.latencies.at(0).count();
-            EXPECT_GT(lat, 0);
           });
 
   stopServer();

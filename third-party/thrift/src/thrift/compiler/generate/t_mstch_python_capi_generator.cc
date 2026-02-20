@@ -16,8 +16,8 @@
 
 #include <algorithm>
 #include <filesystem>
-#include <iterator>
 #include <optional>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -374,11 +374,85 @@ bool is_capi_eligible_field(const t_field& field) {
   return true;
 }
 
+bool has_types(const t_program& program) {
+  return !program.structured_definitions().empty() || !program.enums().empty();
+}
+
+class python_capi_generator_context {
+ public:
+  python_capi_generator_context(
+      const t_program* root_program, bool serialize_python_capi)
+      : root_program_{root_program} {
+    has_marshal_types_ = !serialize_python_capi && has_types(*root_program);
+  }
+
+  const std::set<std::string>& capi_includes() const { return capi_includes_; }
+
+  void register_visitors(t_whisker_generator::context_visitor& visitor) {
+    if (!has_marshal_types_) {
+      return;
+    }
+
+    using context = t_whisker_generator::whisker_generator_visitor_context;
+    // Gather capi includes for included programs
+    visitor.add_program_visitor([this](const context&, const t_program& p) {
+      if (&p != root_program_) {
+        return;
+      }
+      for (const t_program* included_program : p.get_includes_for_codegen()) {
+        if (!included_program->structured_definitions().empty() ||
+            !included_program->enums().empty() ||
+            !included_program->typedefs().empty()) {
+          capi_includes_.insert(get_capi_include(included_program, &p));
+        }
+      }
+    });
+    visitor.add_field_visitor([&](const context& ctx, const t_field& f) {
+      if (&ctx.program() == root_program_) {
+        visit_type(*f.type(), false);
+      }
+    });
+    visitor.add_typedef_visitor([&](const context& ctx, const t_typedef& td) {
+      if (&ctx.program() == root_program_) {
+        visit_type(*td.type(), false);
+      }
+    });
+  }
+
+ private:
+  const t_program* root_program_;
+  bool has_marshal_types_;
+  // Ordered set to ensure deterministic output/builds
+  std::set<std::string> capi_includes_;
+
+  void visit_type(const t_type& orig_type, bool has_typedef) {
+    const t_type& true_type = *orig_type.get_true_type();
+    has_typedef = has_typedef || orig_type.is<t_typedef>();
+    if (has_typedef && true_type.program() != nullptr &&
+        true_type.program() != root_program_) {
+      capi_includes_.insert(
+          get_capi_include(true_type.program(), root_program_));
+    }
+
+    if (const t_list* list = true_type.try_as<t_list>()) {
+      visit_type(*list->elem_type(), has_typedef);
+    } else if (const t_set* set = true_type.try_as<t_set>()) {
+      visit_type(*set->elem_type(), has_typedef);
+    } else if (const t_map* map = true_type.try_as<t_map>()) {
+      visit_type(*map->key_type(), has_typedef);
+      visit_type(*map->val_type(), has_typedef);
+    }
+  }
+};
+
 class python_capi_mstch_program : public mstch_program {
  public:
   python_capi_mstch_program(
-      const t_program* p, mstch_context& ctx, mstch_element_position pos)
-      : mstch_program(p, ctx, pos) {
+      const t_program* p,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const python_capi_generator_context* generator_context)
+      : mstch_program(p, ctx, pos), generator_context_(*generator_context) {
     register_methods(
         this,
         {
@@ -392,27 +466,16 @@ class python_capi_mstch_program : public mstch_program {
              &python_capi_mstch_program::has_types_node},
             {"program:module_path", &python_capi_mstch_program::module_path},
         });
-    has_marshal_types_ = check_has_marshal_types();
-    if (has_marshal_types_) {
-      gather_capi_includes();
-    }
-    visit_types_for_objects();
-    visit_types_for_typedefs();
   }
 
-  mstch::node has_types_node() { return has_types(); }
+  mstch::node has_types_node() { return has_types(*program_); }
 
   mstch::node capi_includes() {
     mstch::array a;
-    a.reserve(capi_includes_.size());
-    for (const auto& it : capi_includes_) {
-      a.emplace_back(it.second.include_prefix);
-    }
-    std::sort(
-        a.begin(), a.end(), [](const mstch::node& m, const mstch::node& n) {
-          // We know the nodes are strings because `include_prefix` is a string
-          return std::get<std::string>(m) < std::get<std::string>(n);
-        });
+    a.insert(
+        a.end(),
+        generator_context_.capi_includes().begin(),
+        generator_context_.capi_includes().end());
     return a;
   }
 
@@ -427,94 +490,8 @@ class python_capi_mstch_program : public mstch_program {
     return cpp2::get_gen_namespace(*program_);
   }
 
- protected:
-  struct CapiInclude {
-    std::string include_prefix;
-  };
-
-  bool has_types() const {
-    return !program_->structured_definitions().empty() ||
-        !program_->enums().empty();
-  }
-
-  bool check_has_marshal_types() {
-    return has_types() && !has_option("serialize_python_capi");
-  }
-
-  void gather_capi_includes() {
-    for (const t_program* included_program :
-         program_->get_includes_for_codegen()) {
-      if (included_program->structured_definitions().empty() &&
-          included_program->enums().empty() &&
-          included_program->typedefs().empty()) {
-        continue;
-      }
-      capi_includes_[included_program->path()] = CapiInclude{
-          get_capi_include(included_program, program_),
-      };
-    }
-  }
-
-  void add_typedef_namespace(const t_type* type) {
-    auto prog = type->program();
-    if (prog && prog != program_) {
-      const auto& path = prog->path();
-      if (capi_includes_.find(path) != capi_includes_.end()) {
-        return;
-      }
-
-      if (has_marshal_types_) {
-        capi_includes_[prog->path()] =
-            CapiInclude{get_capi_include(prog, program_)};
-      }
-    }
-  }
-
-  // visit structs and exceptions
-  void visit_types_for_objects() {
-    for (const t_structured* object : program_->structured_definitions()) {
-      for (auto&& field : object->fields()) {
-        visit_type(field.type().get_type());
-      }
-    }
-  }
-
-  void visit_types_for_typedefs() {
-    for (const auto typedef_def : program_->typedefs()) {
-      visit_type(&typedef_def->type().deref());
-    }
-  }
-
-  enum TypeDef { NoTypedef, HasTypedef };
-
-  void visit_type(const t_type* orig_type) {
-    return visit_type_with_typedef(orig_type, TypeDef::NoTypedef);
-  }
-
-  void visit_type_with_typedef(const t_type* orig_type, TypeDef is_typedef) {
-    if (!seen_types_.insert(orig_type).second) {
-      return;
-    }
-    auto true_type = orig_type->get_true_type();
-    is_typedef = is_typedef == TypeDef::HasTypedef || orig_type->is<t_typedef>()
-        ? TypeDef::HasTypedef
-        : TypeDef::NoTypedef;
-    if (is_typedef == TypeDef::HasTypedef) {
-      add_typedef_namespace(true_type);
-    }
-    if (const t_list* list = true_type->try_as<t_list>()) {
-      visit_type_with_typedef(list->elem_type().get_type(), is_typedef);
-    } else if (const t_set* set = true_type->try_as<t_set>()) {
-      visit_type_with_typedef(set->elem_type().get_type(), is_typedef);
-    } else if (const t_map* map = true_type->try_as<t_map>()) {
-      visit_type_with_typedef(&map->key_type().deref(), is_typedef);
-      visit_type_with_typedef(&map->val_type().deref(), is_typedef);
-    }
-  }
-
-  std::unordered_map<std::string_view, CapiInclude> capi_includes_;
-  std::unordered_set<const t_type*> seen_types_;
-  bool has_marshal_types_ = false;
+ private:
+  const python_capi_generator_context& generator_context_;
 };
 
 class t_mstch_python_capi_generator : public t_mstch_generator {
@@ -524,17 +501,11 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
   std::string template_prefix() const override { return "python_capi"; }
 
   void generate_program() override {
-    generate_root_path_ = package_to_path();
-    out_dir_base_ = "gen-python-capi";
-    auto include_prefix = get_option("include_prefix").value_or("");
-    if (!include_prefix.empty()) {
-      program_->set_include_prefix(std::move(include_prefix));
-    }
     set_mstch_factories();
     generate_types();
   }
 
- protected:
+ private:
   void set_mstch_factories();
   void generate_file(
       const std::string& file, const std::filesystem::path& base);
@@ -543,10 +514,25 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
 
   std::filesystem::path generate_root_path_;
 
- private:
   // Mutable as it contains caches, but needs to be accessed from `const`
   // contexts
   mutable cpp_name_resolver cpp_resolver_;
+  std::unique_ptr<python_capi_generator_context> python_capi_context_;
+
+  void initialize_context(context_visitor& visitor) override {
+    generate_root_path_ = package_to_path();
+    out_dir_base_ = "gen-python-capi";
+    if (std::string_view include_prefix =
+            get_compiler_option("include_prefix").value_or("");
+        !include_prefix.empty()) {
+      program_->set_include_prefix(std::string(include_prefix));
+    }
+
+    python_capi_context_ = std::make_unique<python_capi_generator_context>(
+        program_,
+        /*serialize_python_capi=*/has_compiler_option("serialize_python_capi"));
+    python_capi_context_->register_visitors(visitor);
+  }
 
   prototype<t_named>::ptr make_prototype_for_named(
       const prototype_database& proto) const override {
@@ -652,7 +638,7 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
 };
 
 void t_mstch_python_capi_generator::set_mstch_factories() {
-  mstch_context_.add<python_capi_mstch_program>();
+  mstch_context_.add<python_capi_mstch_program>(python_capi_context_.get());
 }
 
 std::filesystem::path t_mstch_python_capi_generator::package_to_path() {

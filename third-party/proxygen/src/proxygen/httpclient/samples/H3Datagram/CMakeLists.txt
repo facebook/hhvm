@@ -13,6 +13,7 @@ target_link_libraries(
     proxygen_h3datagram_client
     PUBLIC
         proxygen
+        proxygencurl
 )
 install(
     TARGETS proxygen_h3datagram_client

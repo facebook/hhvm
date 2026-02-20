@@ -10,6 +10,7 @@
 #include <folly/init/Init.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/portability/GFlags.h>
+#include <proxygen/httpclient/samples/curl/CurlClient.h>
 #include <proxygen/httpserver/samples/hq/InsecureVerifierDangerousDoNotUseInProduction.h>
 #include <proxygen/lib/transport/H3DatagramAsyncSocket.h>
 
@@ -24,6 +25,8 @@ DEFINE_int32(proxy_port, 6666, "Proxy port");
 
 DEFINE_string(cert, "", "Certificate file path");
 DEFINE_string(key, "", "Private key file path");
+
+DEFINE_string(headers, "", "List of N=V headers separated by ,");
 
 constexpr size_t kMaxReadBufferSize{1232};
 
@@ -55,7 +58,13 @@ class DatagramClient
 
   void start() {
     CHECK(evb_->isInEventBaseThread());
-    socket_.connect(SocketAddress(FLAGS_proxy_host, FLAGS_proxy_port));
+    try {
+      socket_.connect(SocketAddress(FLAGS_proxy_host, FLAGS_proxy_port));
+    } catch (const std::system_error& e) {
+      LOG(ERROR) << "Failed to connect to " << FLAGS_proxy_host << ":"
+                 << FLAGS_proxy_port << ": " << e.what();
+      return;
+    }
     socket_.resumeRead(this);
 
     sendPing();
@@ -162,6 +171,11 @@ int main(int argc, char* argv[]) {
   options.httpRequest_->setMethod(proxygen::HTTPMethod::CONNECT_UDP);
   options.httpRequest_->setURL(fmt::format("{}:{}", FLAGS_host, FLAGS_port));
   options.httpRequest_->setMasque();
+  auto parsedHeaders = CurlService::CurlClient::parseHeaders(FLAGS_headers);
+  parsedHeaders.forEach(
+      [&options](const std::string& name, const std::string& value) {
+        options.httpRequest_->getHeaders().add(name, value);
+      });
   options.certAndKey_ = std::make_pair(FLAGS_cert, FLAGS_key);
   options.certVerifier_ = std::make_unique<
       proxygen::InsecureVerifierDangerousDoNotUseInProduction>();

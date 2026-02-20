@@ -1238,24 +1238,24 @@ func (x *StructWithCustomDefaultValues) setDefaults() *StructWithCustomDefaultVa
         SetOptionalIntegerNonCompat(int32(43)).
         SetRequiredIntegerNonCompat(int32(44)).
         SetUnqualifiedStructNonCompat(
-              NewTrivialStruct().
+            NewTrivialStruct().
     SetIntValueNonCompat(int32(123)),
-          ).
+        ).
         SetOptionalStructNonCompat(
-              NewTrivialStruct().
+            NewTrivialStruct().
     SetIntValueNonCompat(int32(456)),
-          ).
+        ).
         SetRequiredStructNonCompat(
-              NewTrivialStruct().
+            NewTrivialStruct().
     SetIntValueNonCompat(int32(789)),
-          ).
+        ).
         SetStructWithDefaultUnspecifiedNonCompat(
-              NewTrivialStructWithDefault(),
-          ).
+            NewTrivialStructWithDefault(),
+        ).
         SetStructWithDefaultSpecifiedNonCompat(
-              NewTrivialStructWithDefault().
+            NewTrivialStructWithDefault().
     SetIntValue_1NonCompat(int32(123)),
-          )
+        )
 }
 
 func (x *StructWithCustomDefaultValues) GetThriftStructMetadata() *metadata.ThriftStruct {
@@ -1865,29 +1865,29 @@ func (x *StructWithCollectionDefaultValues) String() string {
 func (x *StructWithCollectionDefaultValues) setDefaults() *StructWithCollectionDefaultValues {
     return x.
         SetListWithListValueNonCompat(
-              []int32{
+            []int32{
 },
-          ).
+        ).
         SetSetWithListValueNonCompat(
-              []int32{
+            []int32{
 },
-          ).
+        ).
         SetMapWithMapValueNonCompat(
-              map[int32]int32{
+            map[int32]int32{
 },
-          ).
+        ).
         SetListWithMapValueNonCompat(
-              []int32{
+            []int32{
 },
-          ).
+        ).
         SetSetWithMapValueNonCompat(
-              []int32{
+            []int32{
 },
-          ).
+        ).
         SetMapWithListValueNonCompat(
-              map[int32]int32{
+            map[int32]int32{
 },
-          )
+        )
 }
 
 func (x *StructWithCollectionDefaultValues) GetThriftStructMetadata() *metadata.ThriftStruct {

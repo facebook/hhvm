@@ -23,7 +23,7 @@
 {{> types/struct_definition}}
 
 {{! new function }}
-{{> types/struct_method_new}}
+{{#partial struct_methods.new struct=struct:self}}
 
 {{! methods }}
 {{> types/struct_methods}}
@@ -31,45 +31,45 @@
 {{#if (or struct:resp? struct:stream? struct:sink?)}}
 
 {{! exception }}
-{{> types/struct_method_exception}}
+{{#partial struct_methods.exception struct=struct:self}}
 {{/if (or struct:resp? struct:stream? struct:sink?)}}
 
 {{! write (serialize) }}
 {{#if struct:use_reflect_codec?}}
-{{> types/struct_method_write_v2}}
+{{#partial struct_methods.write_v2 struct=struct:self}}
 {{#else}}
 {{> types/struct_method_write}}
 {{/if struct:use_reflect_codec?}}
 
 {{! read (deserialize) }}
 {{#if struct:use_reflect_codec?}}
-{{> types/struct_method_read_v2}}
+{{#partial struct_methods.read_v2 struct=struct:self}}
 {{#else}}
 {{> types/struct_method_read}}
 {{/if struct:use_reflect_codec?}}
 
 {{! string }}
-{{> types/struct_method_string}}
+{{#partial struct_methods.string struct=struct:self}}
 
 {{! setDefaults }}
-{{> types/struct_method_set_defaults}}
+{{#partial struct_methods.set_defaults struct=struct:self}}
 {{#struct:use_reflect_codec?}}
 
 {{! getStructSpec }}
-{{> types/struct_method_get_spec}}
+{{#partial struct_methods.get_spec struct=struct:self}}
 {{/struct:use_reflect_codec?}}
 {{#program:gen_metadata?}}
 {{^struct:req_resp?}}
 
 {{! GetThrift(Struct|Exception)Metadata }}
-{{> types/struct_method_get_thrift_metadata}}
+{{#partial struct_methods.get_thrift_metadata struct=struct:self}}
 {{/struct:req_resp?}}
 {{/program:gen_metadata?}}
 {{#struct:exception?}}
 
 {{! error }}
-{{> types/struct_method_error}}
+{{#partial struct_methods.error struct=struct:self}}
 
 {{! TypeName }}
-{{> types/struct_method_type_name}}
+{{#partial struct_methods.type_name struct=struct:self}}
 {{/struct:exception?}}

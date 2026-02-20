@@ -1472,8 +1472,8 @@ func (x *MyAnnotation) setDefaults() *MyAnnotation {
     return x.
         SetSignatureNonCompat("").
         SetColorNonCompat(
-              Color_RED,
-          )
+            Color_RED,
+        )
 }
 
 func (x *MyAnnotation) GetThriftStructMetadata() *metadata.ThriftStruct {
@@ -6790,23 +6790,23 @@ func (x *AdaptTemplatedTestStruct) setDefaults() *AdaptTemplatedTestStruct {
         SetAdaptedDoubleDefaultNonCompat(float64(5.0)).
         SetAdaptedStringDefaultNonCompat("6").
         SetAdaptedEnumNonCompat(
-              ThriftAdaptedEnum_One,
-          ).
+            ThriftAdaptedEnum_One,
+        ).
         SetAdaptedListDefaultNonCompat(
-              []int64{
+            []int64{
     int64(1),
 },
-          ).
+        ).
         SetAdaptedSetDefaultNonCompat(
-              []int64{
+            []int64{
     int64(1),
 },
-          ).
+        ).
         SetAdaptedMapDefaultNonCompat(
-              map[int64]int64{
+            map[int64]int64{
     int64(1): int64(1),
 },
-          ).
+        ).
         SetDoubleTypedefBoolNonCompat(NewDoubleTypedefBool())
 }
 

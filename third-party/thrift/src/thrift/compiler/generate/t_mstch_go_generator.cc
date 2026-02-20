@@ -356,6 +356,14 @@ class t_mstch_go_generator : public t_mstch_generator {
       // Whether this is a helper sink struct.
       return data_.is_req_resp_struct(self) && self.name().starts_with("sink");
     });
+    def.property("fields_sorted", [&proto](const t_structured& self) {
+      // Fields (optionally) in the most optimal (memory-saving) layout order.
+      std::vector<const t_field*> fields = self.fields_id_order();
+      if (self.has_structured_annotation(kGoMinimizePaddingUri)) {
+        go::optimize_fields_layout(fields, self.is<t_union>());
+      }
+      return to_array(fields, proto.of<t_field>());
+    });
 
     return std::move(def).make();
   }

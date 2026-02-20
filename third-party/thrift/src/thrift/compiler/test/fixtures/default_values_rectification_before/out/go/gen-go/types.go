@@ -666,23 +666,23 @@ func (x *TestStruct) setDefaults() *TestStruct {
         SetUnqualifiedIntFieldNonCompat(int32(0)).
         SetUnqualifiedBoolFieldNonCompat(false).
         SetUnqualifiedListFieldNonCompat(
-              []int32{
+            []int32{
 },
-          ).
+        ).
         SetUnqualifiedStructFieldNonCompat(
-              NewEmptyStruct(),
-          ).
+            NewEmptyStruct(),
+        ).
         SetOptionalIntFieldNonCompat(int32(42)).
         SetOptionalBoolFieldNonCompat(true).
         SetOptionalListFieldNonCompat(
-              []int32{
+            []int32{
     int32(1),
     int32(2),
 },
-          ).
+        ).
         SetOptionalStructFieldNonCompat(
-              NewEmptyStruct(),
-          )
+            NewEmptyStruct(),
+        )
 }
 
 func (x *TestStruct) GetThriftStructMetadata() *metadata.ThriftStruct {

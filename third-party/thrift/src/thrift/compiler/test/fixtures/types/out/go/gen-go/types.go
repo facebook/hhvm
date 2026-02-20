@@ -1931,11 +1931,11 @@ func (x *MyStructWithForwardRefEnum) String() string {
 func (x *MyStructWithForwardRefEnum) setDefaults() *MyStructWithForwardRefEnum {
     return x.
         SetANonCompat(
-              MyForwardRefEnum_NONZERO,
-          ).
+            MyForwardRefEnum_NONZERO,
+        ).
         SetBNonCompat(
-              MyForwardRefEnum_NONZERO,
-          )
+            MyForwardRefEnum_NONZERO,
+        )
 }
 
 func (x *MyStructWithForwardRefEnum) GetThriftStructMetadata() *metadata.ThriftStruct {
@@ -2289,10 +2289,10 @@ func (x *TrivialNestedWithDefault) setDefaults() *TrivialNestedWithDefault {
     return x.
         SetZNonCompat(int32(4)).
         SetNNonCompat(
-              NewTrivialNumeric().
+            NewTrivialNumeric().
     SetANonCompat(int32(3)).
     SetBNonCompat(true),
-          )
+        )
 }
 
 func (x *TrivialNestedWithDefault) GetThriftStructMetadata() *metadata.ThriftStruct {
@@ -2699,14 +2699,14 @@ func (x *ComplexNestedWithDefault) setDefaults() *ComplexNestedWithDefault {
     return x.
         SetZNonCompat("4").
         SetNNonCompat(
-              NewComplexString().
+            NewComplexString().
     SetANonCompat("3").
     SetBNonCompat(
         map[string]int32{
     "a": int32(3),
 },
     ),
-          )
+        )
 }
 
 func (x *ComplexNestedWithDefault) GetThriftStructMetadata() *metadata.ThriftStruct {

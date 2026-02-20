@@ -650,18 +650,18 @@ func (x *SomeStruct) String() string {
 func (x *SomeStruct) setDefaults() *SomeStruct {
     return x.
         SetReasonableNonCompat(
-              Metasyntactic_FOO,
-          ).
+            Metasyntactic_FOO,
+        ).
         SetFineNonCompat(
-              Metasyntactic_BAR,
-          ).
+            Metasyntactic_BAR,
+        ).
         SetQuestionableNonCompat(
-              Metasyntactic(-1),
-          ).
+            Metasyntactic(-1),
+        ).
         SetTagsNonCompat(
-              []int32{
+            []int32{
 },
-          )
+        )
 }
 
 func (x *SomeStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
@@ -927,17 +927,17 @@ func (x *MyStruct) String() string {
 func (x *MyStruct) setDefaults() *MyStruct {
     return x.
         SetMe2_3NonCompat(
-              MyEnum2(3),
-          ).
+            MyEnum2(3),
+        ).
         SetMe3N3NonCompat(
-              MyEnum3(-3),
-          ).
+            MyEnum3(-3),
+        ).
         SetMe1T1NonCompat(
-              MyEnum1_ME1_1,
-          ).
+            MyEnum1_ME1_1,
+        ).
         SetMe1T2NonCompat(
-              MyEnum1_ME1_1,
-          )
+            MyEnum1_ME1_1,
+        )
 }
 
 func (x *MyStruct) GetThriftStructMetadata() *metadata.ThriftStruct {

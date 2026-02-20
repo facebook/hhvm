@@ -45,12 +45,6 @@
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
-(library
- (name load_script_stubs)
- (wrapped false)
- (modules load_script loadScriptConfig loadScriptUtils)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
 
 (library
  (name messages_stubs)

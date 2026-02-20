@@ -155,7 +155,6 @@
     folly_stubs
     hh_server_provider_backend_stubs
     ide_highlight_refs
-    load_script
     lwt
     memory_stats
     parent

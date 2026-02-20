@@ -10,6 +10,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <fizz/backend/libsodium/crypto/exchange/X25519.h>
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
 #include <fizz/client/AsyncFizzClient.h>
@@ -22,6 +23,7 @@
 #include <fizz/extensions/tokenbinding/TokenBindingClientExtension.h>
 #include <fizz/extensions/tokenbinding/TokenBindingContext.h>
 #include <fizz/extensions/tokenbinding/TokenBindingServerExtension.h>
+#include <fizz/protocol/ech/Decrypter.h>
 #include <fizz/protocol/test/CertUtil.h>
 #include <fizz/protocol/test/Matchers.h>
 #include <fizz/server/AsyncFizzServer.h>
@@ -108,6 +110,8 @@ struct ExpectedParameters {
   folly::Optional<std::string> alpn;
   std::shared_ptr<const Cert> clientCert;
   folly::Optional<CertificateCompressionAlgorithm> serverCertCompAlgo;
+  folly::Optional<client::ECHStatus> clientECHStatus;
+  server::ECHStatus serverECHStatus{server::ECHStatus::NotRequested};
 };
 
 class HandshakeTest : public Test {
@@ -252,7 +256,7 @@ class HandshakeTest : public Test {
         nullptr,
         folly::none,
         std::string("Fizz"),
-        folly::Optional<std::vector<ech::ParsedECHConfig>>(folly::none));
+        echConfigs_);
     server_->accept(&serverCallback_);
   }
 
@@ -267,7 +271,7 @@ class HandshakeTest : public Test {
         nullptr,
         folly::none,
         std::string("Fizz"),
-        folly::Optional<std::vector<ech::ParsedECHConfig>>(folly::none));
+        echConfigs_);
     evb_.loop();
   }
 
@@ -276,11 +280,7 @@ class HandshakeTest : public Test {
     // register read callback here because we don't call expectClientSuccess
     client_->setReadCB(&clientRead_);
     client_->connect(
-        nullptr,
-        nullptr,
-        folly::none,
-        std::string("Fizz"),
-        folly::Optional<std::vector<ech::ParsedECHConfig>>(folly::none));
+        nullptr, nullptr, folly::none, std::string("Fizz"), echConfigs_);
     evb_.loop();
   }
 
@@ -437,6 +437,12 @@ class HandshakeTest : public Test {
         client_->getState().serverCertCompAlgo(), expected_.serverCertCompAlgo);
     EXPECT_EQ(
         server_->getState().serverCertCompAlgo(), expected_.serverCertCompAlgo);
+    if (expected_.clientECHStatus.hasValue()) {
+      ASSERT_TRUE(client_->getState().echState().hasValue());
+      EXPECT_EQ(
+          client_->getState().echState()->status, *expected_.clientECHStatus);
+    }
+    EXPECT_EQ(server_->getState().echStatus(), expected_.serverECHStatus);
   }
 
   void setupResume() {
@@ -463,6 +469,33 @@ class HandshakeTest : public Test {
     expected_.scheme = none;
     expected_.pskType = PskType::Resumption;
     expected_.pskMode = PskKeyExchangeMode::psk_dhe_ke;
+  }
+
+  void setupECH() {
+    auto kex = std::make_unique<libsodium::X25519KeyExchange>();
+    kex->generateKeyPair();
+    auto echPublicKey = kex->getKeyShare();
+
+    ech::ParsedECHConfig echConfig;
+    echConfig.key_config.config_id = 0xFB;
+    echConfig.key_config.kem_id = hpke::KEMId::x25519;
+    echConfig.key_config.public_key = std::move(echPublicKey);
+    echConfig.key_config.cipher_suites = {ech::HpkeSymmetricCipherSuite{
+        hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
+    echConfig.maximum_name_length = 100;
+    echConfig.public_name = "public.example.com";
+
+    echConfigs_ = std::vector<ech::ParsedECHConfig>();
+    echConfigs_->push_back(std::move(echConfig));
+
+    auto decrypter = std::make_shared<ech::ECHConfigManager>(
+        std::make_shared<DefaultFactory>());
+    decrypter->addDecryptionConfig(
+        ech::DecrypterParams{echConfigs_->at(0), std::move(kex)});
+    serverContext_->setECHDecrypter(decrypter);
+
+    expected_.clientECHStatus = client::ECHStatus::Accepted;
+    expected_.serverECHStatus = server::ECHStatus::Accepted;
   }
 
  protected:
@@ -492,6 +525,7 @@ class HandshakeTest : public Test {
   MockReplaySafetyCallback replayCallback_;
 
   ExpectedParameters expected_;
+  folly::Optional<std::vector<ech::ParsedECHConfig>> echConfigs_;
 };
 } // namespace test
 } // namespace fizz

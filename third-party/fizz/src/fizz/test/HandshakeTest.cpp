@@ -1077,6 +1077,14 @@ TEST_F(HandshakeTest, ServerInitiateKeyUpdate) {
           AppTrafficSecrets::ServerAppTraffic));
 }
 
+TEST_F(HandshakeTest, ECHHandshake) {
+  setupECH();
+  expectSuccess();
+  doHandshake();
+  verifyParameters();
+  sendAppData();
+}
+
 INSTANTIATE_TEST_SUITE_P(
     SignatureSchemes,
     SigSchemeTest,

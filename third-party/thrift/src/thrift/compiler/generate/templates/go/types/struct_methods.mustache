@@ -48,7 +48,7 @@
 
 }}{{^struct:use_reflect_codec?}}{{!
 }}{{#struct:fields_sorted}}
-{{> types/field_method_write}}
+{{#partial m_field_methods.write struct=struct:self field=field:self}}
 
 {{/struct:fields_sorted}}{{!
 }}{{/struct:use_reflect_codec?}}{{!
@@ -57,7 +57,7 @@
 
 }}{{^struct:use_reflect_codec?}}{{!
 }}{{#struct:fields_sorted}}
-{{> types/field_method_read}}
+{{#partial m_field_methods.read struct=struct:self field=field:self}}
 
 {{/struct:fields_sorted}}{{!
 }}{{/struct:use_reflect_codec?}}{{!

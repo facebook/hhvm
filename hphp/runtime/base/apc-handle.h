@@ -56,7 +56,6 @@ enum class APCKind: uint8_t {
   SerializedKeyset,
   SerializedObject,
   FuncEntity,
-  ClassEntity,
   ClsMeth,
   RFunc,
   RClsMeth

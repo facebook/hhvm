@@ -92,8 +92,8 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
         auto const value = new APCTypedValue(cls);
         return {value->getHandle(), sizeof(APCTypedValue)};
       }
-      auto const value = new APCNamedClass(cls);
-      return {value->getHandle(), sizeof(APCNamedClass)};
+      auto const value = new APCTypedValue(LazyClassData::create(cls->name()));
+      return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfLazyClass: {
       auto const value = new APCTypedValue(val(cell).plazyclass);
@@ -190,9 +190,6 @@ Variant APCHandle::toLocalHelper(bool pure) const {
     case APCKind::FuncEntity:
       return APCNamedFunc::fromHandle(this)->getEntityOrNull();
 
-    case APCKind::ClassEntity:
-      return APCNamedClass::fromHandle(this)->getEntityOrNull();
-
     case APCKind::ClsMeth:
       return APCClsMeth::fromHandle(this)->getEntityOrNull();
 
@@ -270,7 +267,6 @@ bool APCHandle::toLocalMayRaise() const {
       return false;
 
     case APCKind::FuncEntity:
-    case APCKind::ClassEntity:
     case APCKind::ClsMeth:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
@@ -320,10 +316,6 @@ void APCHandle::deleteShared() {
 
     case APCKind::FuncEntity:
       delete APCNamedFunc::fromHandle(this);
-      return;
-
-    case APCKind::ClassEntity:
-      delete APCNamedClass::fromHandle(this);
       return;
 
     case APCKind::SerializedVec:
@@ -412,7 +404,6 @@ bool APCHandle::checkInvariants() const {
               m_type == KindOfPersistentKeyset);
       return true;
     case APCKind::FuncEntity:
-    case APCKind::ClassEntity:
     case APCKind::ClsMeth:
     case APCKind::RFunc:
     case APCKind::RClsMeth:

@@ -145,7 +145,6 @@ bool APCTypedValue::checkInvariants() const {
     }
 
     case APCKind::FuncEntity:
-    case APCKind::ClassEntity:
     case APCKind::ClsMeth:
     case APCKind::RFunc:
     case APCKind::RClsMeth:

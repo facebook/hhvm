@@ -30,11 +30,22 @@ namespace apache::thrift::dynamic::detail {
 // allowed (more efficient)
 //                     if true, non-trivial types are supported via vtable
 //                     (needed for MSVC)
+// MoveOnly: if true, copy operations are deleted. Use this when the buffer
+//           will hold move-only types (e.g., std::unique_ptr). When false
+//           (default), all emplaced types must be copy-constructible.
+//
+// Move semantics: When SupportsNonTrivial is true, SmallBuffer supports move
+// operations. After a move, the source buffer is left in an empty state
+// (empty() returns true). The empty state is tracked via ops_ == &kEmptyOps.
 template <
     size_t InlineSize,
     size_t Alignment = alignof(void*),
-    bool SupportsNonTrivial = false>
+    bool SupportsNonTrivial = false,
+    bool MoveOnly = false>
 struct SmallBuffer {
+  static_assert(
+      !MoveOnly || SupportsNonTrivial,
+      "MoveOnly requires SupportsNonTrivial to be true");
   // Access
   template <typename T>
   T& as() {
@@ -52,21 +63,45 @@ struct SmallBuffer {
   T& emplace(Args&&... args) {
     checkInvariants<T>();
     if constexpr (SupportsNonTrivial) {
+      destroy(); // Clean up any existing value first
       setOps<T>();
     }
     return *new (inline_) T(std::forward<Args>(args)...);
   }
 
+  // Reset to empty state, destroying any held value
+  // Only available when SupportsNonTrivial is true (trivial-only buffers have
+  // no empty state)
+  void reset() noexcept
+    requires SupportsNonTrivial
+  {
+    destroy();
+    ops_ = &kEmptyOps;
+  }
+
+  // Check if buffer is in empty state (default-constructed or moved-from)
+  // Only available when SupportsNonTrivial is true (trivial-only buffers have
+  // no empty state)
+  bool empty() const noexcept
+    requires SupportsNonTrivial
+  {
+    return ops_ == &kEmptyOps;
+  }
+
   SmallBuffer() {
     if constexpr (SupportsNonTrivial) {
-      ops_ = &kTrivialOps;
+      ops_ = &kEmptyOps; // Default is empty state
     }
   }
 
-  SmallBuffer(SmallBuffer const& other) {
+  SmallBuffer(SmallBuffer const& other)
+    requires(!MoveOnly)
+  {
     if constexpr (SupportsNonTrivial) {
       ops_ = other.ops_;
-      if (ops_->copy) {
+      if (ops_ == &kEmptyOps) {
+        // Empty - nothing to copy
+      } else if (ops_->copy) {
         ops_->copy(inline_, other.inline_);
       } else {
         std::memcpy(inline_, other.inline_, InlineSize);
@@ -76,16 +111,56 @@ struct SmallBuffer {
     }
   }
 
-  SmallBuffer& operator=(SmallBuffer const& other) {
+  SmallBuffer(SmallBuffer&& other) noexcept {
+    if constexpr (SupportsNonTrivial) {
+      ops_ = other.ops_;
+      if (ops_ == &kEmptyOps) {
+        // Empty - nothing to move
+      } else if (ops_->move) {
+        ops_->move(inline_, other.inline_);
+      } else {
+        std::memcpy(inline_, other.inline_, InlineSize);
+      }
+      other.ops_ = &kEmptyOps; // Mark source as empty
+    } else {
+      std::memcpy(inline_, other.inline_, InlineSize);
+    }
+  }
+
+  SmallBuffer& operator=(SmallBuffer const& other)
+    requires(!MoveOnly)
+  {
     if (this != &other) {
       if constexpr (SupportsNonTrivial) {
         destroy();
         ops_ = other.ops_;
-        if (ops_->copy) {
+        if (ops_ == &kEmptyOps) {
+          // Empty - nothing to copy
+        } else if (ops_->copy) {
           ops_->copy(inline_, other.inline_);
         } else {
           std::memcpy(inline_, other.inline_, InlineSize);
         }
+      } else {
+        std::memcpy(inline_, other.inline_, InlineSize);
+      }
+    }
+    return *this;
+  }
+
+  SmallBuffer& operator=(SmallBuffer&& other) noexcept {
+    if (this != &other) {
+      if constexpr (SupportsNonTrivial) {
+        destroy();
+        ops_ = other.ops_;
+        if (ops_ == &kEmptyOps) {
+          // Empty - nothing to move
+        } else if (ops_->move) {
+          ops_->move(inline_, other.inline_);
+        } else {
+          std::memcpy(inline_, other.inline_, InlineSize);
+        }
+        other.ops_ = &kEmptyOps; // Mark source as empty
       } else {
         std::memcpy(inline_, other.inline_, InlineSize);
       }
@@ -103,17 +178,23 @@ struct SmallBuffer {
   struct Ops {
     void (*destroy)(void*);
     void (*copy)(void* dst, const void* src);
+    void (*move)(
+        void* dst, void* src); // Move-constructs dst from src, destroys src
   };
 
-  static constexpr Ops kTrivialOps{nullptr, nullptr};
+  // For trivially copyable/destructible types - all ops are nullptr (use
+  // memcpy)
+  static constexpr Ops kTrivialOps{nullptr, nullptr, nullptr};
+  // For empty state - same content as kTrivialOps but different address
+  static constexpr Ops kEmptyOps{nullptr, nullptr, nullptr};
 
   alignas(Alignment) std::byte inline_[InlineSize];
   [[FOLLY_ATTR_NO_UNIQUE_ADDRESS]]
   std::conditional_t<SupportsNonTrivial, const Ops*, std::nullptr_t> ops_{};
 
-  void destroy() {
+  void destroy() noexcept {
     if constexpr (SupportsNonTrivial) {
-      if (ops_->destroy) {
+      if (ops_ != &kEmptyOps && ops_->destroy) {
         ops_->destroy(inline_);
       }
     }
@@ -126,13 +207,36 @@ struct SmallBuffer {
           std::is_trivially_destructible_v<T> &&
           std::is_trivially_copyable_v<T>) {
         ops_ = &kTrivialOps;
+      } else if constexpr (MoveOnly) {
+        // Move-only buffer - only provide move operations
+        static constexpr Ops kOps = {
+            // destroy
+            [](void* p) { static_cast<T*>(p)->~T(); },
+            // copy - nullptr for move-only buffers
+            nullptr,
+            // move
+            [](void* dst, void* src) {
+              new (dst) T(std::move(*static_cast<T*>(src)));
+              static_cast<T*>(src)->~T();
+            }};
+        ops_ = &kOps;
       } else {
+        // Copyable buffer - require copy-constructible types
+        static_assert(
+            std::is_copy_constructible_v<T>,
+            "SmallBuffer with MoveOnly=false requires copy-constructible types. "
+            "Use MoveOnly=true for move-only types.");
         static constexpr Ops kOps = {
             // destroy
             [](void* p) { static_cast<T*>(p)->~T(); },
             // copy
             [](void* dst, const void* src) {
               new (dst) T(*static_cast<const T*>(src));
+            },
+            // move
+            [](void* dst, void* src) {
+              new (dst) T(std::move(*static_cast<T*>(src)));
+              static_cast<T*>(src)->~T();
             }};
         ops_ = &kOps;
       }

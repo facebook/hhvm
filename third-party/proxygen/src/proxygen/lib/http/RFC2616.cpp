@@ -8,7 +8,7 @@
 
 #include <proxygen/lib/http/RFC2616.h>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <folly/String.h>
 #include <folly/ThreadLocal.h>

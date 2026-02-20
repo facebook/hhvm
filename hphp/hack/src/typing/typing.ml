@@ -13524,15 +13524,17 @@ end = struct
         (* TODO akenn: Should we move this to the class_get original call? *)
         let (env, this_ty) = ExprDepTy.make env ~cid:cid_ this_ty in
         (* When accessing a class constant via `self` in a trait with
-           `require class C`, resolve `this_ty` to C rather than the trait. *)
+           `require class C` or `require this as C`, resolve `this_ty` to C
+           rather than the trait. *)
         let (env, this_ty) =
           if
             is_const
             && Ast_defs.is_c_trait (Cls.kind class_)
             && Nast.equal_class_id_ cid_ CIself
           then
-            match Cls.all_ancestor_req_class_requirements class_ with
-            | (_, req_ty) :: _ ->
+            match Cls.all_ancestor_req_constraints_requirements class_ with
+            | cr :: _ ->
+              let (_, req_ty) = to_requirement cr in
               let ((env, _), locl_ty) =
                 Phase.localize_no_subst env ~ignore_errors:true req_ty
               in

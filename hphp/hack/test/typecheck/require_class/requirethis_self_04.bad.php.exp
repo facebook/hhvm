@@ -1,0 +1,32 @@
+ERROR: File "requirethis_self_04.bad.php", line 29, characters 22-23:
+Invalid argument (Typing[4110])
+  File "requirethis_self_04.bad.php", line 44, characters 27-32:
+  Expected `Banana`
+  File "requirethis_self_04.bad.php", line 10, characters 23-25:
+  But got `int`
+  File "requirethis_self_04.bad.php", line 20, characters 9-20:
+    resulting from expanding the type constant `DefinesConcreteTypeConst::TThere`
+ERROR: File "requirethis_self_04.bad.php", line 32, characters 22-23:
+Invalid argument (Typing[4110])
+  File "requirethis_self_04.bad.php", line 44, characters 27-32:
+  Expected `Banana`
+  File "requirethis_self_04.bad.php", line 10, characters 23-25:
+  But got `int`
+  File "requirethis_self_04.bad.php", line 20, characters 9-20:
+    resulting from expanding the type constant `this::TThere`
+ERROR: File "requirethis_self_04.bad.php", line 35, characters 22-23:
+Invalid argument (Typing[4110])
+  File "requirethis_self_04.bad.php", line 44, characters 27-32:
+  Expected `Banana`
+  File "requirethis_self_04.bad.php", line 22, characters 22-27:
+  But got `string`
+  File "requirethis_self_04.bad.php", line 23, characters 9-19:
+    resulting from expanding the type constant `DefinesConcreteTypeConst::THere`
+ERROR: File "requirethis_self_04.bad.php", line 38, characters 22-23:
+Invalid argument (Typing[4110])
+  File "requirethis_self_04.bad.php", line 44, characters 27-32:
+  Expected `Banana`
+  File "requirethis_self_04.bad.php", line 22, characters 22-27:
+  But got `string`
+  File "requirethis_self_04.bad.php", line 23, characters 9-19:
+    resulting from expanding the type constant `this::THere`

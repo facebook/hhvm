@@ -9,10 +9,10 @@
 #include <proxygen/lib/utils/RendezvousHash.h>
 
 #include <algorithm>
+#include <cmath> /* pow */
 #include <folly/hash/Hash.h>
 #include <limits>
 #include <map>
-#include <math.h> /* pow */
 #include <vector>
 
 namespace proxygen {

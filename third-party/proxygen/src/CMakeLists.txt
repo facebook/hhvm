@@ -93,7 +93,7 @@ find_package(Zstd REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Threads)
-find_package(c-ares REQUIRED)
+find_package(Cares REQUIRED)
 find_package(Glog REQUIRED)
 
 # Propagate glog's required compile definition to all proxygen targets.

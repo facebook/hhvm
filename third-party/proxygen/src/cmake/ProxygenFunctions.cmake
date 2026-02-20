@@ -371,7 +371,7 @@ function(proxygen_create_monolithic_library)
       ZLIB::ZLIB
       ${OPENSSL_LIBRARIES}
       Threads::Threads
-      c-ares::cares
+      cares
     PRIVATE
       glog::glog
       ${GFLAG_DEPENDENCIES}

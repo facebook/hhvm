@@ -61,7 +61,7 @@ proxygen_add_library(proxygen_dns_cares_dns
     proxygen_utils_time_util
     Folly::folly_conv
     Folly::folly_portability_sockets
-    c-ares::cares
+    cares
     glog::glog
   EXPORTED_DEPS
     proxygen_dns_dns_base
@@ -69,7 +69,7 @@ proxygen_add_library(proxygen_dns_cares_dns
     Folly::folly_io_async_async_base
     Folly::folly_network_address
     Folly::folly_portability_windows
-    c-ares::cares
+    cares
 )
 
 proxygen_add_library(proxygen_dns_future_dns

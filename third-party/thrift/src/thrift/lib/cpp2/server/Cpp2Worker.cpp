@@ -19,7 +19,7 @@
 #include <vector>
 
 #include <folly/GLog.h>
-#include <folly/experimental/io/AsyncIoUringSocketFactory.h>
+#include <folly/io/async/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBaseLocal.h>

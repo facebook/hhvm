@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/security/SSLUtil.h>
 
-#include <folly/experimental/io/AsyncIoUringSocketFactory.h>
+#include <folly/io/async/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
 #include <folly/io/async/ssl/BasicTransportCertificate.h>
 

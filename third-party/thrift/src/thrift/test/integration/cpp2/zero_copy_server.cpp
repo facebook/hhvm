@@ -24,7 +24,7 @@
 #include <folly/io/async/AsyncSignalHandler.h>
 #include <folly/io/async/IoUringOptions.h>
 
-#include <folly/experimental/io/MuxIOThreadPoolExecutor.h>
+#include <folly/io/async/MuxIOThreadPoolExecutor.h>
 
 #include <common/services/cpp/ServiceFramework.h>
 #include <folly/io/async/IoUringBackend.h>

@@ -62,6 +62,7 @@ std::unique_ptr<HTTPServerAcceptor> HTTPServerAcceptor::make(
   // Create a copy of the filter chain in reverse order since we need to create
   // Handlers in that order.
   std::vector<RequestHandlerFactory*> handlerFactories;
+  handlerFactories.reserve(opts.handlerFactories.size());
   for (auto& f : opts.handlerFactories) {
     handlerFactories.push_back(f.get());
   }

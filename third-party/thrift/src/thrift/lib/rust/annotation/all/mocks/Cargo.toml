@@ -18,7 +18,7 @@ doc = false
 [dependencies]
 all__clients = { package = "all_clients", version = "0.0.1+unstable", path = "../clients" }
 all__types = { package = "all", version = "0.0.1+unstable", path = ".." }
-anyhow = "1.0.98"
+anyhow = "1.0.101"
 async-trait = "0.1.86"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 cpp = { version = "0.0.1+unstable", path = "../../cpp" }

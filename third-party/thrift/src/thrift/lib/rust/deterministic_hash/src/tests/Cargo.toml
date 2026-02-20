@@ -24,7 +24,7 @@ name = "deterministic_hash_test"
 path = "deterministic_hash_test.rs"
 
 [dependencies]
-anyhow = "1.0.98"
+anyhow = "1.0.101"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }

@@ -11,7 +11,7 @@ license = "MIT"
 path = "../hh_config.rs"
 
 [dependencies]
-anyhow = "1.0.98"
+anyhow = "1.0.101"
 config_file = { version = "0.0.0", path = "../../config_file/rust" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }

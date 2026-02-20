@@ -1,0 +1,32 @@
+ERROR: File "self_03.bad.php", line 27, characters 22-23:
+Invalid argument (Typing[4110])
+  File "self_03.bad.php", line 42, characters 27-32:
+  Expected `Banana`
+  File "self_03.bad.php", line 8, characters 23-25:
+  But got `int`
+  File "self_03.bad.php", line 18, characters 9-20:
+    resulting from expanding the type constant `DefinesConcreteTypeConst::TThere`
+ERROR: File "self_03.bad.php", line 30, characters 22-23:
+Invalid argument (Typing[4110])
+  File "self_03.bad.php", line 42, characters 27-32:
+  Expected `Banana`
+  File "self_03.bad.php", line 8, characters 23-25:
+  But got `int`
+  File "self_03.bad.php", line 18, characters 9-20:
+    resulting from expanding the type constant `this::TThere`
+ERROR: File "self_03.bad.php", line 33, characters 22-23:
+Invalid argument (Typing[4110])
+  File "self_03.bad.php", line 42, characters 27-32:
+  Expected `Banana`
+  File "self_03.bad.php", line 20, characters 22-27:
+  But got `string`
+  File "self_03.bad.php", line 21, characters 9-19:
+    resulting from expanding the type constant `DefinesConcreteTypeConst::THere`
+ERROR: File "self_03.bad.php", line 36, characters 22-23:
+Invalid argument (Typing[4110])
+  File "self_03.bad.php", line 42, characters 27-32:
+  Expected `Banana`
+  File "self_03.bad.php", line 20, characters 22-27:
+  But got `string`
+  File "self_03.bad.php", line 21, characters 9-19:
+    resulting from expanding the type constant `this::THere`

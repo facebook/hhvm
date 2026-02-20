@@ -275,15 +275,15 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 {{/program:structs}}
 {{#program:enums}}
-ExtractorResult<{{program:cpp_namespaces}}::{{enum:cpp_name}}>
+ExtractorResult<{{program:cpp_namespace}}::{{enum:cpp_name}}>
 Extractor<{{> common/wrapped_enum }}>::operator()(PyObject* obj) {
   {{! thrift-python enums have int parent class}}
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
-    return extractorError<{{program:cpp_namespaces}}::{{enum:cpp_name}}>(
+    return extractorError<{{program:cpp_namespace}}::{{enum:cpp_name}}>(
         "Error getting python int value: {{enum:name}}");
   }
-  return static_cast<{{program:cpp_namespaces}}::{{enum:cpp_name}}>(val);
+  return static_cast<{{program:cpp_namespace}}::{{enum:cpp_name}}>(val);
 }
 
 int Extractor<{{> common/wrapped_enum }}>::typeCheck(PyObject* obj) {
@@ -302,7 +302,7 @@ int Extractor<{{> common/wrapped_enum }}>::typeCheck(PyObject* obj) {
 
 
 PyObject* Constructor<{{> common/wrapped_enum }}>::operator()(
-    {{program:cpp_namespaces}}::{{enum:cpp_name}} val) {
+    {{program:cpp_namespace}}::{{enum:cpp_name}} val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;

@@ -72,13 +72,13 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 template <>
 struct Extractor<{{> common/wrapped_enum }}>
     : public BaseExtractor<{{> common/wrapped_enum}}> {
-  ExtractorResult<{{program:cpp_namespaces}}::{{enum:cpp_name}}> operator()(PyObject* obj);
+  ExtractorResult<{{program:cpp_namespace}}::{{enum:cpp_name}}> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
 struct Constructor<{{> common/wrapped_enum }}> {
-  PyObject* operator()({{program:cpp_namespaces}}::{{enum:cpp_name}} val);
+  PyObject* operator()({{program:cpp_namespace}}::{{enum:cpp_name}} val);
 };
 
 {{/program:enums}}

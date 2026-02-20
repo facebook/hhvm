@@ -17,4 +17,4 @@
 }}{{!
     Shorthand to wrap cpp2 type with tag that includes py3 namespace and module.
     This prevents ODR bugs for structs with common names when cpp2 namespace not unique
-}}::apache::thrift::python::capi::PythonNamespaced<{{program:cpp_namespaces}}::{{enum:cpp_name}}, {{> common/namespace_tag }}>
+}}::apache::thrift::python::capi::PythonNamespaced<{{program:cpp_namespace}}::{{enum:cpp_name}}, {{> common/namespace_tag }}>

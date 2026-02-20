@@ -32,7 +32,7 @@ cdef extern from "{{program:include_prefix}}gen-cpp2/{{program:name}}_types.h":
 {{#first?}}
 cdef extern from "{{program:include_prefix}}gen-cpp2/{{program:name}}_types.h":
 {{/first?}}
-    cdef cppclass c{{enum:name}} "{{program:cpp_namespaces}}::{{enum:cpp_name}}":
+    cdef cppclass c{{enum:name}} "{{program:cpp_namespace}}::{{enum:cpp_name}}":
         pass
 {{/program:enums}}
 {{#program:structs}}

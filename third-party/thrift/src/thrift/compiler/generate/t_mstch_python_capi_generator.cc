@@ -445,68 +445,15 @@ class python_capi_generator_context {
   }
 };
 
-class python_capi_mstch_program : public mstch_program {
- public:
-  python_capi_mstch_program(
-      const t_program* p,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const python_capi_generator_context* generator_context)
-      : mstch_program(p, ctx, pos), generator_context_(*generator_context) {
-    register_methods(
-        this,
-        {
-            {"program:capi_includes",
-             &python_capi_mstch_program::capi_includes},
-            {"program:capi_module_prefix",
-             &python_capi_mstch_program::capi_module_prefix},
-            {"program:cpp_namespaces",
-             &python_capi_mstch_program::get_cpp2_namespace},
-            {"program:generate_capi?",
-             &python_capi_mstch_program::has_types_node},
-            {"program:module_path", &python_capi_mstch_program::module_path},
-        });
-  }
-
-  mstch::node has_types_node() { return has_types(*program_); }
-
-  mstch::node capi_includes() {
-    mstch::array a;
-    a.insert(
-        a.end(),
-        generator_context_.capi_includes().begin(),
-        generator_context_.capi_includes().end());
-    return a;
-  }
-
-  mstch::node capi_module_prefix() { return gen_capi_module_prefix(program_); }
-
-  mstch::node module_path() {
-    return get_py3_namespace_with_name_and_prefix(
-        program_, get_option("root_module_prefix"));
-  }
-
-  mstch::node get_cpp2_namespace() {
-    return cpp2::get_gen_namespace(*program_);
-  }
-
- private:
-  const python_capi_generator_context& generator_context_;
-};
-
 class t_mstch_python_capi_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
   std::string template_prefix() const override { return "python_capi"; }
 
-  void generate_program() override {
-    set_mstch_factories();
-    generate_types();
-  }
+  void generate_program() override { generate_types(); }
 
  private:
-  void set_mstch_factories();
   void generate_file(
       const std::string& file, const std::filesystem::path& base);
   void generate_types();
@@ -559,6 +506,35 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
     def.property("iobuf?", [](const t_field& self) {
       const t_type* ttype = self.type()->get_true_type();
       return ttype->is_binary() && is_type_iobuf(ttype);
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_program>::ptr make_prototype_for_program(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_program(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_program>::extends(std::move(base));
+
+    def.property("capi_includes", [this](const t_program& self) {
+      if (&self != program_) {
+        throw whisker::eval_error(
+            "capi_includes is only valid on root program");
+      }
+      return whisker::array::of(
+          {python_capi_context_->capi_includes().begin(),
+           python_capi_context_->capi_includes().end()});
+    });
+    def.property("capi_module_prefix", [](const t_program& self) {
+      return gen_capi_module_prefix(&self);
+    });
+    def.property("cpp_namespace", &cpp2::get_gen_namespace);
+    def.property("generate_capi?", &has_types);
+    def.property("module_path", [this](const t_program& self) {
+      return get_py3_namespace_with_name_and_prefix(
+          &self,
+          std::string(get_compiler_option("root_module_prefix").value_or("")));
     });
 
     return std::move(def).make();
@@ -636,10 +612,6 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 };
-
-void t_mstch_python_capi_generator::set_mstch_factories() {
-  mstch_context_.add<python_capi_mstch_program>(python_capi_context_.get());
-}
 
 std::filesystem::path t_mstch_python_capi_generator::package_to_path() {
   auto package = get_py3_namespace(get_program());

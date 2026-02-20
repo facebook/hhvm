@@ -233,6 +233,11 @@ prototype<t_structured>::ptr t_whisker_generator::make_prototype_for_structured(
             ? to_array(self.fields_id_order(), proto.of<t_field>())
             : to_array(self.fields(), proto.of<t_field>());
       });
+  def.property(
+      "has_serialize_in_field_id_order_annotation?",
+      [](const t_structured& self) {
+        return self.has_structured_annotation(kSerializeInFieldIdOrderUri);
+      });
   return std::move(def).make();
 }
 

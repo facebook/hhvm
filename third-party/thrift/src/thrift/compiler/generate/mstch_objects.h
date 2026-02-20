@@ -636,15 +636,12 @@ class mstch_struct : public mstch_base {
             {"struct:fields", &mstch_struct::fields},
             {"struct:fields_in_serialization_order",
              &mstch_struct::fields_in_serialization_order},
-            {"struct:has_serialize_in_field_id_order_annotation?",
-             &mstch_struct::has_serialize_in_field_id_order_annotation},
         });
   }
 
   whisker::object self() {
     return resolve_derived_t_type(*context_.prototypes, *struct_);
   }
-  mstch::node has_fields() { return struct_->has_fields(); }
   whisker::object self_exception() {
     if (const t_exception* ex = struct_->try_as<t_exception>()) {
       return make_self<t_exception>(*ex);
@@ -660,10 +657,6 @@ class mstch_struct : public mstch_base {
     }
 
     return make_mstch_fields(struct_->fields());
-  }
-
-  mstch::node has_serialize_in_field_id_order_annotation() {
-    return struct_->has_structured_annotation(kSerializeInFieldIdOrderUri);
   }
 
  protected:

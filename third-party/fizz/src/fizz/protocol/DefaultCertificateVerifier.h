@@ -8,6 +8,10 @@
 
 #pragma once
 
+#include <fizz/fizz-config.h>
+
+#if FIZZ_CERTIFICATE_USE_OPENSSL_CERT
+
 #include <fizz/protocol/CertificateVerifier.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
 
@@ -78,3 +82,13 @@ class DefaultCertificateVerifier : public CertificateVerifier {
   X509VerifyCallback customVerifyCallback_{nullptr};
 };
 } // namespace fizz
+
+#else // !FIZZ_CERTIFICATE_USE_OPENSSL_CERT
+
+#include <fizz/protocol/CertificateVerifier.h>
+
+namespace fizz {
+using DefaultCertificateVerifier = TerminatingCertificateVerifier;
+} // namespace fizz
+
+#endif // FIZZ_CERTIFICATE_USE_OPENSSL_CERT

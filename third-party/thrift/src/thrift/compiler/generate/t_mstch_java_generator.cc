@@ -194,6 +194,27 @@ class t_mstch_java_generator : public t_mstch_generator {
     def.property("javaCapitalName", [](const t_const& self) {
       return java::mangle_java_constant_name(self.name());
     });
+    def.property("javaIgnoreConstant?", [](const t_const& self) {
+      // we have to ignore constants if they are enums that we handled as ints,
+      // as we don't have the constant values to work with.
+      if (const t_map* map = self.type()->try_as<t_map>();
+          map != nullptr && map->key_type()->is<t_enum>()) {
+        return map->key_type()->has_unstructured_annotation(
+            "java.swift.skip_enum_name_map");
+      }
+      if (const t_list* list = self.type()->try_as<t_list>();
+          list != nullptr && list->elem_type()->is<t_enum>()) {
+        return list->elem_type()->has_unstructured_annotation(
+            "java.swift.skip_enum_name_map");
+      }
+      if (const t_set* set = self.type()->try_as<t_set>();
+          set != nullptr && set->elem_type()->is<t_enum>()) {
+        return set->elem_type()->has_unstructured_annotation(
+            "java.swift.skip_enum_name_map");
+      }
+      // T194272441 generated schema const is rendered incorrectly.
+      return self.generated();
+    });
 
     return std::move(def).make();
   }
@@ -1298,54 +1319,6 @@ class mstch_java_enum : public mstch_enum {
   }
 };
 
-class mstch_java_const : public mstch_const {
- public:
-  mstch_java_const(
-      const t_const* c,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_const* current_const,
-      const t_field* field)
-      : mstch_const(c, ctx, pos, current_const, field) {
-    register_methods(
-        this,
-        {
-            {"constant:javaIgnoreConstant?",
-             &mstch_java_const::java_ignore_constant},
-        });
-  }
-  mstch::node java_ignore_constant() {
-    // we have to ignore constants if they are enums that we handled as ints, as
-    // we don't have the constant values to work with.
-    if (const_->type()->is<t_map>()) {
-      t_map* map = (t_map*)const_->type();
-      if (map->key_type()->is<t_enum>()) {
-        return map->key_type()->has_unstructured_annotation(
-            "java.swift.skip_enum_name_map");
-      }
-    }
-    if (const_->type()->is<t_list>()) {
-      t_list* list = (t_list*)const_->type();
-      if (list->elem_type().get_type()->is<t_enum>()) {
-        return list->elem_type().get_type()->has_unstructured_annotation(
-            "java.swift.skip_enum_name_map");
-      }
-    }
-    if (const_->type()->is<t_set>()) {
-      t_set* set = (t_set*)const_->type();
-      if (set->elem_type().get_type()->is<t_enum>()) {
-        return set->elem_type().get_type()->has_unstructured_annotation(
-            "java.swift.skip_enum_name_map");
-      }
-    }
-    if (const_->generated()) {
-      // T194272441 generated schema const is rendered incorrectly.
-      return true;
-    }
-    return mstch::node();
-  }
-};
-
 class mstch_java_type : public mstch_type {
  public:
   mstch_java_type(
@@ -1499,7 +1472,6 @@ void t_mstch_java_generator::set_mstch_factories() {
   mstch_context_.add<mstch_java_struct>();
   mstch_context_.add<mstch_java_field>();
   mstch_context_.add<mstch_java_enum>();
-  mstch_context_.add<mstch_java_const>();
 }
 
 THRIFT_REGISTER_GENERATOR(mstch_java, "Java", "");

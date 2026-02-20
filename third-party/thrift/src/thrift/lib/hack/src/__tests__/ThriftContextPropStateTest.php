@@ -844,6 +844,59 @@ final class ThriftContextPropStateTest extends WWWTest {
     expect($estimate?->depth)->toEqual(25);
   }
 
+  public function testAgentIdNullable(): void {
+    $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+
+    // Initially null
+    expect($tcps->getAgentId())->toBeNull();
+
+    // Set agent_id
+    $tcps->setAgentId('AGENT:devmate');
+    expect($tcps->getAgentId())->toEqual('AGENT:devmate');
+
+    // Override existing value
+    $tcps->setAgentId('AGENT:metamate');
+    expect($tcps->getAgentId())->toEqual('AGENT:metamate');
+
+    // Back to null
+    $tcps->setAgentId(null);
+    expect($tcps->getAgentId())->toBeNull();
+  }
+
+  public function testAgentIdDirtiesCache(): void {
+    $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+
+    // Serialize the initial state to populate the cache
+    $serialized_before = $tcps->getSerialized();
+
+    // Set agent_id, which should dirty the cache
+    $tcps->setAgentId('AGENT:devmate');
+
+    // Serialize the state again
+    $serialized_after = $tcps->getSerialized();
+
+    // The serialized strings should be different because the cache was dirtied
+    expect($serialized_before)->toNotEqual($serialized_after);
+  }
+
+  public function testAgentIdRoundTrip()[defaults]: void {
+    $tfm = ThriftFrameworkMetadata::withDefaultValues();
+    $tfm->baggage = ContextProp\Baggage::withDefaultValues();
+    $tfm->baggage->agent_id = 'AGENT:devmate';
+
+    $buf = new TMemoryBuffer();
+    $prot = new TCompactProtocolAccelerated($buf);
+    $tfm->write($prot);
+    $s = $buf->getBuffer();
+    $e = Base64::encode($s);
+
+    ThriftContextPropState::initFromString($e);
+    $tcps = ThriftContextPropState::get();
+    expect($tcps->getAgentId())->toEqual('AGENT:devmate');
+  }
+
   public function testTraceSizeEstimationDirtiesCache(): void {
     $tcps = ThriftContextPropState::get();
     $tcps->clear();

@@ -853,6 +853,24 @@ final class ThriftContextPropState {
     $this->setBaggageFlags1($flags1);
   }
 
+  // agent_id getter
+  public readonly function getAgentId()[leak_safe]: ?string {
+    if ($this->storage->baggage?->agent_id is null) {
+      return null;
+    }
+    return ($this->storage->baggage?->agent_id as string);
+  }
+
+  // agent_id setter
+  public function setAgentId(?string $agent_id)[write_props]: void {
+    $this->storage->baggage =
+      $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
+
+    $baggage = $this->storage->baggage as nonnull;
+    $baggage->agent_id = $agent_id;
+    $this->dirty();
+  }
+
   // Getters for the root_product_id
   public readonly function getRootProductId()[leak_safe]: ?int {
     if ($this->storage->baggage is null) {

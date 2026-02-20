@@ -71,6 +71,10 @@ final class ImmutableThriftContextPropState {
     return $this->getUserIds()?->ig_user_id;
   }
 
+  public function getAgentId()[]: ?string {
+    return $this->getBaggage()?->agent_id;
+  }
+
   public function getTraceContext()[]: ?ContextProp\TraceContext {
     return $this->state->getTraceContext();
   }

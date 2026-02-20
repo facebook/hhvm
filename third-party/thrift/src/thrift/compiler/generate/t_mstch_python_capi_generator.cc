@@ -615,48 +615,6 @@ class python_capi_mstch_struct : public mstch_struct {
   cpp_name_resolver cpp_resolver_;
 };
 
-class python_capi_mstch_field : public mstch_field {
- public:
-  python_capi_mstch_field(
-      const t_field* field, mstch_context& ctx, mstch_element_position pos)
-      : mstch_field(field, ctx, pos), py_name_(python::get_py3_name(*field)) {
-    register_methods(
-        this,
-        {
-            {"field:cpp_name", &python_capi_mstch_field::cpp_name},
-            {"field:marshal_type", &python_capi_mstch_field::marshal_type},
-            {"field:iobuf?", &python_capi_mstch_field::iobuf},
-        });
-  }
-
-  mstch::node cpp_name() { return cpp2::get_name(field_); }
-
-  mstch::node marshal_type() { return format_marshal_type(*field_); }
-
-  mstch::node iobuf() {
-    const auto* ttype = field_->type()->get_true_type();
-    return ttype->is_binary() && is_type_iobuf(ttype);
-  }
-
- private:
-  const std::string py_name_;
-};
-
-class python_capi_mstch_enum : public mstch_enum {
- public:
-  python_capi_mstch_enum(
-      const t_enum* e, mstch_context& ctx, mstch_element_position pos)
-      : mstch_enum(e, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"enum:cpp_name", &python_capi_mstch_enum::cpp_name},
-        });
-  }
-
-  mstch::node cpp_name() { return cpp2::get_name(enum_); }
-};
-
 class t_mstch_python_capi_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -682,13 +640,41 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
   std::filesystem::path package_to_path();
 
   std::filesystem::path generate_root_path_;
+
+ private:
+  prototype<t_named>::ptr make_prototype_for_named(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_named(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_named>::extends(std::move(base));
+
+    def.property(
+        "cpp_name", [](const t_named& self) { return cpp2::get_name(&self); });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_field>::ptr make_prototype_for_field(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_field(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_field>::extends(std::move(base));
+
+    def.property("marshal_type", [](const t_field& self) {
+      return format_marshal_type(self);
+    });
+    def.property("iobuf?", [](const t_field& self) {
+      const t_type* ttype = self.type()->get_true_type();
+      return ttype->is_binary() && is_type_iobuf(ttype);
+    });
+
+    return std::move(def).make();
+  }
 };
 
 void t_mstch_python_capi_generator::set_mstch_factories() {
   mstch_context_.add<python_capi_mstch_program>();
   mstch_context_.add<python_capi_mstch_struct>();
-  mstch_context_.add<python_capi_mstch_field>();
-  mstch_context_.add<python_capi_mstch_enum>();
 }
 
 std::filesystem::path t_mstch_python_capi_generator::package_to_path() {

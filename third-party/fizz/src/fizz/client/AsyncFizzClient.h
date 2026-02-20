@@ -10,6 +10,7 @@
 
 #include <fizz/client/ClientExtensions.h>
 #include <fizz/client/ClientProtocol.h>
+#include <fizz/client/ECHRetryCallback.h>
 #include <fizz/client/EarlyDataRejectionPolicy.h>
 #include <fizz/client/FizzClient.h>
 #include <fizz/client/FizzClientContext.h>
@@ -21,23 +22,6 @@
 
 namespace fizz {
 namespace client {
-
-/**
- * ECHRetryCallback is used to convey ECHRetryConfigs that are
- * received by the client.
- */
-class ECHRetryCallback {
- public:
-  virtual ~ECHRetryCallback() = default;
-
-  /**
-   * retryAvailable may be invoked whenever the client receives a list of
-   * ECHRetryConfigs from the server.
-   *
-   * There is no guarantee that this callback will be invoked on a connection.
-   */
-  virtual void retryAvailable(ECHRetryAvailable retry) = 0;
-};
 
 template <typename SM>
 class AsyncFizzClientT : public AsyncFizzBase,

@@ -16,7 +16,7 @@ thrift_generate(
   "any_rep" #file_name
   "" #services
   "cpp2" #language
-  "no_metadata" #options
+  "json,no_metadata" #options
   "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
   "${CMAKE_CURRENT_BINARY_DIR}" #output_path
   "thrift/lib/thrift" #include_prefix
@@ -93,7 +93,7 @@ thrift_generate(
   "standard" #file_name
   "" #services
   "cpp2" #language
-  "no_metadata" #options
+  "json,no_metadata" #options
   "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
   "${CMAKE_CURRENT_BINARY_DIR}" #output_path
   "thrift/lib/thrift" #include_prefix
@@ -104,7 +104,7 @@ thrift_generate(
   "type_rep" #file_name
   "" #services
   "cpp2" #language
-  "no_metadata" #options
+  "json,no_metadata" #options
   "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
   "${CMAKE_CURRENT_BINARY_DIR}" #output_path
   "thrift/lib/thrift" #include_prefix

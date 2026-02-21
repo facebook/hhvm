@@ -385,6 +385,7 @@ add_library(
   security/FizzPeeker.cpp
   security/SSLUtil.cpp
   security/extensions/ThriftParametersClientExtension.cpp
+  security/extensions/ThriftParametersServerExtension.cpp
   security/extensions/Types.cpp
   server/AdaptiveConcurrency.cpp
   server/ConcurrencyControllerBase.cpp

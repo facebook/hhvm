@@ -18,10 +18,10 @@
 
 /// Service definitions for `{{service:rust_name}}`.
 pub mod {{service:snake}} {{> lib/block}}{{!
-    }}{{#service:docs?}}
+    }}{{#if service:docs?}}
     #![doc = {{service:docs}}]
-    {{/service:docs?}}{{!
-    }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{#function:stream?}}
+    {{/if service:docs?}}{{!
+    }}{{#service:rustFunctions}}{{#if (not function:starts_interaction?)}}{{#if function:stream?}}
 
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}StreamExn {
@@ -84,7 +84,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             Self::ApplicationException(exn)
         }
     }
-    {{#function:enable_anyhow_to_application_exn}}
+    {{#if function:enable_anyhow_to_application_exn}}
 
     impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}StreamExn {
         fn from(exn: ::anyhow::Error) -> Self {
@@ -96,7 +96,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             )
         }
     }
-    {{/function:enable_anyhow_to_application_exn}}
+    {{/if function:enable_anyhow_to_application_exn}}
 
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}StreamExn {
         type Success = {{#function:stream_elem_type}}{{> lib/type}}{{/function:stream_elem_type}};
@@ -141,12 +141,12 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             p.write_struct_end();
         }
     }
-    {{/function:stream?}}{{#function:sink?}}{{^function:bidirectional_stream?}}
+    {{/if function:stream?}}{{#if function:sink?}}{{#if (not function:bidirectional_stream?)}}
 
     pub struct {{function:upcamel}}SinkResult {
-        {{#function:sink_has_first_response?}}
+        {{#if function:sink_has_first_response?}}
         pub initial_response: {{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}},
-        {{/function:sink_has_first_response?}}
+        {{/if function:sink_has_first_response?}}
         pub stream_handler: ::std::boxed::Box<dyn ::std::ops::FnOnce(
             ::futures::stream::BoxStream<'static, ::std::result::Result<{{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}}, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}SinkExn>>
         ) -> ::futures::future::BoxFuture<'static,
@@ -158,9 +158,9 @@ pub mod {{service:snake}} {{> lib/block}}{{!
 
     impl {{function:upcamel}}SinkResult {
         pub fn new(
-            {{#function:sink_has_first_response?}}
+            {{#if function:sink_has_first_response?}}
             initial_response: {{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}},
-            {{/function:sink_has_first_response?}}
+            {{/if function:sink_has_first_response?}}
             stream_handler: ::std::boxed::Box<dyn ::std::ops::FnOnce(
                 ::futures::stream::BoxStream<'static, ::std::result::Result<{{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}}, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}SinkExn>>
             ) -> ::futures::future::BoxFuture<'static,
@@ -168,9 +168,9 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             > + Send>,
         ) -> Self {
             Self {
-                {{#function:sink_has_first_response?}}
+                {{#if function:sink_has_first_response?}}
                 initial_response,
-                {{/function:sink_has_first_response?}}
+                {{/if function:sink_has_first_response?}}
                 stream_handler,
                 buffer_size: 100,
                 chunk_timeout: ::std::time::Duration::ZERO,
@@ -187,7 +187,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             self
         }
     }
-    {{/function:bidirectional_stream?}}
+    {{/if (not function:bidirectional_stream?)}}
 
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}SinkExn {
@@ -250,7 +250,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             Self::ApplicationException(exn)
         }
     }
-    {{#function:enable_anyhow_to_application_exn}}
+    {{#if function:enable_anyhow_to_application_exn}}
 
     impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}SinkExn {
         fn from(exn: ::anyhow::Error) -> Self {
@@ -262,7 +262,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             )
         }
     }
-    {{/function:enable_anyhow_to_application_exn}}
+    {{/if function:enable_anyhow_to_application_exn}}
 
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}SinkExn {
         type Success = {{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}};
@@ -368,7 +368,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             )
         }
     }
-    {{^function:bidirectional_stream?}}
+    {{#if (not function:bidirectional_stream?)}}
 
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}SinkFinalExn {
@@ -431,7 +431,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             Self::ApplicationException(exn)
         }
     }
-    {{#function:enable_anyhow_to_application_exn}}
+    {{#if function:enable_anyhow_to_application_exn}}
 
     impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}SinkFinalExn {
         fn from(exn: ::anyhow::Error) -> Self {
@@ -443,7 +443,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             )
         }
     }
-    {{/function:enable_anyhow_to_application_exn}}
+    {{/if function:enable_anyhow_to_application_exn}}
 
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}SinkFinalExn {
         type Success = {{#function:sink_final_response_type}}{{> lib/type}}{{/function:sink_final_response_type}};
@@ -488,8 +488,8 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             p.write_struct_end();
         }
     }
-    {{/function:bidirectional_stream?}}
-    {{/function:sink?}}
+    {{/if (not function:bidirectional_stream?)}}
+    {{/if function:sink?}}
 
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}Exn {
@@ -506,7 +506,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
         }
     }{{!
     }}{{/function:uniqueExceptions}}
-    {{#function:enable_anyhow_to_application_exn}}
+    {{#if function:enable_anyhow_to_application_exn}}
 
     impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}Exn {
         fn from(exn: ::anyhow::Error) -> Self {
@@ -518,9 +518,9 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             )
         }
     }
-    {{/function:enable_anyhow_to_application_exn}}
+    {{/if function:enable_anyhow_to_application_exn}}
 
-    {{^function:exceptions?}}
+    {{#if (not function:exceptions?)}}
     impl ::std::convert::From<{{function:upcamel}}Exn> for ::fbthrift::NonthrowingFunctionError {
         fn from(err: {{function:upcamel}}Exn) -> Self {
             match err {
@@ -540,7 +540,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             }
         }
     }
-    {{/function:exceptions?}}
+    {{/if (not function:exceptions?)}}
 
     impl ::std::convert::From<::fbthrift::ApplicationException> for {{function:upcamel}}Exn {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
@@ -590,18 +590,18 @@ pub mod {{service:snake}} {{> lib/block}}{{!
 
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}Exn {
         type Success = {{!
-}}{{#function:bidirectional_stream?}}{{#function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:sink_has_first_response?}}{{^function:sink_has_first_response?}}(){{/function:sink_has_first_response?}}{{/function:bidirectional_stream?}}{{!
-}}{{^function:bidirectional_stream?}}{{!
-}}{{^function:sink?}}{{^function:stream?}}{{> lib/server_ok_type}}{{/function:stream?}}{{/function:sink?}}{{!
-}}{{#function:stream?}}{{!
-}}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
-}}{{^function:stream_has_first_response?}}(){{/function:stream_has_first_response?}}{{!
-}}{{/function:stream?}}{{!
-}}{{#function:sink?}}{{!
-}}{{#function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:sink_has_first_response?}}{{!
-}}{{^function:sink_has_first_response?}}(){{/function:sink_has_first_response?}}{{!
-}}{{/function:sink?}}{{!
-}}{{/function:bidirectional_stream?}}{{!
+}}{{#if function:bidirectional_stream?}}{{#if function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/if function:sink_has_first_response?}}{{#if (not function:sink_has_first_response?)}}(){{/if (not function:sink_has_first_response?)}}{{/if function:bidirectional_stream?}}{{!
+}}{{#if (not function:bidirectional_stream?)}}{{!
+}}{{#if (not function:sink?)}}{{#if (not function:stream?)}}{{> lib/server_ok_type}}{{/if (not function:stream?)}}{{/if (not function:sink?)}}{{!
+}}{{#if function:stream?}}{{!
+}}{{#if function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/if function:stream_has_first_response?}}{{!
+}}{{#if (not function:stream_has_first_response?)}}(){{/if (not function:stream_has_first_response?)}}{{!
+}}{{/if function:stream?}}{{!
+}}{{#if function:sink?}}{{!
+}}{{#if function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/if function:sink_has_first_response?}}{{!
+}}{{#if (not function:sink_has_first_response?)}}(){{/if (not function:sink_has_first_response?)}}{{!
+}}{{/if function:sink?}}{{!
+}}{{/if (not function:bidirectional_stream?)}}{{!
         }};
 
         fn write_result<P>(
@@ -620,47 +620,47 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", {{!
-                        }}{{#function:bidirectional_stream?}}{{!
-                            }}{{#function:sink_has_first_response?}}{{!
+                        }}{{#if function:bidirectional_stream?}}{{!
+                            }}{{#if function:sink_has_first_response?}}{{!
                                 }}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/ttype}}{{/function:sink_first_response_type}}{{/function:return_type}}{{!
-                            }}{{/function:sink_has_first_response?}}{{!
-                            }}{{^function:sink_has_first_response?}}::fbthrift::TType::Void{{/function:sink_has_first_response?}}{{!
-                        }}{{/function:bidirectional_stream?}}{{!
-                        }}{{^function:bidirectional_stream?}}{{!
-                            }}{{^function:sink?}}{{^function:stream?}}{{!
+                            }}{{/if function:sink_has_first_response?}}{{!
+                            }}{{#if (not function:sink_has_first_response?)}}::fbthrift::TType::Void{{/if (not function:sink_has_first_response?)}}{{!
+                        }}{{/if function:bidirectional_stream?}}{{!
+                        }}{{#if (not function:bidirectional_stream?)}}{{!
+                            }}{{#if (not function:sink?)}}{{#if (not function:stream?)}}{{!
                                 }}{{#function:return_type}}{{> lib/ttype}}{{/function:return_type}}{{!
-                            }}{{/function:stream?}}{{/function:sink?}}{{!
-                            }}{{#function:stream?}}{{!
-                                }}{{#function:stream_has_first_response?}}{{!
+                            }}{{/if (not function:stream?)}}{{/if (not function:sink?)}}{{!
+                            }}{{#if function:stream?}}{{!
+                                }}{{#if function:stream_has_first_response?}}{{!
                                     }}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
-                                }}{{/function:stream_has_first_response?}}{{!
-                                }}{{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
-                            }}{{/function:stream?}}{{!
-                            }}{{#function:sink?}}{{!
-                                }}{{#function:sink_has_first_response?}}{{!
+                                }}{{/if function:stream_has_first_response?}}{{!
+                                }}{{#if (not function:stream_has_first_response?)}}::fbthrift::TType::Void{{/if (not function:stream_has_first_response?)}}{{!
+                            }}{{/if function:stream?}}{{!
+                            }}{{#if function:sink?}}{{!
+                                }}{{#if function:sink_has_first_response?}}{{!
                                     }}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/ttype}}{{/function:sink_first_response_type}}{{/function:return_type}}{{!
-                                }}{{/function:sink_has_first_response?}}{{!
-                                }}{{^function:sink_has_first_response?}}::fbthrift::TType::Void{{/function:sink_has_first_response?}}{{!
-                            }}{{/function:sink?}}{{!
-                        }}{{/function:bidirectional_stream?}}{{!
+                                }}{{/if function:sink_has_first_response?}}{{!
+                                }}{{#if (not function:sink_has_first_response?)}}::fbthrift::TType::Void{{/if (not function:sink_has_first_response?)}}{{!
+                            }}{{/if function:sink?}}{{!
+                        }}{{/if (not function:bidirectional_stream?)}}{{!
                     }}, 0i16);
-                    {{#function:bidirectional_stream?}}{{#function:sink_has_first_response?}}
+                    {{#if function:bidirectional_stream?}}{{#if function:sink_has_first_response?}}
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
-                    {{/function:sink_has_first_response?}}{{/function:bidirectional_stream?}}
-                    {{^function:bidirectional_stream?}}{{^function:sink?}}{{^function:stream?}}
+                    {{/if function:sink_has_first_response?}}{{/if function:bidirectional_stream?}}
+                    {{#if (not function:bidirectional_stream?)}}{{#if (not function:sink?)}}{{#if (not function:stream?)}}
                     ::fbthrift::Serialize::rs_thrift_write({{#function:return_type}}{{!
                         }}{{#type:has_adapter?}}{{!
                             }}&{{> lib/adapter/qualified}}::to_thrift_field::<::fbthrift::metadata::NoThriftAnnotations>(_success, 0){{!
                         }}{{/type:has_adapter?}}{{!
                         }}{{^type:has_adapter?}}_success{{/type:has_adapter?}}{{!
                     }}{{/function:return_type}}, p);
-                    {{/function:stream?}}{{/function:sink?}}
-                    {{#function:stream?}}{{#function:stream_has_first_response?}}
+                    {{/if (not function:stream?)}}{{/if (not function:sink?)}}
+                    {{#if function:stream?}}{{#if function:stream_has_first_response?}}
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
-                    {{/function:stream_has_first_response?}}{{/function:stream?}}
-                    {{#function:sink?}}{{#function:sink_has_first_response?}}
+                    {{/if function:stream_has_first_response?}}{{/if function:stream?}}
+                    {{#if function:sink?}}{{#if function:sink_has_first_response?}}
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
-                    {{/function:sink_has_first_response?}}{{/function:sink?}}{{/function:bidirectional_stream?}}
+                    {{/if function:sink_has_first_response?}}{{/if function:sink?}}{{/if (not function:bidirectional_stream?)}}
                     p.write_field_end();
                 }
                 {{#function:exceptions}}
@@ -680,5 +680,5 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             p.write_struct_end();
         }
     }
-    {{/function:starts_interaction?}}{{/service:rustFunctions}}
+    {{/if (not function:starts_interaction?)}}{{/service:rustFunctions}}
 }

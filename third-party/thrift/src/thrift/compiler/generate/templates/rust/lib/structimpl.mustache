@@ -16,7 +16,7 @@
 
 }}
 
-{{^struct:union?}}
+{{#if (not struct:union?)}}
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::{{struct:rust_name}} {
     fn default() -> Self {
@@ -24,7 +24,7 @@ impl ::std::default::Default for self::{{struct:rust_name}} {
         }}{{#struct:fields}}
             {{field:rust_name}}: {{!
                 }}{{#field:default}}{{!
-                    }}{{#field:optional?}}{{!
+                    }}{{#if field:optional?}}{{!
                         }}{{#if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
                             }}{{#field:has_adapter?}}{{> lib/adapter/struct}}::from_thrift_default::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
                             }}{{> lib/fieldvalue}}{{!
@@ -32,22 +32,20 @@ impl ::std::default::Default for self::{{struct:rust_name}} {
                         }}{{#else}}{{!
                             }}::std::option::Option::None{{!
                         }}{{/if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
-                    }}{{/field:optional?}}{{!
-                    }}{{^field:optional?}}{{!
+                    }}{{#else}}{{!
                         }}{{#field:has_adapter?}}{{> lib/adapter/struct}}::from_thrift_default::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
                         }}{{> lib/fieldvalue}}{{!
                         }}{{#field:has_adapter?}}, {{field:id}}){{/field:has_adapter?}}{{!
-                    }}{{/field:optional?}}{{!
+                    }}{{/if field:optional?}}{{!
                 }}{{/field:default}}{{!
                 }}{{^field:default}}{{!
-                    }}{{#field:optional?}}{{!
+                    }}{{#if field:optional?}}{{!
                         }}::std::option::Option::None{{!
-                    }}{{/field:optional?}}{{!
-                    }}{{^field:optional?}}{{!
+                    }}{{#else}}{{!
                         }}{{#field:has_adapter?}}{{> lib/adapter/struct}}::from_thrift_default::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
                         }}::std::default::Default::default(){{!
                         }}{{#field:has_adapter?}}, {{field:id}}){{/field:has_adapter?}}{{!
-                    }}{{/field:optional?}}{{!
+                    }}{{/if field:optional?}}{{!
                 }}{{/field:default}}{{!
             }},{{!
         }}{{/struct:fields}}
@@ -81,14 +79,14 @@ impl ::std::panic::UnwindSafe for self::{{struct:rust_name}} {}
 impl ::fbthrift::GetTType for self::{{struct:rust_name}} {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
-{{#struct:uri}}
+{{#if (not (string.empty? struct:uri))}}
 
 impl ::fbthrift::GetUri for self::{{struct:rust_name}} {
     fn uri() -> &'static ::std::primitive::str {
         "{{struct:uri}}"
     }
 }
-{{/struct:uri}}
+{{/if (not (string.empty? struct:uri))}}
 
 impl ::fbthrift::GetTypeNameType for self::{{struct:rust_name}} {
     fn type_name_type() -> fbthrift::TypeNameType {
@@ -104,34 +102,33 @@ where
     fn rs_thrift_write(&self, p: &mut P) {
         p.write_struct_begin("{{struct:name}}");{{!
         }}{{#struct:fields}}{{!
-        }}{{#field:optional?}}
+        }}{{#if field:optional?}}
         if let ::std::option::Option::Some(some) = &self.{{field:rust_name}} {
             p.write_field_begin({{!
                 }}"{{field:name}}", {{!
                 }}{{#field:type}}{{> lib/ttype}}{{/field:type}}, {{!
                 }}{{field:id}}{{!
             }});
-            {{#field:type}}{{#field:type_annotation?}}{{> lib/annfieldwrite}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/write}}{{/field:type_annotation?}}{{/field:type}}({{!
+            {{#field:type}}{{#if field:type_annotation?}}{{> lib/annfieldwrite}}{{#else}}{{> lib/write}}{{/if field:type_annotation?}}{{/field:type}}({{!
             }}{{#field:has_adapter?}}&{{> lib/adapter/struct}}::to_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
             }}some{{!
             }}{{#field:has_adapter?}}, {{field:id}}){{/field:has_adapter?}}{{!
             }}, p);
             p.write_field_end();
         }{{!
-        }}{{/field:optional?}}{{!
-        }}{{^field:optional?}}
+        }}{{#else}}
         p.write_field_begin({{!
             }}"{{field:name}}", {{!
             }}{{#field:type}}{{> lib/ttype}}{{/field:type}}, {{!
             }}{{field:id}}{{!
         }});
-        {{#field:type}}{{#field:type_annotation?}}{{> lib/annfieldwrite}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/write}}{{/field:type_annotation?}}{{/field:type}}({{!
+        {{#field:type}}{{#if field:type_annotation?}}{{> lib/annfieldwrite}}{{#else}}{{> lib/write}}{{/if field:type_annotation?}}{{/field:type}}({{!
           }}{{#field:has_adapter?}}&{{> lib/adapter/struct}}::to_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
           }}&self.{{field:rust_name}}{{!
           }}{{#field:has_adapter?}}, {{field:id}}){{/field:has_adapter?}}{{!
         }}, p);
         p.write_field_end();{{!
-        }}{{/field:optional?}}{{!
+        }}{{/if field:optional?}}{{!
         }}{{/struct:fields}}
         p.write_field_stop();
         p.write_struct_end();
@@ -160,15 +157,15 @@ where
             {{#struct:fields}}
             if (fty, fid) == ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}) {
                 output.{{field:rust_name}} = {{!
-                }}{{#field:optional?}}{{!
+                }}{{#if field:optional?}}{{!
                 }}::std::option::Option::Some({{!
-                }}{{/field:optional?}}{{!
+                }}{{/if field:optional?}}{{!
                 }}{{#field:has_adapter?}}{{> lib/adapter/struct}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
-                }}{{#field:type}}::anyhow::Context::context({{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
+                }}{{#field:type}}::anyhow::Context::context({{#if field:type_annotation?}}{{> lib/annfieldread}}{{#else}}{{> lib/read}}{{/if field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
                 }}{{#field:has_adapter?}}, {{field:id}})?{{/field:has_adapter?}}{{!
-                }}{{#field:optional?}}{{!
+                }}{{#if field:optional?}}{{!
                 }}){{!
-                }}{{/field:optional?}}{{!
+                }}{{/if field:optional?}}{{!
                 }};
                 p.read_field_end()?;
             } else {
@@ -210,7 +207,7 @@ where
         {{!TODO: Remove this when we remove the legacy option}}
         {{#else}}
 
-        {{#struct:all_optional?}}
+        {{#if struct:all_optional?}}
         #[allow(unused_mut)]
         let mut output = Self {{> lib/block}}{{!
             }}{{#struct:fields}}
@@ -219,12 +216,12 @@ where
             {{> lib/structvalue_epilogue}}
 
         };
-        {{/struct:all_optional?}}
-        {{^struct:all_optional?}}
+        {{/if struct:all_optional?}}
+        {{#if (not struct:all_optional?)}}
         {{#struct:fields}}
         let mut field_{{field:name}} = ::std::option::Option::None;
         {{/struct:fields}}
-        {{/struct:all_optional?}}
+        {{/if (not struct:all_optional?)}}
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a {{struct:name}}")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -232,11 +229,11 @@ where
                 (::fbthrift::TType::Stop, _) => break,{{!
                 }}{{#struct:fields}}
                 ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}) => {{!
-                    }}{{#struct:all_optional?}}output.{{field:rust_name}}{{/struct:all_optional?}}{{!
-                    }}{{^struct:all_optional?}}field_{{field:name}}{{/struct:all_optional?}}{{!
+                    }}{{#if struct:all_optional?}}output.{{field:rust_name}}{{/if struct:all_optional?}}{{!
+                    }}{{#if (not struct:all_optional?)}}field_{{field:name}}{{/if (not struct:all_optional?)}}{{!
                     }} = ::std::option::Option::Some({{!
                     }}{{#field:has_adapter?}}{{> lib/adapter/struct}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
-                    }}{{#field:type}}::anyhow::Context::context({{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
+                    }}{{#field:type}}::anyhow::Context::context({{#if field:type_annotation?}}{{> lib/annfieldread}}{{#else}}{{> lib/read}}{{/if field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
                     }}{{#field:has_adapter?}}, {{field:id}})?{{/field:has_adapter?}}{{!
                     }}),{{!
                 }}{{/struct:fields}}
@@ -245,14 +242,14 @@ where
             p.read_field_end()?;
         }
         p.read_struct_end()?;
-        {{#struct:all_optional?}}
+        {{#if struct:all_optional?}}
         ::std::result::Result::Ok(output)
-        {{/struct:all_optional?}}
-        {{^struct:all_optional?}}
+        {{/if struct:all_optional?}}
+        {{#if (not struct:all_optional?)}}
         ::std::result::Result::Ok(Self {{> lib/block}}{{!
             }}{{#struct:fields}}
             {{field:rust_name}}: field_{{field:name}}{{!
-                }}{{^field:optional?}}{{!
+                }}{{#if (not field:optional?)}}{{!
                     }}{{#field:has_adapter?}}{{!
                         }}.unwrap_or_else(|| {{> lib/adapter/struct}}::from_thrift_default::<{{struct:rust_name}}>({{!
                         }}{{#field:default}}{{> lib/value}}{{/field:default}}{{!
@@ -261,28 +258,27 @@ where
                     }}{{/field:has_adapter?}}{{!
                     }}{{^field:has_adapter?}}{{!
                         }}{{#field:default}}{{!
-                            }}{{#value:simpleLiteral?}}{{!
+                            }}{{#if value:simpleLiteral?}}{{!
                                 }}.unwrap_or({{> lib/value}}){{!
-                            }}{{/value:simpleLiteral?}}{{!
-                            }}{{^value:simpleLiteral?}}{{!
+                            }}{{#else}}{{!
                                 }}.unwrap_or_else(|| {{> lib/value}}){{!
-                            }}{{/value:simpleLiteral?}}{{!
+                            }}{{/if value:simpleLiteral?}}{{!
                         }}{{/field:default}}{{!
                         }}{{^field:default}}{{!
                             }}.unwrap_or_default(){{!
                         }}{{/field:default}}{{!
                     }}{{/field:has_adapter?}}{{!
-                }}{{/field:optional?}}{{!
+                }}{{/if (not field:optional?)}}{{!
             }},{{!
             }}{{/struct:fields}}
             {{> lib/structvalue_epilogue}}
         })
-        {{/struct:all_optional?}}
+        {{/if (not struct:all_optional?)}}
         {{/if (not (has_compiler_option? "deprecated_optional_with_default_is_some"))}}
     }
 }
 
-{{#program:rust_gen_native_metadata?}}
+{{#if program:rust_gen_native_metadata?}}
 {{> lib/metadata/struct}}
-{{/program:rust_gen_native_metadata?}}
-{{/struct:union?}}
+{{/if program:rust_gen_native_metadata?}}
+{{/if (not struct:union?)}}

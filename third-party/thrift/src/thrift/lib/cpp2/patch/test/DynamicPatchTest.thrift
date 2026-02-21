@@ -41,3 +41,17 @@ struct Sets {
 struct StructWithAny {
   1: any.Any any;
 }
+
+// Structs for testing custom default value preservation in patch conversion
+@patch.GeneratePatchNew
+struct CustomDefaultOptions {
+  1: bool enabled = true;
+  2: i32 thresholdPercent = 90;
+  3: bool allowEmpty = false;
+}
+
+@patch.GeneratePatchNew
+struct OuterStructWithCustomDefaults {
+  1: string name;
+  2: optional CustomDefaultOptions options;
+}

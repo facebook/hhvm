@@ -1554,13 +1554,16 @@ void DiffVisitorBase::diffField(
     auto guard = folly::makeGuard([&] { pop(); });
     auto& field = dst.at(id);
 
-    // patch after
-    // We can't ensure the field because it will be ignored for non-optional
-    // field when applied statically.
+    // For non-optional fields (like in terse structs), ensure may be ignored
+    // during typed patch application. Use ensure + patchIfSet with Assign
+    // operation to make sure the value is actually set.
     auto empty = emptyValue(field.getType());
-    auto subPatch = diff(badge, empty, field);
     patch.ensure(id, std::move(empty));
-    patch.patchIfSet(id).merge(DynamicPatch{std::move(subPatch)});
+
+    Object assignPatch;
+    assignPatch[static_cast<FieldId>(op::PatchOp::Assign)] = field;
+    patch.patchIfSet(id).merge(
+        DynamicPatch::fromObject(std::move(assignPatch)));
     return;
   }
 

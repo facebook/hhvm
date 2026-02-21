@@ -1787,4 +1787,68 @@ TEST(DynamicPatch, AnyPatchMergeThenExtractPreservesRootFields) {
   }
 }
 
+// Verifies that field values different from custom defaults are preserved
+// when converting DynamicPatch to TypedPatch via fromObjectStruct.
+TEST(DynamicPatchTest, CustomDefaultValuesPreservedInTypedPatchExtraction) {
+  OuterStructWithCustomDefaults src;
+  src.name() = "TestEntity";
+
+  OuterStructWithCustomDefaults dst;
+  dst.name() = "TestEntity";
+  CustomDefaultOptions opts;
+  opts.enabled() = false; // Custom default is true
+  opts.thresholdPercent() = 50; // Custom default is 90
+  opts.allowEmpty() = true; // Custom default is false
+  dst.options() = opts;
+
+  DiffVisitorBase visitor;
+  DynamicPatch dynamicPatch =
+      visitor.diff(protocol::asObject(src), protocol::asObject(dst));
+
+  auto typedPatch =
+      fromObjectStruct<type::infer_tag<OuterStructWithCustomDefaultsPatch>>(
+          dynamicPatch.toObject());
+
+  OuterStructWithCustomDefaults fresh;
+  fresh.name() = "TestEntity";
+  typedPatch.apply(fresh);
+
+  ASSERT_TRUE(fresh.options().has_value());
+  EXPECT_EQ(fresh.options()->enabled(), false);
+  EXPECT_EQ(fresh.options()->thresholdPercent(), 50);
+  EXPECT_EQ(fresh.options()->allowEmpty(), true);
+}
+
+// Verifies that intrinsic default values are preserved when they differ from
+// custom defaults during DynamicPatch to TypedPatch conversion.
+TEST(DynamicPatchTest, IntrinsicDefaultValuesPreservedWhenDifferFromCustom) {
+  OuterStructWithCustomDefaults src;
+  src.name() = "TestEntity";
+
+  OuterStructWithCustomDefaults dst;
+  dst.name() = "TestEntity";
+  CustomDefaultOptions opts;
+  opts.enabled() = false; // Intrinsic default, custom default is true
+  opts.thresholdPercent() = 0; // Intrinsic default, custom default is 90
+  opts.allowEmpty() = false;
+  dst.options() = opts;
+
+  DiffVisitorBase visitor;
+  DynamicPatch dynamicPatch =
+      visitor.diff(protocol::asObject(src), protocol::asObject(dst));
+
+  auto typedPatch =
+      fromObjectStruct<type::infer_tag<OuterStructWithCustomDefaultsPatch>>(
+          dynamicPatch.toObject());
+
+  OuterStructWithCustomDefaults fresh;
+  fresh.name() = "TestEntity";
+  typedPatch.apply(fresh);
+
+  ASSERT_TRUE(fresh.options().has_value());
+  EXPECT_EQ(fresh.options()->enabled(), false);
+  EXPECT_EQ(fresh.options()->thresholdPercent(), 0);
+  EXPECT_EQ(fresh.options()->allowEmpty(), false);
+}
+
 } // namespace apache::thrift::protocol

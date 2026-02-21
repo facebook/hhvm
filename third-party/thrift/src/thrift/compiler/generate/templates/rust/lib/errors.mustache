@@ -54,8 +54,8 @@ pub mod {{service:snake}} {
 
     {{/service:rust_exceptions}}
     {{#service:rustFunctions}}
-    {{^function:starts_interaction?}}
-    {{#function:exceptions?}}
+    {{#if (not function:starts_interaction?)}}
+    {{#if function:exceptions?}}
     /// Errors for {{function:rust_name}} (client side).
     #[derive(Debug)]
     pub enum {{function:upcamel}}Error {
@@ -177,28 +177,28 @@ pub mod {{service:snake}} {
             }
         }
     }
-    {{/function:exceptions?}}
-    {{^function:exceptions?}}
+    {{/if function:exceptions?}}
+    {{#if (not function:exceptions?)}}
     pub type {{function:upcamel}}Error = ::fbthrift::NonthrowingFunctionError;
 
-    {{/function:exceptions?}}
+    {{/if (not function:exceptions?)}}
 
     pub(crate) enum {{function:upcamel}}Reader {}
 
     impl ::fbthrift::help::DeserializeExn for {{function:upcamel}}Reader {
         type Success = {{!
-}}{{#function:bidirectional_stream?}}(){{/function:bidirectional_stream?}}{{!
-}}{{^function:bidirectional_stream?}}{{!
-}}{{^function:sink?}}{{^function:stream?}}{{> lib/server_ok_type}}{{/function:stream?}}{{/function:sink?}}{{!
-}}{{#function:stream?}}{{!
-}}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
-}}{{^function:stream_has_first_response?}}(){{/function:stream_has_first_response?}}{{!
-}}{{/function:stream?}}{{!
-}}{{#function:sink?}}{{!
-}}{{#function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:sink_has_first_response?}}{{!
-}}{{^function:sink_has_first_response?}}(){{/function:sink_has_first_response?}}{{!
-}}{{/function:sink?}}{{!
-}}{{/function:bidirectional_stream?}}{{!
+}}{{#if function:bidirectional_stream?}}(){{/if function:bidirectional_stream?}}{{!
+}}{{#if (not function:bidirectional_stream?)}}{{!
+}}{{#if (not function:sink?)}}{{#if (not function:stream?)}}{{> lib/server_ok_type}}{{/if (not function:stream?)}}{{/if (not function:sink?)}}{{!
+}}{{#if function:stream?}}{{!
+}}{{#if function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/if function:stream_has_first_response?}}{{!
+}}{{#if (not function:stream_has_first_response?)}}(){{/if (not function:stream_has_first_response?)}}{{!
+}}{{/if function:stream?}}{{!
+}}{{#if function:sink?}}{{!
+}}{{#if function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/if function:sink_has_first_response?}}{{!
+}}{{#if (not function:sink_has_first_response?)}}(){{/if (not function:sink_has_first_response?)}}{{!
+}}{{/if function:sink?}}{{!
+}}{{/if (not function:bidirectional_stream?)}}{{!
         }};
         type Error = {{function:upcamel}}Error;
 
@@ -214,10 +214,10 @@ pub mod {{service:snake}} {
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;
             let mut alt = {{!
-                }}{{#function:void_or_void_stream?}}{{!
+                }}{{#if function:void_or_void_stream?}}{{!
                     }}::std::result::Result::Ok(()){{!
-                }}{{/function:void_or_void_stream?}}{{!
-                }}{{^function:void_or_void_stream?}}::std::option::Option::None{{/function:void_or_void_stream?}}{{!
+                }}{{/if function:void_or_void_stream?}}{{!
+                }}{{#if (not function:void_or_void_stream?)}}::std::option::Option::None{{/if (not function:void_or_void_stream?)}}{{!
             }};
             loop {
                 let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
@@ -227,55 +227,55 @@ pub mod {{service:snake}} {
                         break;
                     }
                     (({{!
-                        }}{{#function:bidirectional_stream?}}{{!
+                        }}{{#if function:bidirectional_stream?}}{{!
                             }}::fbthrift::TType::Void{{!  Bidirectional methods have no initial response
-                        }}{{/function:bidirectional_stream?}}{{!
-                        }}{{^function:bidirectional_stream?}}{{!
-                            }}{{^function:sink?}}{{^function:stream?}}{{!
+                        }}{{/if function:bidirectional_stream?}}{{!
+                        }}{{#if (not function:bidirectional_stream?)}}{{!
+                            }}{{#if (not function:sink?)}}{{#if (not function:stream?)}}{{!
                                 }}{{#function:return_type}}{{> lib/ttype}}{{/function:return_type}}{{!
-                            }}{{/function:stream?}}{{/function:sink?}}{{!
-                            }}{{#function:stream?}}{{!
-                                }}{{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
-                                }}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
-                            }}{{/function:stream?}}{{!
-                            }}{{#function:sink?}}{{!
-                                }}{{^function:sink_has_first_response?}}::fbthrift::TType::Void{{/function:sink_has_first_response?}}{{!
-                                }}{{#function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/ttype}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:sink_has_first_response?}}{{!
-                            }}{{/function:sink?}}{{!
-                        }}{{/function:bidirectional_stream?}}{{!
+                            }}{{/if (not function:stream?)}}{{/if (not function:sink?)}}{{!
+                            }}{{#if function:stream?}}{{!
+                                }}{{#if (not function:stream_has_first_response?)}}::fbthrift::TType::Void{{/if (not function:stream_has_first_response?)}}{{!
+                                }}{{#if function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/if function:stream_has_first_response?}}{{!
+                            }}{{/if function:stream?}}{{!
+                            }}{{#if function:sink?}}{{!
+                                }}{{#if (not function:sink_has_first_response?)}}::fbthrift::TType::Void{{/if (not function:sink_has_first_response?)}}{{!
+                                }}{{#if function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/ttype}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/if function:sink_has_first_response?}}{{!
+                            }}{{/if function:sink?}}{{!
+                        }}{{/if (not function:bidirectional_stream?)}}{{!
                     }}, 0i32), false) => {
                         once = true;
                         alt = {{!
-                            }}{{^function:void_or_void_stream?}}::std::option::Option::Some({{/function:void_or_void_stream?}}{{!
+                            }}{{#if (not function:void_or_void_stream?)}}::std::option::Option::Some({{/if (not function:void_or_void_stream?)}}{{!
                             }}::std::result::Result::Ok({{!
-                                }}{{#function:bidirectional_stream?}}{{!
+                                }}{{#if function:bidirectional_stream?}}{{!
                                     }}(){{!  Bidirectional methods deserialize nothing for initial response
-                                }}{{/function:bidirectional_stream?}}{{!
-                                }}{{^function:bidirectional_stream?}}{{!
-                                    }}{{^function:sink?}}{{^function:stream?}}{{#function:return_type}}{{!
+                                }}{{/if function:bidirectional_stream?}}{{!
+                                }}{{#if (not function:bidirectional_stream?)}}{{!
+                                    }}{{#if (not function:sink?)}}{{#if (not function:stream?)}}{{#function:return_type}}{{!
                                         }}{{#type:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::rs_thrift_read(p)?, 0)?{{/type:has_adapter?}}{{!
                                         }}{{^type:has_adapter?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/type:has_adapter?}}{{!
-                                    }}{{/function:return_type}}{{/function:stream?}}{{/function:sink?}}{{!
-                                    }}{{#function:stream?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/function:stream?}}{{!
-                                    }}{{#function:sink?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/function:sink?}}{{!
-                                }}{{/function:bidirectional_stream?}}{{!
+                                    }}{{/function:return_type}}{{/if (not function:stream?)}}{{/if (not function:sink?)}}{{!
+                                    }}{{#if function:stream?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/if function:stream?}}{{!
+                                    }}{{#if function:sink?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/if function:sink?}}{{!
+                                }}{{/if (not function:bidirectional_stream?)}}{{!
                             }}){{!
-                            }}{{^function:void_or_void_stream?}}){{/function:void_or_void_stream?}}{{!
+                            }}{{#if (not function:void_or_void_stream?)}}){{/if (not function:void_or_void_stream?)}}{{!
                         }};
                     }{{!
                     }}{{#function:exceptions}}
                     (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}), false) => {
                         once = true;
                         alt = {{!
-                            }}{{^function:void_or_void_stream?}}::std::option::Option::Some({{/function:void_or_void_stream?}}{{!
+                            }}{{#if (not function:void_or_void_stream?)}}::std::option::Option::Some({{/if (not function:void_or_void_stream?)}}{{!
                             }}::std::result::Result::Err(Self::Error::{{field:rust_name}}({{!
-                                }}{{^function:stream?}}{{#function:return_type}}{{!
+                                }}{{#if (not function:stream?)}}{{#function:return_type}}{{!
                                     }}{{#type:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::rs_thrift_read(p)?, 0)?{{/type:has_adapter?}}{{!
                                     }}{{^type:has_adapter?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/type:has_adapter?}}{{!
-                                }}{{/function:return_type}}{{/function:stream?}}{{!
-                                }}{{#function:stream?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/function:stream?}}{{!
+                                }}{{/function:return_type}}{{/if (not function:stream?)}}{{!
+                                }}{{#if function:stream?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/if function:stream?}}{{!
                             }})){{!
-                            }}{{^function:void_or_void_stream?}}){{/function:void_or_void_stream?}}{{!
+                            }}{{#if (not function:void_or_void_stream?)}}){{/if (not function:void_or_void_stream?)}}{{!
                         }};
                     }{{!
                     }}{{/function:exceptions}}
@@ -295,10 +295,10 @@ pub mod {{service:snake}} {
                 p.read_field_end()?;
             }
             p.read_struct_end()?;{{!
-            }}{{#function:void_or_void_stream?}}
+            }}{{#if function:void_or_void_stream?}}
             ::std::result::Result::Ok(alt){{!
-            }}{{/function:void_or_void_stream?}}{{!
-            }}{{^function:void_or_void_stream?}}
+            }}{{/if function:void_or_void_stream?}}{{!
+            }}{{#if (not function:void_or_void_stream?)}}
             alt.ok_or_else(||
                 ::fbthrift::ApplicationException::new(
                     ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
@@ -306,11 +306,11 @@ pub mod {{service:snake}} {
                 )
                 .into(),
             ){{!
-            }}{{/function:void_or_void_stream?}}
+            }}{{/if (not function:void_or_void_stream?)}}
         }
     }
 
-    {{#function:sink?}}
+    {{#if function:sink?}}
     #[derive(Debug)]
     pub enum {{function:upcamel}}SinkError {
         {{#function:sink_exceptions}}
@@ -450,14 +450,14 @@ pub mod {{service:snake}} {
             }
         }
     }
-    {{#function:enable_anyhow_to_application_exn}}
+    {{#if function:enable_anyhow_to_application_exn}}
 
     impl ::std::convert::From<::anyhow::Error> for {{function:upcamel}}SinkError {
         fn from(exn: ::anyhow::Error) -> Self {
             Self::ThriftError(exn)
         }
     }
-    {{/function:enable_anyhow_to_application_exn}}
+    {{/if function:enable_anyhow_to_application_exn}}
 
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}SinkError {
         type Success = {{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}};
@@ -508,7 +508,7 @@ pub mod {{service:snake}} {
             p.write_struct_end();
         }
     }
-{{^function:bidirectional_stream?}}
+{{#if (not function:bidirectional_stream?)}}
 
     #[derive(Debug)]
     pub enum {{function:upcamel}}SinkFinalError {
@@ -707,8 +707,8 @@ pub mod {{service:snake}} {
             )
         }
     }
-    {{/function:bidirectional_stream?}}
-    {{/function:sink?}}{{#function:stream?}}
+    {{/if (not function:bidirectional_stream?)}}
+    {{/if function:sink?}}{{#if function:stream?}}
     {{#if (array.empty? function:stream.exceptions)}}
     pub type {{function:upcamel}}StreamError = ::fbthrift::NonthrowingFunctionError;
 
@@ -881,8 +881,8 @@ pub mod {{service:snake}} {
         }
     }
 
-    {{/function:stream?}}
-    {{/function:starts_interaction?}}
+    {{/if function:stream?}}
+    {{/if (not function:starts_interaction?)}}
     {{/service:rustFunctions}}
 }
 

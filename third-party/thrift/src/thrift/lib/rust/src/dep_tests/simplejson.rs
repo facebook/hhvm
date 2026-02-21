@@ -904,6 +904,67 @@ fn test_trailing_comma_in_list() {
     assert!(deserialize::<Containers, _, _>(input).is_err());
 }
 
+#[test]
+fn test_unquoted_number_followed_by_quote_integer() {
+    // Malformed input: unquoted number followed by quote should fail
+    // The parser should stop at the quote, not include it in the number
+    let input = r#"{"num":123"}"#;
+    assert!(deserialize::<Small, _, _>(input).is_err());
+}
+
+#[test]
+fn test_unquoted_number_followed_by_quote_float() {
+    // Malformed input: unquoted float followed by quote should fail
+    let input = r#"{"f32":123.45"}"#;
+    assert!(deserialize::<FloatingPoint, _, _>(input).is_err());
+}
+
+#[test]
+fn test_unquoted_number_followed_by_quote_in_list() {
+    // Malformed input: unquoted number followed by quote in a list
+    let input = r#"{"l":[123"]}"#;
+    // This should fail because the list expects Small structs, not bare numbers
+    assert!(deserialize::<MainStruct, _, _>(input).is_err());
+}
+
+#[test]
+fn test_unquoted_number_followed_by_quote_as_map_value() {
+    // Malformed input: unquoted number followed by quote as map value
+    let input = r#"{"m":{"key":123"}}"#;
+    assert!(deserialize::<MainStruct, _, _>(input).is_err());
+}
+
+#[test]
+fn test_valid_quoted_number() {
+    // Valid input: quoted numbers are accepted by SimpleJSON protocol
+    let input = r#"{"num":"123"}"#;
+    let result = deserialize::<Small, _, _>(input);
+    assert!(result.is_ok());
+    let s = result.unwrap();
+    assert_eq!(s.num, 123);
+}
+
+#[test]
+fn test_unquoted_number_with_comma() {
+    // Valid input: unquoted number followed by comma should work
+    let input = r#"{"num":123,"two":456}"#;
+    let result = deserialize::<Small, _, _>(input);
+    assert!(result.is_ok());
+    let s = result.unwrap();
+    assert_eq!(s.num, 123);
+    assert_eq!(s.two, 456);
+}
+
+#[test]
+fn test_unquoted_number_with_closing_brace() {
+    // Valid input: unquoted number followed by closing brace should work
+    let input = r#"{"num":123}"#;
+    let result = deserialize::<Small, _, _>(input);
+    assert!(result.is_ok());
+    let s = result.unwrap();
+    assert_eq!(s.num, 123);
+}
+
 proptest! {
 #[test]
 fn test_prop_serialize_deserialize(s in gen_main_struct()) {

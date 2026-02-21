@@ -35,6 +35,8 @@ use bytes::Bytes;
 use bytes::BytesMut;
 use bytes::buf::Writer;
 use ghost::phantom;
+use memchr::memchr;
+use memchr::memchr2;
 use serde_json::ser::CompactFormatter;
 use serde_json::ser::Formatter;
 
@@ -500,11 +502,50 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
     }
     #[inline]
     fn strip_whitespace(&mut self) {
-        while let Some(b) = self.peek() {
-            if !&[b' ', b'\t', b'\n', b'\r'].contains(&b) {
+        loop {
+            let chunk = self.buffer.chunk();
+            if chunk.is_empty() {
+                return;
+            }
+
+            let chunk_len = chunk.len();
+
+            // Fast path: check first 8 bytes inline (most fields have 0-2 spaces)
+            let scan_limit = chunk_len.min(8);
+            let mut pos = 0;
+            while pos < scan_limit {
+                match chunk[pos] {
+                    b' ' | b'\t' | b'\n' | b'\r' => pos += 1,
+                    _ => break,
+                }
+            }
+
+            // If we found non-whitespace in first 8 bytes or chunk is small, we're done
+            if pos < scan_limit {
+                if pos > 0 {
+                    self.advance(pos);
+                }
                 break;
             }
-            self.advance(1);
+
+            // Continue scanning the rest if needed
+            while pos < chunk_len {
+                match chunk[pos] {
+                    b' ' | b'\t' | b'\n' | b'\r' => pos += 1,
+                    _ => break,
+                }
+            }
+
+            // If we didn't consume the entire chunk, we found a non-whitespace byte
+            let found_non_whitespace = pos < chunk_len;
+
+            if pos > 0 {
+                self.advance(pos);
+            }
+
+            if found_non_whitespace {
+                break;
+            }
         }
     }
     // Validates that next chars is `val`
@@ -581,23 +622,53 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
             _ => false,
         };
 
-        while let Some(b) = self.peek() {
-            match b {
-                b' ' | b'\t' | b'\n' | b'\r' | b'}' | b']' | b',' | b':' => {
-                    if quoted {
-                        bail!("Missing closing quote \" for number")
+        if quoted {
+            // For quoted numbers, just search for the closing quote
+            loop {
+                let chunk = self.buffer.chunk();
+                if chunk.is_empty() {
+                    bail!("Missing closing quote \" for number");
+                }
+
+                match memchr(b'"', chunk) {
+                    Some(pos) => {
+                        string.extend_from_slice(&chunk[..pos]);
+                        self.advance(pos + 1);
+                        break;
                     }
+                    None => {
+                        string.extend_from_slice(chunk);
+                        self.advance(chunk.len());
+                    }
+                }
+            }
+        } else {
+            // For unquoted numbers, scan for terminator bytes
+            loop {
+                let chunk = self.buffer.chunk();
+                if chunk.is_empty() {
                     break;
                 }
-                b'"' => {
-                    if quoted {
-                        self.advance(1);
+
+                let chunk_len = chunk.len();
+
+                // Find first terminator byte
+                let mut pos = 0;
+                while pos < chunk_len {
+                    match chunk[pos] {
+                        b' ' | b'\t' | b'\n' | b'\r' | b'}' | b']' | b',' | b':' | b'"' => break,
+                        _ => pos += 1,
                     }
-                    break;
                 }
-                _ => {
-                    string.push(b);
-                    self.advance(1);
+
+                if pos > 0 {
+                    string.extend_from_slice(&chunk[..pos]);
+                    self.advance(pos);
+                }
+
+                // If we found a terminator in this chunk, we're done
+                if pos < chunk_len {
+                    break;
                 }
             }
         }
@@ -1068,13 +1139,45 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
         let mut ret = Vec::new();
         ret.push(b'"');
         loop {
-            match self.peek() {
-                Some(b'"') => {
-                    self.advance(1);
-                    break;
+            let chunk = self.buffer.chunk();
+            if chunk.is_empty() {
+                bail!("Expected the string to continue");
+            }
+
+            let chunk_len = chunk.len();
+
+            // Fast path for short strings: check first 32 bytes inline
+            // This avoids memchr2 overhead for common short field names
+            let scan_limit = chunk_len.min(32);
+            let found_pos = chunk[..scan_limit]
+                .iter()
+                .position(|&b| b == b'"' || b == b'\\');
+
+            let pos = match found_pos {
+                Some(p) => p,
+                None if scan_limit < chunk_len => {
+                    // Not found in first 32 bytes, use memchr2 for the rest
+                    match memchr2(b'"', b'\\', &chunk[scan_limit..]) {
+                        Some(p) => scan_limit + p,
+                        None => chunk_len, // No special chars in entire chunk
+                    }
                 }
-                Some(b'\\') => {
-                    self.advance(1);
+                None => chunk_len, // Chunk is <= 32 bytes and no special chars
+            };
+
+            if pos < chunk_len {
+                // Found a special character
+                ret.extend_from_slice(&chunk[..pos]);
+                self.advance(pos);
+
+                let special = self.peek_can_panic();
+                self.advance(1);
+
+                if special == b'"' {
+                    // End of string
+                    break;
+                } else {
+                    // Backslash - handle escape sequence
                     ret.push(b'\\');
                     match self.peek() {
                         Some(b'"') => {
@@ -1088,11 +1191,10 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
                         _ => {}
                     }
                 }
-                Some(b) => {
-                    self.advance(1);
-                    ret.push(b);
-                }
-                None => bail!("Expected the string to continue"),
+            } else {
+                // No special characters in this chunk, copy it all
+                ret.extend_from_slice(chunk);
+                self.advance(chunk_len);
             }
         }
         ret.push(b'"');
@@ -1108,16 +1210,24 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
         self.eat(b"\"").context("Expected a start of a string")?;
         let mut ret = Vec::new();
         loop {
-            match self.peek() {
-                Some(b'"') => {
-                    self.advance(1);
+            let chunk = self.buffer.chunk();
+            if chunk.is_empty() {
+                bail!("Expected the string to continue");
+            }
+
+            // Use memchr to quickly find the closing quote
+            match memchr(b'"', chunk) {
+                Some(pos) => {
+                    // Copy everything up to the quote
+                    ret.extend_from_slice(&chunk[..pos]);
+                    self.advance(pos + 1);
                     break;
                 }
-                Some(b) => {
-                    self.advance(1);
-                    ret.push(b);
+                None => {
+                    // No quote in this chunk, copy it all
+                    ret.extend_from_slice(chunk);
+                    self.advance(chunk.len());
                 }
-                None => bail!("Expected the string to continue"),
             }
         }
         let bin = STANDARD_NO_PAD_INDIFFERENT

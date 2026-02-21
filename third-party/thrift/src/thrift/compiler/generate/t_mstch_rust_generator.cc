@@ -1292,6 +1292,57 @@ class t_mstch_rust_generator : public t_mstch_generator {
       }
       return whisker::make::array(std::move(result));
     });
+    def.property("args_by_name", [&proto](const t_function& self) {
+      std::vector<const t_field*> params = self.params().fields().copy();
+      std::sort(params.begin(), params.end(), [](auto a, auto b) {
+        return a->name() < b->name();
+      });
+      return to_array(params, proto.of<t_field>());
+    });
+    def.property(
+        "enable_anyhow_to_application_exn", [this](const t_function& self) {
+          // First look for annotation on the function.
+          if (const t_const* annot =
+                  find_structured_service_exn_annotation(self)) {
+            for (const auto& item : annot->value()->get_map()) {
+              if (item.first->get_string() == "anyhow_to_application_exn") {
+                return get_annotation_property_bool(
+                    annot, "anyhow_to_application_exn");
+              }
+            }
+          }
+          // If not present on function, look at service annotations.
+          const t_interface* parent = context().get_function_parent(&self);
+          if (parent) {
+            if (const t_const* annot =
+                    find_structured_service_exn_annotation(*parent)) {
+              return get_annotation_property_bool(
+                  annot, "anyhow_to_application_exn");
+            }
+          }
+          return false;
+        });
+    def.property("upcamel", [this](const t_function& self) -> std::string {
+      auto upcamel_name = camelcase(self.name());
+      const t_interface* parent = context().get_function_parent(&self);
+      // If a service contains a pair of methods that collide converted to
+      // CamelCase, like a service containing both create_shard and
+      // createShard, then we name the exception types without any case
+      // conversion; instead of a CreateShardExn they'll get create_shardExn
+      // and createShardExn.
+      if (parent) {
+        int count = 0;
+        for (const auto& f : parent->functions()) {
+          if (camelcase(f.name()) == upcamel_name) {
+            count++;
+          }
+        }
+        if (count > 1) {
+          upcamel_name = self.name();
+        }
+      }
+      return upcamel_name;
+    });
     return std::move(def).make();
   }
 
@@ -1844,13 +1895,11 @@ class rust_mstch_function : public mstch_function {
       const t_function* function,
       mstch_context& ctx,
       mstch_element_position pos,
-      const std::unordered_multiset<std::string>& function_upcamel_names)
-      : mstch_function(function, ctx, pos),
-        function_upcamel_names_(function_upcamel_names) {
+      const std::unordered_multiset<std::string>& /*function_upcamel_names*/)
+      : mstch_function(function, ctx, pos) {
     register_methods(
         this,
-        {{"function:upcamel", &rust_mstch_function::rust_upcamel},
-         {"function:index", &rust_mstch_function::rust_index},
+        {{"function:index", &rust_mstch_function::rust_index},
          {"function:uniqueExceptions",
           &rust_mstch_function::rust_unique_exceptions},
          {"function:uniqueStreamExceptions",
@@ -1858,22 +1907,7 @@ class rust_mstch_function : public mstch_function {
          {"function:uniqueSinkExceptions",
           &rust_mstch_function::rust_unique_sink_exceptions},
          {"function:uniqueSinkFinalExceptions",
-          &rust_mstch_function::rust_unique_sink_final_exceptions},
-         {"function:args_by_name", &rust_mstch_function::rust_args_by_name},
-         {"function:enable_anyhow_to_application_exn",
-          &rust_mstch_function::rust_anyhow_to_application_exn}});
-  }
-  mstch::node rust_upcamel() {
-    auto upcamel_name = camelcase(function_->name());
-    if (function_upcamel_names_.count(upcamel_name) > 1) {
-      // If a service contains a pair of methods that collide converted to
-      // CamelCase, like a service containing both create_shard and
-      // createShard, then we name the exception types without any case
-      // conversion; instead of a CreateShardExn they'll get create_shardExn
-      // and createShardExn.
-      return function_->name();
-    }
-    return upcamel_name;
+          &rust_mstch_function::rust_unique_sink_final_exceptions}});
   }
   mstch::node rust_index() { return pos_.index; }
   mstch::node rust_unique_exceptions() {
@@ -1915,37 +1949,6 @@ class rust_mstch_function : public mstch_function {
 
     return make_mstch_fields(unique_exceptions);
   }
-  mstch::node rust_args_by_name() {
-    auto params = function_->params().fields().copy();
-    std::sort(params.begin(), params.end(), [](auto a, auto b) {
-      return a->name() < b->name();
-    });
-    return make_mstch_fields(params);
-  }
-
-  mstch::node rust_anyhow_to_application_exn() {
-    // First look for annotation on the function.
-    if (const t_const* annot =
-            find_structured_service_exn_annotation(*function_)) {
-      for (const auto& item : annot->value()->get_map()) {
-        if (item.first->get_string() == "anyhow_to_application_exn") {
-          return get_annotation_property_bool(
-              annot, "anyhow_to_application_exn");
-        }
-      }
-    }
-
-    // If not present on function, look at service annotations.
-    if (const t_const* annot =
-            find_structured_service_exn_annotation(interface())) {
-      return get_annotation_property_bool(annot, "anyhow_to_application_exn");
-    }
-
-    return false;
-  }
-
- private:
-  const std::unordered_multiset<std::string>& function_upcamel_names_;
 };
 
 class rust_mstch_function_factory {

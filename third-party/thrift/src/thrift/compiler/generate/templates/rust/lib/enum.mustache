@@ -26,37 +26,37 @@
 pub struct {{enum:rust_name}}(pub ::std::primitive::i32);
 
 impl {{enum:rust_name}} {{> lib/block}}{{!
-    }}{{#enum:values}}
-    {{#if enum_value:docs?}}
-    #[doc = {{enum_value:docs}}]
-    {{/if enum_value:docs?}}
-    pub const {{enum_value:rust_name}}: Self = {{!
-        }}{{enum:rust_name}}({{enum_value:value}}i32);{{!
-    }}{{/enum:values}}
+    }}{{#each enum:values as |enum_value|}}
+    {{#if enum_value.docs?}}
+    #[doc = {{enum_value.docs}}]
+    {{/if enum_value.docs?}}
+    pub const {{enum_value.rust_name}}: Self = {{!
+        }}{{enum:rust_name}}({{enum_value.value}}i32);{{!
+    }}{{/each}}
 }
 
 impl ::fbthrift::ThriftEnum for {{enum:rust_name}} {
     fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
         &[
-            {{#enum:values}}
-            (Self::{{enum_value:rust_name}}, "{{enum_value:name}}"),
-            {{/enum:values}}
+            {{#each enum:values as |enum_value|}}
+            (Self::{{enum_value.rust_name}}, "{{enum_value.name}}"),
+            {{/each}}
         ]
     }
 
     fn variants() -> &'static [&'static ::std::primitive::str] {
         &[
-            {{#enum:values}}
-            "{{enum_value:name}}",
-            {{/enum:values}}
+            {{#each enum:values as |enum_value|}}
+            "{{enum_value.name}}",
+            {{/each}}
         ]
     }
 
     fn variant_values() -> &'static [Self] {
         &[
-            {{#enum:values}}
-            Self::{{enum_value:rust_name}},
-            {{/enum:values}}
+            {{#each enum:values as |enum_value|}}
+            Self::{{enum_value.rust_name}},
+            {{/each}}
         ]
     }
 
@@ -100,9 +100,9 @@ impl ::std::convert::From<::std::primitive::i32> for {{enum:rust_name}} {
 impl ::std::fmt::Display for {{enum:rust_name}} {
     fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {{> lib/block}}
         static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
-            {{#enum:variants_by_number}}
-            ("{{enum_value:name}}", {{enum_value:value}}),
-            {{/enum:variants_by_number}}
+            {{#each enum:variants_by_number as |variant|}}
+            ("{{variant.name}}", {{variant.value}}),
+            {{/each}}
         ];
         ::fbthrift::help::enum_display(VARIANTS_BY_NUMBER, fmt, self.0)
     }
@@ -119,9 +119,9 @@ impl ::std::str::FromStr for {{enum:rust_name}} {
 
     fn from_str(string: &::std::primitive::str) -> ::std::result::Result<Self, Self::Err> {
         static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
-            {{#enum:variants_by_name}}
-            ("{{enum_value:name}}", {{enum_value:value}}),
-            {{/enum:variants_by_name}}
+            {{#each enum:variants_by_name as |variant|}}
+            ("{{variant.name}}", {{variant.value}}),
+            {{/each}}
         ];
         ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "{{enum:name}}").map(Self)
     }

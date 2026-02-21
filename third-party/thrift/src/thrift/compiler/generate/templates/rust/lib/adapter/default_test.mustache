@@ -22,12 +22,11 @@ mod tests {
     {{#program:structs_for_default_test}}
     #[test]
     fn test_struct_{{struct:rust_name}}_default_does_not_panic() {
-        {{#struct:has_adapter?}}
+        {{#if struct:has_adapter?}}
         let _ = super::unadapted::{{struct:rust_name}}::default();
-        {{/struct:has_adapter?}}
-        {{^struct:has_adapter?}}
+        {{#else}}
         let _ = super::{{struct:rust_name}}::default();
-        {{/struct:has_adapter?}}
+        {{/if struct:has_adapter?}}
     }
     {{/program:structs_for_default_test}}
 }

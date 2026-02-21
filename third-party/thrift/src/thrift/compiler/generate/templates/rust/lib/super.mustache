@@ -16,5 +16,5 @@
 
 }}{{#service:extends}}{{!
 }}{{service:server_package}}::{{service:rust_name}}{{!
-}}{{#service:requestContext?}}<RequestContext = R>{{/service:requestContext?}}{{!
+}}{{#if service:requestContext?}}<RequestContext = R>{{/if service:requestContext?}}{{!
 }}{{/service:extends}}

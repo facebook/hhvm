@@ -1547,7 +1547,7 @@ TEST(DynamicPatch, applyToDataFieldInsideAny) {
       type::AnyData{any1}.get<type::union_t<MyUnion>>().s().value(),
       "hello world");
 
-  dynPatch.applyObjectInAny(any2);
+  dynPatch.applyObjectInAny(badge, any2);
   EXPECT_EQ(
       type::AnyData{any2}.get<type::union_t<MyUnion>>().s().value(),
       "hello world");
@@ -1584,7 +1584,7 @@ TEST(DynamicPatch, applyAnyPatchToDataFieldInsideAny) {
       "hello world");
 
   outer = type::AnyData::toAny(any2);
-  dynPatch.applyObjectInAny(outer.toThrift());
+  dynPatch.applyObjectInAny(badge, outer.toThrift());
   outer.get(any2);
   EXPECT_EQ(
       type::AnyData{any2}.get<type::union_t<MyUnion>>().s().value(),

@@ -2268,7 +2268,7 @@ void DynamicPatch::applyToDataFieldInsideAny(type::AnyStruct& any) const {
             .toThrift();
 }
 
-void DynamicPatch::applyObjectInAny(type::AnyStruct& any) const {
+void DynamicPatch::applyObjectInAny(detail::Badge, type::AnyStruct& any) const {
   if (any.protocol() == type::StandardProtocol::Binary) {
     any.data() = *applyToSerializedObjectWithoutExtractingMask<
         type::StandardProtocol::Binary>(*any.data());

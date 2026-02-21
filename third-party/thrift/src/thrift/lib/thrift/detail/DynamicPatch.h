@@ -595,7 +595,6 @@ class DynamicPatch {
   void apply(Value&) const;
   /// Applies the patch to the given Thrift Any. Throws if the patch is not
   /// applicable.
-  void applyObjectInAny(type::AnyStruct&) const;
   void applyToDataFieldInsideAny(type::AnyStruct&) const;
   /// @brief Applies the patch to the given blob and returns the result as a
   /// blob. Throws if the patch is not applicable.
@@ -676,6 +675,10 @@ class DynamicPatch {
   void decode(Protocol& prot);
   template <typename Protocol>
   void decode(const folly::IOBuf& buf);
+
+  // this method uses CurSe to patch data field in Any in-place.
+  // It should only be invoked when Any is a struct/union/exception.
+  void applyObjectInAny(detail::Badge, type::AnyStruct&) const;
 
   template <class T>
   bool holds_alternative(detail::Badge) const {

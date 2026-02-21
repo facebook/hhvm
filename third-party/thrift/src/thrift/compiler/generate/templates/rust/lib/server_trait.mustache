@@ -15,23 +15,23 @@
   limitations under the License.
 
 }}
-{{#service:docs?}}
+{{#if service:docs?}}
 #[doc = {{service:docs}}]
-{{/service:docs?}}
+{{/if service:docs?}}
 #[::async_trait::async_trait]
 pub trait {{service:rust_name}}: ::std::marker::Send + ::std::marker::Sync + 'static {{> lib/block}}{{!
-}}{{#service:requestContext?}}
+}}{{#if service:requestContext?}}
     type RequestContext: ::std::marker::Sync;{{!
-}}{{/service:requestContext?}}
-{{#service:rustFunctions}}{{^function:starts_interaction?}}
-    {{#function:docs?}}
+}}{{/if service:requestContext?}}
+{{#service:rustFunctions}}{{#if (not function:starts_interaction?)}}
+    {{#if function:docs?}}
     #[doc = {{function:docs}}]
-    {{/function:docs?}}
+    {{/if function:docs?}}
     async fn {{function:rust_name}}(
         &self,{{!
-        }}{{#service:requestContext?}}
+        }}{{#if service:requestContext?}}
         _request_context: &Self::RequestContext,{{!
-        }}{{/service:requestContext?}}{{!
+        }}{{/if service:requestContext?}}{{!
         }}{{#function:args}}
         _{{field:name}}: {{#field:type}}{{> lib/type}}{{/field:type}},{{!
         }}{{/function:args}}
@@ -43,19 +43,19 @@ pub trait {{service:rust_name}}: ::std::marker::Send + ::std::marker::Sync + 'st
             ),
         ))
     }
-{{/function:starts_interaction?}}{{#function:starts_interaction?}}
-    {{#function:docs?}}
+{{/if (not function:starts_interaction?)}}{{#if function:starts_interaction?}}
+    {{#if function:docs?}}
     #[doc = {{function:docs}}]
-    {{/function:docs?}}
+    {{/if function:docs?}}
     fn {{function:rust_name}}(
         &self,
     ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function:interaction_name}}>> {
         ::anyhow::bail!("{{service:name}}.{{function:name}} not implemented");
     }
-{{/function:starts_interaction?}}{{/service:rustFunctions}}
-{{#service:interaction?}}
+{{/if function:starts_interaction?}}{{/service:rustFunctions}}
+{{#if service:interaction?}}
     async fn on_termination(&self) {}
-{{/service:interaction?}}
+{{/if service:interaction?}}
 }
 
 #[::async_trait::async_trait]
@@ -63,40 +63,40 @@ impl<T> {{service:rust_name}} for ::std::boxed::Box<T>
 where
     T: {{service:rust_name}} + Send + Sync + ?Sized,
 {{> lib/block}}
-{{#service:requestContext?}}
+{{#if service:requestContext?}}
     type RequestContext = T::RequestContext;{{!
-}}{{/service:requestContext?}}
-{{#service:rustFunctions}}{{^function:starts_interaction?}}
+}}{{/if service:requestContext?}}
+{{#service:rustFunctions}}{{#if (not function:starts_interaction?)}}
     async fn {{function:rust_name}}(
         &self,{{!
-        }}{{#service:requestContext?}}
+        }}{{#if service:requestContext?}}
         request_context: &Self::RequestContext,{{!
-        }}{{/service:requestContext?}}{{!
+        }}{{/if service:requestContext?}}{{!
         }}{{#function:args}}
         {{field:rust_name}}: {{#field:type}}{{> lib/type}}{{/field:type}},{{!
         }}{{/function:args}}
     ) -> {{> lib/server_return_type}} {
         (**self).{{function:rust_name}}({{!
-            }}{{#service:requestContext?}}
+            }}{{#if service:requestContext?}}
             request_context,{{!
-            }}{{/service:requestContext?}}{{!
+            }}{{/if service:requestContext?}}{{!
             }}{{#function:args}}
             {{field:rust_name}},{{!
             }}{{/function:args}}
         ).await
     }
-{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+{{/if (not function:starts_interaction?)}}{{#if function:starts_interaction?}}
     fn {{function:rust_name}}(
         &self,
     ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function:interaction_name}}>> {
         (**self).{{function:rust_name}}()
     }
-{{/function:starts_interaction?}}{{/service:rustFunctions}}
-{{#service:interaction?}}
+{{/if function:starts_interaction?}}{{/service:rustFunctions}}
+{{#if service:interaction?}}
     async fn on_termination(&self) {
         (**self).on_termination().await;
     }
-{{/service:interaction?}}
+{{/if service:interaction?}}
 }
 
 #[::async_trait::async_trait]
@@ -104,38 +104,38 @@ impl<T> {{service:rust_name}} for ::std::sync::Arc<T>
 where
     T: {{service:rust_name}} + Send + Sync + ?Sized,
 {{> lib/block}}
-{{#service:requestContext?}}
+{{#if service:requestContext?}}
     type RequestContext = T::RequestContext;{{!
-}}{{/service:requestContext?}}
-{{#service:rustFunctions}}{{^function:starts_interaction?}}
+}}{{/if service:requestContext?}}
+{{#service:rustFunctions}}{{#if (not function:starts_interaction?)}}
     async fn {{function:rust_name}}(
         &self,{{!
-        }}{{#service:requestContext?}}
+        }}{{#if service:requestContext?}}
         request_context: &Self::RequestContext,{{!
-        }}{{/service:requestContext?}}{{!
+        }}{{/if service:requestContext?}}{{!
         }}{{#function:args}}
         {{field:rust_name}}: {{#field:type}}{{> lib/type}}{{/field:type}},{{!
         }}{{/function:args}}
     ) -> {{> lib/server_return_type}} {
         (**self).{{function:rust_name}}({{!
-            }}{{#service:requestContext?}}
+            }}{{#if service:requestContext?}}
             request_context,{{!
-            }}{{/service:requestContext?}}{{!
+            }}{{/if service:requestContext?}}{{!
             }}{{#function:args}}
             {{field:rust_name}},{{!
             }}{{/function:args}}
         ).await
     }
-{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+{{/if (not function:starts_interaction?)}}{{#if function:starts_interaction?}}
     fn {{function:rust_name}}(
         &self,
     ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function:interaction_name}}>> {
         (**self).{{function:rust_name}}()
     }
-{{/function:starts_interaction?}}{{/service:rustFunctions}}
-{{#service:interaction?}}
+{{/if function:starts_interaction?}}{{/service:rustFunctions}}
+{{#if service:interaction?}}
     async fn on_termination(&self) {
         (**self).on_termination().await;
     }
-{{/service:interaction?}}
+{{/if service:interaction?}}
 }

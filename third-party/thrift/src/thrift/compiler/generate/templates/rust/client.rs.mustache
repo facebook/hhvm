@@ -20,14 +20,14 @@
 {{#program:include_docs}}
 #![doc = include_str!("{{.}}")]
 {{/program:include_docs}}
-{{#program:services?}}
+{{#if program:services?}}
 //! Client implementation for each service in `{{program:name}}`.
 
-{{^program:multifile?}}
+{{#if (not program:multifile?)}}
 #![recursion_limit = "100000000"]
-{{/program:multifile?}}
+{{/if (not program:multifile?)}}
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals{{!
-}}{{^program:multifile?}}, unused_crate_dependencies{{/program:multifile?}}{{!
+}}{{#if (not program:multifile?)}}, unused_crate_dependencies{{/if (not program:multifile?)}}{{!
 }}, unused_imports, clippy::all)]
 
 {{#program:clients_include_srcs}}
@@ -48,17 +48,17 @@ pub(crate) use {{program:types}}::services;
 {{#program:services}}
 {{> lib/client}}
 {{/program:services}}
-{{/program:services?}}
-{{^program:services?}}
+{{/if program:services?}}
+{{#if (not program:services?)}}
 #![doc(hidden)]
 #![allow({{!
-}}{{^program:multifile?}}non_snake_case, unused_crate_dependencies, {{/program:multifile?}}{{!
+}}{{#if (not program:multifile?)}}non_snake_case, unused_crate_dependencies, {{/if (not program:multifile?)}}{{!
 }}unused_imports)]
 
 pub use {{program:types}} as types;
 pub(crate) use {{program:crate}} as client;
-{{/program:services?}}
-{{#program:direct_dependencies?}}
+{{/if (not program:services?)}}
+{{#if program:direct_dependencies?}}
 
 #[doc(hidden)]
 pub mod __dependencies {
@@ -70,4 +70,4 @@ pub mod __dependencies {
     }
     {{/program:direct_dependencies}}
 }
-{{/program:direct_dependencies?}}
+{{/if program:direct_dependencies?}}

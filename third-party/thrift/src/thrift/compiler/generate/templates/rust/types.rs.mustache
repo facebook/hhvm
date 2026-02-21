@@ -20,14 +20,14 @@
 {{#program:include_docs}}
 #![doc = include_str!("{{.}}")]
 {{/program:include_docs}}
-{{#program:docs?}}
+{{#if program:docs?}}
 #![doc = {{program:docs}}]
-{{/program:docs?}}
-{{^program:multifile?}}
+{{/if program:docs?}}
+{{#if (not program:multifile?)}}
 #![recursion_limit = "100000000"]
-{{/program:multifile?}}
+{{/if (not program:multifile?)}}
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals{{!
-}}{{^program:multifile?}}, unused_crate_dependencies{{/program:multifile?}}{{!
+}}{{#if (not program:multifile?)}}, unused_crate_dependencies{{/if (not program:multifile?)}}{{!
 }}, unused_extern_crates, elided_lifetimes_in_paths{{!
 }}, clippy::eq_op, clippy::nonminimal_bool, clippy::redundant_closure, clippy::type_complexity)]
 
@@ -37,7 +37,7 @@ pub(crate) use {{program:crate}} as types;
 {{!
 ================================================================================
 }}
-{{#program:split_mode_enabled?}}
+{{#if program:split_mode_enabled?}}
 
 {{#program:type_splits}}
 #[allow(unused_imports)]
@@ -48,23 +48,23 @@ pub mod __constructors {
   pub use {{program:types}}_split{{.}}::__constructors::*;
 {{/program:type_splits}}
 }
-{{/program:split_mode_enabled?}}
+{{/if program:split_mode_enabled?}}
 {{!
 ================================================================================
 }}
-{{#program:serde?}}
+{{#if program:serde?}}
 
 {{! Work around https://github.com/rust-lang/rust/issues/46991 }}
 extern crate serde;
-{{/program:serde?}}
+{{/if program:serde?}}
 {{!
 ================================================================================
 }}
-{{#program:valuable?}}
+{{#if program:valuable?}}
 
 {{! Work around https://github.com/rust-lang/rust/issues/46991 }}
 extern crate valuable;
-{{/program:valuable?}}
+{{/if program:valuable?}}
 {{!
 ================================================================================
 }}
@@ -75,22 +75,22 @@ include!("{{.}}");
 {{!
 ================================================================================
 }}
-{{#program:constants?}}
+{{#if program:constants?}}
 
 pub mod consts;
 #[doc(inline)]
 pub use self::consts::*;
-{{/program:constants?}}
+{{/if program:constants?}}
 {{!
 ================================================================================
 }}
-{{#program:services?}}
+{{#if program:services?}}
 
 pub mod services;
-{{/program:services?}}
+{{/if program:services?}}
 {{!
 ================================================================================
-}}{{^program:split_mode_enabled?}}{{!
+}}{{#if (not program:split_mode_enabled?)}}{{!
 --------------------------------------------------------------------------------
 }}
 {{#program:typedefs}}
@@ -100,9 +100,9 @@ pub mod services;
 --------------------------------------------------------------------------------
 }}
 {{#program:structs}}
-{{^struct:has_adapter?}}
+{{#if (not struct:has_adapter?)}}
 {{> lib/struct}}
-{{/struct:has_adapter?}}
+{{/if (not struct:has_adapter?)}}
 {{/program:structs}}
 {{!
 --------------------------------------------------------------------------------
@@ -120,26 +120,26 @@ pub mod services;
 --------------------------------------------------------------------------------
 }}
 {{#program:structs}}
-{{^struct:has_adapter?}}
+{{#if (not struct:has_adapter?)}}
 {{> lib/structimpl}}
 {{> lib/unionimpl}}
-{{/struct:has_adapter?}}
+{{/if (not struct:has_adapter?)}}
 {{/program:structs}}
 {{!
 --------------------------------------------------------------------------------
 }}
-{{#program:nonexhaustiveStructs?}}
+{{#if program:nonexhaustiveStructs?}}
 
 mod dot_dot {{> lib/block}}{{!
     NOTE: intentionally no Default impl}}
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash{{#program:valuable?}}, ::valuable::Valuable{{/program:valuable?}})]
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash{{#if program:valuable?}}, ::valuable::Valuable{{/if program:valuable?}})]
     pub struct OtherFields(pub(crate) ());
 
     #[allow(dead_code)] // if serde isn't being used
     pub(super) fn default_for_serde_deserialize() -> OtherFields {
         OtherFields(())
     }
-}{{/program:nonexhaustiveStructs?}}
+}{{/if program:nonexhaustiveStructs?}}
 {{!
 --------------------------------------------------------------------------------
 }}
@@ -148,9 +148,9 @@ pub(crate) mod r#impl {{> lib/block}}{{> lib/mod.impl}}}
 {{!
 --------------------------------------------------------------------------------
 }}
-{{#program:has_default_tests?}}
+{{#if program:has_default_tests?}}
 {{> lib/adapter/default_test}}
-{{/program:has_default_tests?}}
+{{/if program:has_default_tests?}}
 {{!
 --------------------------------------------------------------------------------
 }}
@@ -168,23 +168,23 @@ pub mod __constructors {
 }
 {{!
 --------------------------------------------------------------------------------
-}}{{/program:split_mode_enabled?}}{{!
+}}{{/if (not program:split_mode_enabled?)}}{{!
 ================================================================================
 }}
-{{#program:has_adapted_structs?}}
+{{#if program:has_adapted_structs?}}
 {{> lib/mod.unadapted}}
 {{> lib/mod.adapted_types}}
-{{/program:has_adapted_structs?}}
+{{/if program:has_adapted_structs?}}
 {{!
 ================================================================================
 }}
-{{#program:has_adapters?}}
+{{#if program:has_adapters?}}
 {{> lib/mod.adapters}}
-{{/program:has_adapters?}}
+{{/if program:has_adapters?}}
 {{!
 ================================================================================
 }}
-{{#program:direct_dependencies?}}
+{{#if program:direct_dependencies?}}
 
 #[doc(hidden)]
 pub mod __dependencies {
@@ -196,7 +196,7 @@ pub mod __dependencies {
     }
     {{/program:direct_dependencies}}
 }
-{{/program:direct_dependencies?}}
+{{/if program:direct_dependencies?}}
 {{!
 ================================================================================
 }}

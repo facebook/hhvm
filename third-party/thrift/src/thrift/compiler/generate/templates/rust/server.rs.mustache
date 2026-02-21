@@ -19,15 +19,15 @@
 {{#program:include_docs}}
 #![doc = include_str!("{{.}}")]
 {{/program:include_docs}}
-{{#program:services?}}
+{{#if program:services?}}
 
 //! Server definitions for `{{program:name}}`.
 
-{{^program:multifile?}}
+{{#if (not program:multifile?)}}
 #![recursion_limit = "100000000"]
-{{/program:multifile?}}
+{{/if (not program:multifile?)}}
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals{{!
-}}{{^program:multifile?}}, unused_crate_dependencies{{/program:multifile?}}{{!
+}}{{#if (not program:multifile?)}}, unused_crate_dependencies{{/if (not program:multifile?)}}{{!
 }}, unused_imports, clippy::all)]
 
 {{#program:services_include_srcs}}
@@ -57,16 +57,16 @@ pub(crate) use {{program:types}}::services;
 {{/program:interactions}}
 {{#program:services}}{{> lib/server}}{{!
 }}{{/program:services}}{{!
-}}{{/program:services?}}
-{{^program:services?}}
+}}{{/if program:services?}}
+{{#if (not program:services?)}}
 #![doc(hidden)]
-{{^program:multifile?}}
+{{#if (not program:multifile?)}}
 #![allow(non_snake_case, unused_crate_dependencies)]
-{{/program:multifile?}}
+{{/if (not program:multifile?)}}
 
 pub use {{program:types}} as types;
-{{/program:services?}}
-{{#program:direct_dependencies?}}
+{{/if (not program:services?)}}
+{{#if program:direct_dependencies?}}
 
 #[doc(hidden)]
 pub mod __dependencies {
@@ -78,4 +78,4 @@ pub mod __dependencies {
     }
     {{/program:direct_dependencies}}
 }
-{{/program:direct_dependencies?}}
+{{/if program:direct_dependencies?}}

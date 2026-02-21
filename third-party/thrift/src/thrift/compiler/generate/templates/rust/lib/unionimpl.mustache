@@ -133,7 +133,7 @@ impl {{struct:rust_name}} {
         ]
     }
 }
-{{#program:rust_gen_native_metadata?}}
+{{#if program:rust_gen_native_metadata?}}
 {{> lib/metadata/struct}}
-{{/program:rust_gen_native_metadata?}}
+{{/if program:rust_gen_native_metadata?}}
 {{/if struct:union?}}

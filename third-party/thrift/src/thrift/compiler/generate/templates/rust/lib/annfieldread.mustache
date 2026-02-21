@@ -14,5 +14,4 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#field:type_nonstandard?}}{{program:crate}}::r#impl::rs_thrift_read{{/field:type_nonstandard?}}{{!
-}}{{^field:type_nonstandard?}}::fbthrift::Deserialize::rs_thrift_read{{/field:type_nonstandard?}}
+}}{{#if field:type_nonstandard?}}{{program:crate}}::r#impl::rs_thrift_read{{#else}}::fbthrift::Deserialize::rs_thrift_read{{/if field:type_nonstandard?}}

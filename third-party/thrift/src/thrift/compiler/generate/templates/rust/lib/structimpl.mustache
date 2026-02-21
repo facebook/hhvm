@@ -184,15 +184,15 @@ where
                     }}{{#struct:fields}}
                     ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}) => {{!
                         }}output.{{field:rust_name}} = {{!
-                        }}{{#field:optional?}}{{!
+                        }}{{#if field:optional?}}{{!
                         }}::std::option::Option::Some({{!
-                        }}{{/field:optional?}}{{!
+                        }}{{/if field:optional?}}{{!
                         }}{{#field:has_adapter?}}{{> lib/adapter/struct}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
-                        }}{{#field:type}}::anyhow::Context::context({{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
+                        }}{{#field:type}}::anyhow::Context::context({{#if field:type_annotation?}}{{> lib/annfieldread}}{{#else}}{{> lib/read}}{{/if field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
                         }}{{#field:has_adapter?}}, {{field:id}})?{{/field:has_adapter?}}{{!
-                        }}{{#field:optional?}}{{!
+                        }}{{#if field:optional?}}{{!
                         }}){{!
-                        }}{{/field:optional?}}{{!
+                        }}{{/if field:optional?}}{{!
                         }},{{!
                     }}{{/struct:fields}}
                     (fty, _) => p.skip(fty)?,

@@ -19,6 +19,6 @@
 
 //! Thrift constant definitions for `{{program:name}}`.
 {{#program:constants}}{{> lib/const}}{{/program:constants}}
-{{#program:has_const_tests?}}
+{{#if program:has_const_tests?}}
     {{> lib/adapter/const_test}}
-{{/program:has_const_tests?}}
+{{/if program:has_const_tests?}}

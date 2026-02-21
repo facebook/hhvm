@@ -18,12 +18,12 @@
 {{#if typedef:newtype?}}
 impl ::fbthrift::GetTType for {{typedef:rust_name}} {
     const TTYPE: ::fbthrift::TType = {{!
-      }}{{#typedef:has_adapter?}}{{!
-      }}<{{> lib/adapter/qualified}}::StandardType as ::fbthrift::GetTType>::TTYPE{{!
-      }}{{/typedef:has_adapter?}}{{!
-      }}{{^typedef:has_adapter?}}{{!
+      }}{{#if typedef:has_adapter?}}{{!
+      }}<{{typedef:adapter_qualified}}::StandardType as ::fbthrift::GetTType>::TTYPE{{!
+      }}{{/if typedef:has_adapter?}}{{!
+      }}{{#if (not typedef:has_adapter?)}}{{!
       }}<{{#typedef:type}}{{> lib/type}}{{/typedef:type}} as ::fbthrift::GetTType>::TTYPE{{!
-      }}{{/typedef:has_adapter?}}{{!
+      }}{{/if (not typedef:has_adapter?)}}{{!
       }};
 }
 {{#if typedef:nonstandard?}}
@@ -57,12 +57,12 @@ where
 {
     #[inline]
     fn rs_thrift_write(&self, p: &mut P) {
-        {{#typedef:has_adapter?}}{{!
-        }}{{> lib/adapter/qualified}}::to_thrift(&self.0).rs_thrift_write(p){{!
-        }}{{/typedef:has_adapter?}}{{!
-        }}{{^typedef:has_adapter?}}{{!
+        {{#if typedef:has_adapter?}}{{!
+        }}{{typedef:adapter_qualified}}::to_thrift(&self.0).rs_thrift_write(p){{!
+        }}{{/if typedef:has_adapter?}}{{!
+        }}{{#if (not typedef:has_adapter?)}}{{!
         }}self.0.rs_thrift_write(p){{!
-        }}{{/typedef:has_adapter?}}
+        }}{{/if (not typedef:has_adapter?)}}
     }
 }
 
@@ -72,12 +72,12 @@ where
 {
     #[inline]
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-        {{#typedef:has_adapter?}}{{!
-        }}{{> lib/adapter/qualified}}::from_thrift({{!
-        }}{{/typedef:has_adapter?}}{{!
+        {{#if typedef:has_adapter?}}{{!
+        }}{{typedef:adapter_qualified}}::from_thrift({{!
+        }}{{/if typedef:has_adapter?}}{{!
         }}::fbthrift::Deserialize::rs_thrift_read({{!
         }}p){{!
-        }}{{#typedef:has_adapter?}}?).map_err(Into::<::anyhow::Error>::into){{/typedef:has_adapter?}}{{!
+        }}{{#if typedef:has_adapter?}}?).map_err(Into::<::anyhow::Error>::into){{/if typedef:has_adapter?}}{{!
         }}.map({{typedef:rust_name}})
     }
 }

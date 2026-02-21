@@ -20,8 +20,8 @@
 }}{{#field:type}}{{!
 }}{{#if field:type_annotation?}}{{> lib/annfieldtype}}{{!
 }}{{#else}}{{!
-}}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::AdaptedType{{/field:has_adapter?}}{{!
-}}{{^field:has_adapter?}}{{> lib/type}}{{/field:has_adapter?}}{{!
+}}{{#if field:has_adapter?}}{{field:adapter_qualified}}::AdaptedType{{/if field:has_adapter?}}{{!
+}}{{#if (not field:has_adapter?)}}{{> lib/type}}{{/if (not field:has_adapter?)}}{{!
 }}{{/if field:type_annotation?}}{{!
 }}{{/field:type}}{{!
 }}{{#if field:arc?}}>{{/if field:arc?}}{{!

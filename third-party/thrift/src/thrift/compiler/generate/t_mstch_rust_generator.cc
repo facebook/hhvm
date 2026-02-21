@@ -463,47 +463,137 @@ bool node_has_custom_rust_type(const t_named& node) {
       node.has_structured_annotation(kRustNewTypeUri);
 }
 
-// NOTE: a transitive _adapter_ is different from a transitive _annotation_. A
-// transitive adapter is defined as one applied transitively through types.
-// E.g.
+// Compute the Rust type name string for a type, replicating `lib/type.mustache`
+// logic. This is needed for generic adapter type parameters.
+std::string compute_type_name(
+    const t_type* type, const rust_codegen_options& options);
+
+// Forward declarations for adapter name computation.
+std::string compute_transitive_adapter_name(
+    const t_type* type,
+    const rust_codegen_options& options,
+    const t_field* field);
+
+// Resolve the direct adapter annotation name, applying crate path fixups.
+std::string resolve_adapter_annotation_name(
+    const t_const* adapter_annotation, const rust_codegen_options& options) {
+  std::string package =
+      get_types_import_name(adapter_annotation->program(), options);
+  auto adapter_name =
+      get_annotation_property_string(adapter_annotation, "name");
+
+  bool is_generic = adapter_name.ends_with("<>");
+  if (is_generic) {
+    adapter_name = adapter_name.substr(0, adapter_name.length() - 2);
+  }
+
+  if (!package.empty() && adapter_name.starts_with(kRustCrateTypesPrefix)) {
+    adapter_name =
+        package + "::" + adapter_name.substr(kRustCrateTypesPrefix.length());
+  } else if (!package.empty() && adapter_name.starts_with(kRustCratePrefix)) {
+    adapter_name =
+        package + "::" + adapter_name.substr(kRustCratePrefix.length());
+  } else if (!(adapter_name.starts_with("::") ||
+               adapter_name.starts_with(kRustCratePrefix))) {
+    adapter_name = "::" + adapter_name;
+  }
+
+  return adapter_name;
+}
+
+// Compute the Rust raw type name (like lib/rawtype.mustache).
+std::string compute_rawtype_name(
+    const t_type* type, const rust_codegen_options& options) {
+  auto rust_type = get_type_annotation(type);
+  if (!rust_type.empty()) {
+    if (rust_type.find("::") == std::string::npos) {
+      return "fbthrift::builtin_types::" + rust_type;
+    }
+    return "::" + rust_type;
+  }
+
+  if (type->is_void()) {
+    return "()";
+  }
+  if (type->is_bool()) {
+    return "::std::primitive::bool";
+  }
+  if (type->is_byte()) {
+    return "::std::primitive::i8";
+  }
+  if (type->is_i16()) {
+    return "::std::primitive::i16";
+  }
+  if (type->is_i32()) {
+    return "::std::primitive::i32";
+  }
+  if (type->is_i64()) {
+    return "::std::primitive::i64";
+  }
+  if (type->is_float()) {
+    return "::std::primitive::f32";
+  }
+  if (type->is_double()) {
+    return "::std::primitive::f64";
+  }
+  if (type->is_binary()) {
+    return "::std::vec::Vec<::std::primitive::u8>";
+  }
+  if (type->is_string()) {
+    return "::std::string::String";
+  }
+  if (type->is<t_enum>() || type->is<t_structured>()) {
+    return get_types_import_name(type->program(), options) +
+        "::" + type_rust_name(type);
+  }
+  if (const auto* list_type = type->try_as<t_list>()) {
+    return "::std::vec::Vec<" +
+        compute_type_name(list_type->elem_type().get_type(), options) + ">";
+  }
+  if (const auto* set_type = type->try_as<t_set>()) {
+    return "::std::collections::BTreeSet<" +
+        compute_type_name(set_type->elem_type().get_type(), options) + ">";
+  }
+  if (const auto* map_type = type->try_as<t_map>()) {
+    return "::std::collections::BTreeMap<" +
+        compute_type_name(&map_type->key_type().deref(), options) + ", " +
+        compute_type_name(&map_type->val_type().deref(), options) + ">";
+  }
+  return type_rust_name(type);
+}
+
+// Compute the full type name, handling typedefs (like lib/type.mustache).
+std::string compute_type_name(
+    const t_type* type, const rust_codegen_options& options) {
+  if (type->is<t_typedef>()) {
+    if (has_type_annotation(type) && !has_newtype_annotation(type)) {
+      return compute_rawtype_name(type, options);
+    }
+    return get_types_import_name(type->program(), options) +
+        "::" + type_rust_name(type);
+  }
+  return compute_rawtype_name(type, options);
+}
+
+// Compute the adapter name string. This replicates the logic of
+// `lib/adapter/name.mustache`.
 //
-// ```
-// @rust.Adapter{name = "Foo"}
-// typedef string AdaptedString
-//
-// struct Bar {
-//   1: AdaptedString field1;
-// }
-// ```
-//
-// `Bar.field1` has a transitive adapter due to its type being an adapted
-// type.
-//
-// A transitive annotation is one that is applied through `@scope.Transitive`.
-// E.g.
-//
-// ```
-// @rust.Adapter{name = "Foo"}
-// @scope.Transitive
-// struct SomeAnnotation {}
-//
-// struct Bar {
-//   @SomeAnnotation
-//   1: string field1;
-// }
-// ```
-//
-// `Bar.field1` has an non-transitive adapter applied through a transitive
-// annotation in this example.
-mstch::node adapter_node(
-    // The field or typedef's adapter (if there is one).
+// Parameters:
+// - adapter_annotation: the direct adapter annotation on the field/typedef
+//   (may be null)
+// - type: the type (for typedef: the underlying type; for field: the field
+//   type; for struct: the struct itself)
+// - ignore_transitive_check: true for structs (which cannot have transitive
+//   adapters)
+// - options: codegen options
+// - field: optional field pointer, used for struct-context adapter name
+//   computation where field type annotations affect container wrappers
+std::string compute_adapter_name(
     const t_const* adapter_annotation,
     const t_type* type,
     bool ignore_transitive_check,
-    mstch_context& context,
-    mstch_element_position pos,
-    const rust_codegen_options& options) {
-  // Step through typedefs.
+    const rust_codegen_options& options,
+    const t_field* field = nullptr) {
   const t_type* curr_type = step_through_typedefs(type, true);
   const t_type* transitive_type = nullptr;
 
@@ -513,66 +603,160 @@ mstch::node adapter_node(
   }
 
   if (!adapter_annotation && !transitive_type) {
-    return false;
+    return "";
   }
 
-  mstch::node name;
+  std::string direct_name;
   bool is_generic = false;
   if (adapter_annotation != nullptr) {
-    // Always replace `crate::` with the package name of where this annotation
-    // originated to support adapters applied with `@scope.Transitive`.
-    // If the annotation originates from the same module, this will just
-    // return `crate::` anyways to be a no-op.
-    std::string package =
-        get_types_import_name(adapter_annotation->program(), options);
-
-    auto adapter_name =
-        get_annotation_property_string(adapter_annotation, "name");
-
-    is_generic = adapter_name.ends_with("<>");
-    if (is_generic) {
-      adapter_name = adapter_name.substr(0, adapter_name.length() - 2);
-    }
-
-    if (!package.empty() && adapter_name.starts_with(kRustCrateTypesPrefix)) {
-      adapter_name =
-          package + "::" + adapter_name.substr(kRustCrateTypesPrefix.length());
-    } else if (!package.empty() && adapter_name.starts_with(kRustCratePrefix)) {
-      adapter_name =
-          package + "::" + adapter_name.substr(kRustCratePrefix.length());
-    } else if (!(adapter_name.starts_with("::") ||
-                 adapter_name.starts_with(kRustCratePrefix))) {
-      adapter_name = "::" + adapter_name;
-    }
-
-    name = adapter_name;
+    direct_name = resolve_adapter_annotation_name(adapter_annotation, options);
+    auto raw_name = get_annotation_property_string(adapter_annotation, "name");
+    is_generic = raw_name.ends_with("<>");
   }
 
   bool layered = adapter_annotation != nullptr && transitive_type != nullptr;
-  bool transitive_only =
-      adapter_annotation == nullptr && transitive_type != nullptr;
 
-  auto underlying_type =
-      context.type_factory->make_mstch_object(type, context, pos);
+  std::string result;
 
-  mstch::node transitive_type_node;
-  if (transitive_type) {
-    transitive_type_node =
-        context.type_factory->make_mstch_object(transitive_type, context, pos);
+  if (layered) {
+    result += "::fbthrift::adapter::LayeredThriftAdapter<";
   }
 
-  mstch::map node{
-      // Only populated if this adapter node was generated from a typedef
-      // or a field with an adapter.
-      {"adapter:name?", name},
-      {"adapter:is_generic?", is_generic},
-      {"adapter:underlying_type", underlying_type},
-      {"adapter:layered?", layered},
-      {"adapter:transitive_only?", transitive_only},
-      {"adapter:transitive_type?", transitive_type_node},
-  };
+  if (!direct_name.empty()) {
+    result += direct_name;
+  }
 
-  return node;
+  if (is_generic) {
+    result += "<" + compute_type_name(type, options) + ">";
+  }
+
+  if (layered) {
+    result += ", ";
+  }
+
+  if (transitive_type) {
+    result += compute_transitive_adapter_name(transitive_type, options, field);
+  }
+
+  if (layered) {
+    result += ">";
+  }
+
+  return result;
+}
+
+// Compute the transitive adapter name for a type.
+// This handles typedef, struct, and container (list/set/map) cases.
+std::string compute_transitive_adapter_name(
+    const t_type* type,
+    const rust_codegen_options& options,
+    const t_field* field) {
+  if (type->is<t_typedef>()) {
+    return get_types_import_name(type->program(), options) +
+        "::adapters::" + type_rust_name(type);
+  }
+
+  if (type->is<t_structured>()) {
+    auto true_type = type->get_true_type();
+    return get_types_import_name(true_type->program(), options) +
+        "::adapters::" + type_rust_name(true_type);
+  }
+
+  if (const auto* list_type = type->try_as<t_list>()) {
+    auto elem = list_type->elem_type().get_type();
+    std::string wrapper;
+    if (field && has_type_annotation(field)) {
+      wrapper = "::" + get_type_annotation(field);
+    } else {
+      wrapper = "::fbthrift::adapter::ListMapAdapter";
+    }
+    // Recurse into elem for its adapter name
+    std::string elem_adapter =
+        compute_adapter_name(nullptr, elem, false, options, nullptr);
+    return wrapper + "<" + elem_adapter + ">";
+  }
+
+  if (const auto* set_type = type->try_as<t_set>()) {
+    auto elem = set_type->elem_type().get_type();
+    std::string wrapper;
+    if (field && has_type_annotation(field)) {
+      wrapper = "::" + get_type_annotation(field);
+    } else {
+      wrapper = "::fbthrift::adapter::SetMapAdapter";
+    }
+    std::string elem_adapter =
+        compute_adapter_name(nullptr, elem, false, options, nullptr);
+    return wrapper + "<" + elem_adapter + ">";
+  }
+
+  if (const auto* map_type = type->try_as<t_map>()) {
+    auto key_type = &map_type->key_type().deref();
+    auto val_type = &map_type->val_type().deref();
+    std::string wrapper;
+    if (field && has_type_annotation(field)) {
+      wrapper = "::" + get_type_annotation(field);
+    } else {
+      wrapper = "::fbthrift::adapter::MapMapAdapter";
+    }
+    std::string key_adapter;
+    if (type_has_transitive_adapter(
+            step_through_typedefs(key_type, true), false) ||
+        node_has_adapter(*key_type)) {
+      key_adapter =
+          compute_adapter_name(nullptr, key_type, false, options, nullptr);
+    } else {
+      key_adapter = "::fbthrift::adapter::IdentityAdapter<" +
+          compute_type_name(key_type, options) + ">";
+    }
+    std::string val_adapter;
+    if (type_has_transitive_adapter(
+            step_through_typedefs(val_type, true), false) ||
+        node_has_adapter(*val_type)) {
+      val_adapter =
+          compute_adapter_name(nullptr, val_type, false, options, nullptr);
+    } else {
+      val_adapter = "::fbthrift::adapter::IdentityAdapter<" +
+          compute_type_name(val_type, options) + ">";
+    }
+    return wrapper + "<" + key_adapter + ", " + val_adapter + ">";
+  }
+
+  return "";
+}
+
+// Compute the qualified adapter string:
+// `<ADAPTER_NAME as ::fbthrift::adapter::ThriftAdapter>`
+std::string compute_adapter_qualified(
+    const t_const* adapter_annotation,
+    const t_type* type,
+    bool ignore_transitive_check,
+    const rust_codegen_options& options,
+    const t_field* field = nullptr) {
+  std::string name = compute_adapter_name(
+      adapter_annotation, type, ignore_transitive_check, options, field);
+  if (name.empty()) {
+    return "";
+  }
+  return "<" + name + " as ::fbthrift::adapter::ThriftAdapter>";
+}
+
+// Compute the struct-qualified adapter string:
+// `<ADAPTER_NAME as ::fbthrift::adapter::ThriftAdapter>`
+// Used in structimpl context for field-level adapter calls.
+// The difference from compute_adapter_qualified is that this passes the field
+// pointer, which affects how container adapter wrappers are chosen based on
+// field type annotations.
+std::string compute_adapter_struct_qualified(
+    const t_const* adapter_annotation,
+    const t_type* type,
+    const rust_codegen_options& options,
+    const t_field* field) {
+  std::string name =
+      compute_adapter_name(adapter_annotation, type, false, options, field);
+  if (name.empty()) {
+    return "";
+  }
+  return "<" + name + " as ::fbthrift::adapter::ThriftAdapter>";
 }
 
 mstch::node structured_annotations_node(
@@ -758,6 +942,16 @@ class t_mstch_rust_generator : public t_mstch_generator {
     def.property("serde?", [this](const t_type& self) {
       return rust_serde_enabled(options_, self);
     });
+    def.property("has_adapter?", [](const t_type& self) {
+      const t_type* curr_type = step_through_typedefs(&self, true);
+      return type_has_transitive_adapter(curr_type, false);
+    });
+    def.property("adapter_name", [this](const t_type& self) {
+      return compute_adapter_name(nullptr, &self, false, options_);
+    });
+    def.property("adapter_qualified", [this](const t_type& self) {
+      return compute_adapter_qualified(nullptr, &self, false, options_);
+    });
     return std::move(def).make();
   }
 
@@ -816,6 +1010,32 @@ class t_mstch_rust_generator : public t_mstch_generator {
     def.property("constructor?", [](const t_typedef& self) {
       return typedef_has_constructor_expression(&self);
     });
+    def.property("has_adapter?", [](const t_typedef& self) {
+      auto adapter_annotation = find_structured_adapter_annotation(self);
+      auto type = &self.type().deref();
+      const t_type* curr_type = step_through_typedefs(type, true);
+      return adapter_annotation != nullptr ||
+          type_has_transitive_adapter(curr_type, false);
+    });
+    def.property("adapter_name", [this](const t_typedef& self) {
+      auto adapter_annotation = find_structured_adapter_annotation(self);
+      return compute_adapter_name(
+          adapter_annotation, &self.type().deref(), false, options_);
+    });
+    def.property("adapter_qualified", [this](const t_typedef& self) {
+      auto adapter_annotation = find_structured_adapter_annotation(self);
+      return compute_adapter_qualified(
+          adapter_annotation, &self.type().deref(), false, options_);
+    });
+    def.property("adapter_transitive_only?", [](const t_typedef& self) {
+      auto adapter_annotation = find_structured_adapter_annotation(self);
+      if (adapter_annotation != nullptr) {
+        return false;
+      }
+      auto type = &self.type().deref();
+      const t_type* curr_type = step_through_typedefs(type, true);
+      return type_has_transitive_adapter(curr_type, false);
+    });
     return std::move(def).make();
   }
 
@@ -848,6 +1068,28 @@ class t_mstch_rust_generator : public t_mstch_generator {
         return std::string("fbthrift::builtin_types::") + rust_type;
       }
       return rust_type;
+    });
+    def.property("has_adapter?", [](const t_field& self) {
+      auto adapter_annotation = find_structured_adapter_annotation(self);
+      auto type = self.type().get_type();
+      const t_type* curr_type = step_through_typedefs(type, true);
+      return adapter_annotation != nullptr ||
+          type_has_transitive_adapter(curr_type, false);
+    });
+    def.property("adapter_name", [this](const t_field& self) {
+      auto adapter_annotation = find_structured_adapter_annotation(self);
+      return compute_adapter_name(
+          adapter_annotation, self.type().get_type(), false, options_);
+    });
+    def.property("adapter_qualified", [this](const t_field& self) {
+      auto adapter_annotation = find_structured_adapter_annotation(self);
+      return compute_adapter_qualified(
+          adapter_annotation, self.type().get_type(), false, options_);
+    });
+    def.property("adapter_struct_qualified", [this](const t_field& self) {
+      auto adapter_annotation = find_structured_adapter_annotation(self);
+      return compute_adapter_struct_qualified(
+          adapter_annotation, self.type().get_type(), options_, &self);
     });
     return std::move(def).make();
   }
@@ -917,6 +1159,16 @@ class t_mstch_rust_generator : public t_mstch_generator {
     });
     def.property("has_adapter?", [](const t_structured& self) {
       return node_has_adapter(self);
+    });
+    def.property("adapter_name", [this](const t_structured& self) {
+      auto adapter_annotation = find_structured_adapter_annotation(self);
+      // Structs cannot have transitive types, so ignore transitive check.
+      return compute_adapter_name(adapter_annotation, &self, true, options_);
+    });
+    def.property("adapter_qualified", [this](const t_structured& self) {
+      auto adapter_annotation = find_structured_adapter_annotation(self);
+      return compute_adapter_qualified(
+          adapter_annotation, &self, true, options_);
     });
     return std::move(def).make();
   }
@@ -1717,14 +1969,11 @@ class rust_mstch_struct : public mstch_struct {
       mstch_context& ctx,
       mstch_element_position pos,
       const rust_codegen_options* options)
-      : mstch_struct(s, ctx, pos),
-        options_(*options),
-        adapter_annotation_(find_structured_adapter_annotation(*s)) {
+      : mstch_struct(s, ctx, pos), options_(*options) {
     register_methods(
         this,
         {
             {"struct:fields_by_name", &rust_mstch_struct::rust_fields_by_name},
-            {"struct:has_adapter?", &rust_mstch_struct::has_adapter},
             {"struct:rust_structured_annotations",
              &rust_mstch_struct::rust_structured_annotations},
         });
@@ -1736,37 +1985,8 @@ class rust_mstch_struct : public mstch_struct {
     });
     return make_mstch_fields(fields);
   }
-  mstch::node has_adapter() {
-    // Structs cannot have transitive types, so we ignore the transitive type
-    // check.
-    return adapter_node(
-        adapter_annotation_, struct_, true, context_, pos_, options_);
-  }
   mstch::node rust_structured_annotations() {
     return structured_annotations_node(*struct_, 1, context_, pos_, options_);
-  }
-
- private:
-  const rust_codegen_options& options_;
-  const t_const* adapter_annotation_;
-};
-
-class rust_mstch_type : public mstch_type {
- public:
-  rust_mstch_type(
-      const t_type* type,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const rust_codegen_options* options)
-      : mstch_type(type, ctx, pos), options_(*options) {
-    register_methods(
-        this,
-        {
-            {"type:has_adapter?", &rust_mstch_type::adapter},
-        });
-  }
-  mstch::node adapter() {
-    return adapter_node(nullptr, type_, false, context_, pos_, options_);
   }
 
  private:
@@ -2105,6 +2325,8 @@ class mstch_rust_struct_field : public mstch_base {
             {"field:arc?", &mstch_rust_struct_field::is_arc},
             {"field:docs?", &mstch_rust_struct_field::rust_has_docs},
             {"field:has_adapter?", &mstch_rust_struct_field::has_adapter},
+            {"field:adapter_qualified",
+             &mstch_rust_struct_field::rust_adapter_qualified},
         });
   }
   whisker::object self() { return make_self(*field_); }
@@ -2136,13 +2358,14 @@ class mstch_rust_struct_field : public mstch_base {
   mstch::node is_arc() { return field_kind(*field_) == FieldKind::Arc; }
   mstch::node rust_has_docs() { return field_->has_doc(); }
   mstch::node has_adapter() {
-    return adapter_node(
-        adapter_annotation_,
-        field_->type().get_type(),
-        false,
-        context_,
-        pos_,
-        options_);
+    auto type = field_->type().get_type();
+    const t_type* curr_type = step_through_typedefs(type, true);
+    return adapter_annotation_ != nullptr ||
+        type_has_transitive_adapter(curr_type, false);
+  }
+  mstch::node rust_adapter_qualified() {
+    return compute_adapter_qualified(
+        adapter_annotation_, field_->type().get_type(), false, options_);
   }
 
  private:
@@ -2240,14 +2463,11 @@ class rust_mstch_field : public mstch_field {
       mstch_context& ctx,
       mstch_element_position pos,
       const rust_codegen_options* options)
-      : mstch_field(field, ctx, pos),
-        options_(*options),
-        adapter_annotation_(find_structured_adapter_annotation(*field)) {
+      : mstch_field(field, ctx, pos), options_(*options) {
     register_methods(
         this,
         {
             {"field:default", &rust_mstch_field::rust_default},
-            {"field:has_adapter?", &rust_mstch_field::has_adapter},
             {"field:rust_structured_annotations",
              &rust_mstch_field::rust_structured_annotations},
         });
@@ -2262,53 +2482,12 @@ class rust_mstch_field : public mstch_field {
     }
     return mstch::node();
   }
-  mstch::node has_adapter() {
-    return adapter_node(
-        adapter_annotation_,
-        field_->type().get_type(),
-        false,
-        context_,
-        pos_,
-        options_);
-  }
   mstch::node rust_structured_annotations() {
     return structured_annotations_node(*field_, 3, context_, pos_, options_);
   }
 
  private:
   const rust_codegen_options& options_;
-  const t_const* adapter_annotation_;
-};
-
-class rust_mstch_typedef : public mstch_typedef {
- public:
-  rust_mstch_typedef(
-      const t_typedef* t,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const rust_codegen_options* options)
-      : mstch_typedef(t, ctx, pos),
-        options_(*options),
-        adapter_annotation_(find_structured_adapter_annotation(*t)) {
-    register_methods(
-        this,
-        {
-            {"typedef:has_adapter?", &rust_mstch_typedef::has_adapter},
-        });
-  }
-  mstch::node has_adapter() {
-    return adapter_node(
-        adapter_annotation_,
-        &typedef_->type().deref(),
-        false,
-        context_,
-        pos_,
-        options_);
-  }
-
- private:
-  const rust_codegen_options& options_;
-  const t_const* adapter_annotation_;
 };
 
 mstch::node rust_mstch_service::rust_functions() {
@@ -2547,8 +2726,6 @@ void t_mstch_rust_generator::set_mstch_factories() {
   mstch_context_.add<rust_mstch_program>(&options_);
   mstch_context_.add<rust_mstch_service>(&options_);
   mstch_context_.add<rust_mstch_interaction>(&options_);
-  mstch_context_.add<rust_mstch_type>(&options_);
-  mstch_context_.add<rust_mstch_typedef>(&options_);
   mstch_context_.add<rust_mstch_struct>(&options_);
   mstch_context_.add<rust_mstch_field>(&options_);
   mstch_context_.add<rust_mstch_const>(&options_);

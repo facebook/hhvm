@@ -253,8 +253,8 @@ pub mod {{service:snake}} {
                                 }}{{/if function:bidirectional_stream?}}{{!
                                 }}{{#if (not function:bidirectional_stream?)}}{{!
                                     }}{{#if (not function:sink?)}}{{#if (not function:stream?)}}{{#function:return_type}}{{!
-                                        }}{{#type:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::rs_thrift_read(p)?, 0)?{{/type:has_adapter?}}{{!
-                                        }}{{^type:has_adapter?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/type:has_adapter?}}{{!
+                                        }}{{#if type:has_adapter?}}{{type:adapter_qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::rs_thrift_read(p)?, 0)?{{/if type:has_adapter?}}{{!
+                                        }}{{#if (not type:has_adapter?)}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/if (not type:has_adapter?)}}{{!
                                     }}{{/function:return_type}}{{/if (not function:stream?)}}{{/if (not function:sink?)}}{{!
                                     }}{{#if function:stream?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/if function:stream?}}{{!
                                     }}{{#if function:sink?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/if function:sink?}}{{!
@@ -270,8 +270,8 @@ pub mod {{service:snake}} {
                             }}{{#if (not function:void_or_void_stream?)}}::std::option::Option::Some({{/if (not function:void_or_void_stream?)}}{{!
                             }}::std::result::Result::Err(Self::Error::{{field:rust_name}}({{!
                                 }}{{#if (not function:stream?)}}{{#function:return_type}}{{!
-                                    }}{{#type:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::rs_thrift_read(p)?, 0)?{{/type:has_adapter?}}{{!
-                                    }}{{^type:has_adapter?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/type:has_adapter?}}{{!
+                                    }}{{#if type:has_adapter?}}{{type:adapter_qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::rs_thrift_read(p)?, 0)?{{/if type:has_adapter?}}{{!
+                                    }}{{#if (not type:has_adapter?)}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/if (not type:has_adapter?)}}{{!
                                 }}{{/function:return_type}}{{/if (not function:stream?)}}{{!
                                 }}{{#if function:stream?}}::fbthrift::Deserialize::rs_thrift_read(p)?{{/if function:stream?}}{{!
                             }})){{!

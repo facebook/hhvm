@@ -17,13 +17,13 @@
 }}{{#value:underlying_type}}{{!
 }}{{#if value:newtype?}}{{!
     }}{{type:package}}::{{type:rust_name}}({{!
-        }}{{#value:underlying_type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
-        }}{{> lib/adapter/qualified}}::from_thrift({{!
-        }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:underlying_type}}{{!
+        }}{{#value:underlying_type}}{{#type:typedef}}{{#if typedef:has_adapter?}}{{!
+        }}{{typedef:adapter_qualified}}::from_thrift({{!
+        }}{{/if typedef:has_adapter?}}{{/type:typedef}}{{/value:underlying_type}}{{!
         }}{{#value:inner}}{{> lib/value}}{{/value:inner}}{{!
-        }}{{#value:underlying_type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
+        }}{{#value:underlying_type}}{{#type:typedef}}{{#if typedef:has_adapter?}}{{!
         }}).expect("constant Thrift value should adapt without error"){{!
-        }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:underlying_type}}{{!
+        }}{{/if typedef:has_adapter?}}{{/type:typedef}}{{/value:underlying_type}}{{!
     }}){{!
 }}{{/if value:newtype?}}{{!
 }}{{#if value:bool?}}{{value:bool_value}}{{/if value:bool?}}{{!
@@ -48,8 +48,8 @@
 {{value:indent}}{
     {{value:indent}}#[inline(never)]
     {{value:indent}}fn __do_push(list: &mut {{!
-        }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::StandardType{{/type:has_adapter?}}{{!
-        }}{{^type:has_adapter?}}{{>lib/type}}{{/type:has_adapter?}}{{!
+        }}{{#if type:has_adapter?}}{{type:adapter_qualified}}::StandardType{{/if type:has_adapter?}}{{!
+        }}{{#if (not type:has_adapter?)}}{{>lib/type}}{{/if (not type:has_adapter?)}}{{!
     }}) {
         {{value:indent}}list.push({{> lib/value}});
     {{value:indent}}}
@@ -75,8 +75,8 @@
 {{value:indent}}{
     {{value:indent}}#[inline(never)]
     {{value:indent}}fn __do_insert(set: &mut {{!
-        }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::StandardType{{/type:has_adapter?}}{{!
-        }}{{^type:has_adapter?}}{{>lib/type}}{{/type:has_adapter?}}{{!
+        }}{{#if type:has_adapter?}}{{type:adapter_qualified}}::StandardType{{/if type:has_adapter?}}{{!
+        }}{{#if (not type:has_adapter?)}}{{>lib/type}}{{/if (not type:has_adapter?)}}{{!
     }}) {
         {{value:indent}}set.insert({{!
             }}{{#if value:floatingPoint?}}{{!
@@ -106,8 +106,8 @@
             {{value:indent}}{
                 {{value:indent}}#[inline(never)]
                 {{value:indent}}fn __do_insert(map: &mut {{!
-                    }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::StandardType{{/type:has_adapter?}}{{!
-                    }}{{^type:has_adapter?}}{{>lib/type}}{{/type:has_adapter?}}{{!
+                    }}{{#if type:has_adapter?}}{{type:adapter_qualified}}::StandardType{{/if type:has_adapter?}}{{!
+                    }}{{#if (not type:has_adapter?)}}{{>lib/type}}{{/if (not type:has_adapter?)}}{{!
                 }}) {
                     {{value:indent}}map.insert({{!
                         }}{{#entry:key}}{{!
@@ -129,7 +129,7 @@
     }}{{> lib/type}} {{> lib/block}}{{!
         }}{{#value:structFields}}
             {{value:indent}}{{field:rust_name}}: {{!
-            }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_default::<{{!
+            }}{{#if field:has_adapter?}}{{field:adapter_qualified}}::from_thrift_default::<{{!
                 }}{{#value:underlying_type}}{{#if type:structured?}}{{!
                     }}{{#if type:true_type.has_adapter?}}{{!
                         }}{{type:true_type.package}}::unadapted::{{type:true_type.rust_name}}{{!
@@ -137,7 +137,7 @@
                         }}{{type:true_type.package}}::{{type:true_type.rust_name}}{{!
                     }}{{/if type:true_type.has_adapter?}}{{!
                 }}{{/if type:structured?}}{{/value:underlying_type}}{{!
-            }}>({{/field:has_adapter?}}{{!
+            }}>({{/if field:has_adapter?}}{{!
             }}{{#field:explicit_value}}{{!
                 }}{{> lib/fieldvalue}}{{!
             }}{{/field:explicit_value}}{{!
@@ -157,7 +157,7 @@
                     }}::std::default::Default::default(){{!
                 }}{{/field:default}}{{!
             }}{{/field:explicit_value}}{{!
-            }}{{#field:has_adapter?}}, {{field:id}}){{/field:has_adapter?}}{{!
+            }}{{#if field:has_adapter?}}, {{field:id}}){{/if field:has_adapter?}}{{!
             }},{{!
         }}{{/value:structFields}}{{!
         }}{{#if (not value:exhaustive?)}}

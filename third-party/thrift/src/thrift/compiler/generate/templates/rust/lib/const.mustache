@@ -32,13 +32,13 @@ pub const {{constant:rust_name}}{{!
 pub static {{constant:rust_name}}{{!
 }}: ::std::sync::LazyLock<{{!
 }}{{#constant:type}}{{!
-    }}{{#type:has_adapter?}}{{> lib/adapter/qualified}}::AdaptedType{{/type:has_adapter?}}{{!
-    }}{{^type:has_adapter?}}{{> lib/type}}{{/type:has_adapter?}}{{!
+    }}{{#if type:has_adapter?}}{{type:adapter_qualified}}::AdaptedType{{/if type:has_adapter?}}{{!
+    }}{{#if (not type:has_adapter?)}}{{> lib/type}}{{/if (not type:has_adapter?)}}{{!
 }}{{/constant:type}}{{!
 }}> = ::std::sync::LazyLock::new(|| {{!
-    }}{{#constant:type}}{{#type:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift({{/type:has_adapter?}}{{/constant:type}}{{!
+    }}{{#constant:type}}{{#if type:has_adapter?}}{{type:adapter_qualified}}::from_thrift({{/if type:has_adapter?}}{{/constant:type}}{{!
     }}{{> lib/value}}{{!
-    }}{{#constant:type}}{{#type:has_adapter?}}).expect("constant Thrift value should adapt without error"){{/type:has_adapter?}}{{/constant:type}}{{!
+    }}{{#constant:type}}{{#if type:has_adapter?}}).expect("constant Thrift value should adapt without error"){{/if type:has_adapter?}}{{/constant:type}}{{!
 }});
 {{/if constant:lazy?}}
 {{/constant:type}}

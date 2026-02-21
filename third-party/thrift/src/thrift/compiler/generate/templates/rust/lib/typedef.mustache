@@ -20,15 +20,15 @@
 #[doc = {{typedef:docs}}]
 {{/if typedef:docs?}}{{!
 }}{{#if (not typedef:newtype?)}}{{!
-}}{{#typedef:has_adapter?}}
+}}{{#if typedef:has_adapter?}}
 pub type {{typedef:rust_name}} = {{!
-  }}{{#if adapter:transitive_only?}}{{!
-    }}{{#adapter:underlying_type}}{{> lib/type}}{{/adapter:underlying_type}}{{!
+  }}{{#if typedef:adapter_transitive_only?}}{{!
+    }}{{#typedef:type}}{{> lib/type}}{{/typedef:type}}{{!
   }}{{#else}}{{!
-    }}{{> lib/adapter/qualified}}::AdaptedType{{!
-  }}{{/if adapter:transitive_only?}};
-{{/typedef:has_adapter?}}{{!
-}}{{^typedef:has_adapter?}}{{!
+    }}{{typedef:adapter_qualified}}::AdaptedType{{!
+  }}{{/if typedef:adapter_transitive_only?}};
+{{/if typedef:has_adapter?}}{{!
+}}{{#if (not typedef:has_adapter?)}}{{!
   }}{{#typedef:type}}
 pub type {{typedef:rust_name}} = {{!
     }}{{#if (not (string.empty? typedef:rust_type))}}::{{typedef:rust_type}}{{> lib/type_generics}}{{!
@@ -39,13 +39,13 @@ pub type {{typedef:rust_name}} = {{!
 pub use {{type:package}}::__constructors::{{type:rust_name}} as {{typedef:rust_name}};
 {{/if typedef:constructor?}}
   {{/typedef:type}}{{!
-}}{{/typedef:has_adapter?}}{{!
+}}{{/if (not typedef:has_adapter?)}}{{!
 }}{{/if (not typedef:newtype?)}}{{!
 }}{{#if typedef:newtype?}}
 #[derive({{!
-    }}{{^typedef:has_adapter?}}{{!
+    }}{{#if (not typedef:has_adapter?)}}{{!
     }}Default, {{!
-    }}{{/typedef:has_adapter?}}{{!
+    }}{{/if (not typedef:has_adapter?)}}{{!
     }}{{#if typedef:copy?}}Copy, {{/if typedef:copy?}}{{!
     }}Clone, Debug, PartialEq{{!
     }}{{#if typedef:ord?}}, Eq, PartialOrd, Ord, Hash{{/if typedef:ord?}}{{!
@@ -53,12 +53,12 @@ pub use {{type:package}}::__constructors::{{type:rust_name}} as {{typedef:rust_n
     }}{{#if program:valuable?}}, ::valuable::Valuable{{/if program:valuable?}}{{!
 }})]
 pub struct {{typedef:rust_name}}(pub {{!
-  }}{{#typedef:has_adapter?}}{{!
-    }}{{> lib/adapter/qualified}}::AdaptedType{{!
-  }}{{/typedef:has_adapter?}}{{!
-  }}{{^typedef:has_adapter?}}{{!
+  }}{{#if typedef:has_adapter?}}{{!
+    }}{{typedef:adapter_qualified}}::AdaptedType{{!
+  }}{{/if typedef:has_adapter?}}{{!
+  }}{{#if (not typedef:has_adapter?)}}{{!
     }}{{#if (not (string.empty? typedef:rust_type))}}::{{typedef:rust_type}}{{!
     }}{{#else}}{{#typedef:type}}{{> lib/type}}{{/typedef:type}}{{/if (not (string.empty? typedef:rust_type))}}{{!
-  }}{{/typedef:has_adapter?}}{{!
+  }}{{/if (not typedef:has_adapter?)}}{{!
 }});
 {{/if typedef:newtype?}}

@@ -497,12 +497,12 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
             }}{{field:id}}i16{{!
         }});
         {{#field:type}}{{!
-          }}{{#type:has_adapter?}}{{!
-            }}::fbthrift::Serialize::rs_thrift_write(&{{> lib/adapter/qualified}}::to_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(&self.{{field:rust_name}}, {{field:id}}), p){{!
-          }}{{/type:has_adapter?}}{{!
-          }}{{^type:has_adapter?}}{{!
+          }}{{#if type:has_adapter?}}{{!
+            }}::fbthrift::Serialize::rs_thrift_write(&{{type:adapter_qualified}}::to_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(&self.{{field:rust_name}}, {{field:id}}), p){{!
+          }}{{/if type:has_adapter?}}{{!
+          }}{{#if (not type:has_adapter?)}}{{!
             }}{{> lib/write}}(&self.{{field:rust_name}}, p){{!
-          }}{{/type:has_adapter?}}{{!
+          }}{{/if (not type:has_adapter?)}}{{!
         }}{{/field:type}};
         p.write_field_end();{{!
         }}{{/function:args}}

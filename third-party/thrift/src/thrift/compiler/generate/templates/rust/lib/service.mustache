@@ -649,10 +649,10 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                     {{/if function:sink_has_first_response?}}{{/if function:bidirectional_stream?}}
                     {{#if (not function:bidirectional_stream?)}}{{#if (not function:sink?)}}{{#if (not function:stream?)}}
                     ::fbthrift::Serialize::rs_thrift_write({{#function:return_type}}{{!
-                        }}{{#type:has_adapter?}}{{!
-                            }}&{{> lib/adapter/qualified}}::to_thrift_field::<::fbthrift::metadata::NoThriftAnnotations>(_success, 0){{!
-                        }}{{/type:has_adapter?}}{{!
-                        }}{{^type:has_adapter?}}_success{{/type:has_adapter?}}{{!
+                        }}{{#if type:has_adapter?}}{{!
+                            }}&{{type:adapter_qualified}}::to_thrift_field::<::fbthrift::metadata::NoThriftAnnotations>(_success, 0){{!
+                        }}{{/if type:has_adapter?}}{{!
+                        }}{{#if (not type:has_adapter?)}}_success{{/if (not type:has_adapter?)}}{{!
                     }}{{/function:return_type}}, p);
                     {{/if (not function:stream?)}}{{/if (not function:sink?)}}
                     {{#if function:stream?}}{{#if function:stream_has_first_response?}}

@@ -32,6 +32,8 @@ using namespace std;
 
 namespace apache::thrift::compiler {
 
+namespace {
+
 /**
  * JSON code generator.
  */
@@ -858,6 +860,8 @@ void t_json_generator::print_source_range(const source_range& range) {
   indent_down();
   indent(f_out_) << "}" << endl;
 }
+
+} // namespace
 
 THRIFT_REGISTER_GENERATOR(
     json,

@@ -410,21 +410,272 @@ bool simplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool psimplify(Env& env, const store& inst, Vlabel b, size_t i) {
-  return simplify(env, inst, b, i);
+constexpr int64_t kSimpleUpdateMin = -256;
+constexpr int64_t kSimpleUpdateMax = 255;
+
+bool validUpdateOffset(int64_t offset, int laneSize, int lanes) {
+  if (lanes > 1) {
+    if (laneSize <= 0 || (offset % laneSize) != 0) return false;
+    auto const scaled = offset / laneSize;
+    return scaled >= -64 && scaled <= 63;
+  }
+  return offset >= kSimpleUpdateMin && offset <= kSimpleUpdateMax;
 }
 
-bool psimplify(Env& env, const storel& inst, Vlabel b, size_t i) {
-  return simplify(env, inst, b, i);
+struct UpdateMatch {
+  size_t index;
+  int64_t offset;
+};
+
+Optional<UpdateMatch> matchPreUpdate(Env& env,
+                                     Vlabel b,
+                                     size_t i,
+                                     Vreg64 base) {
+  if (i == 0) return {};
+  auto const idx = i - 1;
+  auto const& inst = env.unit.blocks[b].code[idx];
+  int64_t offset;
+  switch (inst.op) {
+    case Vinstr::addqi: {
+      auto const& add = inst.addqi_;
+      if (add.d != base || add.s1 != base) return {};
+      if (add.sf.isValid() && env.use_counts[add.sf]) return {};
+      offset = add.s0.l();
+      break;
+    }
+    case Vinstr::lea: {
+      auto const& lea = inst.lea_;
+      if (lea.d != base || lea.s.base != base) return {};
+      if (lea.s.index.isValid()) return {};
+      offset = lea.s.disp;
+      break;
+    }
+    case Vinstr::subqi: {
+      auto const& sub = inst.subqi_;
+      if (sub.d != base || sub.s1 != base) return {};
+      if (sub.sf.isValid() && env.use_counts[sub.sf]) return {};
+      offset = -sub.s0.l();
+      break;
+    }
+    default:
+      return {};
+  }
+  return UpdateMatch{idx, offset};
 }
 
-bool psimplify(Env& env, const load& inst, Vlabel b, size_t i) {
-  return simplify(env, inst, b, i);
+Optional<UpdateMatch> matchPostUpdate(Env& env,
+                                      Vlabel b,
+                                      size_t i,
+                                      Vreg64 base) {
+  auto const& code = env.unit.blocks[b].code;
+  if (i + 1 >= code.size()) return {};
+  auto const idx = i + 1;
+  auto const& inst = code[idx];
+  int64_t offset;
+  switch (inst.op) {
+    case Vinstr::addqi: {
+      auto const& add = inst.addqi_;
+      if (add.d != base || add.s1 != base) return {};
+      if (add.sf.isValid() && env.use_counts[add.sf]) return {};
+      offset = add.s0.l();
+      break;
+    }
+    case Vinstr::lea: {
+      auto const& lea = inst.lea_;
+      if (lea.d != base || lea.s.base != base) return {};
+      if (lea.s.index.isValid()) return {};
+      offset = lea.s.disp;
+      break;
+    }
+    case Vinstr::subqi: {
+      auto const& sub = inst.subqi_;
+      if (sub.d != base || sub.s1 != base) return {};
+      if (sub.sf.isValid() && env.use_counts[sub.sf]) return {};
+      offset = -sub.s0.l();
+      break;
+    }
+    default:
+      return {};
+  }
+  return UpdateMatch{idx, offset};
 }
 
-bool psimplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
-  return simplify(env, inst, b, i);
+template<class Ptr>
+bool isSimpleAddress(const Ptr& ptr, Vreg64 base) {
+  return base.isValid() &&
+         ptr.base == base &&
+         !ptr.index.isValid() &&
+         ptr.disp == 0;
 }
+
+template<class EmitFn>
+bool foldPreUpdateImpl(Env& env,
+                       Vlabel b,
+                       size_t i,
+                       Vreg64 base,
+                       int laneSize,
+                       int lanes,
+                       EmitFn emitFn) {
+  auto const match = matchPreUpdate(env, b, i, base);
+  if (!match) return false;
+  if (!validUpdateOffset(match->offset, laneSize, lanes)) return false;
+  auto const offset = match->offset;
+  return simplify_impl(env, b, match->index, [&] (Vout& v) {
+    emitFn(v, offset);
+    return 2;
+  });
+}
+
+template<class EmitFn>
+bool foldPostUpdateImpl(Env& env,
+                        Vlabel b,
+                        size_t i,
+                        Vreg64 base,
+                        int laneSize,
+                        int lanes,
+                        EmitFn emitFn) {
+  auto const match = matchPostUpdate(env, b, i, base);
+  if (!match) return false;
+  if (!validUpdateOffset(match->offset, laneSize, lanes)) return false;
+  auto const offset = match->offset;
+  assertx(match->index == i + 1);
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    emitFn(v, offset);
+    return 2;
+  });
+}
+
+#define DEFINE_STORE_UPDATE_SIMPLIFY(name, pre, post, reg, size, ptr_field)    \
+  static bool fold_pre_##name(Env& env, const name& inst, Vlabel b, size_t i) {\
+    auto const& addr = inst.ptr_field;                                         \
+    auto const base = addr.base;                                               \
+    if (!isSimpleAddress(addr, base)) return false;                            \
+    return foldPreUpdateImpl(env, b, i, base, size, 1,                         \
+      [&](Vout& v, int64_t off) {                                              \
+        v << pre{Immed(static_cast<int32_t>(off)), base, base, inst.s};        \
+      });                                                                      \
+  }                                                                            \
+  static bool fold_post_##name(Env& env, const name& inst, Vlabel b, size_t i) {\
+    auto const& addr = inst.ptr_field;                                         \
+    auto const base = addr.base;                                               \
+    if (!isSimpleAddress(addr, base)) return false;                            \
+    return foldPostUpdateImpl(env, b, i, base, size, 1,                        \
+      [&](Vout& v, int64_t off) {                                              \
+        v << post{Immed(static_cast<int32_t>(off)), base, base, inst.s};       \
+      });                                                                      \
+  }
+
+VASM_STORE_UPDATE_SINGLE_LIST(DEFINE_STORE_UPDATE_SIMPLIFY)
+#undef DEFINE_STORE_UPDATE_SIMPLIFY
+
+#define DEFINE_STORE_PAIR_UPDATE_SIMPLIFY(name, pre, post, reg, size, lanes, ptr_field) \
+  static bool fold_pre_##name(Env& env, const name& inst, Vlabel b, size_t i) {    \
+    auto const& addr = inst.ptr_field;                                            \
+    auto const base = addr.base;                                                  \
+    if (!isSimpleAddress(addr, base)) return false;                               \
+    return foldPreUpdateImpl(env, b, i, base, size, lanes,                        \
+      [&](Vout& v, int64_t off) {                                                 \
+        v << pre{Immed(static_cast<int32_t>(off)), base, base, inst.s0, inst.s1}; \
+      });                                                                         \
+  }                                                                               \
+  static bool fold_post_##name(Env& env, const name& inst, Vlabel b, size_t i) {  \
+    auto const& addr = inst.ptr_field;                                            \
+    auto const base = addr.base;                                                  \
+    if (!isSimpleAddress(addr, base)) return false;                               \
+    return foldPostUpdateImpl(env, b, i, base, size, lanes,                       \
+      [&](Vout& v, int64_t off) {                                                 \
+        v << post{Immed(static_cast<int32_t>(off)), base, base, inst.s0, inst.s1};\
+      });                                                                         \
+  }
+
+VASM_STORE_UPDATE_PAIR_LIST(DEFINE_STORE_PAIR_UPDATE_SIMPLIFY)
+#undef DEFINE_STORE_PAIR_UPDATE_SIMPLIFY
+
+#define DEFINE_LOAD_UPDATE_SIMPLIFY(name, pre, post, reg, size, ptr_field)      \
+  static bool fold_pre_##name(Env& env, const name& inst, Vlabel b, size_t i) { \
+    auto const& addr = inst.ptr_field;                                         \
+    auto const base = addr.base;                                               \
+    if (!isSimpleAddress(addr, base)) return false;                            \
+    return foldPreUpdateImpl(env, b, i, base, size, 1,                         \
+      [&](Vout& v, int64_t off) {                                              \
+        v << pre{Immed(static_cast<int32_t>(off)), base, base, inst.d};        \
+      });                                                                      \
+  }                                                                            \
+  static bool fold_post_##name(Env& env, const name& inst, Vlabel b, size_t i) {\
+    auto const& addr = inst.ptr_field;                                         \
+    auto const base = addr.base;                                               \
+    if (!isSimpleAddress(addr, base)) return false;                            \
+    return foldPostUpdateImpl(env, b, i, base, size, 1,                        \
+      [&](Vout& v, int64_t off) {                                              \
+        v << post{Immed(static_cast<int32_t>(off)), base, base, inst.d};       \
+      });                                                                      \
+  }
+
+VASM_LOAD_UPDATE_SINGLE_LIST(DEFINE_LOAD_UPDATE_SIMPLIFY)
+#undef DEFINE_LOAD_UPDATE_SIMPLIFY
+
+#define DEFINE_LOAD_PAIR_UPDATE_SIMPLIFY(name, pre, post, reg, size, lanes, ptr_field) \
+  static bool fold_pre_##name(Env& env, const name& inst, Vlabel b, size_t i) {  \
+    auto const& addr = inst.ptr_field;                                         \
+    auto const base = addr.base;                                               \
+    if (!isSimpleAddress(addr, base)) return false;                            \
+    return foldPreUpdateImpl(env, b, i, base, size, lanes,                     \
+      [&](Vout& v, int64_t off) {                                              \
+        v << pre{Immed(static_cast<int32_t>(off)), base, base, inst.d0, inst.d1};\
+      });                                                                      \
+  }                                                                            \
+  static bool fold_post_##name(Env& env, const name& inst, Vlabel b, size_t i) {\
+    auto const& addr = inst.ptr_field;                                         \
+    auto const base = addr.base;                                               \
+    if (!isSimpleAddress(addr, base)) return false;                            \
+    return foldPostUpdateImpl(env, b, i, base, size, lanes,                    \
+      [&](Vout& v, int64_t off) {                                              \
+        v << post{Immed(static_cast<int32_t>(off)), base, base, inst.d0, inst.d1};\
+      });                                                                      \
+  }
+
+VASM_LOAD_UPDATE_PAIR_LIST(DEFINE_LOAD_PAIR_UPDATE_SIMPLIFY)
+#undef DEFINE_LOAD_PAIR_UPDATE_SIMPLIFY
+
+#define DEFINE_STORE_PS(name, pre, post, reg, size, ptr_field)                \
+bool psimplify(Env& env, const name& inst, Vlabel b, size_t i) {              \
+  if (fold_pre_##name(env, inst, b, i)) return true;                          \
+  if (fold_post_##name(env, inst, b, i)) return true;                         \
+  return simplify(env, inst, b, i);                                           \
+}
+
+VASM_STORE_UPDATE_SINGLE_LIST(DEFINE_STORE_PS)
+#undef DEFINE_STORE_PS
+
+#define DEFINE_STORE_PAIR_PS(name, pre, post, reg, size, lanes, ptr_field)    \
+bool psimplify(Env& env, const name& inst, Vlabel b, size_t i) {              \
+  if (fold_pre_##name(env, inst, b, i)) return true;                          \
+  if (fold_post_##name(env, inst, b, i)) return true;                         \
+  return simplify(env, inst, b, i);                                           \
+}
+
+VASM_STORE_UPDATE_PAIR_LIST(DEFINE_STORE_PAIR_PS)
+#undef DEFINE_STORE_PAIR_PS
+
+#define DEFINE_LOAD_PS(name, pre, post, reg, size, ptr_field)                 \
+bool psimplify(Env& env, const name& inst, Vlabel b, size_t i) {              \
+  if (fold_pre_##name(env, inst, b, i)) return true;                          \
+  if (fold_post_##name(env, inst, b, i)) return true;                         \
+  return simplify(env, inst, b, i);                                           \
+}
+
+VASM_LOAD_UPDATE_SINGLE_LIST(DEFINE_LOAD_PS)
+#undef DEFINE_LOAD_PS
+
+#define DEFINE_LOAD_PAIR_PS(name, pre, post, reg, size, lanes, ptr_field)     \
+bool psimplify(Env& env, const name& inst, Vlabel b, size_t i) {              \
+  if (fold_pre_##name(env, inst, b, i)) return true;                          \
+  if (fold_post_##name(env, inst, b, i)) return true;                         \
+  return simplify(env, inst, b, i);                                           \
+}
+
+VASM_LOAD_UPDATE_PAIR_LIST(DEFINE_LOAD_PAIR_PS)
+#undef DEFINE_LOAD_PAIR_PS
 
 ///////////////////////////////////////////////////////////////////////////////
 

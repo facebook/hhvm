@@ -215,8 +215,6 @@ class HTTP2PriorityQueue : public HTTP2PriorityQueueBase {
   void updateEnqueuedWeight();
 
  private:
-  using link_mode = boost::intrusive::link_mode<boost::intrusive::auto_unlink>;
-
   class Node
       : public BaseNode
       , public folly::HHWheelTimer::Callback {

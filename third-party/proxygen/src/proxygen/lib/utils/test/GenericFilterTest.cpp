@@ -20,7 +20,7 @@ using std::unique_ptr;
 
 namespace detail {
 
-// This is defined in boost 1.53, but we only have 1.51 so far
+// Helper to get a raw pointer from a unique_ptr
 
 template <typename T>
 T* get_pointer(const unique_ptr<T>& ptr) {

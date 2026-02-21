@@ -697,7 +697,7 @@ void HTTPMessage::splitNameValuePieces(
 }
 
 StringPiece HTTPMessage::trim(StringPiece sp) {
-  // TODO: use a library function from boost?
+  // TODO: use a library trim function?
   for (; !sp.empty() && sp.front() == ' '; sp.pop_front()) {
   }
   for (; !sp.empty() && sp.back() == ' '; sp.pop_back()) {

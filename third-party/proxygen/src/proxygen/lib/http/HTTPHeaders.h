@@ -209,7 +209,7 @@ class HTTPHeaders {
    *     hdrs.removeByPredicate([&] (HTTPHeaderCode code,
    *                                 const string& header,
    *                                 const string& val) {
-   *       return boost::regex_match(header, "^X-Fb-.*");
+   *       return std::regex_match(header, std::regex("^X-Fb-.*"));
    *     });
    *
    * return true only if one or more headers are removed.

@@ -24,7 +24,7 @@
     }}{{#if struct:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/if struct:serde?}}{{!
     }}{{#if program:valuable?}}, ::valuable::Valuable{{/if program:valuable?}}{{!
     }}{{#if struct:exception?}}{{#if struct:union?}}, ::thiserror::Error{{/if struct:union?}}{{/if struct:exception?}}{{!
-    }}{{#struct:derive}}, {{.}}{{/struct:derive}}{{!
+    }}{{#if (not (string.empty? struct:derive))}}, {{struct:derive}}{{/if (not (string.empty? struct:derive))}}{{!
 }})]
 {{#if struct:docs?}}
 #[doc = {{struct:docs}}]

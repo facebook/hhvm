@@ -21,7 +21,7 @@
 {{/if enum:docs?}}
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash{{!
     }}{{#if enum:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/if enum:serde?}}{{!
-    }}{{#if program:valuable?}}, ::valuable::Valuable{{/if program:valuable?}}{{#enum:derive}}, {{.}}{{/enum:derive}}{{!
+    }}{{#if program:valuable?}}, ::valuable::Valuable{{/if program:valuable?}}{{#if (not (string.empty? enum:derive))}}, {{enum:derive}}{{/if (not (string.empty? enum:derive))}}{{!
 }})]
 pub struct {{enum:rust_name}}(pub ::std::primitive::i32);
 

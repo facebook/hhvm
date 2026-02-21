@@ -319,9 +319,9 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             P: ::fbthrift::ProtocolReader,
         {
             static RETURNS: &[::fbthrift::Field] = &[
-                {{#function:returns_by_name}}
-                {{.}},
-                {{/function:returns_by_name}}
+                {{#each function:returns_by_name as |field|}}
+                {{field}},
+                {{/each}}
             ];
             let _ = p.read_struct_begin(|_| ())?;
             let mut once = false;

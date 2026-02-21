@@ -350,6 +350,33 @@ const t_const* find_structured_service_exn_annotation(const t_named& node) {
   return node.find_structured_annotation_or_null(kRustServiceExnUri);
 }
 
+// Used to create the part contained within the parentheses of the derived
+// string "#[derive(Debug, Clone, Copy, PartialEq, Default)]" for structs and
+// enums based on annotations within the thrift file
+std::string compute_derive_string(
+    const t_named& node, const rust_codegen_options& options) {
+  if (auto annotation = find_structured_derive_annotation(node)) {
+    std::string package = get_types_import_name(annotation->program(), options);
+    std::string ret;
+    std::string delimiter;
+    for (const auto& item : annotation->value()->get_map()) {
+      if (item.first->get_string() == "derives") {
+        for (const t_const_value* val : item.second->get_list()) {
+          auto str_val = val->get_string();
+          if (!package.empty() && str_val.starts_with(kRustCratePrefix)) {
+            str_val = package.append("::").append(
+                str_val.substr(kRustCratePrefix.length()));
+          }
+          ret = ret.append(delimiter).append(str_val);
+          delimiter = ", ";
+        }
+      }
+    }
+    return ret;
+  }
+  return std::string();
+}
+
 bool node_has_adapter(const t_named& node) {
   return find_structured_adapter_annotation(node) != nullptr;
 }
@@ -669,36 +696,7 @@ class t_mstch_rust_generator : public t_mstch_generator {
       return to_array(variants, proto.of<t_enum_value>());
     });
     def.property("derive", [this](const t_enum& self) {
-      if (auto annotation = find_structured_derive_annotation(self)) {
-        // Always replace `crate::` with the package name of where this
-        // annotation originated to support derives applied with
-        // `@scope.Transitive`. If the annotation originates from the same
-        // module, this will just return `crate::` anyways to be a no-op.
-        std::string package =
-            get_types_import_name(annotation->program(), options_);
-
-        std::string ret;
-        std::string delimiter;
-
-        for (const auto& item : annotation->value()->get_map()) {
-          if (item.first->get_string() == "derives") {
-            for (const t_const_value* val : item.second->get_list()) {
-              auto str_val = val->get_string();
-
-              if (!package.empty() && str_val.starts_with(kRustCratePrefix)) {
-                str_val =
-                    package + "::" + str_val.substr(kRustCratePrefix.length());
-              }
-
-              ret = ret + delimiter + str_val;
-              delimiter = ", ";
-            }
-          }
-        }
-
-        return ret;
-      }
-      return std::string();
+      return compute_derive_string(self, options_);
     });
     return std::move(def).make();
   }
@@ -883,27 +881,7 @@ class t_mstch_rust_generator : public t_mstch_generator {
       return self.has_structured_annotation(kRustExhaustiveUri);
     });
     def.property("derive", [this](const t_structured& self) {
-      if (auto annotation = find_structured_derive_annotation(self)) {
-        std::string package =
-            get_types_import_name(annotation->program(), options_);
-        std::string ret;
-        std::string delimiter;
-        for (const auto& item : annotation->value()->get_map()) {
-          if (item.first->get_string() == "derives") {
-            for (const t_const_value* val : item.second->get_list()) {
-              auto str_val = val->get_string();
-              if (!package.empty() && str_val.starts_with(kRustCratePrefix)) {
-                str_val =
-                    package + "::" + str_val.substr(kRustCratePrefix.length());
-              }
-              ret = ret + delimiter + str_val;
-              delimiter = ", ";
-            }
-          }
-        }
-        return ret;
-      }
-      return std::string();
+      return compute_derive_string(self, options_);
     });
     def.property("has_exception_message?", [](const t_structured& self) {
       if (const auto* exc = dynamic_cast<const t_exception*>(&self)) {

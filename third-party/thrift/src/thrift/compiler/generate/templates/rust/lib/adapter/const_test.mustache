@@ -19,12 +19,12 @@
 /// These are here to ensure adapted consts do not panic with `from_thrift`.
 #[cfg(test)]
 mod tests {
-    {{#program:consts_for_test}}
+    {{#each program:consts_for_test as |name|}}
     #[test]
-    fn test_const_{{.}}_force_does_not_panic() {
-        let _ = ::std::sync::LazyLock::force(&super::{{.}});
+    fn test_const_{{name}}_force_does_not_panic() {
+        let _ = ::std::sync::LazyLock::force(&super::{{name}});
     }
-    {{/program:consts_for_test}}
+    {{/each}}
 }
 
 // This is here to ensure you enable unittests on your Thrift library.

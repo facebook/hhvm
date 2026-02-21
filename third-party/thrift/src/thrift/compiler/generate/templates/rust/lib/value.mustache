@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}{{#value:underlying_type}}{{!
-}}{{#value:newtype?}}{{!
+}}{{#if value:newtype?}}{{!
     }}{{type:package}}::{{type:rust_name}}({{!
         }}{{#value:underlying_type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
         }}{{> lib/adapter/qualified}}::from_thrift({{!
@@ -25,24 +25,23 @@
         }}).expect("constant Thrift value should adapt without error"){{!
         }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:underlying_type}}{{!
     }}){{!
-}}{{/value:newtype?}}{{!
-}}{{#value:bool?}}{{value:bool_value}}{{/value:bool?}}{{!
-}}{{#value:integer?}}{{value:integer_value}}{{/value:integer?}}{{!
-}}{{#value:floatingPoint?}}{{value:floatingPointValue}}{{/value:floatingPoint?}}{{!
-}}{{#value:string?}}{{!
-    }}{{#value:empty?}}::std::string::String::new(){{/value:empty?}}{{!
-    }}{{^value:empty?}}{{value:quoted}}.to_owned(){{/value:empty?}}{{!
-}}{{/value:string?}}{{!
-}}{{#value:binary?}}{{!
-    }}{{#value:empty?}}{{!
+}}{{/if value:newtype?}}{{!
+}}{{#if value:bool?}}{{value:bool_value}}{{/if value:bool?}}{{!
+}}{{#if value:integer?}}{{value:integer_value}}{{/if value:integer?}}{{!
+}}{{#if value:floatingPoint?}}{{value:floatingPointValue}}{{/if value:floatingPoint?}}{{!
+}}{{#if value:string?}}{{!
+    }}{{#if value:empty?}}::std::string::String::new(){{!
+    }}{{#else}}{{value:quoted}}.to_owned(){{/if value:empty?}}{{!
+}}{{/if value:string?}}{{!
+}}{{#if value:binary?}}{{!
+    }}{{#if value:empty?}}{{!
         }}{{#if (not (string.empty? type:rust))}}<::{{type:rust}}>::new(){{!
         }}{{#else}}::std::vec::Vec::new(){{/if (not (string.empty? type:rust))}}{{!
-    }}{{/value:empty?}}{{!
-    }}{{^value:empty?}}{{value:quoted}}.as_bytes().into(){{/value:empty?}}{{!
-}}{{/value:binary?}}{{!
-}}{{#value:list?}}{{!
-    }}{{#value:empty?}}::std::vec::Vec::new(){{/value:empty?}}{{!
-    }}{{^value:empty?}}{{!
+    }}{{#else}}{{value:quoted}}.as_bytes().into(){{/if value:empty?}}{{!
+}}{{/if value:binary?}}{{!
+}}{{#if value:list?}}{{!
+    }}{{#if value:empty?}}::std::vec::Vec::new(){{/if value:empty?}}{{!
+    }}{{#if (not value:empty?)}}{{!
         }}{
             {{value:indent}}let mut list = ::std::vec::Vec::new();
             {{#value:list_elements}}
@@ -59,15 +58,14 @@
             {{/value:list_elements}}
             {{value:indent}}list
         {{value:indent}}}{{!
-    }}{{/value:empty?}}{{!
-}}{{/value:list?}}{{!
-}}{{#value:set?}}{{!
-    }}{{#value:empty?}}{{!
+    }}{{/if (not value:empty?)}}{{!
+}}{{/if value:list?}}{{!
+}}{{#if value:set?}}{{!
+    }}{{#if value:empty?}}{{!
         }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
         }}{{#else}}::std::collections::BTreeSet{{/if (not (string.empty? type:rust))}}{{!
         }}::new(){{!
-    }}{{/value:empty?}}{{!
-    }}{{^value:empty?}}{{!
+    }}{{#else}}{{!
         }}{
             {{value:indent}}let mut set = {{!
                 }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
@@ -81,10 +79,9 @@
         }}{{^type:has_adapter?}}{{>lib/type}}{{/type:has_adapter?}}{{!
     }}) {
         {{value:indent}}set.insert({{!
-            }}{{#value:floatingPoint?}}{{!
+            }}{{#if value:floatingPoint?}}{{!
                 }}::fbthrift::export::OrderedFloat({{> lib/value}}){{!
-            }}{{/value:floatingPoint?}}{{!
-            }}{{^value:floatingPoint?}}{{> lib/value}}{{/value:floatingPoint?}}{{!
+            }}{{#else}}{{> lib/value}}{{/if value:floatingPoint?}}{{!
         }});
     {{value:indent}}}
     {{value:indent}}__do_insert(&mut set);
@@ -92,15 +89,14 @@
             {{/value:setMembers}}
             {{value:indent}}set
         {{value:indent}}}{{!
-    }}{{/value:empty?}}{{!
-}}{{/value:set?}}{{!
-}}{{#value:map?}}{{!
-    }}{{#value:empty?}}{{!
+    }}{{/if value:empty?}}{{!
+}}{{/if value:set?}}{{!
+}}{{#if value:map?}}{{!
+    }}{{#if value:empty?}}{{!
         }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
         }}{{#else}}::std::collections::BTreeMap{{/if (not (string.empty? type:rust))}}{{!
         }}::new(){{!
-    }}{{/value:empty?}}{{!
-    }}{{^value:empty?}}{{!
+    }}{{#else}}{{!
         }}{
             {{value:indent}}let mut map = {{!
                 }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
@@ -115,10 +111,9 @@
                 }}) {
                     {{value:indent}}map.insert({{!
                         }}{{#entry:key}}{{!
-                            }}{{#value:floatingPoint?}}{{!
+                            }}{{#if value:floatingPoint?}}{{!
                                 }}::fbthrift::export::OrderedFloat({{> lib/value}}){{!
-                            }}{{/value:floatingPoint?}}{{!
-                            }}{{^value:floatingPoint?}}{{> lib/value}}{{/value:floatingPoint?}}{{!
+                            }}{{#else}}{{> lib/value}}{{/if value:floatingPoint?}}{{!
                         }}{{/entry:key}}, {{!
                         }}{{#entry:value}}{{> lib/value}}{{/entry:value}}{{!
                     }});
@@ -128,9 +123,9 @@
             }}{{/value:mapEntries}}
             {{value:indent}}map
         {{value:indent}}}{{!
-    }}{{/value:empty?}}{{!
-}}{{/value:map?}}{{!
-}}{{#value:struct?}}{{!
+    }}{{/if value:empty?}}{{!
+}}{{/if value:map?}}{{!
+}}{{#if value:struct?}}{{!
     }}{{> lib/type}} {{> lib/block}}{{!
         }}{{#value:structFields}}
             {{value:indent}}{{field:rust_name}}: {{!
@@ -148,16 +143,15 @@
             }}{{/field:explicit_value}}{{!
             }}{{^field:explicit_value}}{{!
                 }}{{#field:default}}{{!
-                    }}{{#field:optional?}}{{!
+                    }}{{#if field:optional?}}{{!
                         }}{{#if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
                             }}{{> lib/fieldvalue}}{{!
                         }}{{#else}}{{!
                             }}::std::option::Option::None{{!
                         }}{{/if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
-                    }}{{/field:optional?}}{{!
-                    }}{{^field:optional?}}{{!
+                    }}{{#else}}{{!
                         }}{{> lib/fieldvalue}}{{!
-                    }}{{/field:optional?}}{{!
+                    }}{{/if field:optional?}}{{!
                 }}{{/field:default}}{{!
                 }}{{^field:default}}{{!
                     }}::std::default::Default::default(){{!
@@ -166,12 +160,12 @@
             }}{{#field:has_adapter?}}, {{field:id}}){{/field:has_adapter?}}{{!
             }},{{!
         }}{{/value:structFields}}{{!
-        }}{{^value:exhaustive?}}
+        }}{{#if (not value:exhaustive?)}}
             {{value:indent}}..::std::default::Default::default(){{!
-        }}{{/value:exhaustive?}}
+        }}{{/if (not value:exhaustive?)}}
         {{value:indent}}}{{!
-}}{{/value:struct?}}{{!
-}}{{#value:union?}}{{!
+}}{{/if value:struct?}}{{!
+}}{{#if value:union?}}{{!
     }}{{#value:unionVariant}}{{!
         }}{{> lib/type}}::{{value:unionVariant}}({{!
             }}{{#value:unionValue}}{{> lib/value}}{{/value:unionValue}}{{!
@@ -180,11 +174,11 @@
     }}{{^value:unionVariant}}{{!
         }}{{> lib/type}}::default(){{!
     }}{{/value:unionVariant}}{{!
-}}{{/value:union?}}{{!
-}}{{#value:enum?}}{{!
+}}{{/if value:union?}}{{!
+}}{{#if value:enum?}}{{!
     }}{{#value:local_type}}{{type:package}}::{{type:rust_name}}{{/value:local_type}}{{!
     }}{{#value:enumVariant}}::{{value:enumVariant}}{{/value:enumVariant}}{{!
     }}{{^value:enumVariant}}({{value:integer_value}}){{/value:enumVariant}}{{!
-}}{{/value:enum?}}{{!
+}}{{/if value:enum?}}{{!
 }}{{/value:underlying_type}}{{!
 }}

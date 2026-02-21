@@ -42,7 +42,7 @@
     }{{!
 
 }}{{#program:nonstandardTypes}}{{!
-    }}{{#type:set?}}
+    }}{{#if type:set?}}
 
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{> lib/rawtype}}>
     where
@@ -98,9 +98,9 @@
             ::std::result::Result::Ok(LocalImpl(set))
         }
     }{{!
-    }}{{/type:set?}}{{!
+    }}{{/if type:set?}}{{!
 
-    }}{{#type:map?}}
+    }}{{#if type:map?}}
 
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{> lib/rawtype}}>
     where
@@ -163,9 +163,9 @@
             ::std::result::Result::Ok(LocalImpl(map))
         }
     }{{!
-    }}{{/type:map?}}{{!
+    }}{{/if type:map?}}{{!
 
-    }}{{#type:binary?}}
+    }}{{#if type:binary?}}
 
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{> lib/rawtype}}>
     where
@@ -198,9 +198,9 @@
             LocalImpl(::std::convert::Into::into(vec))
         }
     }{{!
-    }}{{/type:binary?}}{{!
+    }}{{/if type:binary?}}{{!
 
-    }}{{^typedef:newtype?}}{{#type:i64?}}
+    }}{{#if (not typedef:newtype?)}}{{#if type:i64?}}
 
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{> lib/type}}>
     where
@@ -223,11 +223,11 @@
             ::std::result::Result::Ok(LocalImpl({{> lib/type}}::rs_thrift_read(p)?))
         }
     }{{!
-    }}{{/type:i64?}}{{/typedef:newtype?}}{{!
+    }}{{/if type:i64?}}{{/if (not typedef:newtype?)}}{{!
 }}{{/program:nonstandardTypes}}{{!
 
 }}{{#program:nonstandardFields}}{{#field:type}}{{!
-    }}{{#type:set?}}
+    }}{{#if type:set?}}
 
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{> lib/annfieldtype}}>
     where
@@ -283,9 +283,9 @@
             ::std::result::Result::Ok(LocalImpl(set))
         }
     }{{!
-    }}{{/type:set?}}{{!
+    }}{{/if type:set?}}{{!
 
-    }}{{#type:map?}}
+    }}{{#if type:map?}}
 
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{> lib/annfieldtype}}>
     where
@@ -348,9 +348,9 @@
             ::std::result::Result::Ok(LocalImpl(map))
         }
     }{{!
-    }}{{/type:map?}}{{!
+    }}{{/if type:map?}}{{!
 
-    }}{{#type:binary?}}
+    }}{{#if type:binary?}}
 
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{> lib/annfieldtype}}>
     where
@@ -383,9 +383,9 @@
             LocalImpl(::std::convert::Into::into(vec))
         }
     }{{!
-    }}{{/type:binary?}}{{!
+    }}{{/if type:binary?}}{{!
 
-    }}{{^typedef:newtype?}}{{#type:i64?}}
+    }}{{#if (not typedef:newtype?)}}{{#if type:i64?}}
 
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{> lib/annfieldtype}}>
     where
@@ -409,7 +409,7 @@
         }
     }{{!
 
-    }}{{/type:i64?}}{{/typedef:newtype?}}{{!
+    }}{{/if type:i64?}}{{/if (not typedef:newtype?)}}{{!
 
 }}{{/field:type}}{{/program:nonstandardFields}}
 {{! newline}}

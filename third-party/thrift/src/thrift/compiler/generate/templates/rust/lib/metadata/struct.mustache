@@ -26,7 +26,7 @@
   for now.
 }}
 
-{{^struct:generated?}}
+{{#if (not struct:generated?)}}
 impl ::fbthrift::metadata::ThriftAnnotations for {{struct:rust_name}} {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
         {{! We can't use a match statement as `TypeId::of` must be const, which is blocked by
@@ -91,5 +91,5 @@ impl ::fbthrift::metadata::ThriftAnnotations for {{struct:rust_name}} {
         ::std::option::Option::None
     }
 }
-{{/struct:generated?}}
+{{/if (not struct:generated?)}}
 {{! line break }}

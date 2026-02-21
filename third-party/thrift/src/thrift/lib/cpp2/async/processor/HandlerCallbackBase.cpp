@@ -16,6 +16,7 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Executor.h>
+#include <folly/stop_watch.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 #include <thrift/lib/cpp2/async/AsyncProcessorFactory.h>
@@ -380,6 +381,7 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
     }
   }
 
+  folly::stop_watch<std::chrono::microseconds> totalTimer;
   for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     auto* connectionCtx = reqCtx_->getConnectionContext();
     auto connectionInfo = ServiceInterceptorBase::ConnectionInfo{
@@ -406,6 +408,8 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
       exceptions.emplace_back(i, folly::current_exception());
     }
   }
+  server->getInterceptorMetricCallback().onRequestTotalComplete(
+      totalTimer.elapsed());
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onRequest threw exceptions:\n[{}] {}\n",
@@ -434,6 +438,7 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
       serviceInterceptors = server->getServiceInterceptors();
   std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
 
+  folly::stop_watch<std::chrono::microseconds> totalTimer;
   for (auto i = std::ptrdiff_t(serviceInterceptors.size()) - 1; i >= 0; --i) {
     auto* connectionCtx = reqCtx_->getConnectionContext();
     auto connectionInfo = ServiceInterceptorBase::ConnectionInfo{
@@ -458,6 +463,8 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
       exceptions.emplace_back(i, folly::current_exception());
     }
   }
+  server->getInterceptorMetricCallback().onResponseTotalComplete(
+      totalTimer.elapsed());
 
   if (!exceptions.empty()) {
     std::string message = fmt::format(

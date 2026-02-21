@@ -25,6 +25,7 @@
 #include <folly/io/async/EventBaseLocal.h>
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
 #include <folly/portability/Sockets.h>
+#include <folly/stop_watch.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/security/PSP.h>
@@ -209,29 +210,39 @@ void Cpp2Worker::invokeServiceInterceptorsOnConnectionForHeader(
   bool didServiceInterceptorOnConnectionThrow = false;
 
   // First, invoke onConnectionAttempted for all interceptors
-  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
-    ServiceInterceptorBase::ConnectionInfo connectionInfo{
-        &context,
-        context.getStorageForServiceInterceptorOnConnectionByIndex(i)};
-    try {
-      serviceInterceptors[i]->internal_onConnectionAttempted(
-          std::move(connectionInfo), server_->getInterceptorMetricCallback());
-    } catch (...) {
-      didServiceInterceptorOnConnectionThrow = true;
+  {
+    folly::stop_watch<std::chrono::microseconds> totalTimer;
+    for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
+      ServiceInterceptorBase::ConnectionInfo connectionInfo{
+          &context,
+          context.getStorageForServiceInterceptorOnConnectionByIndex(i)};
+      try {
+        serviceInterceptors[i]->internal_onConnectionAttempted(
+            std::move(connectionInfo), server_->getInterceptorMetricCallback());
+      } catch (...) {
+        didServiceInterceptorOnConnectionThrow = true;
+      }
     }
+    server_->getInterceptorMetricCallback().onConnectionAttemptedTotalComplete(
+        totalTimer.elapsed());
   }
 
   // Then, invoke onConnectionEstablished for all interceptors
-  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
-    ServiceInterceptorBase::ConnectionInfo connectionInfo{
-        &context,
-        context.getStorageForServiceInterceptorOnConnectionByIndex(i)};
-    try {
-      serviceInterceptors[i]->internal_onConnectionEstablished(
-          std::move(connectionInfo), server_->getInterceptorMetricCallback());
-    } catch (...) {
-      didServiceInterceptorOnConnectionThrow = true;
+  {
+    folly::stop_watch<std::chrono::microseconds> totalTimer;
+    for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
+      ServiceInterceptorBase::ConnectionInfo connectionInfo{
+          &context,
+          context.getStorageForServiceInterceptorOnConnectionByIndex(i)};
+      try {
+        serviceInterceptors[i]->internal_onConnectionEstablished(
+            std::move(connectionInfo), server_->getInterceptorMetricCallback());
+      } catch (...) {
+        didServiceInterceptorOnConnectionThrow = true;
+      }
     }
+    server_->getInterceptorMetricCallback().onConnectionTotalComplete(
+        totalTimer.elapsed());
   }
 
   // Unfortunately, header transport does not have a way to provide an error

@@ -27,6 +27,7 @@
 #include <folly/CPortability.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/coro/Task.h>
+#include <folly/stop_watch.h>
 #include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorBase.h>
@@ -96,6 +97,7 @@ class StreamInterceptorContext {
    * Called when a stream is established.
    */
   folly::coro::Task<void> invokeOnStreamBegin() {
+    folly::stop_watch<std::chrono::microseconds> totalTimer;
     for (std::size_t i = 0; i < interceptors_.size(); ++i) {
       auto streamInfo = ServiceInterceptorBase::StreamInfo{
           .streamId = streamId_,
@@ -108,6 +110,7 @@ class StreamInterceptorContext {
       co_await interceptors_[i]->internal_onStreamBegin(
           streamInfo, metricCallback_);
     }
+    metricCallback_.onStreamBeginTotalComplete(totalTimer.elapsed());
   }
 
   /**
@@ -121,6 +124,7 @@ class StreamInterceptorContext {
     const auto sequenceNumber =
         sequenceNumber_.fetch_add(1, std::memory_order_seq_cst);
 
+    folly::stop_watch<std::chrono::microseconds> totalTimer;
     for (std::size_t i = 0; i < interceptors_.size(); ++i) {
       auto payloadInfo = ServiceInterceptorBase::StreamPayloadInfo{
           .streamId = streamId_,
@@ -132,6 +136,7 @@ class StreamInterceptorContext {
       co_await interceptors_[i]->internal_onStreamPayload(
           payloadInfo, metricCallback_);
     }
+    metricCallback_.onStreamPayloadTotalComplete(totalTimer.elapsed());
   }
 
   /**
@@ -144,6 +149,7 @@ class StreamInterceptorContext {
       details::STREAM_ENDING_TYPES reason,
       folly::exception_wrapper error = {}) {
     // Call in reverse order (LIFO pattern like onResponse)
+    folly::stop_watch<std::chrono::microseconds> totalTimer;
     for (auto i = std::ptrdiff_t(interceptors_.size()) - 1; i >= 0; --i) {
       auto endInfo = ServiceInterceptorBase::StreamEndInfo{
           .streamId = streamId_,
@@ -155,6 +161,7 @@ class StreamInterceptorContext {
 
       co_await interceptors_[i]->internal_onStreamEnd(endInfo, metricCallback_);
     }
+    metricCallback_.onStreamEndTotalComplete(totalTimer.elapsed());
   }
 
  private:

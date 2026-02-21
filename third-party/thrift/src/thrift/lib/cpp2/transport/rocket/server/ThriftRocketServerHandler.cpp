@@ -26,6 +26,7 @@
 #include <folly/Overload.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
+#include <folly/stop_watch.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
@@ -1098,6 +1099,7 @@ void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnectionAttempted(
   const auto& serviceInterceptors = server->getServiceInterceptors();
   std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
 
+  folly::stop_watch<std::chrono::microseconds> totalTimer;
   for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &connContext_,
@@ -1109,6 +1111,8 @@ void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnectionAttempted(
       exceptions.emplace_back(i, folly::current_exception());
     }
   }
+  server->getInterceptorMetricCallback().onConnectionAttemptedTotalComplete(
+      totalTimer.elapsed());
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onConnectionAttempted threw exceptions:\n[{}] {}\n",
@@ -1136,6 +1140,7 @@ void ThriftRocketServerHandler::
   std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
   didExecuteServiceInterceptorsOnConnection_ = true;
 
+  folly::stop_watch<std::chrono::microseconds> totalTimer;
   for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &connContext_,
@@ -1147,6 +1152,8 @@ void ThriftRocketServerHandler::
       exceptions.emplace_back(i, folly::current_exception());
     }
   }
+  server->getInterceptorMetricCallback().onConnectionTotalComplete(
+      totalTimer.elapsed());
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onConnectionEstablished threw exceptions:\n[{}] {}\n",
@@ -1171,6 +1178,7 @@ void ThriftRocketServerHandler::
   if (didExecuteServiceInterceptorsOnConnection_) {
     auto* server = worker_->getServer();
     const auto& serviceInterceptors = server->getServiceInterceptors();
+    folly::stop_watch<std::chrono::microseconds> totalTimer;
     for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
       ServiceInterceptorBase::ConnectionInfo connectionInfo{
           &connContext_,
@@ -1179,6 +1187,8 @@ void ThriftRocketServerHandler::
       serviceInterceptors[i]->internal_onConnectionClosed(
           connectionInfo, server->getInterceptorMetricCallback());
     }
+    server->getInterceptorMetricCallback().onConnectionClosedTotalComplete(
+        totalTimer.elapsed());
   }
 #endif // FOLLY_HAS_COROUTINES
 }

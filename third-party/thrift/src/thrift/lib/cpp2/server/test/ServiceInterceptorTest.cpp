@@ -502,6 +502,46 @@ class MockInterceptorMetricCallback : public InterceptorMetricCallback {
       (const ServiceInterceptorQualifiedName& qualifiedName,
        std::chrono::microseconds duration),
       (override));
+  MOCK_METHOD(
+      void,
+      onRequestTotalComplete,
+      (std::chrono::microseconds duration),
+      (override));
+  MOCK_METHOD(
+      void,
+      onResponseTotalComplete,
+      (std::chrono::microseconds duration),
+      (override));
+  MOCK_METHOD(
+      void,
+      onConnectionAttemptedTotalComplete,
+      (std::chrono::microseconds duration),
+      (override));
+  MOCK_METHOD(
+      void,
+      onConnectionTotalComplete,
+      (std::chrono::microseconds duration),
+      (override));
+  MOCK_METHOD(
+      void,
+      onConnectionClosedTotalComplete,
+      (std::chrono::microseconds duration),
+      (override));
+  MOCK_METHOD(
+      void,
+      onStreamBeginTotalComplete,
+      (std::chrono::microseconds duration),
+      (override));
+  MOCK_METHOD(
+      void,
+      onStreamPayloadTotalComplete,
+      (std::chrono::microseconds duration),
+      (override));
+  MOCK_METHOD(
+      void,
+      onStreamEndTotalComplete,
+      (std::chrono::microseconds duration),
+      (override));
 };
 
 } // namespace
@@ -534,6 +574,21 @@ CO_TEST_P(ServiceInterceptorTestP, BasicTM) {
       .WillRepeatedly(Return());
   EXPECT_CALL(*interceptorMetricCallback, onResponseComplete(_, _))
       .Times(2)
+      .WillRepeatedly(Return());
+  EXPECT_CALL(*interceptorMetricCallback, onRequestTotalComplete(_))
+      .Times(2)
+      .WillRepeatedly(Return());
+  EXPECT_CALL(*interceptorMetricCallback, onResponseTotalComplete(_))
+      .Times(2)
+      .WillRepeatedly(Return());
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionAttemptedTotalComplete(_))
+      .Times(callsIfNotHttp2(2))
+      .WillRepeatedly(Return());
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionTotalComplete(_))
+      .Times(callsIfNotHttp2(2))
+      .WillRepeatedly(Return());
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionClosedTotalComplete(_))
+      .Times(callsIfNotHttp2(2))
       .WillRepeatedly(Return());
 
   auto client =
@@ -1631,6 +1686,24 @@ CO_TEST_P(ServiceInterceptorTestP, StreamingInterceptorMetrics) {
   EXPECT_CALL(*interceptorMetricCallback, onConnectionComplete(_, _))
       .Times(testing::AnyNumber());
   EXPECT_CALL(*interceptorMetricCallback, onConnectionClosedComplete(_, _))
+      .Times(testing::AnyNumber());
+
+  // Expect total metrics to be called
+  EXPECT_CALL(*interceptorMetricCallback, onRequestTotalComplete(_))
+      .Times(testing::AtLeast(1));
+  EXPECT_CALL(*interceptorMetricCallback, onResponseTotalComplete(_))
+      .Times(testing::AtLeast(1));
+  EXPECT_CALL(*interceptorMetricCallback, onStreamBeginTotalComplete(_))
+      .Times(testing::AtLeast(1));
+  EXPECT_CALL(*interceptorMetricCallback, onStreamPayloadTotalComplete(_))
+      .Times(testing::AtLeast(1));
+  EXPECT_CALL(*interceptorMetricCallback, onStreamEndTotalComplete(_))
+      .Times(testing::AtLeast(1));
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionAttemptedTotalComplete(_))
+      .Times(testing::AnyNumber());
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionTotalComplete(_))
+      .Times(testing::AnyNumber());
+  EXPECT_CALL(*interceptorMetricCallback, onConnectionClosedTotalComplete(_))
       .Times(testing::AnyNumber());
 
   auto client =

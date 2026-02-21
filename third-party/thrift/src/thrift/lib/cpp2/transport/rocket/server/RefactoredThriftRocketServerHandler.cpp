@@ -20,6 +20,7 @@
 #include <utility>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/stop_watch.h>
 
 #include <fmt/core.h>
 #include <folly/ExceptionString.h>
@@ -235,6 +236,7 @@ void RefactoredThriftRocketServerHandler::
   const auto& serviceInterceptors = server->getServiceInterceptors();
   std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
 
+  folly::stop_watch<std::chrono::microseconds> totalTimer;
   for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &connContext_,
@@ -246,6 +248,8 @@ void RefactoredThriftRocketServerHandler::
       exceptions.emplace_back(i, folly::current_exception());
     }
   }
+  server->getInterceptorMetricCallback().onConnectionAttemptedTotalComplete(
+      totalTimer.elapsed());
   if (!exceptions.empty()) {
     auto message = formatServiceInterceptorExceptions(
         "onConnectionAttempted", exceptions, serviceInterceptors);
@@ -265,6 +269,7 @@ void RefactoredThriftRocketServerHandler::
   std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
   didExecuteServiceInterceptorsOnConnection_ = true;
 
+  folly::stop_watch<std::chrono::microseconds> totalTimer;
   for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &connContext_,
@@ -276,6 +281,8 @@ void RefactoredThriftRocketServerHandler::
       exceptions.emplace_back(i, folly::current_exception());
     }
   }
+  server->getInterceptorMetricCallback().onConnectionTotalComplete(
+      totalTimer.elapsed());
   if (!exceptions.empty()) {
     auto message = formatServiceInterceptorExceptions(
         "onConnectionEstablished", exceptions, serviceInterceptors);
@@ -295,6 +302,7 @@ void RefactoredThriftRocketServerHandler::
 
   auto* server = worker_->getServer();
   const auto& serviceInterceptors = server->getServiceInterceptors();
+  folly::stop_watch<std::chrono::microseconds> totalTimer;
   for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &connContext_,
@@ -303,6 +311,8 @@ void RefactoredThriftRocketServerHandler::
     serviceInterceptors[i]->internal_onConnectionClosed(
         connectionInfo, server->getInterceptorMetricCallback());
   }
+  server->getInterceptorMetricCallback().onConnectionClosedTotalComplete(
+      totalTimer.elapsed());
 #endif // FOLLY_HAS_COROUTINES
 }
 

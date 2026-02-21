@@ -19,6 +19,7 @@
 #include <algorithm>
 
 #include <folly/Overload.h>
+#include <folly/stop_watch.h>
 
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/Flags.h>
@@ -167,6 +168,7 @@ void Cpp2Connection::invokeServiceInterceptorsOnConnectionClosed() noexcept {
 #if FOLLY_HAS_COROUTINES
   auto* server = worker_->getServer();
   const auto& serviceInterceptors = server->getServiceInterceptors();
+  folly::stop_watch<std::chrono::microseconds> totalTimer;
   for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &context_,
@@ -174,6 +176,8 @@ void Cpp2Connection::invokeServiceInterceptorsOnConnectionClosed() noexcept {
     serviceInterceptors[i]->internal_onConnectionClosed(
         connectionInfo, server->getInterceptorMetricCallback());
   }
+  server->getInterceptorMetricCallback().onConnectionClosedTotalComplete(
+      totalTimer.elapsed());
 #endif // FOLLY_HAS_COROUTINES
 }
 

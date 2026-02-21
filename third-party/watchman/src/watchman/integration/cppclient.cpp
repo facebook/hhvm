@@ -13,8 +13,8 @@
 #include <mutex>
 #include <thread>
 
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/init/Init.h>
+#include <folly/io/FsUtil.h>
 #include <folly/io/async/EventBaseThread.h>
 #include <folly/json/json.h>
 #include <folly/testing/TestUtil.h>

@@ -14,16 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#field:optional?}}::std::option::Option<{{/field:optional?}}{{!
-}}{{#field:box?}}::std::boxed::Box<{{/field:box?}}{{!
-}}{{#field:arc?}}::std::sync::Arc<{{/field:arc?}}{{!
+}}{{#if field:optional?}}::std::option::Option<{{/if field:optional?}}{{!
+}}{{#if field:box?}}::std::boxed::Box<{{/if field:box?}}{{!
+}}{{#if field:arc?}}::std::sync::Arc<{{/if field:arc?}}{{!
 }}{{#field:type}}{{!
-}}{{#field:type_annotation?}}{{> lib/annfieldtype}}{{/field:type_annotation?}}{{!
-}}{{^field:type_annotation?}}{{!
+}}{{#if field:type_annotation?}}{{> lib/annfieldtype}}{{!
+}}{{#else}}{{!
 }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::AdaptedType{{/field:has_adapter?}}{{!
 }}{{^field:has_adapter?}}{{> lib/type}}{{/field:has_adapter?}}{{!
-}}{{/field:type_annotation?}}{{!
+}}{{/if field:type_annotation?}}{{!
 }}{{/field:type}}{{!
-}}{{#field:arc?}}>{{/field:arc?}}{{!
-}}{{#field:box?}}>{{/field:box?}}{{!
-}}{{#field:optional?}}>{{/field:optional?}}
+}}{{#if field:arc?}}>{{/if field:arc?}}{{!
+}}{{#if field:box?}}>{{/if field:box?}}{{!
+}}{{#if field:optional?}}>{{/if field:optional?}}

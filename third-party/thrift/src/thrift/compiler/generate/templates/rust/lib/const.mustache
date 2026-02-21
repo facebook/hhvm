@@ -18,16 +18,17 @@
 
 {{#constant:rust}}
 {{#constant:type}}
-{{#constant:docs?}}
+{{#if constant:docs?}}
 #[doc = {{constant:docs}}]
-{{/constant:docs?}}{{^constant:lazy?}}
+{{/if constant:docs?}}{{#if (not constant:lazy?)}}
 pub const {{constant:rust_name}}{{!
 }}: {{!
-}}{{#type:string?}}&::std::primitive::str = {{value:quoted}}{{/type:string?}}{{!
-}}{{^type:string?}}{{> lib/type}} = {{> lib/value}}{{/type:string?}}{{!
+}}{{#if type:string?}}&::std::primitive::str = {{value:quoted}}{{!
+}}{{#else}}{{> lib/type}} = {{> lib/value}}{{!
+}}{{/if type:string?}}{{!
 }};
-{{/constant:lazy?}}
-{{#constant:lazy?}}
+{{/if (not constant:lazy?)}}
+{{#if constant:lazy?}}
 pub static {{constant:rust_name}}{{!
 }}: ::std::sync::LazyLock<{{!
 }}{{#constant:type}}{{!
@@ -39,6 +40,6 @@ pub static {{constant:rust_name}}{{!
     }}{{> lib/value}}{{!
     }}{{#constant:type}}{{#type:has_adapter?}}).expect("constant Thrift value should adapt without error"){{/type:has_adapter?}}{{/constant:type}}{{!
 }});
-{{/constant:lazy?}}
+{{/if constant:lazy?}}
 {{/constant:type}}
 {{/constant:rust}}

@@ -15,12 +15,11 @@
   limitations under the License.
 
 }}{{#field:type}}{{!
-    }}{{#type:string?}}::std::primitive::str{{/type:string?}}{{!
-    }}{{#type:list?}}{{!
+    }}{{#if type:string?}}::std::primitive::str{{!
+    }}{{#else if type:list?}}{{!
       }}[{{#type:list_elem_type}}{{> lib/type}}{{/type:list_elem_type}}]{{!
-    }}{{/type:list?}}{{!
-    }}{{^type:string?}}{{^type:list?}}{{!
+    }}{{#else}}{{!
       }}{{> lib/type}}{{!
-    }}{{/type:list?}}{{/type:string?}}{{!
+    }}{{/if type:string?}}{{!
 }}{{/field:type}}{{!
 }}

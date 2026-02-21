@@ -14,30 +14,28 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#type:list?}}{{!
+}}{{#if type:list?}}{{!
     }}<{{!
         }}{{#type:list_elem_type}}{{!
             }}{{> lib/type}}{{!
         }}{{/type:list_elem_type}}{{!
     }}>{{!
-}}{{/type:list?}}{{!
-}}{{#type:set?}}{{!
+}}{{#else if type:set?}}{{!
     }}<{{!
         }}{{#type:set_elem_type}}{{!
-            }}{{#type:floating_point?}}::fbthrift::export::OrderedFloat<{{> lib/type}}>{{/type:floating_point?}}{{!
-            }}{{^type:floating_point?}}{{> lib/type}}{{/type:floating_point?}}{{!
+            }}{{#if type:floating_point?}}::fbthrift::export::OrderedFloat<{{> lib/type}}>{{!
+            }}{{#else}}{{> lib/type}}{{/if type:floating_point?}}{{!
         }}{{/type:set_elem_type}}{{!
     }}>{{!
-}}{{/type:set?}}{{!
-}}{{#type:map?}}{{!
+}}{{#else if type:map?}}{{!
     }}<{{!
         }}{{#type:key_type}}{{!
-            }}{{#type:floating_point?}}::fbthrift::export::OrderedFloat<{{> lib/type}}>{{/type:floating_point?}}{{!
-            }}{{^type:floating_point?}}{{> lib/type}}{{/type:floating_point?}}{{!
+            }}{{#if type:floating_point?}}::fbthrift::export::OrderedFloat<{{> lib/type}}>{{!
+            }}{{#else}}{{> lib/type}}{{/if type:floating_point?}}{{!
         }}{{/type:key_type}}, {{!
         }}{{#type:value_type}}{{!
             }}{{> lib/type}}{{!
         }}{{/type:value_type}}{{!
     }}>{{!
-}}{{/type:map?}}{{!
+}}{{/if type:list?}}{{!
 }}

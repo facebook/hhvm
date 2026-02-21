@@ -16,20 +16,20 @@
 
 }}
 
-{{#enum:docs?}}
+{{#if enum:docs?}}
 #[doc = {{enum:docs}}]
-{{/enum:docs?}}
+{{/if enum:docs?}}
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash{{!
-    }}{{#enum:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/enum:serde?}}{{!
-    }}{{#program:valuable?}}, ::valuable::Valuable{{/program:valuable?}}{{#enum:derive}}, {{.}}{{/enum:derive}}{{!
+    }}{{#if enum:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/if enum:serde?}}{{!
+    }}{{#if program:valuable?}}, ::valuable::Valuable{{/if program:valuable?}}{{#enum:derive}}, {{.}}{{/enum:derive}}{{!
 }})]
 pub struct {{enum:rust_name}}(pub ::std::primitive::i32);
 
 impl {{enum:rust_name}} {{> lib/block}}{{!
     }}{{#enum:values}}
-    {{#enum_value:docs?}}
+    {{#if enum_value:docs?}}
     #[doc = {{enum_value:docs}}]
-    {{/enum_value:docs?}}
+    {{/if enum_value:docs?}}
     pub const {{enum_value:rust_name}}: Self = {{!
         }}{{enum:rust_name}}({{enum_value:value}}i32);{{!
     }}{{/enum:values}}
@@ -130,14 +130,14 @@ impl ::std::str::FromStr for {{enum:rust_name}} {
 impl ::fbthrift::GetTType for {{enum:rust_name}} {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
-{{#enum:uri}}
+{{#if (not (string.empty? enum:uri))}}
 
 impl ::fbthrift::GetUri for self::{{enum:rust_name}} {
     fn uri() -> &'static ::std::primitive::str {
         "{{enum:uri}}"
     }
 }
-{{/enum:uri}}
+{{/if (not (string.empty? enum:uri))}}
 
 impl<P> ::fbthrift::Serialize<P> for {{enum:rust_name}}
 where

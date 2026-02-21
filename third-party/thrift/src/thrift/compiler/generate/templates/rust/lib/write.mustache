@@ -14,5 +14,5 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#type:nonstandard?}}{{program:crate}}::r#impl::rs_thrift_write{{/type:nonstandard?}}{{!
-}}{{^type:nonstandard?}}::fbthrift::Serialize::rs_thrift_write{{/type:nonstandard?}}
+}}{{#if type:nonstandard?}}{{program:crate}}::r#impl::rs_thrift_write{{!
+}}{{#else}}::fbthrift::Serialize::rs_thrift_write{{/if type:nonstandard?}}

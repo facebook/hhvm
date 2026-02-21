@@ -14,10 +14,10 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#field:optional?}}::std::option::Option::Some({{/field:optional?}}{{!
-}}{{#field:box?}}::std::boxed::Box::new({{/field:box?}}{{!
-}}{{#field:arc?}}::std::sync::Arc::new({{/field:arc?}}{{!
+}}{{#if field:optional?}}::std::option::Option::Some({{/if field:optional?}}{{!
+}}{{#if field:box?}}::std::boxed::Box::new({{/if field:box?}}{{!
+}}{{#if field:arc?}}::std::sync::Arc::new({{/if field:arc?}}{{!
     }}{{> lib/value}}{{!
-}}{{#field:arc?}}){{/field:arc?}}{{!
-}}{{#field:box?}}){{/field:box?}}{{!
-}}{{#field:optional?}}){{/field:optional?}}
+}}{{#if field:arc?}}){{/if field:arc?}}{{!
+}}{{#if field:box?}}){{/if field:box?}}{{!
+}}{{#if field:optional?}}){{/if field:optional?}}

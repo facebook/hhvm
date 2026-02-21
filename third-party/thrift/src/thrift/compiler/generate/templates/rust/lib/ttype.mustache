@@ -15,18 +15,19 @@
   limitations under the License.
 
 }}::fbthrift::TType::{{!
-}}{{#type:void?}}Void{{/type:void?}}{{!
-}}{{#type:string?}}String{{/type:string?}}{{!
-}}{{#type:binary?}}String{{/type:binary?}}{{!
-}}{{#type:bool?}}Bool{{/type:bool?}}{{!
-}}{{#type:byte?}}Byte{{/type:byte?}}{{!
-}}{{#type:i16?}}I16{{/type:i16?}}{{!
-}}{{#type:i32?}}I32{{/type:i32?}}{{!
-}}{{#type:i64?}}I64{{/type:i64?}}{{!
-}}{{#type:double?}}Double{{/type:double?}}{{!
-}}{{#type:float?}}Float{{/type:float?}}{{!
-}}{{#type:structured?}}Struct{{/type:structured?}}{{!
-}}{{#type:enum?}}I32{{/type:enum?}}{{!
-}}{{#type:list?}}List{{/type:list?}}{{!
-}}{{#type:set?}}Set{{/type:set?}}{{!
-}}{{#type:map?}}Map{{/type:map?}}
+}}{{#if type:void?}}Void{{!
+}}{{#else if type:string?}}String{{!
+}}{{#else if type:binary?}}String{{!
+}}{{#else if type:bool?}}Bool{{!
+}}{{#else if type:byte?}}Byte{{!
+}}{{#else if type:i16?}}I16{{!
+}}{{#else if type:i32?}}I32{{!
+}}{{#else if type:i64?}}I64{{!
+}}{{#else if type:double?}}Double{{!
+}}{{#else if type:float?}}Float{{!
+}}{{#else if type:structured?}}Struct{{!
+}}{{#else if type:enum?}}I32{{!
+}}{{#else if type:list?}}List{{!
+}}{{#else if type:set?}}Set{{!
+}}{{#else if type:map?}}Map{{!
+}}{{/if type:void?}}

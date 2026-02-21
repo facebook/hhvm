@@ -14,12 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{^struct:exhaustive?}}{{!
+}}{{#if (not struct:exhaustive?)}}{{!
 }}_dot_dot_Default_default: {{!
-}}{{#struct:has_adapter?}}{{!
+}}{{#if struct:has_adapter?}}{{!
 }}super::dot_dot::OtherFields(()),{{!
-}}{{/struct:has_adapter?}}{{!
-}}{{^struct:has_adapter?}}{{!
+}}{{#else}}{{!
 }}self::dot_dot::OtherFields(()),{{!
-}}{{/struct:has_adapter?}}{{!
-}}{{/struct:exhaustive?}}
+}}{{/if struct:has_adapter?}}{{!
+}}{{/if (not struct:exhaustive?)}}

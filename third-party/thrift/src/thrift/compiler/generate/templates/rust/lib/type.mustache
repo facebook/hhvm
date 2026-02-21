@@ -14,11 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#type:typedef?}}{{!
-  }}{{#type:type_annotation?}}{{> lib/rawtype}}{{/type:type_annotation?}}{{!
-  }}{{^type:type_annotation?}}{{type:package}}::{{type:rust_name}}{{/type:type_annotation?}}{{!
-}}{{/type:typedef?}}{{!
-}}{{^type:typedef?}}{{!
+}}{{#if type:typedef?}}{{!
+  }}{{#if type:type_annotation?}}{{> lib/rawtype}}{{/if type:type_annotation?}}{{!
+  }}{{#if (not type:type_annotation?)}}{{type:package}}::{{type:rust_name}}{{/if (not type:type_annotation?)}}{{!
+}}{{/if type:typedef?}}{{!
+}}{{#if (not type:typedef?)}}{{!
 }}{{> lib/rawtype}}{{!
-}}{{/type:typedef?}}{{!
+}}{{/if (not type:typedef?)}}{{!
 }}

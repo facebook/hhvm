@@ -1085,6 +1085,50 @@ TEST_F(HandshakeTest, ECHHandshake) {
   sendAppData();
 }
 
+TEST_F(HandshakeTest, ECHHandshakeHRR) {
+  setupECH();
+  clientContext_->setDefaultShares({});
+  expected_.clientKexType = expected_.serverKexType =
+      KeyExchangeType::HelloRetryRequest;
+
+  expectSuccess();
+  doHandshake();
+  verifyParameters();
+  sendAppData();
+}
+
+TEST_F(HandshakeTest, ECHHandshakePskDheKe) {
+  setupECH();
+  setupResume();
+
+  expectSuccess();
+  doHandshake();
+  verifyParameters();
+  sendAppData();
+}
+
+TEST_F(HandshakeTest, ECHHandshakeResumeOnlyPskDheKe) {
+  setupResume();
+  setupECH();
+
+  expectSuccess();
+  doHandshake();
+  verifyParameters();
+  sendAppData();
+}
+
+TEST_F(HandshakeTest, ECHHandshakeHrrPskDheKe) {
+  setupECH();
+  clientContext_->setDefaultShares({});
+  expected_.clientKexType = expected_.serverKexType =
+      KeyExchangeType::HelloRetryRequest;
+  setupResumeWithHRR();
+  expectSuccess();
+  doHandshake();
+  verifyParameters();
+  sendAppData();
+}
+
 INSTANTIATE_TEST_SUITE_P(
     SignatureSchemes,
     SigSchemeTest,

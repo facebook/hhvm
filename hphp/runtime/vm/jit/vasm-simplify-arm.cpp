@@ -123,8 +123,31 @@ bool simplify(Env& env, const shrqi& inst, Vlabel b, size_t i) {
   });
 }
 
+template <typename cmpbrz, typename cmpbrnz, typename testop>
+bool foldTestJcc(Env& env, const testop& inst, Vlabel b, size_t i) {
+  if (inst.s0 != inst.s1 || env.use_counts[inst.sf] != 1) return false;
+  return if_inst<Vinstr::jcc>(env, b, i + 1, [&] (const jcc& jcci) {
+    if (jcci.sf != inst.sf || (jcci.cc != CC_E && jcci.cc != CC_NE))
+      return false;
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      if (jcci.cc == CC_E)
+        v << cmpbrz{inst.s0, {jcci.targets[0], jcci.targets[1]}, jcci.tag};
+      else
+        v << cmpbrnz{inst.s0, {jcci.targets[0], jcci.targets[1]}, jcci.tag};
+      return 2;
+    });
+  });
+}
+
+bool simplify(Env& env, const testl& inst, Vlabel b, size_t i) {
+  return foldTestJcc<cbzl, cbnzl>(env, inst, b, i);
+}
+
 bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
   if (env.use_counts[inst.sf] != 1) return false;
+
+  if (foldTestJcc<cbzq, cbnzq>(env, inst, b, i))
+    return true;
 
   uint64_t Val;
   if (!get_const_int(env, inst.s0, Val) || Val != 0x8000000000000000ull) {

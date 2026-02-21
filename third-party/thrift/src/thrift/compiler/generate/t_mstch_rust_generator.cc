@@ -69,9 +69,9 @@ struct rust_codegen_options {
   bool multifile_mode = false;
 
   // List of extra sources to include at top level of crate.
-  mstch::array types_include_srcs;
-  mstch::array clients_include_srcs;
-  mstch::array services_include_srcs;
+  std::vector<std::string> types_include_srcs;
+  std::vector<std::string> clients_include_srcs;
+  std::vector<std::string> services_include_srcs;
 
   // Markdown file to include in front of crate-level documentation.
   std::string include_docs;
@@ -325,7 +325,8 @@ int checked_stoi(const std::string& s, const std::string& msg) {
 }
 
 void parse_include_srcs(
-    mstch::array& elements, std::optional<std::string> const& include_srcs) {
+    std::vector<std::string>& elements,
+    std::optional<std::string> const& include_srcs) {
   if (!include_srcs) {
     return;
   }
@@ -1143,6 +1144,27 @@ class t_mstch_rust_generator : public t_mstch_generator {
       }
       return false;
     });
+    def.property("types_include_srcs", [this](const t_program&) {
+      whisker::array::raw result;
+      for (const auto& s : options_.types_include_srcs) {
+        result.emplace_back(whisker::make::string(s));
+      }
+      return whisker::make::array(std::move(result));
+    });
+    def.property("clients_include_srcs", [this](const t_program&) {
+      whisker::array::raw result;
+      for (const auto& s : options_.clients_include_srcs) {
+        result.emplace_back(whisker::make::string(s));
+      }
+      return whisker::make::array(std::move(result));
+    });
+    def.property("services_include_srcs", [this](const t_program&) {
+      whisker::array::raw result;
+      for (const auto& s : options_.services_include_srcs) {
+        result.emplace_back(whisker::make::string(s));
+      }
+      return whisker::make::array(std::move(result));
+    });
     return std::move(def).make();
   }
 };
@@ -1167,12 +1189,6 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_nonstandard_types},
             {"program:nonstandardFields",
              &rust_mstch_program::rust_nonstandard_fields},
-            {"program:types_include_srcs",
-             &rust_mstch_program::rust_types_include_srcs},
-            {"program:clients_include_srcs",
-             &rust_mstch_program::rust_clients_include_srcs},
-            {"program:services_include_srcs",
-             &rust_mstch_program::rust_services_include_srcs},
             {"program:structs_for_default_test",
              &rust_mstch_program::rust_structs_for_default_test},
             {"program:adapted_structs",
@@ -1245,13 +1261,6 @@ class rust_mstch_program : public mstch_program {
     fields_set_t fields = nonstandard_fields();
     return make_mstch_fields(
         std::vector<const t_field*>(fields.begin(), fields.end()));
-  }
-  mstch::node rust_types_include_srcs() { return options_.types_include_srcs; }
-  mstch::node rust_clients_include_srcs() {
-    return options_.clients_include_srcs;
-  }
-  mstch::node rust_services_include_srcs() {
-    return options_.services_include_srcs;
   }
   mstch::node rust_structs_for_default_test() {
     mstch::array strcts;

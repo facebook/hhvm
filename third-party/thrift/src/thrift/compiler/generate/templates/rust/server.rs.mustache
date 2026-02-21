@@ -30,9 +30,9 @@
 }}{{#if (not program:multifile?)}}, unused_crate_dependencies{{/if (not program:multifile?)}}{{!
 }}, unused_imports, clippy::all)]
 
-{{#program:services_include_srcs}}
-include!("{{.}}");
-{{/program:services_include_srcs}}
+{{#each program:services_include_srcs as |src|}}
+include!("{{src}}");
+{{/each}}
 
 #[doc(inline)]
 pub use {{program:types}} as types;

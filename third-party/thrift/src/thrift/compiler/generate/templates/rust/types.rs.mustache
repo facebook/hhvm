@@ -68,10 +68,10 @@ extern crate valuable;
 {{!
 ================================================================================
 }}
-{{#program:types_include_srcs}}
+{{#each program:types_include_srcs as |src|}}
 
-include!("{{.}}");
-{{/program:types_include_srcs}}
+include!("{{src}}");
+{{/each}}
 {{!
 ================================================================================
 }}

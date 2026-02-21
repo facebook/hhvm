@@ -142,9 +142,9 @@ where
     #[inline]
     fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
-            {{#struct:fields_by_name}}
-            ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}),
-            {{/struct:fields_by_name}}
+            {{#each struct:fields_by_name as |field|}}
+            ::fbthrift::Field::new("{{field.name}}", {{#field.type}}{{> lib/ttype}}{{/field.type}}, {{field.id}}),
+            {{/each}}
         ];
 
         {{#if (not (has_compiler_option? "deprecated_optional_with_default_is_some"))}}

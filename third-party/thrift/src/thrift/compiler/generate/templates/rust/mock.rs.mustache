@@ -424,12 +424,12 @@ pub(crate) use {{program:types}} as types;
 
 #[doc(hidden)]
 pub mod __dependencies {
-    {{#program:direct_dependencies}}
+    {{#each program:direct_dependencies as |dependency|}}
     #[doc(hidden)]
-    pub mod {{dependency:name_unmangled}}_mocks {
+    pub mod {{dependency.name_unmangled}}_mocks {
         #[doc(hidden)]
-        pub use ::{{dependency:name_unmangled}}_mocks::*;
+        pub use ::{{dependency.name_unmangled}}_mocks::*;
     }
-    {{/program:direct_dependencies}}
+    {{/each}}
 }
 {{/if program:direct_dependencies?}}

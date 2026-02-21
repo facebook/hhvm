@@ -19,16 +19,16 @@
 /// These are here to ensure the `from_thrift_default` methods on adapters don't panic.
 #[cfg(test)]
 mod tests {
-    {{#program:structs_for_default_test}}
+    {{#each program:structs_for_default_test as |struct|}}
     #[test]
-    fn test_struct_{{struct:rust_name}}_default_does_not_panic() {
-        {{#if struct:has_adapter?}}
-        let _ = super::unadapted::{{struct:rust_name}}::default();
+    fn test_struct_{{struct.rust_name}}_default_does_not_panic() {
+        {{#if struct.has_adapter?}}
+        let _ = super::unadapted::{{struct.rust_name}}::default();
         {{#else}}
-        let _ = super::{{struct:rust_name}}::default();
-        {{/if struct:has_adapter?}}
+        let _ = super::{{struct.rust_name}}::default();
+        {{/if struct.has_adapter?}}
     }
-    {{/program:structs_for_default_test}}
+    {{/each}}
 }
 
 // This is here to ensure you enable unittests on your Thrift library.

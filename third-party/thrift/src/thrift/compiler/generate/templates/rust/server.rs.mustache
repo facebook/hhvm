@@ -70,12 +70,12 @@ pub use {{program:types}} as types;
 
 #[doc(hidden)]
 pub mod __dependencies {
-    {{#program:direct_dependencies}}
+    {{#each program:direct_dependencies as |dependency|}}
     #[doc(hidden)]
-    pub mod {{dependency:name_unmangled}}_services {
+    pub mod {{dependency.name_unmangled}}_services {
         #[doc(hidden)]
-        pub use ::{{dependency:name_unmangled}}_services::*;
+        pub use ::{{dependency.name_unmangled}}_services::*;
     }
-    {{/program:direct_dependencies}}
+    {{/each}}
 }
 {{/if program:direct_dependencies?}}

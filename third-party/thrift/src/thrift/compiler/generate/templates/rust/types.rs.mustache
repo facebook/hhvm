@@ -188,13 +188,13 @@ pub mod __constructors {
 
 #[doc(hidden)]
 pub mod __dependencies {
-    {{#program:direct_dependencies}}
+    {{#each program:direct_dependencies as |dependency|}}
     #[doc(hidden)]
-    pub mod {{dependency:name}} {
+    pub mod {{dependency.name}} {
         #[doc(hidden)]
-        pub use ::{{dependency:name}}::*;
+        pub use ::{{dependency.name}}::*;
     }
-    {{/program:direct_dependencies}}
+    {{/each}}
 }
 {{/if program:direct_dependencies?}}
 {{!

@@ -1170,6 +1170,13 @@ class t_mstch_rust_generator : public t_mstch_generator {
       return compute_adapter_qualified(
           adapter_annotation, &self, true, options_);
     });
+    def.property("fields_by_name", [&proto](const t_structured& self) {
+      std::vector<const t_field*> fields = self.fields().copy();
+      std::sort(fields.begin(), fields.end(), [](auto a, auto b) {
+        return a->name() < b->name();
+      });
+      return to_array(fields, proto.of<t_field>());
+    });
     return std::move(def).make();
   }
 
@@ -1417,6 +1424,32 @@ class t_mstch_rust_generator : public t_mstch_generator {
       }
       return whisker::make::array(std::move(result));
     });
+    def.property("direct_dependencies", [this](const t_program&) {
+      whisker::array::raw deps;
+      for (auto crate : options_.crate_index.direct_dependencies()) {
+        whisker::map::raw dep;
+        dep["name"] =
+            whisker::make::string(mangle_crate_name(crate->dependency_path[0]));
+        dep["name_unmangled"] =
+            whisker::make::string(crate->dependency_path[0]);
+        dep["label"] = whisker::make::string(crate->label);
+        deps.emplace_back(whisker::make::map(std::move(dep)));
+      }
+      return whisker::make::array(std::move(deps));
+    });
+    def.property("structs_for_default_test", [&proto](const t_program& self) {
+      std::vector<const t_structured*> structs;
+      for (const t_structured* strct : self.structs_and_unions()) {
+        for (const t_field& field : strct->fields()) {
+          if (node_has_adapter(field) ||
+              type_has_transitive_adapter(field.type().get_type(), true)) {
+            structs.push_back(strct);
+            break;
+          }
+        }
+      }
+      return to_array(structs, proto.of<t_structured>());
+    });
     return std::move(def).make();
   }
 };
@@ -1435,14 +1468,10 @@ class rust_mstch_program : public mstch_program {
     register_methods(
         this,
         {
-            {"program:direct_dependencies",
-             &rust_mstch_program::rust_direct_dependencies},
             {"program:nonstandardTypes",
              &rust_mstch_program::rust_nonstandard_types},
             {"program:nonstandardFields",
              &rust_mstch_program::rust_nonstandard_fields},
-            {"program:structs_for_default_test",
-             &rust_mstch_program::rust_structs_for_default_test},
             {"program:adapted_structs",
              &rust_mstch_program::rust_adapted_structs},
             {"program:adapters", &rust_mstch_program::rust_adapters},
@@ -1462,19 +1491,6 @@ class rust_mstch_program : public mstch_program {
       initialize_type_split();
       generate_split_data();
     }
-  }
-
-  mstch::node rust_direct_dependencies() {
-    mstch::array direct_dependencies;
-    for (auto crate : options_.crate_index.direct_dependencies()) {
-      mstch::map dependency;
-      dependency["dependency:name"] =
-          mangle_crate_name(crate->dependency_path[0]);
-      dependency["dependency:name_unmangled"] = crate->dependency_path[0];
-      dependency["dependency:label"] = crate->label;
-      direct_dependencies.emplace_back(std::move(dependency));
-    }
-    return direct_dependencies;
   }
 
   template <typename F>
@@ -1514,23 +1530,6 @@ class rust_mstch_program : public mstch_program {
     return make_mstch_fields(
         std::vector<const t_field*>(fields.begin(), fields.end()));
   }
-  mstch::node rust_structs_for_default_test() {
-    mstch::array strcts;
-
-    for (const t_structured* strct : program_->structs_and_unions()) {
-      for (const t_field& field : strct->fields()) {
-        if (node_has_adapter(field) ||
-            type_has_transitive_adapter(field.type().get_type(), true)) {
-          strcts.emplace_back(context_.struct_factory->make_mstch_object(
-              strct, context_, pos_));
-          break;
-        }
-      }
-    }
-
-    return strcts;
-  }
-
   mstch::node rust_adapted_structs() {
     mstch::array strcts;
 
@@ -1973,17 +1972,9 @@ class rust_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
-            {"struct:fields_by_name", &rust_mstch_struct::rust_fields_by_name},
             {"struct:rust_structured_annotations",
              &rust_mstch_struct::rust_structured_annotations},
         });
-  }
-  mstch::node rust_fields_by_name() {
-    auto fields = struct_->fields().copy();
-    std::sort(fields.begin(), fields.end(), [](auto a, auto b) {
-      return a->name() < b->name();
-    });
-    return make_mstch_fields(fields);
   }
   mstch::node rust_structured_annotations() {
     return structured_annotations_node(*struct_, 1, context_, pos_, options_);

@@ -62,12 +62,12 @@ pub(crate) use {{program:crate}} as client;
 
 #[doc(hidden)]
 pub mod __dependencies {
-    {{#program:direct_dependencies}}
+    {{#each program:direct_dependencies as |dependency|}}
     #[doc(hidden)]
-    pub mod {{dependency:name_unmangled}}_clients {
+    pub mod {{dependency.name_unmangled}}_clients {
         #[doc(hidden)]
-        pub use ::{{dependency:name_unmangled}}_clients::*;
+        pub use ::{{dependency.name_unmangled}}_clients::*;
     }
-    {{/program:direct_dependencies}}
+    {{/each}}
 }
 {{/if program:direct_dependencies?}}

@@ -16,50 +16,49 @@
 
 }}
 
-{{#typedef:docs?}}
+{{#if typedef:docs?}}
 #[doc = {{typedef:docs}}]
-{{/typedef:docs?}}{{!
-}}{{^typedef:newtype?}}{{!
+{{/if typedef:docs?}}{{!
+}}{{#if (not typedef:newtype?)}}{{!
 }}{{#typedef:has_adapter?}}
 pub type {{typedef:rust_name}} = {{!
-  }}{{#adapter:transitive_only?}}{{!
+  }}{{#if adapter:transitive_only?}}{{!
     }}{{#adapter:underlying_type}}{{> lib/type}}{{/adapter:underlying_type}}{{!
-  }}{{/adapter:transitive_only?}}{{!
-  }}{{^adapter:transitive_only?}}{{!
+  }}{{#else}}{{!
     }}{{> lib/adapter/qualified}}::AdaptedType{{!
-  }}{{/adapter:transitive_only?}};
+  }}{{/if adapter:transitive_only?}};
 {{/typedef:has_adapter?}}{{!
 }}{{^typedef:has_adapter?}}{{!
   }}{{#typedef:type}}
 pub type {{typedef:rust_name}} = {{!
-    }}{{#typedef:rust_type}}::{{typedef:rust_type}}{{> lib/type_generics}}{{/typedef:rust_type}}{{!
-    }}{{^typedef:rust_type}}{{> lib/type}}{{/typedef:rust_type}}{{!
+    }}{{#if (not (string.empty? typedef:rust_type))}}::{{typedef:rust_type}}{{> lib/type_generics}}{{!
+    }}{{#else}}{{> lib/type}}{{/if (not (string.empty? typedef:rust_type))}}{{!
 }};
-{{#typedef:constructor?}}
+{{#if typedef:constructor?}}
 #[doc(hidden)]
 pub use {{type:package}}::__constructors::{{type:rust_name}} as {{typedef:rust_name}};
-{{/typedef:constructor?}}
+{{/if typedef:constructor?}}
   {{/typedef:type}}{{!
 }}{{/typedef:has_adapter?}}{{!
-}}{{/typedef:newtype?}}{{!
-}}{{#typedef:newtype?}}
+}}{{/if (not typedef:newtype?)}}{{!
+}}{{#if typedef:newtype?}}
 #[derive({{!
     }}{{^typedef:has_adapter?}}{{!
     }}Default, {{!
     }}{{/typedef:has_adapter?}}{{!
-    }}{{#typedef:copy?}}Copy, {{/typedef:copy?}}{{!
+    }}{{#if typedef:copy?}}Copy, {{/if typedef:copy?}}{{!
     }}Clone, Debug, PartialEq{{!
-    }}{{#typedef:ord?}}, Eq, PartialOrd, Ord, Hash{{/typedef:ord?}}{{!
-    }}{{#typedef:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/typedef:serde?}}{{!
-    }}{{#program:valuable?}}, ::valuable::Valuable{{/program:valuable?}}{{!
+    }}{{#if typedef:ord?}}, Eq, PartialOrd, Ord, Hash{{/if typedef:ord?}}{{!
+    }}{{#if typedef:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/if typedef:serde?}}{{!
+    }}{{#if program:valuable?}}, ::valuable::Valuable{{/if program:valuable?}}{{!
 }})]
 pub struct {{typedef:rust_name}}(pub {{!
   }}{{#typedef:has_adapter?}}{{!
     }}{{> lib/adapter/qualified}}::AdaptedType{{!
   }}{{/typedef:has_adapter?}}{{!
   }}{{^typedef:has_adapter?}}{{!
-    }}{{#typedef:rust_type}}::{{typedef:rust_type}}{{/typedef:rust_type}}{{!
-    }}{{^typedef:rust_type}}{{#typedef:type}}{{> lib/type}}{{/typedef:type}}{{/typedef:rust_type}}{{!
+    }}{{#if (not (string.empty? typedef:rust_type))}}::{{typedef:rust_type}}{{!
+    }}{{#else}}{{#typedef:type}}{{> lib/type}}{{/typedef:type}}{{/if (not (string.empty? typedef:rust_type))}}{{!
   }}{{/typedef:has_adapter?}}{{!
 }});
-{{/typedef:newtype?}}
+{{/if typedef:newtype?}}

@@ -18,24 +18,21 @@
 }}::futures::future::BoxFuture<'static, ::std::result::Result<{{!
 
     }}{{#function:return_type}}{{!
-        }}{{#function:creates_interaction?}}{{!
-            }}{{#function:stream?}}{{!
+        }}{{#if function:creates_interaction?}}{{!
+            }}{{#if function:stream?}}{{!
                 }}({{program:crate}}::client::{{function:interaction_name}}Client, {{> lib/return_type}}){{!
-            }}{{/function:stream?}}{{!
-            }}{{#function:sink?}}{{!
+            }}{{#else if function:sink?}}{{!
                 }}({{program:crate}}::client::{{function:interaction_name}}Client, {{> lib/return_type}}){{!
-            }}{{/function:sink?}}{{!
-            }}{{^function:sink?}}{{^function:stream?}}{{!
-                }}{{#type:void?}}{{!
+            }}{{#else}}{{!
+                }}{{#if type:void?}}{{!
                     }}{{program:crate}}::client::{{function:interaction_name}}Client{{!
-                }}{{/type:void?}}{{!
-                }}{{^type:void?}}{{!
+                }}{{#else}}{{!
                     }}({{program:crate}}::client::{{function:interaction_name}}Client, {{> lib/return_type}}){{!
-                }}{{/type:void?}}{{!
-            }}{{/function:stream?}}{{/function:sink?}}{{!
-        }}{{/function:creates_interaction?}}{{^function:creates_interaction?}}{{!
+                }}{{/if type:void?}}{{!
+            }}{{/if function:stream?}}{{!
+        }}{{#else}}{{!
             }}{{> lib/return_type}}{{!
-        }}{{/function:creates_interaction?}}{{!
+        }}{{/if function:creates_interaction?}}{{!
     }}{{/function:return_type}}{{!
 
     }}, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error{{!

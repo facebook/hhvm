@@ -17,23 +17,21 @@
 }}
 ::std::result::Result<{{!
     }}{{#function:return_type}}{{!
-        }}{{#function:creates_interaction?}}{{!
-            }}{{#function:bidirectional_stream?}}{{!
+        }}{{#if function:creates_interaction?}}{{!
+            }}{{#if function:bidirectional_stream?}}{{!
                 }}(::std::boxed::Box<dyn {{function:interaction_name}}>, {{> lib/server_ok_type}}){{!
-            }}{{/function:bidirectional_stream?}}{{!
-            }}{{^function:bidirectional_stream?}}{{#function:stream?}}{{!
+            }}{{#else if function:stream?}}{{!
                 }}(::std::boxed::Box<dyn {{function:interaction_name}}>, {{> lib/server_ok_type}}){{!
-            }}{{/function:stream?}}{{!
-            }}{{^function:stream?}}{{!
-                }}{{#type:void?}}{{!
+            }}{{#else}}{{!
+                }}{{#if type:void?}}{{!
                     }}::std::boxed::Box<dyn {{function:interaction_name}}>{{!
-                }}{{/type:void?}}{{^type:void?}}{{!
+                }}{{#else}}{{!
                     }}(::std::boxed::Box<dyn {{function:interaction_name}}>, {{> lib/server_ok_type}}){{!
-                }}{{/type:void?}}{{!
-            }}{{/function:stream?}}{{/function:bidirectional_stream?}}{{!
-        }}{{/function:creates_interaction?}}{{^function:creates_interaction?}}{{!
+                }}{{/if type:void?}}{{!
+            }}{{/if function:bidirectional_stream?}}{{!
+        }}{{#else}}{{!
             }}{{> lib/server_ok_type}}{{!
-        }}{{/function:creates_interaction?}}{{!
+        }}{{/if function:creates_interaction?}}{{!
     }}{{/function:return_type}}{{!
     }}, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn{{!
 }}>

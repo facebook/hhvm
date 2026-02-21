@@ -9,7 +9,7 @@
 
 #include <fmt/format.h>
 #include <folly/executors/thread_factory/InitThreadFactory.h>
-#include <folly/experimental/io/MuxIOThreadPoolExecutor.h>
+#include <folly/io/async/MuxIOThreadPoolExecutor.h>
 
 namespace facebook {
 namespace memcache {

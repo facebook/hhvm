@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{#typedef:newtype?}}
+{{#if typedef:newtype?}}
 impl ::fbthrift::GetTType for {{typedef:rust_name}} {
     const TTYPE: ::fbthrift::TType = {{!
       }}{{#typedef:has_adapter?}}{{!
@@ -26,7 +26,7 @@ impl ::fbthrift::GetTType for {{typedef:rust_name}} {
       }}{{/typedef:has_adapter?}}{{!
       }};
 }
-{{#typedef:nonstandard?}}
+{{#if typedef:nonstandard?}}
 
 impl<P> ::fbthrift::Serialize<P> for {{typedef:rust_name}}
 where
@@ -48,8 +48,8 @@ where
     }
 }
 
-{{/typedef:nonstandard?}}
-{{^typedef:nonstandard?}}
+{{/if typedef:nonstandard?}}
+{{#if (not typedef:nonstandard?)}}
 
 impl<P> ::fbthrift::Serialize<P> for {{typedef:rust_name}}
 where
@@ -82,5 +82,5 @@ where
     }
 }
 
-{{/typedef:nonstandard?}}
-{{/typedef:newtype?}}
+{{/if (not typedef:nonstandard?)}}
+{{/if typedef:newtype?}}

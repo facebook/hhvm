@@ -37,6 +37,8 @@ static const std::string kSetPostfix = "_set";
 static const std::string kToStringPostfix = "ToString";
 static const std::string kFromStringPostfix = "FromString";
 
+namespace {
+
 /**
  * Objective-C code generator.
  */
@@ -267,6 +269,8 @@ class t_cocoa_generator : public t_concat_generator {
   bool simple_value_equality_;
   std::string import_path_;
 };
+
+} // namespace
 
 /**
  * Prepares for file generation by opening up the necessary file output

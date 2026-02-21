@@ -163,8 +163,6 @@ bool is_annotation_map_field_equal(
   return annotation->value()->get_map().empty();
 }
 
-} // namespace
-
 class t_mstch_java_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -1473,6 +1471,8 @@ void t_mstch_java_generator::set_mstch_factories() {
   mstch_context_.add<mstch_java_field>();
   mstch_context_.add<mstch_java_enum>();
 }
+
+} // namespace
 
 THRIFT_REGISTER_GENERATOR(mstch_java, "Java", "");
 

@@ -162,6 +162,8 @@ struct Vunit;
   O(addqrm, I(fl), U(s1) UM(m), D(sf)) \
   O(addqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(addqim, I(s0) I(fl), UM(m), D(sf)) \
+  O(addshiftl, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf)) \
+  O(addshiftq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\
   O(andb, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))    \
   O(andbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
@@ -173,6 +175,8 @@ struct Vunit;
   O(andq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(andqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andqi64, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
+  O(andshiftl, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf)) \
+  O(andshiftq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf)) \
   O(btrq, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))    \
   O(decl, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(declm, I(fl), UM(m), D(sf))\
@@ -201,6 +205,8 @@ struct Vunit;
   O(orq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))    \
   O(orqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(orqim, I(s0) I(fl), UM(m), D(sf))\
+  O(orshiftl, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf)) \
+  O(orshiftq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf)) \
   O(sar, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(shl, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(shr, I(fl), U(s0) U(s1), D(d) D(sf))\
@@ -214,6 +220,8 @@ struct Vunit;
   O(subq, I(fl), UA(s0) UH(s1,d), DH(d,s1) D(sf))         \
   O(subqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(subqim, I(s0) I(fl), UM(m), D(sf)) \
+  O(subshiftl, I(fl), UA(s0) UH(s1,d), DH(d,s1) D(sf)) \
+  O(subshiftq, I(fl), UA(s0) UH(s1,d), DH(d,s1) D(sf)) \
   O(subsd, Inone, UA(s0) U(s1), D(d))\
   O(xorb, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))          \
   O(xorbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
@@ -222,6 +230,8 @@ struct Vunit;
   O(xorl, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))   \
   O(xorq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(xorqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(xorshiftl, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf)) \
+  O(xorshiftq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf)) \
   /* compares and tests */\
   O(cmpb, I(fl), U(s0) U(s1), D(sf))\
   O(cmpbi, I(s0) I(fl), U(s1), D(sf))\
@@ -239,6 +249,8 @@ struct Vunit;
   O(cmpqi, I(s0) I(fl), U(s1), D(sf))\
   O(cmpqm, I(fl), U(s0) U(s1), D(sf))\
   O(cmpqim, I(s0) I(fl), U(s1), D(sf))\
+  O(cmpshiftl, I(fl), U(s0) U(s1), D(sf))\
+  O(cmpshiftq, I(fl), U(s0) U(s1), D(sf))\
   O(cmpsd, I(pred), UA(s0) U(s1), D(d))\
   O(ucomisd, I(fl), U(s0) U(s1), D(sf))\
   O(testb, I(fl), U(s0) U(s1), D(sf))\
@@ -255,6 +267,8 @@ struct Vunit;
   O(testlm, I(fl), U(s0) U(s1), D(sf))  \
   O(testq, I(fl), U(s0) U(s1), D(sf))\
   O(testqi, I(s0) I(fl), U(s1), D(sf))\
+  O(testshiftl, I(fl), U(s0) U(s1), D(sf))\
+  O(testshiftq, I(fl), U(s0) U(s1), D(sf))\
   O(testqm, I(fl), U(s0) U(s1), D(sf))\
   O(testqim, I(s0) I(fl), U(s1), D(sf))\
   /* conditional operations */\
@@ -1010,6 +1024,8 @@ struct addqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct addqmr { Vptr64 m; Vreg64 s1; Vreg64 d; VregSF sf; Vflags fl; };
 struct addqrm { Vreg64 s1; Vptr64 m; VregSF sf; Vflags fl; };
 struct addqim { Immed s0; Vptr64 m; VregSF sf; Vflags fl; };
+struct addshiftl { VregShiftExtend s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
+struct addshiftq { VregShiftExtend s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct addsd  { VregDbl s0, s1, d; };
 // and: s0 & {s1|m} => {d|m}, sf
 struct andb  { Vreg8 s0, s1, d; VregSF sf; Vflags fl; };
@@ -1021,6 +1037,8 @@ struct andl  { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct andli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct andq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
+struct andshiftl { VregShiftExtend s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
+struct andshiftq { VregShiftExtend s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // Set bit s0 in s1 to 0, sets carry if set, sets d to s1
 struct btrq { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // dec: {s|m} - 1 => {d|m}, sf
@@ -1058,6 +1076,8 @@ struct orlim { Immed s0; Vptr32 m; VregSF sf; Vflags fl; };
 struct orq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct orqim { Immed s0; Vptr64 m; VregSF sf; Vflags fl; };
+struct orshiftl { VregShiftExtend s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
+struct orshiftq { VregShiftExtend s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // shift: s1 << s0 => d, sf
 struct sar { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct shl { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
@@ -1073,6 +1093,8 @@ struct subli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct subq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct subqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct subqim { Immed s0; Vptr64 m; VregSF sf; Vflags fl; };
+struct subshiftl { VregShiftExtend s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
+struct subshiftq { VregShiftExtend s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct subsd { VregDbl s0, s1, d; };
 // xor: s0 ^ s1 => d, sf
 struct xorb { Vreg8 s0, s1, d; VregSF sf; Vflags fl; };
@@ -1082,6 +1104,8 @@ struct xorwi { Immed s0; Vreg16 s1, d; VregSF sf; Vflags fl; };
 struct xorl { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct xorq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
+struct xorshiftl { VregShiftExtend s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
+struct xorshiftq { VregShiftExtend s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 
 /*
  * Compares and tests.
@@ -1103,6 +1127,8 @@ struct cmpq { Vreg64 s0; Vreg64 s1; VregSF sf; Vflags fl; };
 struct cmpqi { Immed s0; Vreg64 s1; VregSF sf; Vflags fl; };
 struct cmpqm { Vreg64 s0; Vptr64 s1; VregSF sf; Vflags fl; };
 struct cmpqim { Immed s0; Vptr64 s1; VregSF sf; Vflags fl; };
+struct cmpshiftl { VregShiftExtend s0; Vreg32 s1; VregSF sf; Vflags fl; };
+struct cmpshiftq { VregShiftExtend s0; Vreg64 s1; VregSF sf; Vflags fl; };
 struct cmpsd { ComparisonPred pred; VregDbl s0, s1, d; };
 struct ucomisd { VregDbl s0, s1; VregSF sf; Vflags fl; };
 // s1 & s0 => sf
@@ -1120,6 +1146,8 @@ struct testlim { Immed s0; Vptr32 s1; VregSF sf; Vflags fl; };
 struct testlm { Vreg32 s0; Vptr32 s1; VregSF sf; Vflags fl; };
 struct testq { Vreg64 s0, s1; VregSF sf; Vflags fl; };
 struct testqi { Immed s0; Vreg64 s1; VregSF sf; Vflags fl; };
+struct testshiftl { VregShiftExtend s0; Vreg32 s1; VregSF sf; Vflags fl; };
+struct testshiftq { VregShiftExtend s0; Vreg64 s1; VregSF sf; Vflags fl; };
 struct testqm { Vreg64 s0; Vptr64 s1; VregSF sf; Vflags fl; };
 struct testqim { Immed s0; Vptr64 s1; VregSF sf; Vflags fl; };
 

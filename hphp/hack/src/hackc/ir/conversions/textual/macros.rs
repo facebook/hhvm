@@ -5,14 +5,12 @@
 #![feature(box_patterns)]
 
 use itertools::Itertools;
-use proc_macro_error::ResultExt;
-use proc_macro_error::abort;
-use proc_macro_error::proc_macro_error;
 use proc_macro2::Literal;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::Attribute;
 use syn::DeriveInput;
+use syn::Error;
 use syn::Ident;
 use syn::Result;
 use syn::Token;
@@ -45,11 +43,15 @@ use syn::token;
 ///   }
 ///
 /// It also implements the Display trait for the enum.
-#[proc_macro_error]
 #[proc_macro_derive(TextualDecl, attributes(decl, function))]
 pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
+    do_textual_decl_derive(input)
+        .unwrap_or_else(Error::into_compile_error)
+        .into()
+}
 
+fn do_textual_decl_derive(input: DeriveInput) -> Result<TokenStream> {
     let name = &input.ident;
     let vis = &input.vis;
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
@@ -62,19 +64,19 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
         syn::Data::Enum(e) => {
             for variant in e.variants {
                 let variant_name = &variant.ident;
-                let attr = extract_exactly_one_attr(&variant.ident, variant.attrs, "decl");
-                let decl: Decl = syn::parse2(attr.tokens).unwrap_or_abort();
+                let attr = extract_exactly_one_attr(&variant.ident, variant.attrs, "decl")?;
+                let decl: Decl = syn::parse2(attr.tokens)?;
 
                 // Enforce sorted variant order.
                 let variant_name_str = format!("{variant_name}");
                 if let Some(last_str) = last {
                     if last_str > variant_name_str {
-                        abort!(
-                            variant_name,
+                        return Err(Error::new(
+                            variant_name.span(),
                             format!(
                                 "Variants are out of order - '{last_str}' must be after '{variant_name_str}'"
-                            )
-                        );
+                            ),
+                        ));
                     }
                 }
                 last = Some(variant_name_str);
@@ -127,11 +129,21 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
                 }
             }
         }
-        syn::Data::Struct(s) => abort!(s.struct_token, "TextualDecl does not support 'struct'"),
-        syn::Data::Union(u) => abort!(u.union_token, "TextualDecl does not support 'union'"),
+        syn::Data::Struct(s) => {
+            return Err(Error::new(
+                s.struct_token.span,
+                "TextualDecl does not support 'struct'",
+            ));
+        }
+        syn::Data::Union(u) => {
+            return Err(Error::new(
+                u.union_token.span,
+                "TextualDecl does not support 'union'",
+            ));
+        }
     }
 
-    let output = quote! {
+    Ok(quote! {
         impl #impl_generics #name #ty_generics #where_clause {
             #vis fn write_decls(txf: &mut TextualFile<'_>, subset: &HashSet<#name #ty_generics>) -> Result<()> {
                 #(#decls)*
@@ -150,28 +162,29 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
                 }
             }
         }
-    };
-
-    output.into()
+    })
 }
 
-fn extract_exactly_one_attr(ident: &Ident, attrs: Vec<Attribute>, name: &str) -> Attribute {
+fn extract_exactly_one_attr(ident: &Ident, attrs: Vec<Attribute>, name: &str) -> Result<Attribute> {
     let mut attrs = attrs.into_iter().filter(|attr| attr.path.is_ident(name));
 
     let attr = if let Some(attr) = attrs.next() {
         attr
     } else {
-        abort!(ident, "variant is missing 'decl' attribute");
+        return Err(Error::new(
+            ident.span(),
+            "variant is missing 'decl' attribute",
+        ));
     };
 
     if let Some(next) = attrs.next() {
-        abort!(
+        return Err(Error::new_spanned(
             next.path,
-            "'decl' attribute may not be specified multiple times"
-        );
+            "'decl' attribute may not be specified multiple times",
+        ));
     }
 
-    attr
+    Ok(attr)
 }
 
 enum Decl {
@@ -202,7 +215,7 @@ impl Parse for Decl {
                 }
                 return Ok(Decl::Skip);
             } else {
-                abort!(tag, "Unknown 'decl' type");
+                return Err(Error::new(tag.span(), "Unknown 'decl' type"));
             }
         };
 
@@ -308,7 +321,7 @@ impl Parse for DeclTy {
         } else {
             use syn::ext::IdentExt;
             let id = Ident::parse_any(input)?;
-            abort!(id, "Unexpected token");
+            return Err(Error::new(id.span(), "Unexpected token"));
         }
     }
 }

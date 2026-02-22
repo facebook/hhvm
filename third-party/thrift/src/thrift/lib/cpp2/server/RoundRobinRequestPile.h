@@ -56,6 +56,11 @@ class RoundRobinRequestPile : public RequestPileBase {
     // this is a per bucket limit
     uint64_t numMaxRequests{0};
 
+    // Per-priority per-bucket limits. When set for a given priority,
+    // overrides numMaxRequests for that priority. 0 means no limit.
+    // If empty, numMaxRequests is used for all priorities.
+    std::vector<uint32_t> numMaxRequestsPerPriority;
+
     // Function to route requests to priority/bucket
     PileSelectionFunction pileSelectionFunction;
 
@@ -97,24 +102,32 @@ class RoundRobinRequestPile : public RequestPileBase {
       pileSelectionFunction = std::move(func);
     }
 
+    // Set per-priority per-bucket limits. The vector size must match the
+    // number of priorities. A value of 0 means no limit for that priority.
+    void setNumMaxRequestsPerPriority(std::vector<uint32_t> limits) {
+      numMaxRequestsPerPriority = std::move(limits);
+    }
+
+    // Get the effective per-bucket limit for a given priority.
+    // Returns the per-priority limit if set, otherwise the global limit.
+    uint32_t getNumMaxRequestsForPriority(unsigned priority) const {
+      if (!numMaxRequestsPerPriority.empty()) {
+        return numMaxRequestsPerPriority.at(priority);
+      }
+      return numMaxRequests;
+    }
+
     // emulating PriorityQueueThreadManager
     PileSelectionFunction getDefaultPileSelectionFunc(
         unsigned defaultPriority = static_cast<unsigned>(concurrency::NORMAL));
 
     std::string describe() const {
-      auto numBucketsPerPriorityString = [this]() -> std::string {
-        std::string result = "{";
-        for (std::size_t i = 0; i < numBucketsPerPriority.size(); i++) {
-          result += std::to_string(numBucketsPerPriority[i]);
-        }
-        result += "}";
-        return result;
-      };
       return fmt::format(
-          "{{Options name={} numBucketsPerPriority={} numMaxRequests={}}}",
+          "{{Options name={} numBucketsPerPriority={{{}}} numMaxRequests={} numMaxRequestsPerPriority={{{}}}}}",
           name,
-          numBucketsPerPriorityString(),
-          numMaxRequests);
+          fmt::join(numBucketsPerPriority, ","),
+          numMaxRequests,
+          fmt::join(numMaxRequestsPerPriority, ","));
     }
   };
 

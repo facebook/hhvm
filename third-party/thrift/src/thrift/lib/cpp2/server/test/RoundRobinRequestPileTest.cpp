@@ -185,6 +185,70 @@ TEST_F(RoundRobinRequestPileTest, getRequestsCounts) {
   EXPECT_EQ(pile.getRequestCounts(), expectedRequestCounts);
 }
 
+TEST_F(
+    RoundRobinRequestPileTest, testPerPriorityBucketSizeLimitForManyBuckets) {
+  RoundRobinRequestPile::Options opts(
+      {10, 10, 10}, makePileSelectionFunction());
+  // P0: no limit, P1: limit 2, P2: limit 1
+  opts.setNumMaxRequestsPerPriority({0, 2, 1});
+  RoundRobinRequestPile pile(opts);
+
+  // P0 should accept unlimited requests (no limit)
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(0, 0)));
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(0, 0)));
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(0, 0)));
+
+  // P1 should accept up to 2 per bucket
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(1, 0)));
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(1, 0)));
+  EXPECT_TRUE(pile.enqueue(makeServerRequestForBucket(1, 0)))
+      << "P1 bucket 0 should reject at limit 2";
+  // Different bucket still has its own limit
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(1, 1)));
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(1, 1)));
+  EXPECT_TRUE(pile.enqueue(makeServerRequestForBucket(1, 1)))
+      << "P1 bucket 1 should reject at limit 2";
+
+  // P2 should accept only 1 per bucket
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(2, 0)));
+  EXPECT_TRUE(pile.enqueue(makeServerRequestForBucket(2, 0)))
+      << "P2 bucket 0 should reject at limit 1";
+
+  // Verify dequeue order: P0 first, then P1, then P2
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 1);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 1);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 2, 0);
+  EXPECT_EQ(pile.dequeue(), std::nullopt);
+}
+
+TEST_F(
+    RoundRobinRequestPileTest, testPerPriorityBucketSizeLimitForSingleBucket) {
+  RoundRobinRequestPile::Options opts({1, 1, 1}, makePileSelectionFunction());
+  // P0: no limit, P1: limit 2, P2: limit 1
+  opts.setNumMaxRequestsPerPriority({0, 2, 1});
+  RoundRobinRequestPile pile(opts);
+
+  // P0 unlimited
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(0, 0)));
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(0, 0)));
+
+  // P1 limit 2
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(1, 0)));
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(1, 0)));
+  EXPECT_TRUE(pile.enqueue(makeServerRequestForBucket(1, 0)));
+
+  // P2 limit 1
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(2, 0)));
+  EXPECT_TRUE(pile.enqueue(makeServerRequestForBucket(2, 0)));
+
+  EXPECT_EQ(pile.requestCount(), 5);
+}
+
 TEST(RoundRobinRequestPileMiscTest, getDbgInfo) {
   RoundRobinRequestPile::Options opts(
       {11, 12, 13, 14, 15},

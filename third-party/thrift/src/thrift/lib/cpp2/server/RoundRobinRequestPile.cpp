@@ -91,13 +91,17 @@ RoundRobinRequestPile::RoundRobinRequestPile(Options opts)
       std::make_unique<std::unique_ptr<SingleBucketRequestQueue>[]>(
           numBucketsPerPriority.size());
 
+  DCHECK(
+      opts_.numMaxRequestsPerPriority.empty() ||
+      opts_.numMaxRequestsPerPriority.size() == numBucketsPerPriority.size());
+
   for (unsigned i = 0; i < numBucketsPerPriority.size(); ++i) {
     DCHECK(numBucketsPerPriority.at(i));
 
-    if (opts_.numMaxRequests) {
+    if (auto limit = opts_.getNumMaxRequestsForPriority(i)) {
       singleBucketRequestQueues_[i] =
           std::make_unique<SingleBucketRequestQueue>(true);
-      singleBucketRequestQueues_[i]->setLimit(opts_.numMaxRequests);
+      singleBucketRequestQueues_[i]->setLimit(limit);
     } else {
       singleBucketRequestQueues_[i] =
           std::make_unique<SingleBucketRequestQueue>(false);
@@ -179,9 +183,9 @@ std::optional<ServerRequestRejection> RoundRobinRequestPile::enqueue(
         "AppServerException", "RequestPile enqueue error : reached max limit"));
   }
 
-  if (opts_.numMaxRequests != 0) {
-    auto res = requestQueues_[pri][bucket].tryPush(
-        std::move(request), opts_.numMaxRequests);
+  if (auto maxRequest = opts_.getNumMaxRequestsForPriority(pri)) {
+    auto res =
+        requestQueues_[pri][bucket].tryPush(std::move(request), maxRequest);
     switch (res) {
       case RequestQueue::TryPushResult::FAILED_LIMIT_REACHED: {
         if (onRequestRejectedFunction_) {
@@ -341,6 +345,18 @@ RoundRobinRequestPile::addInternalPriorities(
     numBucketsPerPriority.push_back(numBuckets);
   }
   opts.numBucketsPerPriority = std::move(numBucketsPerPriority);
+
+  // Double the number of priorities also for per-priority limits.
+  if (!opts.numMaxRequestsPerPriority.empty()) {
+    std::vector<uint32_t> numMaxRequestsPerPriority;
+    numMaxRequestsPerPriority.reserve(
+        opts.numMaxRequestsPerPriority.size() * 2);
+    for (auto limit : opts.numMaxRequestsPerPriority) {
+      numMaxRequestsPerPriority.push_back(limit);
+      numMaxRequestsPerPriority.push_back(limit);
+    }
+    opts.numMaxRequestsPerPriority = std::move(numMaxRequestsPerPriority);
+  }
 
   // Update pileSelectionFunction
   opts.pileSelectionFunction =

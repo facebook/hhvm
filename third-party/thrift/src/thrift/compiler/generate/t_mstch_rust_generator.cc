@@ -543,8 +543,11 @@ std::string compute_rawtype_name(
     return "::std::string::String";
   }
   if (type->is<t_enum>() || type->is<t_structured>()) {
-    return get_types_import_name(type->program(), options) +
-        "::" + type_rust_name(type);
+    std::string prefix = get_types_import_name(type->program(), options);
+    if (type->is<t_structured>() && node_has_adapter(*type)) {
+      return prefix + "::unadapted::" + type_rust_name(type);
+    }
+    return prefix + "::" + type_rust_name(type);
   }
   if (const auto* list_type = type->try_as<t_list>()) {
     return "::std::vec::Vec<" +

@@ -19,6 +19,7 @@
 #include <optional>
 
 #include <folly/Overload.h>
+#include <folly/ScopeGuard.h>
 #include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Patch.h>
@@ -129,11 +130,15 @@ std::unique_ptr<folly::IOBuf> applyToSerializedObjectImpl(
   using Writer = ProtocolWriterFor<Protocol>;
   DynamicCursorSerializationWrapper<Reader, Writer> inWrapper(std::move(buf));
   DynamicCursorSerializationWrapper<Reader, Writer> outWrapper;
-  auto reader = inWrapper.beginRead();
-  auto writer = outWrapper.beginWrite();
-  patch.applyAllFieldsInStream(badge, reader, writer);
-  inWrapper.endRead(std::move(reader));
-  outWrapper.endWrite(std::move(writer));
+  {
+    auto reader = inWrapper.beginRead();
+    auto writer = outWrapper.beginWrite();
+    auto guard = folly::makeGuard([&] {
+      inWrapper.endRead(std::move(reader));
+      outWrapper.endWrite(std::move(writer));
+    });
+    patch.applyAllFieldsInStream(badge, reader, writer);
+  }
   return std::move(outWrapper).serializedData();
 }
 } // namespace

@@ -1851,4 +1851,16 @@ TEST(DynamicPatchTest, IntrinsicDefaultValuesPreservedWhenDifferFromCustom) {
   EXPECT_EQ(fresh.options()->allowEmpty(), false);
 }
 
+TEST(DynamicPatch, TypeMismatch) {
+  MyUnion v;
+  v.s() = "test";
+  auto any = type::AnyData::toAny(v).toThrift();
+
+  DynamicPatch patch;
+  patch.getStoredPatchByTag<type::struct_c>().patchIfSet<type::i64_t>(
+      FieldId{1}) += 10;
+
+  EXPECT_THROW(patch.applyObjectInAny(badge, any), std::exception);
+}
+
 } // namespace apache::thrift::protocol

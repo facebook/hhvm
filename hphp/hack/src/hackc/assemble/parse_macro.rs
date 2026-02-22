@@ -55,9 +55,9 @@ type TokenIter = std::iter::Peekable<IntoIter>;
 /// patterns translate into.
 #[cfg(not(test))]
 #[proc_macro]
-#[proc_macro_error::proc_macro_error]
+#[proc_macro_error2::proc_macro_error]
 pub fn parse(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    use proc_macro_error::abort;
+    use proc_macro_error2::abort;
     let input = TokenStream::from(input);
     let res = match parse_macro(input) {
         Ok(res) => res,
@@ -760,8 +760,8 @@ impl MyTokenIter for TokenIter {
         if let Some(t) = self.peek() {
             Ok(t)
         } else {
-            proc_macro_error::Diagnostic::new(
-                proc_macro_error::Level::Error,
+            proc_macro_error2::Diagnostic::new(
+                proc_macro_error2::Level::Error,
                 "Token expected at end".into(),
             )
             .abort();

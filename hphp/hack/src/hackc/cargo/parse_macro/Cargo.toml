@@ -14,6 +14,6 @@ doctest = false
 proc-macro = true
 
 [dependencies]
-proc-macro-error = "1.0"
+proc-macro-error2 = "2.0.1"
 proc-macro2 = { version = "1.0.106", features = ["span-locations"] }
 quote = "1.0.44"

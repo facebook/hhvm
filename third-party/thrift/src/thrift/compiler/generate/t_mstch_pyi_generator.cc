@@ -16,7 +16,6 @@
 
 #include <algorithm>
 #include <filesystem>
-#include <memory>
 #include <set>
 #include <string>
 
@@ -26,9 +25,9 @@
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/generate/common.h>
-#include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/python/util.h>
-#include <thrift/compiler/generate/t_mstch_generator.h>
+#include <thrift/compiler/generate/t_whisker_generator.h>
+#include <thrift/compiler/generate/templates.h>
 
 namespace apache::thrift::compiler {
 
@@ -55,21 +54,6 @@ std::string get_filtered_name(const t_named& node) {
   return kKeywords.contains(node.name())
       ? fmt::format("{}_PY_RESERVED_KEYWORD", node.name())
       : node.name();
-}
-
-// TO-DO: remove duplicate in py3
-mstch::array create_string_array(const std::vector<std::string>& values) {
-  mstch::array mstch_array;
-  for (auto it = values.begin(); it != values.end(); ++it) {
-    mstch_array.emplace_back(
-        mstch::map{
-            {"value", *it},
-            {"first?", it == values.begin()},
-            {"last?", std::next(it) == values.end()},
-        });
-  }
-
-  return mstch_array;
 }
 
 // TO-DO: remove duplicate in py3
@@ -169,9 +153,9 @@ std::vector<std::string> gather_import_modules(
 
 // Generator
 
-class t_mstch_pyi_generator : public t_mstch_generator {
+class t_mstch_pyi_generator : public t_whisker_generator {
  public:
-  using t_mstch_generator::t_mstch_generator;
+  using t_whisker_generator::t_whisker_generator;
 
   std::string template_prefix() const override { return "pyi"; }
 
@@ -179,6 +163,19 @@ class t_mstch_pyi_generator : public t_mstch_generator {
 
  private:
   std::filesystem::path root_path_;
+
+  whisker::source_manager template_source_manager() const final {
+    return whisker::source_manager{
+        std::make_unique<in_memory_source_manager_backend>(
+            create_templates_by_path())};
+  }
+
+  strictness_options strictness() const final {
+    return strictness_options{
+        // Templates still have non-boolean conditionals and implicit loops
+        .boolean_conditional = false,
+    };
+  }
 
   void generate_init_files();
   void generate_constants();
@@ -338,20 +335,21 @@ void t_mstch_pyi_generator::render_file(
     const std::string& template_name,
     const std::filesystem::path& path,
     const t_service* service) {
-  auto mstchObject = (service == nullptr)
-      ? make_mstch_program_cached(
-            this->get_program(), t_mstch_generator::mstch_context_)
-      : make_mstch_service_cached(
-            service->program(), service, t_mstch_generator::mstch_context_);
-
-  t_mstch_generator::render_to_file(mstchObject, template_name, path);
+  whisker::object context = service == nullptr
+      ? whisker::make::native_handle(
+            render_state().prototypes->create<t_program>(*program_))
+      : whisker::make::native_handle(
+            render_state().prototypes->create<t_service>(*service));
+  render_to_file(/*output_file=*/path,
+                 /*template_file=*/template_name,
+                 /*context=*/context);
 }
 
 std::filesystem::path t_mstch_pyi_generator::get_root_path() const {
   std::filesystem::path path;
 
   auto namespaces = get_py_namespaces_raw(
-      this->get_program(), t_mstch_generator::has_option("asyncio"));
+      this->get_program(), has_compiler_option("asyncio"));
   for (const auto& ns : namespaces) {
     path /= ns;
   }

@@ -47,7 +47,7 @@ class {{enum:name}}(int):
     _VALUES_TO_NAMES: __T.ClassVar[__T.Dict[{{enum:name}}, str]]
     _NAMES_TO_VALUES: __T.ClassVar[__T.Dict[str, {{enum:name}}]]
 {{/program:enums}}
-{{#program:structs}}
+{{#program:structured_definitions}}
 
 
 class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exception?}}:
@@ -56,27 +56,27 @@ class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exceptio
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self{{^program:enablePosArgs?}}{{^struct:union?}}{{#struct:fields?}}, *{{/struct:fields?}}{{/struct:union?}}{{/program:enablePosArgs?}}{{#struct:fields}},
-        {{field:py_name}}: {{#partial common.optional_field_type field=field:self}} = ...{{/struct:fields}}
+        self{{^program:enablePosArgs?}}{{^struct:union?}}{{#struct:fields?}}, *{{/struct:fields?}}{{/struct:union?}}{{/program:enablePosArgs?}}{{#each struct:fields as |field|}},
+        {{field.py_name}}: {{#partial common.optional_field_type field=field}} = ...{{/each}}
     ) -> None:
         ...
 
     {{^struct:union?}}
-    {{#struct:fields}}
+    {{#each struct:fields as |field|}}
     @__property__
-    def {{field:py_name}}(self) -> {{#if field:optional?}}__T.Optional[{{/if}}{{!
-    }}{{#partial common.type_name type=field:self.type}}{{#if field:optional?}}]{{/if}}: ...
-    @{{field:py_name}}.setter
-    def {{field:py_name}}(self, value: {{#partial common.optional_field_type field=field:self}}) -> None: ...
-    {{/struct:fields}}
+    def {{field.py_name}}(self) -> {{#if field.optional?}}__T.Optional[{{/if}}{{!
+    }}{{#partial common.type_name type=field.type}}{{#if field.optional?}}]{{/if}}: ...
+    @{{field.py_name}}.setter
+    def {{field.py_name}}(self, value: {{#partial common.optional_field_type field=field}}) -> None: ...
+    {{/each}}
     {{/struct:union?}}
 
     {{#struct:union?}}
     def getType(self) -> int: ...
 
     {{#struct:fields}}
-    def get_{{field:py_name}}(self) -> {{#partial common.type_name type=field:self.type}}: ...
-    def set_{{field:py_name}}(self, value: {{#partial common.type_name type=field:self.type}}) -> None: ...
+    def get_{{field:py_name}}(self) -> {{#partial common.type_name type=field:type}}: ...
+    def set_{{field:py_name}}(self, value: {{#partial common.type_name type=field:type}}) -> None: ...
     {{/struct:fields}}
 
     __EMPTY__: int = ...
@@ -105,9 +105,9 @@ class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exceptio
     def _to_mutable_python(self) -> "{{program:pythonNamespace}}{{program:name}}.thrift_mutable_types.{{struct:name}}": ...   # type: ignore
     def _to_py3(self) -> "{{program:py3Namespace}}{{program:name}}.types.{{struct:name}}": ...   # type: ignore
     def _to_py_deprecated(self) -> {{struct:name}}: ...
-{{/program:structs}}
+{{/program:structured_definitions}}
 
 
 {{#program:typedefs}}
-{{typedef:name}} = {{#partial common.type_name type=typedef:self.resolved}}
+{{typedef:name}} = {{#partial common.type_name type=typedef:resolved}}
 {{/program:typedefs}}

@@ -28,6 +28,6 @@ import {{.}}
 {{/program:importModules}}
 from {{program:pyNamespace}}ttypes import *
 
-{{#each program:self.consts as |const|}}
-{{#partial common.const_declaration const=const}}{{!
-}}{{/each}}
+  {{#each program:consts as |const|}}
+{{#partial common.const_declaration const=const}}
+  {{/each}}

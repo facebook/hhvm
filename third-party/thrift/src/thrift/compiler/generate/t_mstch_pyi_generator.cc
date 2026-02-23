@@ -167,115 +167,6 @@ std::vector<std::string> gather_import_modules(
   return import_modules;
 }
 
-// Program
-
-class pyi_mstch_program : public mstch_program {
- public:
-  pyi_mstch_program(
-      const t_program* program,
-      mstch_context& context,
-      mstch_element_position position)
-      : mstch_program(program, context, position) {
-    register_methods(
-        this,
-        {
-            {"program:pyNamespaces", &pyi_mstch_program::get_py_namespaces},
-            {"program:pythonNamespaces",
-             &pyi_mstch_program::get_python_namespaces},
-            {"program:py3Namespaces", &pyi_mstch_program::get_py3_namespaces},
-            {"program:importModules", &pyi_mstch_program::get_import_modules},
-            {"program:enablePosArgs?", &pyi_mstch_program::get_enable_pos_args},
-        });
-
-    this->visit_import_modules();
-  }
-
-  mstch::node get_py_namespaces() {
-    return create_string_array(get_py_namespaces_raw(
-        mstch_program::program_, mstch_base::has_option("asyncio")));
-  }
-
-  mstch::node get_python_namespaces() {
-    // TODO: take root_module_prefix into account
-    return create_string_array(
-        ::apache::thrift::compiler::get_py3_namespace(mstch_program::program_));
-  }
-
-  mstch::node get_py3_namespaces() {
-    return create_string_array(
-        ::apache::thrift::compiler::get_py3_namespace(mstch_program::program_));
-  }
-
-  mstch::node get_import_modules() {
-    mstch::array mstch_array;
-    for (const auto& module : this->import_modules_) {
-      mstch_array.emplace_back(module);
-    }
-    return mstch_array;
-  }
-
-  mstch::node get_enable_pos_args() { return has_option("enable_pos_args"); }
-
- private:
-  std::vector<std::string> import_modules_;
-
-  void visit_import_modules() {
-    this->import_modules_ = gather_import_modules(
-        mstch_program::program_, mstch_base::has_option("asyncio"));
-  }
-};
-
-// Service
-
-class pyi_mstch_service : public mstch_service {
- public:
-  pyi_mstch_service(
-      const t_service* service,
-      mstch_context& context,
-      mstch_element_position position,
-      const t_program* program)
-      : mstch_service(service, context, position), program_(program) {
-    register_methods(
-        this,
-        {
-            {"service:pyNamespaces", &pyi_mstch_service::get_py_namespaces},
-            {"program:pyNamespaces",
-             &pyi_mstch_service::get_program_py_namespaces},
-            {"program:importModules",
-             &pyi_mstch_service::get_program_import_modules},
-        });
-
-    this->visit_program_import_modules();
-  }
-
-  mstch::node get_py_namespaces() {
-    return create_string_array(get_py_namespaces_raw(
-        mstch_service::service_->program(), mstch_base::has_option("asyncio")));
-  }
-
-  mstch::node get_program_py_namespaces() {
-    return create_string_array(get_py_namespaces_raw(
-        this->program_, mstch_base::has_option("asyncio")));
-  }
-
-  mstch::node get_program_import_modules() {
-    mstch::array mstch_array;
-    for (const auto& module : this->program_import_modules_) {
-      mstch_array.emplace_back(module);
-    }
-    return mstch_array;
-  }
-
- private:
-  const t_program* program_;
-  std::vector<std::string> program_import_modules_;
-
-  void visit_program_import_modules() {
-    this->program_import_modules_ = gather_import_modules(
-        this->program_, mstch_base::has_option("asyncio"));
-  }
-};
-
 // Generator
 
 class t_mstch_pyi_generator : public t_mstch_generator {
@@ -289,7 +180,6 @@ class t_mstch_pyi_generator : public t_mstch_generator {
  private:
   std::filesystem::path root_path_;
 
-  void create_factories();
   void generate_init_files();
   void generate_constants();
   void generate_ttypes();
@@ -337,6 +227,49 @@ class t_mstch_pyi_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_program>::ptr make_prototype_for_program(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_program(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_program>::extends(std::move(base));
+
+    def.property("pyNamespace", [this](const t_program& self) {
+      std::vector<std::string> namespaces =
+          get_py_namespaces_raw(&self, has_compiler_option("asyncio"));
+      return namespaces.empty()
+          ? ""
+          : fmt::format("{}.", fmt::join(namespaces, "."));
+    });
+    def.property("py3Namespace", [](const t_program& self) {
+      std::vector<std::string> namespaces = get_py3_namespace(&self);
+      return namespaces.empty()
+          ? ""
+          : fmt::format("{}.", fmt::join(namespaces, "."));
+    });
+    def.property("pythonNamespace", [](const t_program& self) {
+      // TODO: take root_module_prefix into account
+      std::vector<std::string> namespaces = get_py3_namespace(&self);
+      return namespaces.empty()
+          ? ""
+          : fmt::format("{}.", fmt::join(namespaces, "."));
+    });
+    def.property("importModules", [this](const t_program& self) {
+      std::vector<std::string> modules =
+          gather_import_modules(&self, has_compiler_option("asyncio"));
+      whisker::array::raw a;
+      a.insert(
+          a.end(),
+          std::make_move_iterator(modules.begin()),
+          std::make_move_iterator(modules.end()));
+      return whisker::make::array(std::move(a));
+    });
+    def.property("enablePosArgs?", [this](const t_program&) {
+      return has_compiler_option("enable_pos_args");
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_type>::ptr make_prototype_for_type(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
@@ -370,17 +303,10 @@ void t_mstch_pyi_generator::generate_program() {
   this->root_path_ = this->get_root_path();
   this->out_dir_base_ = "gen-py";
 
-  this->create_factories();
-
   this->generate_init_files();
   this->generate_constants();
   this->generate_ttypes();
   this->generate_services();
-}
-
-void t_mstch_pyi_generator::create_factories() {
-  t_mstch_generator::mstch_context_.add<pyi_mstch_program>();
-  t_mstch_generator::mstch_context_.add<pyi_mstch_service>(this->get_program());
 }
 
 void t_mstch_pyi_generator::generate_init_files() {

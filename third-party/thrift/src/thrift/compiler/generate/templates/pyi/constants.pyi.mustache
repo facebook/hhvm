@@ -25,7 +25,7 @@ import typing as __T
 {{#program:importModules}}
 import {{.}}
 {{/program:importModules}}
-from {{#program:pyNamespaces}}{{value}}.{{/program:pyNamespaces}}ttypes import *
+from {{program:pyNamespace}}ttypes import *
 
 {{#program:constants}}
 {{#constant:value}}{{> common/Constant}}{{/constant:value}}{{!

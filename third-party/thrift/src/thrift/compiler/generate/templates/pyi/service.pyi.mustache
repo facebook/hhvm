@@ -28,19 +28,18 @@ import asyncio
 from thrift import Thrift
 from thrift.protocol.TProtocol import TProtocolBase
 
-{{#program:importModules}}
+{{#service:self.program.importModules}}
 import {{.}}
-{{/program:importModules}}
-from {{#program:pyNamespaces}}{{value}}.{{/program:pyNamespaces}}ttypes import *
+{{/service:self.program.importModules}}
+from {{service:self.program.pyNamespace}}ttypes import *
 {{#service:extends}}
-import {{#service:pyNamespaces}}{{value}}.{{/service:pyNamespaces}}{{service:name}}
+import {{service:self.program.pyNamespace}}{{service:name}}
 {{/service:extends}}
 
 
 class Iface{{!
     }}{{#service:extends}}({{!
-        }}{{#service:pyNamespaces}}{{value}}.{{/service:pyNamespaces}}{{!
-            }}{{service:name}}.Iface{{!
+        }}{{service:self.program.pyNamespace}}{{service:name}}.Iface{{!
     }}){{/service:extends}}:{{^service:functions}} ...{{/service:functions}}  # {{service:name}}
     {{#if (has_compiler_option? "asyncio")}}
     # These have to be Awaitable because handler methods don't return Futures

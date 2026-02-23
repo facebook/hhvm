@@ -104,9 +104,9 @@ class {{struct:name}}{{#struct:exception?}}(Thrift.TException){{/struct:exceptio
     def __ne__(self, other: __T.Any) -> bool: ...
     def __dir__(self) -> __T.Sequence[str]: ...
     {{!TODO: accommodate root_module_prefix}}
-    def _to_python(self) -> "{{#program:pythonNamespaces}}{{value}}.{{/program:pythonNamespaces}}{{program:name}}.thrift_types.{{struct:name}}": ...   # type: ignore
-    def _to_mutable_python(self) -> "{{#program:pythonNamespaces}}{{value}}.{{/program:pythonNamespaces}}{{program:name}}.thrift_mutable_types.{{struct:name}}": ...   # type: ignore
-    def _to_py3(self) -> "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types.{{struct:name}}": ...   # type: ignore
+    def _to_python(self) -> "{{program:pythonNamespace}}{{program:name}}.thrift_types.{{struct:name}}": ...   # type: ignore
+    def _to_mutable_python(self) -> "{{program:pythonNamespace}}{{program:name}}.thrift_mutable_types.{{struct:name}}": ...   # type: ignore
+    def _to_py3(self) -> "{{program:py3Namespace}}{{program:name}}.types.{{struct:name}}": ...   # type: ignore
     def _to_py_deprecated(self) -> {{struct:name}}: ...
 {{/program:structs}}
 

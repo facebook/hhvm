@@ -209,25 +209,6 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = NestedContainersStaticMetadata::class;
   const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_mapList(
-  ): \ThriftServiceRequestResponseMethod<
-    NestedContainersAsyncIf,
-    NestedContainers_mapList_args,
-    NestedContainers_mapList_result,
-    null,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      NestedContainers_mapList_args::class,
-      NestedContainers_mapList_result::class,
-      async (
-        NestedContainersAsyncIf $handler,
-        NestedContainers_mapList_args $args,
-      )[defaults] ==> {
-        await $handler->mapList($args->foo);
-        return null;
-      },
-    );
-  }
   protected async function process_mapList(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('mapList');
     $reply_type = \TMessageType::REPLY;
@@ -243,25 +224,6 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'mapList', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function getMethodMetadata_mapSet(
-  ): \ThriftServiceRequestResponseMethod<
-    NestedContainersAsyncIf,
-    NestedContainers_mapSet_args,
-    NestedContainers_mapSet_result,
-    null,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      NestedContainers_mapSet_args::class,
-      NestedContainers_mapSet_result::class,
-      async (
-        NestedContainersAsyncIf $handler,
-        NestedContainers_mapSet_args $args,
-      )[defaults] ==> {
-        await $handler->mapSet($args->foo);
-        return null;
-      },
-    );
   }
   protected async function process_mapSet(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('mapSet');
@@ -279,25 +241,6 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     $this->writeHelper($result, 'mapSet', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_listMap(
-  ): \ThriftServiceRequestResponseMethod<
-    NestedContainersAsyncIf,
-    NestedContainers_listMap_args,
-    NestedContainers_listMap_result,
-    null,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      NestedContainers_listMap_args::class,
-      NestedContainers_listMap_result::class,
-      async (
-        NestedContainersAsyncIf $handler,
-        NestedContainers_listMap_args $args,
-      )[defaults] ==> {
-        await $handler->listMap($args->foo);
-        return null;
-      },
-    );
-  }
   protected async function process_listMap(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('listMap');
     $reply_type = \TMessageType::REPLY;
@@ -313,25 +256,6 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'listMap', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function getMethodMetadata_listSet(
-  ): \ThriftServiceRequestResponseMethod<
-    NestedContainersAsyncIf,
-    NestedContainers_listSet_args,
-    NestedContainers_listSet_result,
-    null,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      NestedContainers_listSet_args::class,
-      NestedContainers_listSet_result::class,
-      async (
-        NestedContainersAsyncIf $handler,
-        NestedContainers_listSet_args $args,
-      )[defaults] ==> {
-        await $handler->listSet($args->foo);
-        return null;
-      },
-    );
   }
   protected async function process_listSet(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('listSet');
@@ -349,25 +273,6 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     $this->writeHelper($result, 'listSet', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_turtles(
-  ): \ThriftServiceRequestResponseMethod<
-    NestedContainersAsyncIf,
-    NestedContainers_turtles_args,
-    NestedContainers_turtles_result,
-    null,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      NestedContainers_turtles_args::class,
-      NestedContainers_turtles_result::class,
-      async (
-        NestedContainersAsyncIf $handler,
-        NestedContainers_turtles_args $args,
-      )[defaults] ==> {
-        await $handler->turtles($args->foo);
-        return null;
-      },
-    );
-  }
   protected async function process_turtles(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('turtles');
     $reply_type = \TMessageType::REPLY;
@@ -383,6 +288,75 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'turtles', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'mapList':
+        return new \ThriftServiceRequestResponseMethod(
+          NestedContainers_mapList_args::class,
+          NestedContainers_mapList_result::class,
+          async (
+            NestedContainersAsyncIf $handler,
+            NestedContainers_mapList_args $args,
+          )[defaults] ==> {
+            await $handler->mapList($args->foo);
+            return null;
+          },
+        );
+      case 'mapSet':
+        return new \ThriftServiceRequestResponseMethod(
+          NestedContainers_mapSet_args::class,
+          NestedContainers_mapSet_result::class,
+          async (
+            NestedContainersAsyncIf $handler,
+            NestedContainers_mapSet_args $args,
+          )[defaults] ==> {
+            await $handler->mapSet($args->foo);
+            return null;
+          },
+        );
+      case 'listMap':
+        return new \ThriftServiceRequestResponseMethod(
+          NestedContainers_listMap_args::class,
+          NestedContainers_listMap_result::class,
+          async (
+            NestedContainersAsyncIf $handler,
+            NestedContainers_listMap_args $args,
+          )[defaults] ==> {
+            await $handler->listMap($args->foo);
+            return null;
+          },
+        );
+      case 'listSet':
+        return new \ThriftServiceRequestResponseMethod(
+          NestedContainers_listSet_args::class,
+          NestedContainers_listSet_result::class,
+          async (
+            NestedContainersAsyncIf $handler,
+            NestedContainers_listSet_args $args,
+          )[defaults] ==> {
+            await $handler->listSet($args->foo);
+            return null;
+          },
+        );
+      case 'turtles':
+        return new \ThriftServiceRequestResponseMethod(
+          NestedContainers_turtles_args::class,
+          NestedContainers_turtles_result::class,
+          async (
+            NestedContainersAsyncIf $handler,
+            NestedContainers_turtles_args $args,
+          )[defaults] ==> {
+            await $handler->turtles($args->foo);
+            return null;
+          },
+        );
+      default:
+        return null;
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, NestedContainersStaticMetadata::class);

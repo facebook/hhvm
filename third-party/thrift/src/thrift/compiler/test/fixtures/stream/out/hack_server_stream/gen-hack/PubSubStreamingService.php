@@ -377,27 +377,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = PubSubStreamingServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_returnstream(
-  ): \ThriftServiceStreamingResponseMethod<
-    PubSubStreamingServiceAsyncIf,
-    PubSubStreamingService_returnstream_args,
-    PubSubStreamingService_returnstream_FirstResponse,
-    null,
-    PubSubStreamingService_returnstream_StreamResponse,
-    int,
-  > {
-    return new \ThriftServiceStreamingResponseMethod(
-      PubSubStreamingService_returnstream_args::class,
-      PubSubStreamingService_returnstream_FirstResponse::class,
-      async (
-        PubSubStreamingServiceAsyncIf $handler,
-        PubSubStreamingService_returnstream_args $args,
-      )[defaults] ==> {
-        return await $handler->returnstream($args->i32_from, $args->i32_to);
-      },
-      PubSubStreamingService_returnstream_StreamResponse::class,
-    );
-  }
   protected async function process_returnstream(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('returnstream');
     $reply_type = \TMessageType::REPLY;
@@ -417,27 +396,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'returnstream', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_streamthrows(
-  ): \ThriftServiceStreamingResponseMethod<
-    PubSubStreamingServiceAsyncIf,
-    PubSubStreamingService_streamthrows_args,
-    PubSubStreamingService_streamthrows_FirstResponse,
-    null,
-    PubSubStreamingService_streamthrows_StreamResponse,
-    int,
-  > {
-    return new \ThriftServiceStreamingResponseMethod(
-      PubSubStreamingService_streamthrows_args::class,
-      PubSubStreamingService_streamthrows_FirstResponse::class,
-      async (
-        PubSubStreamingServiceAsyncIf $handler,
-        PubSubStreamingService_streamthrows_args $args,
-      )[defaults] ==> {
-        return await $handler->streamthrows($args->foo);
-      },
-      PubSubStreamingService_streamthrows_StreamResponse::class,
-    );
-  }
   protected async function process_streamthrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('streamthrows');
     $reply_type = \TMessageType::REPLY;
@@ -456,27 +414,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'streamthrows', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function getMethodMetadata_servicethrows(
-  ): \ThriftServiceStreamingResponseMethod<
-    PubSubStreamingServiceAsyncIf,
-    PubSubStreamingService_servicethrows_args,
-    PubSubStreamingService_servicethrows_FirstResponse,
-    null,
-    PubSubStreamingService_servicethrows_StreamResponse,
-    int,
-  > {
-    return new \ThriftServiceStreamingResponseMethod(
-      PubSubStreamingService_servicethrows_args::class,
-      PubSubStreamingService_servicethrows_FirstResponse::class,
-      async (
-        PubSubStreamingServiceAsyncIf $handler,
-        PubSubStreamingService_servicethrows_args $args,
-      )[defaults] ==> {
-        return await $handler->servicethrows($args->foo);
-      },
-      PubSubStreamingService_servicethrows_StreamResponse::class,
-    );
   }
   protected async function process_servicethrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('servicethrows');
@@ -501,27 +438,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'servicethrows', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_servicethrows2(
-  ): \ThriftServiceStreamingResponseMethod<
-    PubSubStreamingServiceAsyncIf,
-    PubSubStreamingService_servicethrows2_args,
-    PubSubStreamingService_servicethrows2_FirstResponse,
-    null,
-    PubSubStreamingService_servicethrows2_StreamResponse,
-    int,
-  > {
-    return new \ThriftServiceStreamingResponseMethod(
-      PubSubStreamingService_servicethrows2_args::class,
-      PubSubStreamingService_servicethrows2_FirstResponse::class,
-      async (
-        PubSubStreamingServiceAsyncIf $handler,
-        PubSubStreamingService_servicethrows2_args $args,
-      )[defaults] ==> {
-        return await $handler->servicethrows2($args->foo);
-      },
-      PubSubStreamingService_servicethrows2_StreamResponse::class,
-    );
-  }
   protected async function process_servicethrows2(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('servicethrows2');
     $reply_type = \TMessageType::REPLY;
@@ -544,27 +460,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       }
     }
     $this->writeHelper($result, 'servicethrows2', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function getMethodMetadata_boththrows(
-  ): \ThriftServiceStreamingResponseMethod<
-    PubSubStreamingServiceAsyncIf,
-    PubSubStreamingService_boththrows_args,
-    PubSubStreamingService_boththrows_FirstResponse,
-    null,
-    PubSubStreamingService_boththrows_StreamResponse,
-    int,
-  > {
-    return new \ThriftServiceStreamingResponseMethod(
-      PubSubStreamingService_boththrows_args::class,
-      PubSubStreamingService_boththrows_FirstResponse::class,
-      async (
-        PubSubStreamingServiceAsyncIf $handler,
-        PubSubStreamingService_boththrows_args $args,
-      )[defaults] ==> {
-        return await $handler->boththrows($args->foo);
-      },
-      PubSubStreamingService_boththrows_StreamResponse::class,
-    );
   }
   protected async function process_boththrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('boththrows');
@@ -589,27 +484,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'boththrows', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_responseandstreamstreamthrows(
-  ): \ThriftServiceStreamingResponseMethod<
-    PubSubStreamingServiceAsyncIf,
-    PubSubStreamingService_responseandstreamstreamthrows_args,
-    PubSubStreamingService_responseandstreamstreamthrows_FirstResponse,
-    int,
-    PubSubStreamingService_responseandstreamstreamthrows_StreamResponse,
-    int,
-  > {
-    return new \ThriftServiceStreamingResponseMethod(
-      PubSubStreamingService_responseandstreamstreamthrows_args::class,
-      PubSubStreamingService_responseandstreamstreamthrows_FirstResponse::class,
-      async (
-        PubSubStreamingServiceAsyncIf $handler,
-        PubSubStreamingService_responseandstreamstreamthrows_args $args,
-      )[defaults] ==> {
-        return await $handler->responseandstreamstreamthrows($args->foo);
-      },
-      PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::class,
-    );
-  }
   protected async function process_responseandstreamstreamthrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('responseandstreamstreamthrows');
     $reply_type = \TMessageType::REPLY;
@@ -629,27 +503,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'responseandstreamstreamthrows', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function getMethodMetadata_responseandstreamservicethrows(
-  ): \ThriftServiceStreamingResponseMethod<
-    PubSubStreamingServiceAsyncIf,
-    PubSubStreamingService_responseandstreamservicethrows_args,
-    PubSubStreamingService_responseandstreamservicethrows_FirstResponse,
-    int,
-    PubSubStreamingService_responseandstreamservicethrows_StreamResponse,
-    int,
-  > {
-    return new \ThriftServiceStreamingResponseMethod(
-      PubSubStreamingService_responseandstreamservicethrows_args::class,
-      PubSubStreamingService_responseandstreamservicethrows_FirstResponse::class,
-      async (
-        PubSubStreamingServiceAsyncIf $handler,
-        PubSubStreamingService_responseandstreamservicethrows_args $args,
-      )[defaults] ==> {
-        return await $handler->responseandstreamservicethrows($args->foo);
-      },
-      PubSubStreamingService_responseandstreamservicethrows_StreamResponse::class,
-    );
   }
   protected async function process_responseandstreamservicethrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('responseandstreamservicethrows');
@@ -675,27 +528,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'responseandstreamservicethrows', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_responseandstreamboththrows(
-  ): \ThriftServiceStreamingResponseMethod<
-    PubSubStreamingServiceAsyncIf,
-    PubSubStreamingService_responseandstreamboththrows_args,
-    PubSubStreamingService_responseandstreamboththrows_FirstResponse,
-    int,
-    PubSubStreamingService_responseandstreamboththrows_StreamResponse,
-    int,
-  > {
-    return new \ThriftServiceStreamingResponseMethod(
-      PubSubStreamingService_responseandstreamboththrows_args::class,
-      PubSubStreamingService_responseandstreamboththrows_FirstResponse::class,
-      async (
-        PubSubStreamingServiceAsyncIf $handler,
-        PubSubStreamingService_responseandstreamboththrows_args $args,
-      )[defaults] ==> {
-        return await $handler->responseandstreamboththrows($args->foo);
-      },
-      PubSubStreamingService_responseandstreamboththrows_StreamResponse::class,
-    );
-  }
   protected async function process_responseandstreamboththrows(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('responseandstreamboththrows');
     $reply_type = \TMessageType::REPLY;
@@ -720,27 +552,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
     }
     $this->writeHelper($result, 'responseandstreamboththrows', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_returnstreamFast(
-  ): \ThriftServiceStreamingResponseMethod<
-    PubSubStreamingServiceAsyncIf,
-    PubSubStreamingService_returnstreamFast_args,
-    PubSubStreamingService_returnstreamFast_FirstResponse,
-    null,
-    PubSubStreamingService_returnstreamFast_StreamResponse,
-    int,
-  > {
-    return new \ThriftServiceStreamingResponseMethod(
-      PubSubStreamingService_returnstreamFast_args::class,
-      PubSubStreamingService_returnstreamFast_FirstResponse::class,
-      async (
-        PubSubStreamingServiceAsyncIf $handler,
-        PubSubStreamingService_returnstreamFast_args $args,
-      )[defaults] ==> {
-        return await $handler->returnstreamFast($args->i32_from, $args->i32_to);
-      },
-      PubSubStreamingService_returnstreamFast_StreamResponse::class,
-    );
-  }
   protected async function process_returnstreamFast(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('returnstreamFast');
     $reply_type = \TMessageType::REPLY;
@@ -759,6 +570,123 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'returnstreamFast', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'returnstream':
+        return new \ThriftServiceStreamingResponseMethod(
+          PubSubStreamingService_returnstream_args::class,
+          PubSubStreamingService_returnstream_FirstResponse::class,
+          async (
+            PubSubStreamingServiceAsyncIf $handler,
+            PubSubStreamingService_returnstream_args $args,
+          )[defaults] ==> {
+            return await $handler->returnstream($args->i32_from, $args->i32_to);
+          },
+          PubSubStreamingService_returnstream_StreamResponse::class,
+        );
+      case 'streamthrows':
+        return new \ThriftServiceStreamingResponseMethod(
+          PubSubStreamingService_streamthrows_args::class,
+          PubSubStreamingService_streamthrows_FirstResponse::class,
+          async (
+            PubSubStreamingServiceAsyncIf $handler,
+            PubSubStreamingService_streamthrows_args $args,
+          )[defaults] ==> {
+            return await $handler->streamthrows($args->foo);
+          },
+          PubSubStreamingService_streamthrows_StreamResponse::class,
+        );
+      case 'servicethrows':
+        return new \ThriftServiceStreamingResponseMethod(
+          PubSubStreamingService_servicethrows_args::class,
+          PubSubStreamingService_servicethrows_FirstResponse::class,
+          async (
+            PubSubStreamingServiceAsyncIf $handler,
+            PubSubStreamingService_servicethrows_args $args,
+          )[defaults] ==> {
+            return await $handler->servicethrows($args->foo);
+          },
+          PubSubStreamingService_servicethrows_StreamResponse::class,
+        );
+      case 'servicethrows2':
+        return new \ThriftServiceStreamingResponseMethod(
+          PubSubStreamingService_servicethrows2_args::class,
+          PubSubStreamingService_servicethrows2_FirstResponse::class,
+          async (
+            PubSubStreamingServiceAsyncIf $handler,
+            PubSubStreamingService_servicethrows2_args $args,
+          )[defaults] ==> {
+            return await $handler->servicethrows2($args->foo);
+          },
+          PubSubStreamingService_servicethrows2_StreamResponse::class,
+        );
+      case 'boththrows':
+        return new \ThriftServiceStreamingResponseMethod(
+          PubSubStreamingService_boththrows_args::class,
+          PubSubStreamingService_boththrows_FirstResponse::class,
+          async (
+            PubSubStreamingServiceAsyncIf $handler,
+            PubSubStreamingService_boththrows_args $args,
+          )[defaults] ==> {
+            return await $handler->boththrows($args->foo);
+          },
+          PubSubStreamingService_boththrows_StreamResponse::class,
+        );
+      case 'responseandstreamstreamthrows':
+        return new \ThriftServiceStreamingResponseMethod(
+          PubSubStreamingService_responseandstreamstreamthrows_args::class,
+          PubSubStreamingService_responseandstreamstreamthrows_FirstResponse::class,
+          async (
+            PubSubStreamingServiceAsyncIf $handler,
+            PubSubStreamingService_responseandstreamstreamthrows_args $args,
+          )[defaults] ==> {
+            return await $handler->responseandstreamstreamthrows($args->foo);
+          },
+          PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::class,
+        );
+      case 'responseandstreamservicethrows':
+        return new \ThriftServiceStreamingResponseMethod(
+          PubSubStreamingService_responseandstreamservicethrows_args::class,
+          PubSubStreamingService_responseandstreamservicethrows_FirstResponse::class,
+          async (
+            PubSubStreamingServiceAsyncIf $handler,
+            PubSubStreamingService_responseandstreamservicethrows_args $args,
+          )[defaults] ==> {
+            return await $handler->responseandstreamservicethrows($args->foo);
+          },
+          PubSubStreamingService_responseandstreamservicethrows_StreamResponse::class,
+        );
+      case 'responseandstreamboththrows':
+        return new \ThriftServiceStreamingResponseMethod(
+          PubSubStreamingService_responseandstreamboththrows_args::class,
+          PubSubStreamingService_responseandstreamboththrows_FirstResponse::class,
+          async (
+            PubSubStreamingServiceAsyncIf $handler,
+            PubSubStreamingService_responseandstreamboththrows_args $args,
+          )[defaults] ==> {
+            return await $handler->responseandstreamboththrows($args->foo);
+          },
+          PubSubStreamingService_responseandstreamboththrows_StreamResponse::class,
+        );
+      case 'returnstreamFast':
+        return new \ThriftServiceStreamingResponseMethod(
+          PubSubStreamingService_returnstreamFast_args::class,
+          PubSubStreamingService_returnstreamFast_FirstResponse::class,
+          async (
+            PubSubStreamingServiceAsyncIf $handler,
+            PubSubStreamingService_returnstreamFast_args $args,
+          )[defaults] ==> {
+            return await $handler->returnstreamFast($args->i32_from, $args->i32_to);
+          },
+          PubSubStreamingService_returnstreamFast_StreamResponse::class,
+        );
+      default:
+        return null;
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, PubSubStreamingServiceStaticMetadata::class);

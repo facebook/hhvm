@@ -101,24 +101,6 @@ abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
   const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_baz(
-  ): \ThriftServiceRequestResponseMethod<
-    BarAsyncIf,
-    Bar_baz_args,
-    Bar_baz_result,
-    string,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      Bar_baz_args::class,
-      Bar_baz_result::class,
-      async (
-        BarAsyncIf $handler,
-        Bar_baz_args $args,
-      )[defaults] ==> {
-        return await $handler->baz($args->a, $args->b, $args->c, $args->d, $args->e);
-      },
-    );
-  }
   protected async function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
     $reply_type = \TMessageType::REPLY;
@@ -134,6 +116,26 @@ abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'baz', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'baz':
+        return new \ThriftServiceRequestResponseMethod(
+          Bar_baz_args::class,
+          Bar_baz_result::class,
+          async (
+            BarAsyncIf $handler,
+            Bar_baz_args $args,
+          )[defaults] ==> {
+            return await $handler->baz($args->a, $args->b, $args->c, $args->d, $args->e);
+          },
+        );
+      default:
+        return null;
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, BarStaticMetadata::class);

@@ -158,24 +158,6 @@ abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BadServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_bar(
-  ): \ThriftServiceRequestResponseMethod<
-    BadServiceAsyncIf,
-    BadService_bar_args,
-    BadService_bar_result,
-    int,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      BadService_bar_args::class,
-      BadService_bar_result::class,
-      async (
-        BadServiceAsyncIf $handler,
-        BadService_bar_args $args,
-      )[defaults] ==> {
-        return await $handler->bar();
-      },
-    );
-  }
   protected async function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
     $reply_type = \TMessageType::REPLY;
@@ -191,6 +173,26 @@ abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'bar', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'bar':
+        return new \ThriftServiceRequestResponseMethod(
+          BadService_bar_args::class,
+          BadService_bar_result::class,
+          async (
+            BadServiceAsyncIf $handler,
+            BadService_bar_args $args,
+          )[defaults] ==> {
+            return await $handler->bar();
+          },
+        );
+      default:
+        return null;
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, BadServiceStaticMetadata::class);

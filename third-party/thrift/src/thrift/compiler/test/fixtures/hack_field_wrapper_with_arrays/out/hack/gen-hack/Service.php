@@ -87,24 +87,6 @@ abstract class ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = ServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = ServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_func(
-  ): \ThriftServiceRequestResponseMethod<
-    ServiceAsyncIf,
-    Service_func_args,
-    Service_func_result,
-    int,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      Service_func_args::class,
-      Service_func_result::class,
-      async (
-        ServiceAsyncIf $handler,
-        Service_func_args $args,
-      )[defaults] ==> {
-        return await $handler->func($args->arg1, $args->arg2);
-      },
-    );
-  }
   protected async function process_func(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('func');
     $reply_type = \TMessageType::REPLY;
@@ -120,6 +102,26 @@ abstract class ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'func', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'func':
+        return new \ThriftServiceRequestResponseMethod(
+          Service_func_args::class,
+          Service_func_result::class,
+          async (
+            ServiceAsyncIf $handler,
+            Service_func_args $args,
+          )[defaults] ==> {
+            return await $handler->func($args->arg1, $args->arg2);
+          },
+        );
+      default:
+        return null;
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, ServiceStaticMetadata::class);

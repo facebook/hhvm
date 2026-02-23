@@ -274,30 +274,6 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = SinkServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = SinkServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_method(
-  ): \ThriftServiceSinkMethod<
-    SinkServiceAsyncIf,
-    SinkService_method_args,
-    SinkService_method_FirstResponse,
-    null,
-    SinkService_method_SinkPayload,
-    SinkPayload,
-    SinkService_method_FinalResponse,
-    FinalResponse,
-  > {
-    return new \ThriftServiceSinkMethod(
-      SinkService_method_args::class,
-      SinkService_method_FirstResponse::class,
-      async (
-        SinkServiceAsyncIf $handler,
-        SinkService_method_args $args,
-      )[defaults] ==> {
-        return await $handler->method();
-      },
-      SinkService_method_SinkPayload::class,
-      SinkService_method_FinalResponse::class,
-    );
-  }
   protected async function process_method(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('method');
     $reply_type = \TMessageType::REPLY;
@@ -316,30 +292,6 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'method', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function getMethodMetadata_methodAndReponse(
-  ): \ThriftServiceSinkMethod<
-    SinkServiceAsyncIf,
-    SinkService_methodAndReponse_args,
-    SinkService_methodAndReponse_FirstResponse,
-    InitialResponse,
-    SinkService_methodAndReponse_SinkPayload,
-    SinkPayload,
-    SinkService_methodAndReponse_FinalResponse,
-    FinalResponse,
-  > {
-    return new \ThriftServiceSinkMethod(
-      SinkService_methodAndReponse_args::class,
-      SinkService_methodAndReponse_FirstResponse::class,
-      async (
-        SinkServiceAsyncIf $handler,
-        SinkService_methodAndReponse_args $args,
-      )[defaults] ==> {
-        return await $handler->methodAndReponse();
-      },
-      SinkService_methodAndReponse_SinkPayload::class,
-      SinkService_methodAndReponse_FinalResponse::class,
-    );
   }
   protected async function process_methodAndReponse(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('methodAndReponse');
@@ -360,30 +312,6 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'methodAndReponse', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function getMethodMetadata_methodThrow(
-  ): \ThriftServiceSinkMethod<
-    SinkServiceAsyncIf,
-    SinkService_methodThrow_args,
-    SinkService_methodThrow_FirstResponse,
-    null,
-    SinkService_methodThrow_SinkPayload,
-    SinkPayload,
-    SinkService_methodThrow_FinalResponse,
-    FinalResponse,
-  > {
-    return new \ThriftServiceSinkMethod(
-      SinkService_methodThrow_args::class,
-      SinkService_methodThrow_FirstResponse::class,
-      async (
-        SinkServiceAsyncIf $handler,
-        SinkService_methodThrow_args $args,
-      )[defaults] ==> {
-        return await $handler->methodThrow();
-      },
-      SinkService_methodThrow_SinkPayload::class,
-      SinkService_methodThrow_FinalResponse::class,
-    );
   }
   protected async function process_methodThrow(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('methodThrow');
@@ -408,30 +336,6 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'methodThrow', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_methodSinkThrow(
-  ): \ThriftServiceSinkMethod<
-    SinkServiceAsyncIf,
-    SinkService_methodSinkThrow_args,
-    SinkService_methodSinkThrow_FirstResponse,
-    null,
-    SinkService_methodSinkThrow_SinkPayload,
-    SinkPayload,
-    SinkService_methodSinkThrow_FinalResponse,
-    FinalResponse,
-  > {
-    return new \ThriftServiceSinkMethod(
-      SinkService_methodSinkThrow_args::class,
-      SinkService_methodSinkThrow_FirstResponse::class,
-      async (
-        SinkServiceAsyncIf $handler,
-        SinkService_methodSinkThrow_args $args,
-      )[defaults] ==> {
-        return await $handler->methodSinkThrow();
-      },
-      SinkService_methodSinkThrow_SinkPayload::class,
-      SinkService_methodSinkThrow_FinalResponse::class,
-    );
-  }
   protected async function process_methodSinkThrow(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('methodSinkThrow');
     $reply_type = \TMessageType::REPLY;
@@ -450,30 +354,6 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'methodSinkThrow', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected function getMethodMetadata_methodFinalThrow(
-  ): \ThriftServiceSinkMethod<
-    SinkServiceAsyncIf,
-    SinkService_methodFinalThrow_args,
-    SinkService_methodFinalThrow_FirstResponse,
-    null,
-    SinkService_methodFinalThrow_SinkPayload,
-    SinkPayload,
-    SinkService_methodFinalThrow_FinalResponse,
-    FinalResponse,
-  > {
-    return new \ThriftServiceSinkMethod(
-      SinkService_methodFinalThrow_args::class,
-      SinkService_methodFinalThrow_FirstResponse::class,
-      async (
-        SinkServiceAsyncIf $handler,
-        SinkService_methodFinalThrow_args $args,
-      )[defaults] ==> {
-        return await $handler->methodFinalThrow();
-      },
-      SinkService_methodFinalThrow_SinkPayload::class,
-      SinkService_methodFinalThrow_FinalResponse::class,
-    );
   }
   protected async function process_methodFinalThrow(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('methodFinalThrow');
@@ -494,30 +374,6 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'methodFinalThrow', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_methodBothThrow(
-  ): \ThriftServiceSinkMethod<
-    SinkServiceAsyncIf,
-    SinkService_methodBothThrow_args,
-    SinkService_methodBothThrow_FirstResponse,
-    null,
-    SinkService_methodBothThrow_SinkPayload,
-    SinkPayload,
-    SinkService_methodBothThrow_FinalResponse,
-    FinalResponse,
-  > {
-    return new \ThriftServiceSinkMethod(
-      SinkService_methodBothThrow_args::class,
-      SinkService_methodBothThrow_FirstResponse::class,
-      async (
-        SinkServiceAsyncIf $handler,
-        SinkService_methodBothThrow_args $args,
-      )[defaults] ==> {
-        return await $handler->methodBothThrow();
-      },
-      SinkService_methodBothThrow_SinkPayload::class,
-      SinkService_methodBothThrow_FinalResponse::class,
-    );
-  }
   protected async function process_methodBothThrow(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('methodBothThrow');
     $reply_type = \TMessageType::REPLY;
@@ -537,30 +393,6 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     $this->writeHelper($result, 'methodBothThrow', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_methodFast(
-  ): \ThriftServiceSinkMethod<
-    SinkServiceAsyncIf,
-    SinkService_methodFast_args,
-    SinkService_methodFast_FirstResponse,
-    null,
-    SinkService_methodFast_SinkPayload,
-    SinkPayload,
-    SinkService_methodFast_FinalResponse,
-    FinalResponse,
-  > {
-    return new \ThriftServiceSinkMethod(
-      SinkService_methodFast_args::class,
-      SinkService_methodFast_FirstResponse::class,
-      async (
-        SinkServiceAsyncIf $handler,
-        SinkService_methodFast_args $args,
-      )[defaults] ==> {
-        return await $handler->methodFast();
-      },
-      SinkService_methodFast_SinkPayload::class,
-      SinkService_methodFast_FinalResponse::class,
-    );
-  }
   protected async function process_methodFast(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('methodFast');
     $reply_type = \TMessageType::REPLY;
@@ -579,6 +411,106 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'methodFast', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'method':
+        return new \ThriftServiceSinkResponseMethod(
+          SinkService_method_args::class,
+          SinkService_method_FirstResponse::class,
+          async (
+            SinkServiceAsyncIf $handler,
+            SinkService_method_args $args,
+          )[defaults] ==> {
+            return await $handler->method();
+          },
+          SinkService_method_SinkPayload::class,
+          SinkService_method_FinalResponse::class,
+        );
+      case 'methodAndReponse':
+        return new \ThriftServiceSinkResponseMethod(
+          SinkService_methodAndReponse_args::class,
+          SinkService_methodAndReponse_FirstResponse::class,
+          async (
+            SinkServiceAsyncIf $handler,
+            SinkService_methodAndReponse_args $args,
+          )[defaults] ==> {
+            return await $handler->methodAndReponse();
+          },
+          SinkService_methodAndReponse_SinkPayload::class,
+          SinkService_methodAndReponse_FinalResponse::class,
+        );
+      case 'methodThrow':
+        return new \ThriftServiceSinkResponseMethod(
+          SinkService_methodThrow_args::class,
+          SinkService_methodThrow_FirstResponse::class,
+          async (
+            SinkServiceAsyncIf $handler,
+            SinkService_methodThrow_args $args,
+          )[defaults] ==> {
+            return await $handler->methodThrow();
+          },
+          SinkService_methodThrow_SinkPayload::class,
+          SinkService_methodThrow_FinalResponse::class,
+        );
+      case 'methodSinkThrow':
+        return new \ThriftServiceSinkResponseMethod(
+          SinkService_methodSinkThrow_args::class,
+          SinkService_methodSinkThrow_FirstResponse::class,
+          async (
+            SinkServiceAsyncIf $handler,
+            SinkService_methodSinkThrow_args $args,
+          )[defaults] ==> {
+            return await $handler->methodSinkThrow();
+          },
+          SinkService_methodSinkThrow_SinkPayload::class,
+          SinkService_methodSinkThrow_FinalResponse::class,
+        );
+      case 'methodFinalThrow':
+        return new \ThriftServiceSinkResponseMethod(
+          SinkService_methodFinalThrow_args::class,
+          SinkService_methodFinalThrow_FirstResponse::class,
+          async (
+            SinkServiceAsyncIf $handler,
+            SinkService_methodFinalThrow_args $args,
+          )[defaults] ==> {
+            return await $handler->methodFinalThrow();
+          },
+          SinkService_methodFinalThrow_SinkPayload::class,
+          SinkService_methodFinalThrow_FinalResponse::class,
+        );
+      case 'methodBothThrow':
+        return new \ThriftServiceSinkResponseMethod(
+          SinkService_methodBothThrow_args::class,
+          SinkService_methodBothThrow_FirstResponse::class,
+          async (
+            SinkServiceAsyncIf $handler,
+            SinkService_methodBothThrow_args $args,
+          )[defaults] ==> {
+            return await $handler->methodBothThrow();
+          },
+          SinkService_methodBothThrow_SinkPayload::class,
+          SinkService_methodBothThrow_FinalResponse::class,
+        );
+      case 'methodFast':
+        return new \ThriftServiceSinkResponseMethod(
+          SinkService_methodFast_args::class,
+          SinkService_methodFast_FirstResponse::class,
+          async (
+            SinkServiceAsyncIf $handler,
+            SinkService_methodFast_args $args,
+          )[defaults] ==> {
+            return await $handler->methodFast();
+          },
+          SinkService_methodFast_SinkPayload::class,
+          SinkService_methodFast_FinalResponse::class,
+        );
+      default:
+        return null;
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, SinkServiceStaticMetadata::class);

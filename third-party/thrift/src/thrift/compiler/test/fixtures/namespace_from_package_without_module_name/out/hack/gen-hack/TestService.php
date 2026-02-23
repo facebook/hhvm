@@ -88,24 +88,6 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_init(
-  ): \ThriftServiceRequestResponseMethod<
-    TestServiceAsyncIf,
-    \test\namespace_from_package_without_module_name\TestService_init_args,
-    \test\namespace_from_package_without_module_name\TestService_init_result,
-    int,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      \test\namespace_from_package_without_module_name\TestService_init_args::class,
-      \test\namespace_from_package_without_module_name\TestService_init_result::class,
-      async (
-        TestServiceAsyncIf $handler,
-        \test\namespace_from_package_without_module_name\TestService_init_args $args,
-      )[defaults] ==> {
-        return await $handler->init($args->int1);
-      },
-    );
-  }
   protected async function process_init(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('init');
     $reply_type = \TMessageType::REPLY;
@@ -121,6 +103,26 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'init', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'init':
+        return new \ThriftServiceRequestResponseMethod(
+          \test\namespace_from_package_without_module_name\TestService_init_args::class,
+          \test\namespace_from_package_without_module_name\TestService_init_result::class,
+          async (
+            TestServiceAsyncIf $handler,
+            \test\namespace_from_package_without_module_name\TestService_init_args $args,
+          )[defaults] ==> {
+            return await $handler->init($args->int1);
+          },
+        );
+      default:
+        return null;
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, TestServiceStaticMetadata::class);

@@ -87,25 +87,6 @@ abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = RenamedServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = RenamedServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_simple_rpc(
-  ): \ThriftServiceRequestResponseMethod<
-    RenamedServiceAsyncIf,
-    \test\fixtures\basic\RenamedService_simple_rpc_args,
-    \test\fixtures\basic\RenamedService_simple_rpc_result,
-    null,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      \test\fixtures\basic\RenamedService_simple_rpc_args::class,
-      \test\fixtures\basic\RenamedService_simple_rpc_result::class,
-      async (
-        RenamedServiceAsyncIf $handler,
-        \test\fixtures\basic\RenamedService_simple_rpc_args $args,
-      )[defaults] ==> {
-        await $handler->simple_rpc();
-        return null;
-      },
-    );
-  }
   protected async function process_simple_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('simple_rpc');
     $reply_type = \TMessageType::REPLY;
@@ -121,6 +102,27 @@ abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'simple_rpc', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'simple_rpc':
+        return new \ThriftServiceRequestResponseMethod(
+          \test\fixtures\basic\RenamedService_simple_rpc_args::class,
+          \test\fixtures\basic\RenamedService_simple_rpc_result::class,
+          async (
+            RenamedServiceAsyncIf $handler,
+            \test\fixtures\basic\RenamedService_simple_rpc_args $args,
+          )[defaults] ==> {
+            await $handler->simple_rpc();
+            return null;
+          },
+        );
+      default:
+        return null;
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, RenamedServiceStaticMetadata::class);

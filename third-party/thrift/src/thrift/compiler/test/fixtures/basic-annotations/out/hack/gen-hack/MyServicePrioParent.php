@@ -108,25 +108,6 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioParentStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_ping(
-  ): \ThriftServiceRequestResponseMethod<
-    MyServicePrioParentAsyncIf,
-    MyServicePrioParent_ping_args,
-    MyServicePrioParent_ping_result,
-    null,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      MyServicePrioParent_ping_args::class,
-      MyServicePrioParent_ping_result::class,
-      async (
-        MyServicePrioParentAsyncIf $handler,
-        MyServicePrioParent_ping_args $args,
-      )[defaults] ==> {
-        await $handler->ping();
-        return null;
-      },
-    );
-  }
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
@@ -143,25 +124,6 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
     }
     $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_pong(
-  ): \ThriftServiceRequestResponseMethod<
-    MyServicePrioParentAsyncIf,
-    MyServicePrioParent_pong_args,
-    MyServicePrioParent_pong_result,
-    null,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      MyServicePrioParent_pong_args::class,
-      MyServicePrioParent_pong_result::class,
-      async (
-        MyServicePrioParentAsyncIf $handler,
-        MyServicePrioParent_pong_args $args,
-      )[defaults] ==> {
-        await $handler->pong();
-        return null;
-      },
-    );
-  }
   protected async function process_pong(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('pong');
     $reply_type = \TMessageType::REPLY;
@@ -177,6 +139,39 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'pong', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'ping':
+        return new \ThriftServiceRequestResponseMethod(
+          MyServicePrioParent_ping_args::class,
+          MyServicePrioParent_ping_result::class,
+          async (
+            MyServicePrioParentAsyncIf $handler,
+            MyServicePrioParent_ping_args $args,
+          )[defaults] ==> {
+            await $handler->ping();
+            return null;
+          },
+        );
+      case 'pong':
+        return new \ThriftServiceRequestResponseMethod(
+          MyServicePrioParent_pong_args::class,
+          MyServicePrioParent_pong_result::class,
+          async (
+            MyServicePrioParentAsyncIf $handler,
+            MyServicePrioParent_pong_args $args,
+          )[defaults] ==> {
+            await $handler->pong();
+            return null;
+          },
+        );
+      default:
+        return null;
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServicePrioParentStaticMetadata::class);

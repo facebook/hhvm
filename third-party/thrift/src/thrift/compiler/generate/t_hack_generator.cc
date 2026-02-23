@@ -519,10 +519,11 @@ class t_hack_generator : public t_concat_generator {
       const t_function* tfunction,
       bool legacy_arrays = false);
   void generate_service_processor(const t_service* tservice, bool mangle);
-  void generate_method_metadata_function(
+  void generate_get_method_metadata_function(
+      const t_service* tservice, bool mangle);
+  void generate_method_metadata_inline(
       const t_service* tservice, const t_function* tfunction, bool mangle);
   void generate_handler_call_args(const t_function* tfunction);
-  void generate_method_metadata_close();
   void generate_process_function(
       const t_service* tservice, const t_function* tfunction, bool async);
   void generate_process_metadata_function(
@@ -5754,15 +5755,18 @@ void t_hack_generator::generate_service_processor(
 
   indent_up();
 
-  // Generate both old (process_*) and new (getMethodMetadata*) patterns.
+  // Generate both old (process_*) and new (getMethodMetadata) patterns.
   // A runtime killswitch (KS::THRIFT_USE_METHOD_METADATA_PROCESSOR) controls
   // which pattern is used in ThriftAsyncProcessor::processAsync.
   for (const auto* function : get_supported_server_functions(tservice, true)) {
     if (!skip_codegen(function)) {
-      generate_method_metadata_function(tservice, function, mangle);
       generate_process_function(tservice, function, /*async=*/true);
     }
   }
+  // Generate the unified getMethodMetadata function with a switch statement
+  // that inlines method metadata creation for each method.
+  // This replaces dynamic dispatch with static method lookup.
+  generate_get_method_metadata_function(tservice, mangle);
   generate_process_metadata_function(tservice, mangle);
 
   indent_down();
@@ -5793,21 +5797,71 @@ void t_hack_generator::generate_handler_call_args(const t_function* tfunction) {
 }
 
 /**
- * Generates the closing block for a method metadata function.
+ * Generates a single getMethodMetadata(string) function that returns method
+ * metadata for the given method name using a switch statement over all methods.
+ * Returns null if the method is not supported.
+ *
+ * This replaces dynamic dispatch with a static switch statement, eliminating
+ * the need for isSupportedMethod() checks. The metadata creation is inlined
+ * directly in each case of the switch statement.
+ *
+ * @param tservice The service containing the methods
  */
-void t_hack_generator::generate_method_metadata_close() {
+void t_hack_generator::generate_get_method_metadata_function(
+    const t_service* tservice, bool mangle) {
+  std::string long_name = php_servicename_mangle(mangle, tservice);
+
+  // Generate function signature
+  f_service_ << indent() << "<<__Override>>\n"
+             << indent() << "protected static function getMethodMetadata(\n"
+             << indent() << "  string $fn_name,\n"
+             << indent()
+             << "): ?\\IThriftServiceMethodMetadata<this::TThriftIf> {\n";
+  indent_up();
+
+  // Generate switch statement
+  f_service_ << indent() << "switch ($fn_name) {\n";
+  indent_up();
+
+  // Generate case for each method with inlined metadata creation
+  for (const auto* function : get_supported_server_functions(tservice, true)) {
+    if (!skip_codegen(function)) {
+      const std::string& fn_name = find_hack_name(function);
+      f_service_ << indent() << "case '" << fn_name << "':\n";
+      indent_up();
+      generate_method_metadata_inline(tservice, function, mangle);
+      indent_down();
+    }
+  }
+
+  // Default case: delegate to parent if service extends another, else null
+  f_service_ << indent() << "default:\n";
+  indent_up();
+  if (tservice->extends() != nullptr) {
+    // Service has a parent - delegate to parent's getMethodMetadata
+    f_service_ << indent() << "return parent::getMethodMetadata($fn_name);\n";
+  } else {
+    // Root service - return null for unsupported methods
+    f_service_ << indent() << "return null;\n";
+  }
+  indent_down();
+
+  indent_down();
+  f_service_ << indent() << "}\n";
+
   indent_down();
   f_service_ << indent() << "}\n";
 }
 
 /**
- * Generates a getMethodMetadata* function for a service method.
- * Method names use lowerCamelCase: getMethodMetadata + CapitalizedMethodName
+ * Generates inlined method metadata creation for a service method.
+ * This is called from within the switch statement in getMethodMetadata().
  *
  * @param tservice The service containing the method
  * @param tfunction The function to generate metadata for
+ * @param mangle Whether to mangle names
  */
-void t_hack_generator::generate_method_metadata_function(
+void t_hack_generator::generate_method_metadata_inline(
     const t_service* tservice, const t_function* tfunction, bool mangle) {
   std::string long_name = php_servicename_mangle(mangle, tservice);
   const std::string& fn_name = find_hack_name(tfunction);
@@ -5826,29 +5880,6 @@ void t_hack_generator::generate_method_metadata_function(
     std::string stream_response_name = generate_function_helper_name(
         tservice, tfunction, PhpFunctionNameSuffix::STREAM_RESPONSE);
 
-    // Get the stream element type
-    std::string stream_elem_type =
-        type_to_typehint(tfunction->stream()->elem_type().get_type());
-
-    // Get the first response type (null if void)
-    std::string first_response_type = "null";
-    if (!tfunction->has_void_initial_response()) {
-      first_response_type =
-          type_to_typehint(tfunction->return_type().get_type());
-    }
-
-    f_service_ << indent() << "protected function getMethodMetadata_" << fn_name
-               << "(\n"
-               << indent() << "): \\ThriftServiceStreamingResponseMethod<\n"
-               << indent() << "  " << long_name << "AsyncIf,\n"
-               << indent() << "  " << argsname << ",\n"
-               << indent() << "  " << first_response_name << ",\n"
-               << indent() << "  " << first_response_type << ",\n"
-               << indent() << "  " << stream_response_name << ",\n"
-               << indent() << "  " << stream_elem_type << ",\n"
-               << indent() << "> {\n";
-    indent_up();
-
     f_service_ << indent()
                << "return new \\ThriftServiceStreamingResponseMethod(\n"
                << indent() << "  " << argsname << "::class,\n"
@@ -5865,8 +5896,6 @@ void t_hack_generator::generate_method_metadata_function(
                << indent() << "  },\n"
                << indent() << "  " << stream_response_name << "::class,\n"
                << indent() << ");\n";
-
-    generate_method_metadata_close();
   } else if (is_sink) {
     // Sink method
     std::string first_response_name = generate_function_helper_name(
@@ -5876,36 +5905,7 @@ void t_hack_generator::generate_method_metadata_function(
     std::string final_response_name = generate_function_helper_name(
         tservice, tfunction, PhpFunctionNameSuffix::SINK_FINAL_RESPONSE);
 
-    // Get the sink element type
-    std::string sink_elem_type =
-        type_to_typehint(tfunction->sink()->elem_type().get_type());
-
-    // Get the final response type
-    std::string final_response_type =
-        type_to_typehint(tfunction->sink()->final_response_type().get_type());
-
-    // Get the first response type (null if void)
-    std::string first_response_type = "null";
-    if (!tfunction->has_void_initial_response()) {
-      first_response_type =
-          type_to_typehint(tfunction->return_type().get_type());
-    }
-
-    f_service_ << indent() << "protected function getMethodMetadata_" << fn_name
-               << "(\n"
-               << indent() << "): \\ThriftServiceSinkMethod<\n"
-               << indent() << "  " << long_name << "AsyncIf,\n"
-               << indent() << "  " << argsname << ",\n"
-               << indent() << "  " << first_response_name << ",\n"
-               << indent() << "  " << first_response_type << ",\n"
-               << indent() << "  " << sink_payload_name << ",\n"
-               << indent() << "  " << sink_elem_type << ",\n"
-               << indent() << "  " << final_response_name << ",\n"
-               << indent() << "  " << final_response_type << ",\n"
-               << indent() << "> {\n";
-    indent_up();
-
-    f_service_ << indent() << "return new \\ThriftServiceSinkMethod(\n"
+    f_service_ << indent() << "return new \\ThriftServiceSinkResponseMethod(\n"
                << indent() << "  " << argsname << "::class,\n"
                << indent() << "  " << first_response_name << "::class,\n"
                << indent() << "  async (\n"
@@ -5921,8 +5921,6 @@ void t_hack_generator::generate_method_metadata_function(
                << indent() << "  " << sink_payload_name << "::class,\n"
                << indent() << "  " << final_response_name << "::class,\n"
                << indent() << ");\n";
-
-    generate_method_metadata_close();
   } else {
     // Request-response method
     std::string resultname = generate_function_helper_name(
@@ -5932,16 +5930,6 @@ void t_hack_generator::generate_method_metadata_function(
 
     if (is_oneway) {
       // Oneway methods use ThriftServiceOnewayMethod (no response)
-      // Unlike request-response methods, oneway methods don't need a result
-      // type since they never send responses back to the client
-      f_service_ << indent() << "protected function getMethodMetadata_"
-                 << fn_name << "(\n"
-                 << indent() << "): \\ThriftServiceOnewayMethod<\n"
-                 << indent() << "  " << long_name << "AsyncIf,\n"
-                 << indent() << "  " << argsname << ",\n"
-                 << indent() << "> {\n";
-      indent_up();
-
       f_service_ << indent() << "return new \\ThriftServiceOnewayMethod(\n"
                  << indent() << "  " << argsname << "::class,\n"
                  << indent() << "  async (\n"
@@ -5954,26 +5942,8 @@ void t_hack_generator::generate_method_metadata_function(
       f_service_ << ");\n";
 
       f_service_ << indent() << "  },\n" << indent() << ");\n";
-
-      generate_method_metadata_close();
     } else {
       // Regular request-response methods
-      // Get the return type
-      std::string return_type = "null";
-      if (!is_void) {
-        return_type = type_to_typehint(tfunction->return_type().get_type());
-      }
-
-      f_service_ << indent() << "protected function getMethodMetadata_"
-                 << fn_name << "(\n"
-                 << indent() << "): \\ThriftServiceRequestResponseMethod<\n"
-                 << indent() << "  " << long_name << "AsyncIf,\n"
-                 << indent() << "  " << argsname << ",\n"
-                 << indent() << "  " << resultname << ",\n"
-                 << indent() << "  " << return_type << ",\n"
-                 << indent() << "> {\n";
-      indent_up();
-
       f_service_ << indent()
                  << "return new \\ThriftServiceRequestResponseMethod(\n"
                  << indent() << "  " << argsname << "::class,\n"
@@ -5995,8 +5965,6 @@ void t_hack_generator::generate_method_metadata_function(
       }
 
       f_service_ << indent() << "  },\n" << indent() << ");\n";
-
-      generate_method_metadata_close();
     }
   }
 }

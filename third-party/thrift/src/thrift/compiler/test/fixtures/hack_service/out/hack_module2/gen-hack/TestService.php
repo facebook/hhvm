@@ -123,24 +123,6 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_ping(
-  ): \ThriftServiceRequestResponseMethod<
-    TestServiceAsyncIf,
-    \hack_ns2\TestService_ping_args,
-    \hack_ns2\TestService_ping_result,
-    int,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      \hack_ns2\TestService_ping_args::class,
-      \hack_ns2\TestService_ping_result::class,
-      async (
-        TestServiceAsyncIf $handler,
-        \hack_ns2\TestService_ping_args $args,
-      )[defaults] ==> {
-        return await $handler->ping($args->str_arg);
-      },
-    );
-  }
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
@@ -161,25 +143,6 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
     }
     $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
-  protected function getMethodMetadata_voidMethod(
-  ): \ThriftServiceRequestResponseMethod<
-    TestServiceAsyncIf,
-    \hack_ns2\TestService_voidMethod_args,
-    \hack_ns2\TestService_voidMethod_result,
-    null,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      \hack_ns2\TestService_voidMethod_args::class,
-      \hack_ns2\TestService_voidMethod_result::class,
-      async (
-        TestServiceAsyncIf $handler,
-        \hack_ns2\TestService_voidMethod_args $args,
-      )[defaults] ==> {
-        await $handler->voidMethod();
-        return null;
-      },
-    );
-  }
   protected async function process_voidMethod(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('voidMethod');
     $reply_type = \TMessageType::REPLY;
@@ -195,6 +158,38 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'voidMethod', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'ping':
+        return new \ThriftServiceRequestResponseMethod(
+          \hack_ns2\TestService_ping_args::class,
+          \hack_ns2\TestService_ping_result::class,
+          async (
+            TestServiceAsyncIf $handler,
+            \hack_ns2\TestService_ping_args $args,
+          )[defaults] ==> {
+            return await $handler->ping($args->str_arg);
+          },
+        );
+      case 'voidMethod':
+        return new \ThriftServiceRequestResponseMethod(
+          \hack_ns2\TestService_voidMethod_args::class,
+          \hack_ns2\TestService_voidMethod_result::class,
+          async (
+            TestServiceAsyncIf $handler,
+            \hack_ns2\TestService_voidMethod_args $args,
+          )[defaults] ==> {
+            await $handler->voidMethod();
+            return null;
+          },
+        );
+      default:
+        return parent::getMethodMetadata($fn_name);
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, TestServiceStaticMetadata::class);

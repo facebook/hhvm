@@ -81,25 +81,6 @@ abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentA
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioChildStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_pang(
-  ): \ThriftServiceRequestResponseMethod<
-    MyServicePrioChildAsyncIf,
-    MyServicePrioChild_pang_args,
-    MyServicePrioChild_pang_result,
-    null,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      MyServicePrioChild_pang_args::class,
-      MyServicePrioChild_pang_result::class,
-      async (
-        MyServicePrioChildAsyncIf $handler,
-        MyServicePrioChild_pang_args $args,
-      )[defaults] ==> {
-        await $handler->pang();
-        return null;
-      },
-    );
-  }
   protected async function process_pang(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('pang');
     $reply_type = \TMessageType::REPLY;
@@ -115,6 +96,27 @@ abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentA
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'pang', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'pang':
+        return new \ThriftServiceRequestResponseMethod(
+          MyServicePrioChild_pang_args::class,
+          MyServicePrioChild_pang_result::class,
+          async (
+            MyServicePrioChildAsyncIf $handler,
+            MyServicePrioChild_pang_args $args,
+          )[defaults] ==> {
+            await $handler->pang();
+            return null;
+          },
+        );
+      default:
+        return parent::getMethodMetadata($fn_name);
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServicePrioChildStaticMetadata::class);

@@ -83,24 +83,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  protected function getMethodMetadata_second(
-  ): \ThriftServiceRequestResponseMethod<
-    MyServiceAsyncIf,
-    MyService_second_args,
-    MyService_second_result,
-    bool,
-  > {
-    return new \ThriftServiceRequestResponseMethod(
-      MyService_second_args::class,
-      MyService_second_result::class,
-      async (
-        MyServiceAsyncIf $handler,
-        MyService_second_args $args,
-      )[defaults] ==> {
-        return await $handler->second($args->count);
-      },
-    );
-  }
   protected async function process_second(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('second');
     $reply_type = \TMessageType::REPLY;
@@ -116,6 +98,26 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
     }
     $this->writeHelper($result, 'second', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  <<__Override>>
+  protected static function getMethodMetadata(
+    string $fn_name,
+  ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
+    switch ($fn_name) {
+      case 'second':
+        return new \ThriftServiceRequestResponseMethod(
+          MyService_second_args::class,
+          MyService_second_result::class,
+          async (
+            MyServiceAsyncIf $handler,
+            MyService_second_args $args,
+          )[defaults] ==> {
+            return await $handler->second($args->count);
+          },
+        );
+      default:
+        return null;
+    }
   }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, MyServiceStaticMetadata::class);

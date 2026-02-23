@@ -1,0 +1,127 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "codec/codec" as codec}}
+
+{{! Defines the mapping from a Thrift primitive type to codec primitive type. }}
+{{#let export partial codec_primitive_type |type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.bool?}}CODEC_PRIMITIVE_TYPE_BOOL
+{{#else if type.byte?}}CODEC_PRIMITIVE_TYPE_BYTE
+{{#else if type.i16?}}CODEC_PRIMITIVE_TYPE_I16
+{{#else if type.i32?}}CODEC_PRIMITIVE_TYPE_I32
+{{#else if type.i64?}}CODEC_PRIMITIVE_TYPE_I64
+{{#else if type.float?}}CODEC_PRIMITIVE_TYPE_FLOAT
+{{#else if type.double?}}CODEC_PRIMITIVE_TYPE_DOUBLE
+{{#else if type.string?}}CODEC_PRIMITIVE_TYPE_STRING
+{{#else if type.binary?}}CODEC_PRIMITIVE_TYPE_BINARY
+{{#else if type.void?}}CODEC_PRIMITIVE_TYPE_VOID
+{{/if type.bool?}}
+{{/let partial}}
+
+{{! Defines a codec spec instance for a Thrift type. }}
+{{#let export partial codec_type_spec_instance |type| captures |codec codec_primitive_type|}}
+{{#if (and type.typedef? type.defined_kind?)}}
+&thrift.CodecTypedefSpec{
+    ScopedName:         "{{type.scoped_name}}",
+    UnderlyingTypeSpec: {{type.resolved.codec_type_spec_getter}},
+},
+{{#else if type.primitive?}}
+&thrift.CodecPrimitiveSpec{
+    PrimitiveType: thrift.{{#partial codec_primitive_type type=type}},
+},
+{{#else if type.enum?}}
+&thrift.CodecEnumSpec{
+    ScopedName: "{{type.scoped_name}}",
+},
+{{#else if type.structured?}}
+&thrift.CodecStructSpec{
+    ScopedName: "{{type.scoped_name}}",
+    IsUnion:    {{type.union?}},
+    NewFunc:    func() thrift.Struct { return {{type.go_qualified_new_func}}() },
+},
+{{#else if type.list?}}
+&thrift.CodecListSpec{
+    ElementWireType: {{#partial codec.ttype type=type.elem_type}},
+    ElementTypeSpec: {{type.elem_type.codec_type_spec_getter}},
+},
+{{#else if type.map?}}
+&thrift.CodecMapSpec{
+    KeyTypeSpec:   {{type.key_type.codec_type_spec_getter}},
+    ValueTypeSpec: {{type.val_type.codec_type_spec_getter}},
+    KeyWireType:   {{#partial codec.ttype type=type.key_type}},
+    ValueWireType: {{#partial codec.ttype type=type.val_type}},
+},
+{{#else if type.set?}}
+&thrift.CodecSetSpec{
+    ElementWireType: {{#partial codec.ttype type=type.elem_type}},
+    ElementTypeSpec: {{type.elem_type.codec_type_spec_getter}},
+},
+{{/if (and type.typedef? type.defined_kind?)}}
+{{/let partial}}
+
+{{! Defines a spec for a Thrift struct field. }}
+{{#let export partial codec_field_spec |field index| captures |codec|}}
+{
+    ID:                   {{field.id}},
+    WireType:             {{#partial codec.ttype type=field.type}},
+    Name:                 "{{field.name}}",
+    ReflectIndex:         {{index}},
+    IsOptional:           {{field.optional?}},
+    ValueTypeSpec:        {{field.type.codec_type_spec_getter}},
+    MustBeSetToSerialize: {{field.must_be_set_to_serialize?}},
+},
+{{/let partial}}
+
+{{! Defines a spec for a Thrift struct. }}
+{{#let export partial codec_struct_spec |struct| captures |codec_field_spec|}}
+&thrift.StructSpec{
+    Name:                 "{{struct.name}}",
+    ScopedName:           "{{struct.scoped_name}}",
+    IsUnion:              {{struct.union?}},
+    IsException:          {{struct.exception?}},
+    FieldSpecs:           []thrift.FieldSpec{
+        {{#each (array.enumerate struct.fields_sorted) as |index field|}}
+        {{#partial codec_field_spec field=field index=index}}
+        {{/each}}
+    },
+    FieldSpecIDToIndex:   map[int16]int{
+        {{#each (array.enumerate struct.fields_sorted) as |index field|}}
+        {{field.id}}: {{index}},
+        {{/each}}
+    },
+    FieldSpecNameToIndex: map[string]int{
+        {{#each (array.enumerate struct.fields_sorted) as |index field|}}
+        "{{field.name}}": {{index}},
+        {{/each}}
+    },
+}
+{{/let partial}}
+
+{{! Defines the mapping from a Thrift type to a corresponding TypeSpec field name. }}
+{{#let export partial codec_type_spec_setter |type|}}
+  {{#pragma ignore-newlines}}
+{{#if (and type.typedef? type.defined_kind?)}}CodecTypedefSpec
+{{#else if type.typedef?}}{{#partial codec_type_spec_setter type=type.resolved}}
+{{#else if type.metadata_primitive?}}CodecPrimitiveSpec
+{{#else if type.enum?}}CodecEnumSpec
+{{#else if type.structured?}}CodecStructSpec
+{{#else if type.list?}}CodecListSpec
+{{#else if type.map?}}CodecMapSpec
+{{#else if type.set?}}CodecSetSpec
+{{/if (and type.typedef? type.defined_kind?)}}
+{{/let partial}}

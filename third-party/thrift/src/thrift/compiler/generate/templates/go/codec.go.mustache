@@ -25,6 +25,7 @@
 }}
 {{#import "common/constants" as constants}}
 {{#import "codec/codec" as codec}}
+{{#import "spec/spec" as spec}}
 {{> common/auto_generated_go}}
 
 package {{program:go_pkg_name}}
@@ -45,8 +46,8 @@ var (
     {{#program:thrift_metadata_types}}
     {{type:codec_type_spec_name}} = &thrift.TypeSpec{
         FullName: "{{type:full_name}}",
-        {{> spec/codec_type_spec_setter}}:
-            {{> spec/codec_type_spec_instance}}
+        {{#partial spec.codec_type_spec_setter type=type:self}}:
+            {{#partial spec.codec_type_spec_instance type=type:self}}
     }
     {{/program:thrift_metadata_types}}
 )
@@ -55,11 +56,11 @@ var (
 var (
     {{#program:structs}}
     {{struct:struct_spec_name}} =
-        {{> spec/codec_struct_spec}}
+        {{#partial spec.codec_struct_spec struct=struct:self}}
     {{/program:structs}}
     {{#program:req_resp_structs}}
     {{struct:struct_spec_name}} =
-        {{> spec/codec_struct_spec}}
+        {{#partial spec.codec_struct_spec struct=struct:self}}
     {{/program:req_resp_structs}}
 )
 

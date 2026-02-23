@@ -303,7 +303,7 @@ func (x *MyUnion) countSetFields() int {
     return count
 }
 
-func (x *MyUnion) CountSetFieldsMyUnion() int {
+func (x *MyUnion) CountSetFields() int {
     return x.countSetFields()
 }
 

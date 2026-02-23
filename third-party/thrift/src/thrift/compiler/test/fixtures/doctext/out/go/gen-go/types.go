@@ -352,7 +352,7 @@ func (x *U) countSetFields() int {
     return count
 }
 
-func (x *U) CountSetFieldsU() int {
+func (x *U) CountSetFields() int {
     return x.countSetFields()
 }
 

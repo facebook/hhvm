@@ -2000,7 +2000,7 @@ func (x *Union1) countSetFields() int {
     return count
 }
 
-func (x *Union1) CountSetFieldsUnion1() int {
+func (x *Union1) CountSetFields() int {
     return x.countSetFields()
 }
 
@@ -2324,7 +2324,7 @@ func (x *Union2) countSetFields() int {
     return count
 }
 
-func (x *Union2) CountSetFieldsUnion2() int {
+func (x *Union2) CountSetFields() int {
     return x.countSetFields()
 }
 

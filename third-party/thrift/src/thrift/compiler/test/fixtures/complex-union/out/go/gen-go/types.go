@@ -497,7 +497,7 @@ func (x *ComplexUnion) countSetFields() int {
     return count
 }
 
-func (x *ComplexUnion) CountSetFieldsComplexUnion() int {
+func (x *ComplexUnion) CountSetFields() int {
     return x.countSetFields()
 }
 
@@ -783,7 +783,7 @@ func (x *ListUnion) countSetFields() int {
     return count
 }
 
-func (x *ListUnion) CountSetFieldsListUnion() int {
+func (x *ListUnion) CountSetFields() int {
     return x.countSetFields()
 }
 
@@ -992,7 +992,7 @@ func (x *DataUnion) countSetFields() int {
     return count
 }
 
-func (x *DataUnion) CountSetFieldsDataUnion() int {
+func (x *DataUnion) CountSetFields() int {
     return x.countSetFields()
 }
 
@@ -1429,7 +1429,7 @@ func (x *ValUnion) countSetFields() int {
     return count
 }
 
-func (x *ValUnion) CountSetFieldsValUnion() int {
+func (x *ValUnion) CountSetFields() int {
     return x.countSetFields()
 }
 
@@ -1639,7 +1639,7 @@ func (x *VirtualComplexUnion) countSetFields() int {
     return count
 }
 
-func (x *VirtualComplexUnion) CountSetFieldsVirtualComplexUnion() int {
+func (x *VirtualComplexUnion) CountSetFields() int {
     return x.countSetFields()
 }
 
@@ -1917,7 +1917,7 @@ func (x *NonCopyableUnion) countSetFields() int {
     return count
 }
 
-func (x *NonCopyableUnion) CountSetFieldsNonCopyableUnion() int {
+func (x *NonCopyableUnion) CountSetFields() int {
     return x.countSetFields()
 }
 

@@ -2856,7 +2856,7 @@ func (x *Baz) countSetFields() int {
     return count
 }
 
-func (x *Baz) CountSetFieldsBaz() int {
+func (x *Baz) CountSetFields() int {
     return x.countSetFields()
 }
 
@@ -7077,7 +7077,7 @@ func (x *AdaptTestUnion) countSetFields() int {
     return count
 }
 
-func (x *AdaptTestUnion) CountSetFieldsAdaptTestUnion() int {
+func (x *AdaptTestUnion) CountSetFields() int {
     return x.countSetFields()
 }
 

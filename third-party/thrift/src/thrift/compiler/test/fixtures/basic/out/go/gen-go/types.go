@@ -1395,7 +1395,7 @@ func (x *MyUnion) countSetFields() int {
     return count
 }
 
-func (x *MyUnion) CountSetFieldsMyUnion() int {
+func (x *MyUnion) CountSetFields() int {
     return x.countSetFields()
 }
 
@@ -2280,7 +2280,7 @@ func (x *UnionToBeRenamed) countSetFields() int {
     return count
 }
 
-func (x *UnionToBeRenamed) CountSetFieldsUnionToBeRenamed() int {
+func (x *UnionToBeRenamed) CountSetFields() int {
     return x.countSetFields()
 }
 

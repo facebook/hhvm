@@ -109,7 +109,7 @@ func (x *Nada) countSetFields() int {
     return count
 }
 
-func (x *Nada) CountSetFieldsNada() int {
+func (x *Nada) CountSetFields() int {
     return x.countSetFields()
 }
 

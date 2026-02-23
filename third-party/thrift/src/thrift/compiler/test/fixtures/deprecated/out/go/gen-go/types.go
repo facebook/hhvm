@@ -537,7 +537,7 @@ func (x *ExampleUnion) countSetFields() int {
     return count
 }
 
-func (x *ExampleUnion) CountSetFieldsExampleUnion() int {
+func (x *ExampleUnion) CountSetFields() int {
     return x.countSetFields()
 }
 

@@ -1479,6 +1479,13 @@ module M = struct
     in
     { env with lenv = { env.lenv with per_cont_env } }
 
+  let set_loaded_packages env loaded_packages =
+    let per_cont_env =
+      LEnvC.update_cont_entry C.Next env.lenv.per_cont_env (fun entry ->
+          { entry with LEnvC.loaded_packages })
+    in
+    { env with lenv = { env.lenv with per_cont_env } }
+
   let get_fake_members env =
     match LEnvC.get_cont_option C.Next env.lenv.per_cont_env with
     | None -> Fake.empty

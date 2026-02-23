@@ -979,17 +979,22 @@ let stash_conts_for_closure
             Env.get_fake_members env
         in
         let tpenv = Env.get_tpenv env in
-        (initial_locals, initial_fakes, tpenv))
+        let initial_loaded_packages =
+          next_cont.Typing_per_cont_env.loaded_packages
+        in
+        (initial_locals, initial_fakes, tpenv, initial_loaded_packages))
   in
   LEnv.stash_and_do env (Env.all_continuations env) (fun env ->
       let env =
         match init with
         | None -> env
-        | Some (initial_locals, initial_fakes, tpenv) ->
+        | Some (initial_locals, initial_fakes, tpenv, initial_loaded_packages)
+          ->
           let env = Env.reinitialize_locals env in
           let env = Env.set_locals env initial_locals in
           let env = Env.set_fake_members env initial_fakes in
           let env = Env.env_with_tpenv env tpenv in
+          let env = Env.set_loaded_packages env initial_loaded_packages in
           env
       in
       f env)

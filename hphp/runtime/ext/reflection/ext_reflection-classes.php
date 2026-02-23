@@ -251,7 +251,7 @@ class ReflectionParameter implements Reflector {
    * @return     mixed   TRUE if the parameter is passed in by reference,
    *                     otherwise FALSE
    */
-  public function isPassedByReference()[] {
+  public function isPassedByReference()[]: bool {
     // FIXME: backward compatibility hack for places that were checking for
     //        inout by looking at reffy wrappers.
     return $this->isInOut();
@@ -269,7 +269,7 @@ class ReflectionParameter implements Reflector {
    * @return     mixed   Returns TRUE if the parameter can be passed by value,
    *                     FALSE otherwise. Returns NULL in case of an error.
    */
-  public function canBePassedByValue()[] {
+  public function canBePassedByValue()[]: bool {
     // FIXME: backward compatibility hack for places that were checking for
     //        inout by looking at reffy wrappers.
     return !$this->isInOut();
@@ -280,7 +280,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     bool   TRUE if the parameter is inout, otherwise FALSE
    */
-  public function isInOut()[] {
+  public function isInOut()[]: bool {
     return ($this->info['inout'] ?? false);
   }
 
@@ -289,7 +289,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     bool   TRUE if the parameter is readonly, otherwise FALSE
    */
-  public function isReadonly()[] {
+  public function isReadonly()[]: bool {
     return ($this->info['readonly'] ?? false);
   }
 
@@ -303,7 +303,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   A ReflectionClass object.
    */
-  public function getDeclaringClass()[] {
+  public function getDeclaringClass()[]: ?ReflectionClass {
     if (!($this->info['class'] ?? false)) {
       return null;
     }
@@ -337,7 +337,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   A ReflectionClass object.
    */
-  public function getClass()[] {
+  public function getClass()[]: ?ReflectionClass {
     if (!($this->info['type'] ?? false)) {
       return null;
     }
@@ -407,7 +407,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   TRUE if an array is expected, FALSE otherwise.
    */
-  public function isArray()[] {
+  public function isArray()[]: bool {
     return $this->info['type'] == 'array';
   }
 
@@ -421,7 +421,7 @@ class ReflectionParameter implements Reflector {
    *
    * @return     mixed   TRUE if NULL is allowed, otherwise FALSE
    */
-  public function allowsNull()[] {
+  public function allowsNull()[]: bool {
     return isset($this->info['nullable']);
   }
 
@@ -458,7 +458,7 @@ class ReflectionParameter implements Reflector {
    * @return     mixed   TRUE if a default value is available, otherwise
    *                     FALSE
    */
-  public function isDefaultValueAvailable()[] {
+  public function isDefaultValueAvailable()[]: bool {
     if (!array_key_exists('default', $this->info)) {
       return false;
     }
@@ -584,7 +584,7 @@ class ReflectionParameter implements Reflector {
    * @return     mixed   Returns TRUE if the parameter is callable, FALSE if
    *                     it is not or NULL on failure.
    */
-  public function isCallable()[] {
+  public function isCallable()[]: bool {
     return $this->getTypeText() === 'callable';
   }
 
@@ -946,7 +946,7 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   A ReflectionClass object.
    */
-  public function getDeclaringClass()[] {
+  public function getDeclaringClass()[]: ?ReflectionClass {
     return new ReflectionClass($this->class);
   }
 

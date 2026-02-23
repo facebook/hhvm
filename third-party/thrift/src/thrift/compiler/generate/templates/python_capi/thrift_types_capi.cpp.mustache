@@ -38,13 +38,13 @@ bool ensure_module_imported() {
       ::import_{{program:capi_module_prefix}}__thrift_types_capi));
   return import();
 }
-{{#program:structs}}
+{{#program:structured_definitions}}
 {{> common/tuple_position }}
-{{/program:structs}}
+{{/program:structured_definitions}}
 {{/program:generate_capi?}}
 } // namespace
 
-{{#program:structs}}
+{{#program:structured_definitions}}
 {{#struct:marshal_capi?}}
 ExtractorResult<{{struct:cpp_name}}>
 Extractor<{{> common/wrapped_struct }}>::operator()(PyObject* obj) {
@@ -100,7 +100,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 {{#struct:fields?}}
   std::optional<std::string_view> error;
   {{^struct:union?}}
-  {{#each (array.enumerate struct:self.fields) as |field_index field|}}
+  {{#each (array.enumerate struct:fields) as |field_index field|}}
   Extractor<{{field.marshal_type}}>{}.extractInto(
       cpp.{{field.cpp_name}}_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__{{struct:py_name}}__tuple_pos[{{field_index}}]),
@@ -211,7 +211,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     [[maybe_unused]] const {{struct:cpp_name}}& val) {
   {{^struct:union?}}
   StrongRef fbthrift_data(createStructTuple({{struct:num_fields}}));
-  {{#each (array.enumerate struct:self.fields) as |field_index field|}}
+  {{#each (array.enumerate struct:fields) as |field_index field|}}
   StrongRef _fbthrift__{{field.name}}(
     Constructor<{{field.marshal_type}}>{}
     .constructFrom(val.{{field.cpp_name}}_ref()));
@@ -273,7 +273,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 {{/struct:marshal_capi?}}
 
-{{/program:structs}}
+{{/program:structured_definitions}}
 {{#program:enums}}
 ExtractorResult<{{program:cpp_namespace}}::{{enum:cpp_name}}>
 Extractor<{{> common/wrapped_enum }}>::operator()(PyObject* obj) {

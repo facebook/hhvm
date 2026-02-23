@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-#include <algorithm>
 #include <filesystem>
-#include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -30,10 +28,9 @@
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/cpp/name_resolver.h>
 #include <thrift/compiler/generate/cpp/util.h>
-#include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/python/util.h>
-#include <thrift/compiler/generate/t_mstch_generator.h>
-#include <thrift/compiler/whisker/mstch_compat.h>
+#include <thrift/compiler/generate/t_whisker_generator.h>
+#include <thrift/compiler/generate/templates.h>
 
 namespace apache::thrift::compiler {
 
@@ -445,36 +442,58 @@ class python_capi_generator_context {
   }
 };
 
-class t_mstch_python_capi_generator : public t_mstch_generator {
+class t_mstch_python_capi_generator : public t_whisker_generator {
  public:
-  using t_mstch_generator::t_mstch_generator;
+  using t_whisker_generator::t_whisker_generator;
 
   std::string template_prefix() const override { return "python_capi"; }
 
-  void generate_program() override { generate_types(); }
+  whisker::source_manager template_source_manager() const final {
+    return whisker::source_manager{
+        std::make_unique<in_memory_source_manager_backend>(
+            create_templates_by_path())};
+  }
+
+  void generate_program() override {
+    std::filesystem::path generate_root_path =
+        fmt::format("{}", fmt::join(get_py3_namespace(program_), "/"));
+
+    generate_file("thrift_types_capi.pxd", generate_root_path);
+    generate_file("thrift_types_capi.pyx", generate_root_path);
+    generate_file("thrift_types_capi.h", "");
+    generate_file("thrift_types_capi.cpp", "");
+    generate_file("thrift_converter.pxd", generate_root_path);
+    generate_file("thrift_converter.pyx", generate_root_path);
+  }
 
  private:
-  void generate_file(
-      const std::string& file, const std::filesystem::path& base);
-  void generate_types();
-  std::filesystem::path package_to_path();
-
-  std::filesystem::path generate_root_path_;
-
   // Mutable as it contains caches, but needs to be accessed from `const`
   // contexts
   mutable cpp_name_resolver cpp_resolver_;
   std::unique_ptr<python_capi_generator_context> python_capi_context_;
 
-  void initialize_context(context_visitor& visitor) override {
-    generate_root_path_ = package_to_path();
+  void process_options(
+      const std::map<std::string, std::string>& options) override {
+    t_whisker_generator::process_options(options);
     out_dir_base_ = "gen-python-capi";
     if (std::string_view include_prefix =
             get_compiler_option("include_prefix").value_or("");
         !include_prefix.empty()) {
       program_->set_include_prefix(std::string(include_prefix));
     }
+  }
 
+  void generate_file(
+      const std::string& file, const std::filesystem::path& base) {
+    whisker::object context = whisker::make::native_handle(
+        render_state().prototypes->create<t_program>(*program_));
+    t_whisker_generator::render_to_file(
+        /*output_file=*/base / program_->name() / file,
+        /*template_file=*/file,
+        /*context=*/context);
+  }
+
+  void initialize_context(context_visitor& visitor) override {
     python_capi_context_ = std::make_unique<python_capi_generator_context>(
         program_,
         /*serialize_python_capi=*/has_compiler_option("serialize_python_capi"));
@@ -612,28 +631,6 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 };
-
-std::filesystem::path t_mstch_python_capi_generator::package_to_path() {
-  auto package = get_py3_namespace(get_program());
-  return fmt::format("{}", fmt::join(package, "/"));
-}
-
-void t_mstch_python_capi_generator::generate_file(
-    const std::string& file, const std::filesystem::path& base = {}) {
-  auto program = get_program();
-  const auto& name = program->name();
-  auto mstch_program = make_mstch_program_cached(program, mstch_context_);
-  render_to_file(mstch_program, file, base / name / file);
-}
-
-void t_mstch_python_capi_generator::generate_types() {
-  generate_file("thrift_types_capi.pxd", generate_root_path_);
-  generate_file("thrift_types_capi.pyx", generate_root_path_);
-  generate_file("thrift_types_capi.h", "");
-  generate_file("thrift_types_capi.cpp", "");
-  generate_file("thrift_converter.pxd", generate_root_path_);
-  generate_file("thrift_converter.pyx", generate_root_path_);
-}
 
 } // namespace
 

@@ -32,7 +32,7 @@ from thrift.python.serializer import (
 )
 import {{program:module_path}}.thrift_types as __thrift_types
 
-{{#program:structs}}
+{{#program:structured_definitions}}
 cdef api int can_extract__{{program:capi_module_prefix}}__{{struct:py_name}}(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.{{struct:py_name}}) else 0
 
@@ -52,7 +52,7 @@ cdef api object construct__{{program:capi_module_prefix}}__{{struct:py_name}}(__
 cdef api object init__{{program:capi_module_prefix}}__{{struct:py_name}}(object data):
     return __thrift_types.{{struct:py_name}}._fbthrift_from_internal_data(data)
 
-{{/program:structs}}
+{{/program:structured_definitions}}
 {{#program:enums}}
 cdef api int can_extract__{{program:capi_module_prefix}}__{{enum:name}}(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.{{enum:name}}) else 0

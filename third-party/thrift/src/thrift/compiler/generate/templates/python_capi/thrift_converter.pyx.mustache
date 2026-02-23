@@ -27,7 +27,7 @@ cdef extern from "{{program:include_prefix}}gen-python-capi/{{program:name}}/thr
         the Extractor and Constructors into cython cpp }}
     cdef cppclass _fbthrift__NamespaceTag "{{program:capi_module_prefix}}::NamespaceTag"
 
-{{#program:structs}}
+{{#program:structured_definitions}}
 {{! thrift-python replacement for py3_struct._cpp_obj, but no heap allocation }}
 cdef c{{struct:py_name}} {{struct:py_name}}_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[c{{struct:py_name}}, _fbthrift__NamespaceTag](inst))
@@ -36,4 +36,4 @@ cdef c{{struct:py_name}} {{struct:py_name}}_convert_to_cpp(object inst) except *
 cdef object {{struct:py_name}}_from_cpp(const c{{struct:py_name}}& c_struct):
     return cpp_to_python[c{{struct:py_name}}, _fbthrift__NamespaceTag](c_struct)
 
-{{/program:structs}}
+{{/program:structured_definitions}}

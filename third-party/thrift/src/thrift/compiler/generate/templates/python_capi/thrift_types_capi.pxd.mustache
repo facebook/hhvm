@@ -26,7 +26,7 @@ from libcpp.memory cimport unique_ptr as __unique_ptr
 from folly.iobuf cimport cIOBuf as __cIOBuf
 
 
-{{#program:structs}}
+{{#program:structured_definitions}}
 cdef api int can_extract__{{program:capi_module_prefix}}__{{struct:py_name}}(object) except -1
 
 {{^struct:marshal_capi?}}
@@ -37,7 +37,7 @@ cdef api object construct__{{program:capi_module_prefix}}__{{struct:py_name}}(__
 
 cdef api object init__{{program:capi_module_prefix}}__{{struct:py_name}}(object data)
 
-{{/program:structs}}
+{{/program:structured_definitions}}
 {{#program:enums}}
 cdef api int can_extract__{{program:capi_module_prefix}}__{{enum:name}}(object) except -1
 

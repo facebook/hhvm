@@ -33,7 +33,7 @@ struct NamespaceTag {};
 } // namespace {{program:capi_module_prefix}}
 
 namespace apache::thrift::python::capi {
-{{#program:structs}}
+{{#program:structured_definitions}}
 template <>
 struct Extractor<{{> common/wrapped_struct }}>
     : public BaseExtractor<{{> common/wrapped_struct }}> {
@@ -67,7 +67,7 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
   PyObject* operator()(const {{struct:cpp_name}}& val);
 };
 
-{{/program:structs}}
+{{/program:structured_definitions}}
 {{#program:enums}}
 template <>
 struct Extractor<{{> common/wrapped_enum }}>

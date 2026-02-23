@@ -303,26 +303,6 @@ end = struct
         let var = Ast_defs.Covariant in
         find_with_variances tys variances ~var ~update ~is_invariant ~acc ~env
 
-  let find_this_in_refinement ty =
-    let open Typing_defs_core in
-    let res = ref false in
-    let on_rc_bound rc_bound ~ctx:_ = (true, `Continue rc_bound)
-    and on_ty ty ~ctx =
-      match get_node ty with
-      | Tthis when ctx ->
-        res := true;
-        (ctx, `Stop ty)
-      | _ -> (ctx, `Continue ty)
-    in
-    let _ =
-      Typing_defs_core.transform_top_down_decl_ty
-        ty
-        ~ctx:false
-        ~on_ty
-        ~on_rc_bound
-    in
-    !res
-
   let mentions_this ty =
     let open Typing_defs_core in
     let res = ref false in
@@ -401,39 +381,26 @@ end = struct
     match v_opt with
     | Some Ast_defs.Invariant -> Some Ast_defs.Invariant
     | _ ->
-      (* The previous traversal is looking for usage of `this` in parameters and return type.
-         However, we also need to prevent the substituion of `this` for its bound if it appears
-         on the rhs of a class refinement in the bound of a type parameter or in a where constraint *)
+      (* The previous traversal handles usage of `this` in parameters, return type,
+         type parameter bounds (including class refinements within those bounds).
+         However, we also need to prevent the substitution of `this` for its bound if it appears
+         in a where constraint *)
       let open Typing_defs_core in
-      let { ft_tparams; ft_where_constraints; _ } = fun_ty in
+      let { ft_where_constraints; _ } = fun_ty in
       let res =
         List.fold_result
-          ft_tparams
+          ft_where_constraints
           ~init:false
-          ~f:(fun acc { tp_constraints; _ } ->
-            List.fold_result tp_constraints ~init:acc ~f:(fun acc (_, ty) ->
-                if find_this_in_refinement ty then
-                  Error ()
-                else
-                  Ok acc))
+          ~f:(fun acc (ty1, _, ty2) ->
+            if mentions_this ty1 || mentions_this ty2 then
+              Error ()
+            else
+              Ok acc)
       in
       if Result.is_error res then
         Some Ast_defs.Invariant
       else
-        let res =
-          List.fold_result
-            ft_where_constraints
-            ~init:false
-            ~f:(fun acc (ty1, _, ty2) ->
-              if mentions_this ty1 || mentions_this ty2 then
-                Error ()
-              else
-                Ok acc)
-        in
-        if Result.is_error res then
-          Some Ast_defs.Invariant
-        else
-          v_opt
+        v_opt
 
   let update_ty_params ty_param_names ty acc var =
     let open Typing_defs_core in

@@ -1113,23 +1113,40 @@ TEST_F(ServerProtocolTest, TestClientHelloAsyncCertFullHandshakeFlow) {
                     SignatureScheme::ecdsa_secp256r1_sha256,
                     MatchType::Direct});
           }));
-  EXPECT_CALL(*asyncCert, _getCertMessage(_));
-  EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
-      .InSequence(contextSeq);
-  EXPECT_CALL(*mockHandshakeContext_, getHandshakeContext())
+  MockHandshakeContext* clonedHandshakeContext;
+  EXPECT_CALL(*mockHandshakeContext_, clone())
       .InSequence(contextSeq)
-      .WillRepeatedly(Invoke(
-          []() { return folly::IOBuf::copyBuffer("chlo_shlo_ee_cert"); }));
+      .WillOnce(InvokeWithoutArgs([&clonedHandshakeContext]() {
+        auto ret = std::make_unique<MockHandshakeContext>();
+        ret->setDefaults();
+        clonedHandshakeContext = ret.get();
+        return ret;
+      }));
   EXPECT_CALL(
       *asyncCert,
-      signFuture(
+      getCertificateAndSign(
+          _,
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
-          BufMatches("chlo_shlo_ee_cert")))
-      .WillOnce(InvokeWithoutArgs([]() {
-        return folly::makeSemiFuture<folly::Optional<Buf>>(
-            folly::IOBuf::copyBuffer("signature"));
+          _))
+      .WillOnce(Invoke([&clonedHandshakeContext](
+                           folly::Optional<CertificateCompressionAlgorithm>,
+                           SignatureScheme,
+                           CertificateVerifyContext,
+                           std::unique_ptr<HandshakeContext> handshakeContext) {
+        EXPECT_EQ(handshakeContext.get(), clonedHandshakeContext);
+        Buf encodedCert;
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            encodeHandshake(encodedCert, err, TestMessages::certificate()),
+            err);
+        return folly::makeSemiFuture<
+            folly::Optional<AsyncSelfCert::CertificateAndSignature>>(
+            AsyncSelfCert::CertificateAndSignature{
+                std::move(encodedCert), folly::IOBuf::copyBuffer("signature")});
       }));
+  EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
+      .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, getFinishedData(RangeMatches("sht")))

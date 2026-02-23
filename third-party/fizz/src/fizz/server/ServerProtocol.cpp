@@ -1897,12 +1897,13 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                * If sending new cert, add Certificate to handshake write and
                * transcript.
                */
-              Optional<Buf> encodedCertificate;
-              SemiFuture<Optional<Buf>> signature = folly::none;
+              SemiFuture<Optional<AsyncSelfCert::CertificateAndSignature>>
+                  certAndSignature = folly::none;
               Optional<SignatureScheme> sigScheme;
               Optional<std::shared_ptr<const Cert>> serverCert;
               std::shared_ptr<const Cert> clientCert;
               Optional<CertificateCompressionAlgorithm> certCompressionAlgo;
+              bool usedAsyncCert = false;
               if (!resState) { // TODO or reauth
                 std::shared_ptr<const SelfCert> originalSelfCert;
                 std::tie(originalSelfCert, sigScheme) =
@@ -1910,23 +1911,30 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
 
                 certCompressionAlgo =
                     negotiateCertCompressionAlgo(*state.context(), chlo);
-                encodedCertificate = getCertificate(
-                    originalSelfCert, certCompressionAlgo, *handshakeContext);
 
-                auto toBeSigned = handshakeContext->getHandshakeContext();
                 auto asyncSelfCert =
                     dynamic_cast<const AsyncSelfCert*>(originalSelfCert.get());
                 if (asyncSelfCert) {
-                  signature = asyncSelfCert->signFuture(
+                  usedAsyncCert = true;
+                  auto clonedHandshakeContext = handshakeContext->clone();
+                  certAndSignature = asyncSelfCert->getCertificateAndSign(
+                      certCompressionAlgo,
                       *sigScheme,
                       CertificateVerifyContext::Server,
-                      std::move(toBeSigned));
+                      std::move(clonedHandshakeContext));
                 } else {
-                  signature = folly::makeSemiFuture<Optional<Buf>>(
-                      originalSelfCert->sign(
-                          *sigScheme,
-                          CertificateVerifyContext::Server,
-                          toBeSigned->coalesce()));
+                  auto encodedCertificate = getCertificate(
+                      originalSelfCert, certCompressionAlgo, *handshakeContext);
+
+                  auto toBeSigned = handshakeContext->getHandshakeContext();
+                  auto sig = originalSelfCert->sign(
+                      *sigScheme,
+                      CertificateVerifyContext::Server,
+                      toBeSigned->coalesce());
+                  certAndSignature = folly::makeSemiFuture<
+                      Optional<AsyncSelfCert::CertificateAndSignature>>(
+                      AsyncSelfCert::CertificateAndSignature{
+                          std::move(encodedCertificate), std::move(sig)});
                 }
                 serverCert = std::move(originalSelfCert);
               } else {
@@ -1938,7 +1946,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
 
               return runOnCallerIfComplete(
                   state.executor(),
-                  std::move(signature),
+                  std::move(certAndSignature),
                   [&state,
                    scheduler = std::move(scheduler),
                    handshakeContext = std::move(handshakeContext),
@@ -1960,7 +1968,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                    earlyExporterMaster = std::move(earlyExporterMaster),
                    clientHandshakeSecret = std::move(clientHandshakeSecret),
                    encodedEncryptedExt = std::move(encodedEncryptedExt),
-                   encodedCertificate = std::move(encodedCertificate),
+                   usedAsyncCert,
                    encodedCertRequest = std::move(encodedCertRequest),
                    requestClientAuth,
                    certReqExtensions = std::move(certReqExtensions),
@@ -1979,11 +1987,22 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                    legacySessionId = std::move(legacySessionId),
                    serverCertCompAlgo = certCompressionAlgo,
                    handshakeTime,
-                   err = std::move(err)](Optional<Buf> sig) mutable {
+                   err = std::move(err)](
+                      Optional<AsyncSelfCert::CertificateAndSignature>
+                          certAndSig) mutable {
+                    Optional<Buf> encodedCertificate;
                     Optional<Buf> encodedCertificateVerify;
-                    if (sig) {
+                    if (certAndSig) {
+                      encodedCertificate =
+                          std::move(certAndSig->encodedCertificate);
+                      if (usedAsyncCert) {
+                        handshakeContext->appendToTranscript(
+                            *encodedCertificate);
+                      }
                       encodedCertificateVerify = getCertificateVerify(
-                          *sigScheme, std::move(*sig), *handshakeContext);
+                          *sigScheme,
+                          std::move(certAndSig->signature),
+                          *handshakeContext);
                     }
 
                     auto encodedFinished = Protocol::getFinished(

@@ -285,6 +285,14 @@ class MockAsyncSelfCert : public AsyncSelfCert {
        CertificateVerifyContext context,
        std::unique_ptr<folly::IOBuf> toBeSigned),
       (const));
+  MOCK_METHOD(
+      folly::SemiFuture<folly::Optional<CertificateAndSignature>>,
+      getCertificateAndSign,
+      (folly::Optional<CertificateCompressionAlgorithm> algo,
+       SignatureScheme sigScheme,
+       CertificateVerifyContext verifyContext,
+       std::unique_ptr<HandshakeContext> handshakeContext),
+      (const));
 };
 } // namespace test
 } // namespace server

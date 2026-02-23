@@ -86,7 +86,7 @@ func (x *{{struct.go_name}}) TypeName() string {
 {{#let export partial write_v2 |struct|}}
 func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
     {{#struct.union?}}
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("{{struct.go_name}} write union: no more than one field must be set (%d set).", countSet)
     }
     {{/struct.union?}}
@@ -98,7 +98,7 @@ func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
 {{#let export partial write |struct| captures |codec|}}
 func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
     {{#if struct.union?}}
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("{{struct.go_name}} write union: no more than one field must be set (%d set).", countSet)
     }
     {{/if struct.union?}}

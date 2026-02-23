@@ -2836,7 +2836,7 @@ func (x *Baz) readField9(p thrift.Decoder) error {  // LongField
 
 
 
-func (x *Baz) countSetFields() int {
+func (x *Baz) CountSetFields() int {
     count := int(0)
     if (x.IsSetIntField()) {
         count++
@@ -2856,14 +2856,10 @@ func (x *Baz) countSetFields() int {
     return count
 }
 
-func (x *Baz) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *Baz) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("Baz write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("Baz"); err != nil {
@@ -7066,7 +7062,7 @@ func (x *AdaptTestUnion) readField2(p thrift.Decoder) error {  // Custom
 }
 
 
-func (x *AdaptTestUnion) countSetFields() int {
+func (x *AdaptTestUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetDelay()) {
         count++
@@ -7077,14 +7073,10 @@ func (x *AdaptTestUnion) countSetFields() int {
     return count
 }
 
-func (x *AdaptTestUnion) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *AdaptTestUnion) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("AdaptTestUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("AdaptTestUnion"); err != nil {

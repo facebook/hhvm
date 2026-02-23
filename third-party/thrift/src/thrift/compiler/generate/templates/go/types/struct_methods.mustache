@@ -76,7 +76,7 @@
   countSetFields method.
 
 }}{{#struct:union?}}
-func (x *{{struct:go_name}}) countSetFields() int {
+func (x *{{struct:go_name}}) CountSetFields() int {
     count := int(0)
     {{#struct:fields_sorted}}
     if (x.IsSet{{field:go_name}}()) {
@@ -84,10 +84,6 @@ func (x *{{struct:go_name}}) countSetFields() int {
     }
     {{/struct:fields_sorted}}
     return count
-}
-
-func (x *{{struct:go_name}}) CountSetFields() int {
-    return x.countSetFields()
 }
 
 {{/struct:union?}}

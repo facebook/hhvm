@@ -474,7 +474,7 @@ func (x *ComplexUnion) readField14(p thrift.Decoder) error {  // StringRef
 
 
 
-func (x *ComplexUnion) countSetFields() int {
+func (x *ComplexUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetIntValue()) {
         count++
@@ -497,14 +497,10 @@ func (x *ComplexUnion) countSetFields() int {
     return count
 }
 
-func (x *ComplexUnion) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *ComplexUnion) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("ComplexUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("ComplexUnion"); err != nil {
@@ -772,7 +768,7 @@ func (x *ListUnion) readField3(p thrift.Decoder) error {  // StringListValue
     return nil
 }
 
-func (x *ListUnion) countSetFields() int {
+func (x *ListUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetIntListValue()) {
         count++
@@ -783,14 +779,10 @@ func (x *ListUnion) countSetFields() int {
     return count
 }
 
-func (x *ListUnion) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *ListUnion) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("ListUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("ListUnion"); err != nil {
@@ -981,7 +973,7 @@ func (x *DataUnion) readField2(p thrift.Decoder) error {  // StringData
 }
 
 
-func (x *DataUnion) countSetFields() int {
+func (x *DataUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetBinaryData()) {
         count++
@@ -992,14 +984,10 @@ func (x *DataUnion) countSetFields() int {
     return count
 }
 
-func (x *DataUnion) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *DataUnion) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("DataUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("DataUnion"); err != nil {
@@ -1418,7 +1406,7 @@ func (x *ValUnion) readField2(p thrift.Decoder) error {  // V2
 
 
 
-func (x *ValUnion) countSetFields() int {
+func (x *ValUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetV1()) {
         count++
@@ -1429,14 +1417,10 @@ func (x *ValUnion) countSetFields() int {
     return count
 }
 
-func (x *ValUnion) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *ValUnion) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("ValUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("ValUnion"); err != nil {
@@ -1628,7 +1612,7 @@ func (x *VirtualComplexUnion) readField2(p thrift.Decoder) error {  // ThingTwo
 
 
 
-func (x *VirtualComplexUnion) countSetFields() int {
+func (x *VirtualComplexUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetThingOne()) {
         count++
@@ -1639,14 +1623,10 @@ func (x *VirtualComplexUnion) countSetFields() int {
     return count
 }
 
-func (x *VirtualComplexUnion) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *VirtualComplexUnion) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("VirtualComplexUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("VirtualComplexUnion"); err != nil {
@@ -1909,7 +1889,7 @@ func (x *NonCopyableUnion) readField1(p thrift.Decoder) error {  // S
 }
 
 
-func (x *NonCopyableUnion) countSetFields() int {
+func (x *NonCopyableUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetS()) {
         count++
@@ -1917,14 +1897,10 @@ func (x *NonCopyableUnion) countSetFields() int {
     return count
 }
 
-func (x *NonCopyableUnion) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *NonCopyableUnion) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("NonCopyableUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("NonCopyableUnion"); err != nil {

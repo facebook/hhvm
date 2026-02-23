@@ -1010,7 +1010,7 @@ func (x *MyUnion) readField14(p thrift.Decoder) error {  // StructField
 
 
 
-func (x *MyUnion) countSetFields() int {
+func (x *MyUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetBoolField()) {
         count++
@@ -1057,14 +1057,10 @@ func (x *MyUnion) countSetFields() int {
     return count
 }
 
-func (x *MyUnion) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *MyUnion) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("MyUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("MyUnion"); err != nil {

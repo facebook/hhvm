@@ -523,7 +523,7 @@ func (x *ExampleUnion) readField3(p thrift.Decoder) error {  // DoubleValue
 
 
 
-func (x *ExampleUnion) countSetFields() int {
+func (x *ExampleUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetStringValue()) {
         count++
@@ -537,14 +537,10 @@ func (x *ExampleUnion) countSetFields() int {
     return count
 }
 
-func (x *ExampleUnion) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *ExampleUnion) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("ExampleUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("ExampleUnion"); err != nil {

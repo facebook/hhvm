@@ -1378,7 +1378,7 @@ func (x *MyUnion) readField4(p thrift.Decoder) error {  // FloatSet
 
 
 
-func (x *MyUnion) countSetFields() int {
+func (x *MyUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetMyEnum()) {
         count++
@@ -1395,14 +1395,10 @@ func (x *MyUnion) countSetFields() int {
     return count
 }
 
-func (x *MyUnion) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *MyUnion) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("MyUnion write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("MyUnion"); err != nil {
@@ -2272,7 +2268,7 @@ func (x *UnionToBeRenamed) readField1(p thrift.Decoder) error {  // ReservedFiel
 }
 
 
-func (x *UnionToBeRenamed) countSetFields() int {
+func (x *UnionToBeRenamed) CountSetFields() int {
     count := int(0)
     if (x.IsSetReservedField()) {
         count++
@@ -2280,14 +2276,10 @@ func (x *UnionToBeRenamed) countSetFields() int {
     return count
 }
 
-func (x *UnionToBeRenamed) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *UnionToBeRenamed) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("UnionToBeRenamed write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("UnionToBeRenamed"); err != nil {

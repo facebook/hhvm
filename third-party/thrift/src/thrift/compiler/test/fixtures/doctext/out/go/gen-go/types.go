@@ -341,7 +341,7 @@ func (x *U) readField2(p thrift.Decoder) error {  // S
 
 
 
-func (x *U) countSetFields() int {
+func (x *U) CountSetFields() int {
     count := int(0)
     if (x.IsSetI()) {
         count++
@@ -352,14 +352,10 @@ func (x *U) countSetFields() int {
     return count
 }
 
-func (x *U) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *U) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("U write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("U"); err != nil {

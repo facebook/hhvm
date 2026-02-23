@@ -1989,7 +1989,7 @@ func (x *Union1) readField2(p thrift.Decoder) error {  // D
 
 
 
-func (x *Union1) countSetFields() int {
+func (x *Union1) CountSetFields() int {
     count := int(0)
     if (x.IsSetI()) {
         count++
@@ -2000,14 +2000,10 @@ func (x *Union1) countSetFields() int {
     return count
 }
 
-func (x *Union1) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *Union1) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("Union1 write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("union1"); err != nil {
@@ -2307,7 +2303,7 @@ func (x *Union2) readField4(p thrift.Decoder) error {  // U
 
 
 
-func (x *Union2) countSetFields() int {
+func (x *Union2) CountSetFields() int {
     count := int(0)
     if (x.IsSetI()) {
         count++
@@ -2324,14 +2320,10 @@ func (x *Union2) countSetFields() int {
     return count
 }
 
-func (x *Union2) CountSetFields() int {
-    return x.countSetFields()
-}
-
 
 
 func (x *Union2) Write(p thrift.Encoder) error {
-    if countSet := x.countSetFields(); countSet > 1 {
+    if countSet := x.CountSetFields(); countSet > 1 {
         return fmt.Errorf("Union2 write union: no more than one field must be set (%d set).", countSet)
     }
     if err := p.WriteStructBegin("union2"); err != nil {

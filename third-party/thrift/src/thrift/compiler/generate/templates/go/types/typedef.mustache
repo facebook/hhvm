@@ -19,6 +19,7 @@
   This template generates a thrift typedef
 
 }}
+{{#import "types/typedef_methods" as m_typedef_methods}}
 type {{typedef:go_name}} = {{#typedef:type}}{{#partial types.go_type type=type:self}}{{/typedef:type}}
 {{#typedef:type}}
 {{#type:enum?}}
@@ -30,10 +31,10 @@ type {{typedef:go_name}} = {{#typedef:type}}{{#partial types.go_type type=type:s
 {{/typedef:type}}
 
 {{! new function }}
-{{> types/typedef_method_new}}
+{{#partial m_typedef_methods.new typedef=typedef:self}}
 
 {{! write (serialize) }}
-{{> types/typedef_method_write}}
+{{#partial m_typedef_methods.write typedef=typedef:self}}
 
 {{! read (deserialize) }}
-{{> types/typedef_method_read}}
+{{#partial m_typedef_methods.read typedef=typedef:self}}

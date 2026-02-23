@@ -1279,8 +1279,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
 
   whisker_options render_options() const override {
     whisker_options opts;
-    opts.allowed_undefined_variables = {
-        "service:autogen_path", "function:stream?"};
+    opts.allowed_undefined_variables = {"function:stream?"};
     return opts;
   }
 

@@ -421,15 +421,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
-  whisker_options render_options() const override {
-    whisker_options opts;
-    opts.allowed_undefined_variables = {
-        "program:autogen_path",
-        "service:autogen_path",
-    };
-    return opts;
-  }
-
   std::string template_prefix() const override { return "cpp2"; }
 
   void process_options(
@@ -1294,7 +1285,6 @@ class cpp_mstch_service : public mstch_service {
         {
             {"service:program_qualified_name",
              &cpp_mstch_service::program_qualified_name},
-            {"service:autogen_path", &cpp_mstch_service::autogen_path},
             {"service:include_prefix", &cpp_mstch_service::include_prefix},
             {"service:thrift_includes", &cpp_mstch_service::thrift_includes},
             {"service:oneway_functions", &cpp_mstch_service::oneway_functions},
@@ -1323,11 +1313,6 @@ class cpp_mstch_service : public mstch_service {
   mstch::node program_qualified_name() {
     return get_service_namespace(service_->program()) +
         "::" + service_->program()->name();
-  }
-  mstch::node autogen_path() {
-    std::string path = service_->program()->path();
-    std::replace(path.begin(), path.end(), '\\', '/');
-    return path;
   }
   mstch::node cpp_includes() {
     return t_mstch_cpp2_generator::cpp_includes(service_->program());

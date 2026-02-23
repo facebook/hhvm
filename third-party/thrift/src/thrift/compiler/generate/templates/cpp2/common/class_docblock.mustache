@@ -17,5 +17,5 @@
 }}
 {{! The glean annotation is used by Glean indexers to map generated functions to thrift exceptions/structs/unions.
     It can be moved within the docblock, as long as it stays on a single line }}
-/** Glean {"file": "{{program:autogen_path}}", "name": "{{struct:cpp_underlying_name}}", "kind": "{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}{{#struct:union?}}union{{/struct:union?}}{{^struct:union?}}struct{{/struct:union?}}{{/struct:exception?}}" } */
+/** Glean {"file": "{{struct:program.autogen_path}}", "name": "{{struct:cpp_underlying_name}}", "kind": "{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}{{#struct:union?}}union{{/struct:union?}}{{^struct:union?}}struct{{/struct:union?}}{{/struct:exception?}}" } */
 {{! enforce new line }}

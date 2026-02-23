@@ -18,7 +18,6 @@
 #include <filesystem>
 #include <memory>
 #include <set>
-#include <stdexcept>
 #include <string>
 
 #include <boost/algorithm/string/replace.hpp>
@@ -95,42 +94,6 @@ std::vector<std::string> get_py_namespaces_raw(
   }
 
   return ns;
-}
-
-std::string to_flat_type_name(const t_type* type) {
-  assert(type != nullptr);
-
-  const auto* true_type = type->get_true_type();
-  assert(true_type != nullptr);
-
-  if (const t_list* listType = true_type->try_as<t_list>()) {
-    assert(listType != nullptr);
-
-    return fmt::format(
-        "List__{}", to_flat_type_name(listType->elem_type().get_type()));
-  }
-
-  if (const t_set* setType = true_type->try_as<t_set>()) {
-    assert(setType != nullptr);
-
-    return fmt::format(
-        "Set__{}", to_flat_type_name(setType->elem_type().get_type()));
-  }
-
-  if (const t_map* mapType = true_type->try_as<t_map>()) {
-    assert(mapType != nullptr);
-
-    return fmt::format(
-        "Map__{}_{}",
-        to_flat_type_name(&mapType->key_type().deref()),
-        to_flat_type_name(&mapType->val_type().deref()));
-  }
-
-  if (true_type->is_binary()) {
-    return "binary";
-  }
-
-  return true_type->name();
 }
 
 const std::string* get_py_adapter(const t_type* type) {
@@ -210,25 +173,15 @@ class pyi_mstch_program : public mstch_program {
     register_methods(
         this,
         {
-            {"program:returnTypes", &pyi_mstch_program::get_return_types},
             {"program:pyNamespaces", &pyi_mstch_program::get_py_namespaces},
             {"program:pythonNamespaces",
              &pyi_mstch_program::get_python_namespaces},
             {"program:py3Namespaces", &pyi_mstch_program::get_py3_namespaces},
             {"program:importModules", &pyi_mstch_program::get_import_modules},
-            {"program:containerTypes", &pyi_mstch_program::get_containers},
-            {"program:moveContainerTypes",
-             &pyi_mstch_program::get_move_containers},
             {"program:enablePosArgs?", &pyi_mstch_program::get_enable_pos_args},
         });
 
     this->visit_import_modules();
-    this->visit_return_types();
-    this->visit_containers();
-  }
-
-  mstch::node get_return_types() {
-    return make_mstch_types(this->return_types_);
   }
 
   mstch::node get_py_namespaces() {
@@ -255,104 +208,14 @@ class pyi_mstch_program : public mstch_program {
     return mstch_array;
   }
 
-  mstch::node get_containers() { return make_mstch_types(this->containers_); }
-
-  mstch::node get_move_containers() {
-    return make_mstch_types(this->move_containers_);
-  }
-
-  mstch::node get_enable_pos_args() {
-    return this->context_.options->contains("enable_pos_args");
-  }
+  mstch::node get_enable_pos_args() { return has_option("enable_pos_args"); }
 
  private:
-  std::vector<const t_type*> return_types_;
   std::vector<std::string> import_modules_;
-  std::vector<const t_type*> containers_;
-  std::vector<const t_type*> move_containers_;
 
   void visit_import_modules() {
     this->import_modules_ = gather_import_modules(
         mstch_program::program_, mstch_base::has_option("asyncio"));
-  }
-
-  void visit_return_types() {
-    std::set<std::string> visited;
-    for (const auto* service : mstch_program::program_->services()) {
-      for (const auto& function : service->functions()) {
-        const auto* return_type = function.return_type().get_type();
-        std::string name = to_flat_type_name(return_type);
-
-        if (visited.find(name) == visited.end()) {
-          visited.insert(name);
-          this->return_types_.push_back(return_type);
-        }
-      }
-    }
-  }
-
-  void visit_containers() {
-    std::set<std::string> visited;
-
-    for (const auto* service : mstch_program::program_->services()) {
-      for (const auto& function : service->functions()) {
-        for (const auto& param : function.params().fields()) {
-          this->add_containers(visited, param.type().get_type());
-        }
-        this->add_containers(visited, function.return_type().get_type());
-      }
-    }
-
-    for (const t_structured* object :
-         mstch_program::program_->structured_definitions()) {
-      for (const auto& field : object->fields()) {
-        this->add_containers(visited, field.type().get_type());
-      }
-    }
-
-    for (const auto* constant : mstch_program::program_->consts()) {
-      const auto* const_type = constant->type();
-      this->add_containers(visited, const_type);
-    }
-
-    // Collecting move containers within found containers
-    visited.clear();
-    for (const auto* container : this->containers_) {
-      auto name = to_flat_type_name(container);
-      boost::algorithm::replace_all(name, "binary", "string");
-
-      if (visited.find(name) == visited.end()) {
-        visited.insert(name);
-        this->move_containers_.push_back(container);
-      }
-    }
-  }
-
-  void add_containers(std::set<std::string>& visited, const t_type* type) {
-    assert(type != nullptr);
-
-    if (!type->is<t_container>()) {
-      return;
-    }
-
-    std::string name = to_flat_type_name(type);
-    if (visited.find(name) != visited.end()) {
-      return;
-    }
-
-    if (const t_list* list = type->try_as<t_list>()) {
-      const auto* listType = list->elem_type().get_type();
-      add_containers(visited, listType);
-    } else if (const t_set* set = type->try_as<t_set>()) {
-      const auto* setType = set->elem_type().get_type();
-      add_containers(visited, setType);
-    } else if (const t_map* mapType = type->try_as<t_map>()) {
-      add_containers(visited, &mapType->key_type().deref());
-      add_containers(visited, &mapType->val_type().deref());
-    }
-
-    visited.insert(name);
-    this->containers_.push_back(type);
   }
 };
 
@@ -368,9 +231,7 @@ class pyi_mstch_field : public mstch_field {
     register_methods(
         this,
         {
-            {"field:requireValue?", &pyi_mstch_field::get_require_value},
             {"field:PEP484Optional?", &pyi_mstch_field::get_PEP484_optional},
-            {"field:origName", &pyi_mstch_field::get_original_name},
             {"field:capitalizedName", &pyi_mstch_field::get_capitalized_name},
             {"field:py_name", &pyi_mstch_field::get_filtered_name},
         });
@@ -382,7 +243,6 @@ class pyi_mstch_field : public mstch_field {
     bool has_value = (mstch_field::field_->default_value() != nullptr);
     bool has_default_value = has_value || is_unqualified;
 
-    this->require_value_ = is_required && !has_default_value;
     this->pep484_optional_ =
         (is_optional || (!has_default_value && !is_required));
 
@@ -393,13 +253,9 @@ class pyi_mstch_field : public mstch_field {
     this->filtered_name_ = filteredName;
   }
 
-  mstch::node get_require_value() { return this->require_value_; }
-
   mstch::node get_PEP484_optional() { return this->pep484_optional_; }
 
   mstch::node get_filtered_name() { return this->filtered_name_; }
-
-  mstch::node get_original_name() { return mstch_field::field_->name(); }
 
   mstch::node get_capitalized_name() {
     std::string name(this->filtered_name_);
@@ -409,7 +265,6 @@ class pyi_mstch_field : public mstch_field {
   }
 
  private:
-  bool require_value_;
   bool pep484_optional_;
   std::string filtered_name_;
 };
@@ -429,7 +284,6 @@ class pyi_mstch_type : public mstch_type {
         {
             {"type:modulePath", &pyi_mstch_type::get_module_path},
             {"type:externalProgram?", &pyi_mstch_type::is_external_program},
-            {"type:flat_name", &pyi_mstch_type::get_flat_name},
             {"type:adapter", &pyi_mstch_type::get_adapter},
             {"type:has_adapter?", &pyi_mstch_type::has_adapter},
         });
@@ -443,8 +297,6 @@ class pyi_mstch_type : public mstch_type {
   mstch::node is_external_program() {
     return (this->get_type_program()->path() != this->program_->path());
   }
-
-  mstch::node get_flat_name() { return to_flat_type_name(mstch_type::type_); }
 
   mstch::node get_adapter() {
     return std::string(*get_py_adapter(mstch_type::type_));
@@ -476,10 +328,7 @@ class pyi_mstch_service : public mstch_service {
     register_methods(
         this,
         {
-            {"service:externalProgram?",
-             &pyi_mstch_service::is_external_program},
             {"service:pyNamespaces", &pyi_mstch_service::get_py_namespaces},
-            {"service:programName", &pyi_mstch_service::getProgramName},
             {"program:pyNamespaces",
              &pyi_mstch_service::get_program_py_namespaces},
             {"program:importModules",
@@ -489,18 +338,9 @@ class pyi_mstch_service : public mstch_service {
     this->visit_program_import_modules();
   }
 
-  mstch::node is_external_program() {
-    const auto& programPath = mstch_service::service_->program()->path();
-    return (programPath != this->program_->path());
-  }
-
   mstch::node get_py_namespaces() {
     return create_string_array(get_py_namespaces_raw(
         mstch_service::service_->program(), mstch_base::has_option("asyncio")));
-  }
-
-  mstch::node getProgramName() {
-    return mstch_service::service_->program()->name();
   }
 
   mstch::node get_program_py_namespaces() {

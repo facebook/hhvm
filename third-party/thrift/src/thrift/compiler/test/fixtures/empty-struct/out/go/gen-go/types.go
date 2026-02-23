@@ -30,6 +30,7 @@ func NewEmpty() *Empty {
 
 
 
+
 func (x *Empty) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Empty"); err != nil {
         return thrift.PrependError("Empty write struct begin error: ", err)
@@ -104,11 +105,11 @@ func NewNada() *Nada {
     return (&Nada{}).setDefaults()
 }
 
+
 func (x *Nada) CountSetFields() int {
     count := int(0)
     return count
 }
-
 
 
 func (x *Nada) Write(p thrift.Encoder) error {

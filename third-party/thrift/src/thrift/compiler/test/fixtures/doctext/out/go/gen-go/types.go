@@ -155,6 +155,7 @@ func (x *A) readField1(p thrift.Decoder) error {  // UselessField
 
 
 
+
 func (x *A) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("A"); err != nil {
         return thrift.PrependError("A write struct begin error: ", err)
@@ -341,6 +342,7 @@ func (x *U) readField2(p thrift.Decoder) error {  // S
 
 
 
+
 func (x *U) CountSetFields() int {
     count := int(0)
     if (x.IsSetI()) {
@@ -351,7 +353,6 @@ func (x *U) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *U) Write(p thrift.Encoder) error {
@@ -485,6 +486,7 @@ func (x *Bang) readField1(p thrift.Decoder) error {  // Message
 
 
 
+
 func (x *Bang) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Bang"); err != nil {
         return thrift.PrependError("Bang write struct begin error: ", err)
@@ -578,6 +580,7 @@ func newReqCF() *reqCF {
 
 
 
+
 func (x *reqCF) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqCF"); err != nil {
         return thrift.PrependError("reqCF write struct begin error: ", err)
@@ -651,6 +654,7 @@ type CFResultDeprecated = respCF
 func newRespCF() *respCF {
     return (&respCF{}).setDefaults()
 }
+
 
 
 
@@ -733,6 +737,7 @@ func newReqCNumbers() *reqCNumbers {
 
 
 
+
 func (x *reqCNumbers) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqCNumbers"); err != nil {
         return thrift.PrependError("reqCNumbers write struct begin error: ", err)
@@ -806,6 +811,7 @@ type CNumbersResultDeprecated = respCNumbers
 func newRespCNumbers() *respCNumbers {
     return (&respCNumbers{}).setDefaults()
 }
+
 
 
 
@@ -939,6 +945,7 @@ func (x *streamCNumbers) readField0(p thrift.Decoder) error {  // Success
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -1186,6 +1193,7 @@ func (x *reqCThing) readField3(p thrift.Decoder) error {  // C
 
 
 
+
 func (x *reqCThing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqCThing"); err != nil {
         return thrift.PrependError("reqCThing write struct begin error: ", err)
@@ -1382,6 +1390,7 @@ func (x *respCThing) readField1(p thrift.Decoder) error {  // Bang
     x.Bang = result
     return nil
 }
+
 
 
 

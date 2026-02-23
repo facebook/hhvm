@@ -258,6 +258,7 @@ func (x *Color) readField4(p thrift.Decoder) error {  // Alpha
 
 
 
+
 func (x *Color) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Color"); err != nil {
         return thrift.PrependError("Color write struct begin error: ", err)
@@ -616,6 +617,7 @@ func (x *Vehicle) readField5(p thrift.Decoder) error {  // HasAC
     x.HasAC = &result
     return nil
 }
+
 
 
 
@@ -1333,6 +1335,7 @@ func (x *Person) readField10(p thrift.Decoder) error {  // Vehicles
     x.Vehicles = result
     return nil
 }
+
 
 
 

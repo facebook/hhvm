@@ -71,19 +71,4 @@
 {{/program:gen_default_get?}}
 
 {{/field:pointer?}}
-{{/struct:fields_sorted}}{{!
-
-  countSetFields method.
-
-}}{{#struct:union?}}
-func (x *{{struct:go_name}}) CountSetFields() int {
-    count := int(0)
-    {{#struct:fields_sorted}}
-    if (x.IsSet{{field:go_name}}()) {
-        count++
-    }
-    {{/struct:fields_sorted}}
-    return count
-}
-
-{{/struct:union?}}
+{{/struct:fields_sorted}}

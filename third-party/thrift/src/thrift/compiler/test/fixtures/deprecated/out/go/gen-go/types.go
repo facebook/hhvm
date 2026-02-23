@@ -261,6 +261,7 @@ func (x *User) readField5(p thrift.Decoder) error {  // EmailAddress
 
 
 
+
 func (x *User) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("User"); err != nil {
         return thrift.PrependError("User write struct begin error: ", err)
@@ -523,6 +524,7 @@ func (x *ExampleUnion) readField3(p thrift.Decoder) error {  // DoubleValue
 
 
 
+
 func (x *ExampleUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetStringValue()) {
@@ -536,7 +538,6 @@ func (x *ExampleUnion) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *ExampleUnion) Write(p thrift.Encoder) error {

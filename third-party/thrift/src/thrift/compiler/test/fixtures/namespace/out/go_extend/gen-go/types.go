@@ -89,6 +89,7 @@ func (x *reqExtendTestServiceCheck) readField1(p thrift.Decoder) error {  // Str
 
 
 
+
 func (x *reqExtendTestServiceCheck) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqExtendTestServiceCheck"); err != nil {
         return thrift.PrependError("reqExtendTestServiceCheck write struct begin error: ", err)
@@ -220,6 +221,7 @@ func (x *respExtendTestServiceCheck) readField0(p thrift.Decoder) error {  // Su
     x.Success = &result
     return nil
 }
+
 
 
 

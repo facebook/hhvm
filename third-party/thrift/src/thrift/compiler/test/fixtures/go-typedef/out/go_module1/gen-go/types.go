@@ -706,6 +706,7 @@ func (x *Automobile) readField7(p thrift.Decoder) error {  // PartNames
 
 
 
+
 func (x *Automobile) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Automobile"); err != nil {
         return thrift.PrependError("Automobile write struct begin error: ", err)
@@ -905,6 +906,7 @@ func (x *MapKey) readField2(p thrift.Decoder) error {  // Strval
 
 
 
+
 func (x *MapKey) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MapKey"); err != nil {
         return thrift.PrependError("MapKey write struct begin error: ", err)
@@ -1085,6 +1087,7 @@ func (x *MapContainer) readField1(p thrift.Decoder) error {  // Mapval
     x.Mapval = result
     return nil
 }
+
 
 
 
@@ -1273,6 +1276,7 @@ func (x *Pair) readField2(p thrift.Decoder) error {  // Car
     x.Car = result
     return nil
 }
+
 
 
 
@@ -1522,6 +1526,7 @@ func (x *Collection) readField2(p thrift.Decoder) error {  // Cars
 
 
 
+
 func (x *Collection) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Collection"); err != nil {
         return thrift.PrependError("Collection write struct begin error: ", err)
@@ -1652,6 +1657,7 @@ func (x *reqFinderByPlate) readField1(p thrift.Decoder) error {  // Plate
     x.Plate = result
     return nil
 }
+
 
 
 
@@ -1791,6 +1797,7 @@ func (x *respFinderByPlate) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respFinderByPlate) Exception() thrift.WritableException {
     return nil
 }
@@ -1914,6 +1921,7 @@ func (x *reqFinderAliasByPlate) readField1(p thrift.Decoder) error {  // Plate
     x.Plate = result
     return nil
 }
+
 
 
 
@@ -2053,6 +2061,7 @@ func (x *respFinderAliasByPlate) readField0(p thrift.Decoder) error {  // Succes
 
 
 
+
 func (x *respFinderAliasByPlate) Exception() thrift.WritableException {
     return nil
 }
@@ -2176,6 +2185,7 @@ func (x *reqFinderPreviousPlate) readField1(p thrift.Decoder) error {  // Plate
     x.Plate = result
     return nil
 }
+
 
 
 
@@ -2311,6 +2321,7 @@ func (x *respFinderPreviousPlate) readField0(p thrift.Decoder) error {  // Succe
     x.Success = &result
     return nil
 }
+
 
 
 

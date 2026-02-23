@@ -156,6 +156,7 @@ func (x *reqNestedContainersMapList) readField1(p thrift.Decoder) error {  // Fo
 
 
 
+
 func (x *reqNestedContainersMapList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersMapList"); err != nil {
         return thrift.PrependError("reqNestedContainersMapList write struct begin error: ", err)
@@ -235,6 +236,7 @@ type NestedContainersMapListResultDeprecated = respNestedContainersMapList
 func newRespNestedContainersMapList() *respNestedContainersMapList {
     return (&respNestedContainersMapList{}).setDefaults()
 }
+
 
 
 
@@ -440,6 +442,7 @@ func (x *reqNestedContainersMapSet) readField1(p thrift.Decoder) error {  // Foo
 
 
 
+
 func (x *reqNestedContainersMapSet) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersMapSet"); err != nil {
         return thrift.PrependError("reqNestedContainersMapSet write struct begin error: ", err)
@@ -519,6 +522,7 @@ type NestedContainersMapSetResultDeprecated = respNestedContainersMapSet
 func newRespNestedContainersMapSet() *respNestedContainersMapSet {
     return (&respNestedContainersMapSet{}).setDefaults()
 }
+
 
 
 
@@ -724,6 +728,7 @@ func (x *reqNestedContainersListMap) readField1(p thrift.Decoder) error {  // Fo
 
 
 
+
 func (x *reqNestedContainersListMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersListMap"); err != nil {
         return thrift.PrependError("reqNestedContainersListMap write struct begin error: ", err)
@@ -803,6 +808,7 @@ type NestedContainersListMapResultDeprecated = respNestedContainersListMap
 func newRespNestedContainersListMap() *respNestedContainersListMap {
     return (&respNestedContainersListMap{}).setDefaults()
 }
+
 
 
 
@@ -991,6 +997,7 @@ func (x *reqNestedContainersListSet) readField1(p thrift.Decoder) error {  // Fo
 
 
 
+
 func (x *reqNestedContainersListSet) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersListSet"); err != nil {
         return thrift.PrependError("reqNestedContainersListSet write struct begin error: ", err)
@@ -1070,6 +1077,7 @@ type NestedContainersListSetResultDeprecated = respNestedContainersListSet
 func newRespNestedContainersListSet() *respNestedContainersListSet {
     return (&respNestedContainersListSet{}).setDefaults()
 }
+
 
 
 
@@ -1379,6 +1387,7 @@ func (x *reqNestedContainersTurtles) readField1(p thrift.Decoder) error {  // Fo
 
 
 
+
 func (x *reqNestedContainersTurtles) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersTurtles"); err != nil {
         return thrift.PrependError("reqNestedContainersTurtles write struct begin error: ", err)
@@ -1458,6 +1467,7 @@ type NestedContainersTurtlesResultDeprecated = respNestedContainersTurtles
 func newRespNestedContainersTurtles() *respNestedContainersTurtles {
     return (&respNestedContainersTurtles{}).setDefaults()
 }
+
 
 
 

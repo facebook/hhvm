@@ -589,6 +589,7 @@ func (x *MyStruct) readField9(p thrift.Decoder) error {  // NoHackCodegenField
 
 
 
+
 func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError("MyStruct write struct begin error: ", err)
@@ -967,6 +968,7 @@ func (x *Containers) readField3(p thrift.Decoder) error {  // StringToI64Map
 
 
 
+
 func (x *Containers) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Containers"); err != nil {
         return thrift.PrependError("Containers write struct begin error: ", err)
@@ -1058,6 +1060,7 @@ var _ thrift.Struct = (*MyDataItem)(nil)
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{}).setDefaults()
 }
+
 
 
 
@@ -1378,6 +1381,7 @@ func (x *MyUnion) readField4(p thrift.Decoder) error {  // FloatSet
 
 
 
+
 func (x *MyUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetMyEnum()) {
@@ -1394,7 +1398,6 @@ func (x *MyUnion) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *MyUnion) Write(p thrift.Encoder) error {
@@ -1682,6 +1685,7 @@ func (x *MyException) readField4(p thrift.Decoder) error {  // MyUnion
     x.MyUnion = result
     return nil
 }
+
 
 
 
@@ -1986,6 +1990,7 @@ func (x *MyExceptionWithMessage) readField4(p thrift.Decoder) error {  // MyUnio
 
 
 
+
 func (x *MyExceptionWithMessage) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyExceptionWithMessage"); err != nil {
         return thrift.PrependError("MyExceptionWithMessage write struct begin error: ", err)
@@ -2135,6 +2140,7 @@ func (x *ReservedKeyword) readField1(p thrift.Decoder) error {  // ReservedField
 
 
 
+
 func (x *ReservedKeyword) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ReservedKeyword"); err != nil {
         return thrift.PrependError("ReservedKeyword write struct begin error: ", err)
@@ -2268,6 +2274,7 @@ func (x *UnionToBeRenamed) readField1(p thrift.Decoder) error {  // ReservedFiel
 }
 
 
+
 func (x *UnionToBeRenamed) CountSetFields() int {
     count := int(0)
     if (x.IsSetReservedField()) {
@@ -2275,7 +2282,6 @@ func (x *UnionToBeRenamed) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *UnionToBeRenamed) Write(p thrift.Encoder) error {
@@ -2365,6 +2371,7 @@ func newReqFooServiceSimpleRPC() *reqFooServiceSimpleRPC {
 
 
 
+
 func (x *reqFooServiceSimpleRPC) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFooServiceSimpleRPC"); err != nil {
         return thrift.PrependError("reqFooServiceSimpleRPC write struct begin error: ", err)
@@ -2438,6 +2445,7 @@ type FooServiceSimpleRPCResultDeprecated = respFooServiceSimpleRPC
 func newRespFooServiceSimpleRPC() *respFooServiceSimpleRPC {
     return (&respFooServiceSimpleRPC{}).setDefaults()
 }
+
 
 
 
@@ -2558,6 +2566,7 @@ func (x *reqFB303ServiceSimpleRPC) readField1(p thrift.Decoder) error {  // IntP
     x.IntParameter = result
     return nil
 }
+
 
 
 
@@ -2697,6 +2706,7 @@ func (x *respFB303ServiceSimpleRPC) readField0(p thrift.Decoder) error {  // Suc
 
 
 
+
 func (x *respFB303ServiceSimpleRPC) Exception() thrift.WritableException {
     return nil
 }
@@ -2781,6 +2791,7 @@ func newReqMyServicePing() *reqMyServicePing {
 
 
 
+
 func (x *reqMyServicePing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePing"); err != nil {
         return thrift.PrependError("reqMyServicePing write struct begin error: ", err)
@@ -2854,6 +2865,7 @@ type MyServicePingResultDeprecated = respMyServicePing
 func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{}).setDefaults()
 }
+
 
 
 
@@ -2933,6 +2945,7 @@ type MyServiceGetRandomDataArgsDeprecated = reqMyServiceGetRandomData
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{}).setDefaults()
 }
+
 
 
 
@@ -3065,6 +3078,7 @@ func (x *respMyServiceGetRandomData) readField0(p thrift.Decoder) error {  // Su
 
 
 
+
 func (x *respMyServiceGetRandomData) Exception() thrift.WritableException {
     return nil
 }
@@ -3190,6 +3204,7 @@ func (x *reqMyServiceSink) readField1(p thrift.Decoder) error {  // Sink
 
 
 
+
 func (x *reqMyServiceSink) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceSink"); err != nil {
         return thrift.PrependError("reqMyServiceSink write struct begin error: ", err)
@@ -3269,6 +3284,7 @@ type MyServiceSinkResultDeprecated = respMyServiceSink
 func newRespMyServiceSink() *respMyServiceSink {
     return (&respMyServiceSink{}).setDefaults()
 }
+
 
 
 
@@ -3433,6 +3449,7 @@ func (x *reqMyServicePutDataById) readField2(p thrift.Decoder) error {  // Data
 
 
 
+
 func (x *reqMyServicePutDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePutDataById"); err != nil {
         return thrift.PrependError("reqMyServicePutDataById write struct begin error: ", err)
@@ -3518,6 +3535,7 @@ type MyServicePutDataByIdResultDeprecated = respMyServicePutDataById
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{}).setDefaults()
 }
+
 
 
 
@@ -3638,6 +3656,7 @@ func (x *reqMyServiceHasDataById) readField1(p thrift.Decoder) error {  // Id
     x.Id = result
     return nil
 }
+
 
 
 
@@ -3776,6 +3795,7 @@ func (x *respMyServiceHasDataById) readField0(p thrift.Decoder) error {  // Succ
 
 
 
+
 func (x *respMyServiceHasDataById) Exception() thrift.WritableException {
     return nil
 }
@@ -3898,6 +3918,7 @@ func (x *reqMyServiceGetDataById) readField1(p thrift.Decoder) error {  // Id
     x.Id = result
     return nil
 }
+
 
 
 
@@ -4036,6 +4057,7 @@ func (x *respMyServiceGetDataById) readField0(p thrift.Decoder) error {  // Succ
 
 
 
+
 func (x *respMyServiceGetDataById) Exception() thrift.WritableException {
     return nil
 }
@@ -4161,6 +4183,7 @@ func (x *reqMyServiceDeleteDataById) readField1(p thrift.Decoder) error {  // Id
 
 
 
+
 func (x *reqMyServiceDeleteDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceDeleteDataById"); err != nil {
         return thrift.PrependError("reqMyServiceDeleteDataById write struct begin error: ", err)
@@ -4240,6 +4263,7 @@ type MyServiceDeleteDataByIdResultDeprecated = respMyServiceDeleteDataById
 func newRespMyServiceDeleteDataById() *respMyServiceDeleteDataById {
     return (&respMyServiceDeleteDataById{}).setDefaults()
 }
+
 
 
 
@@ -4404,6 +4428,7 @@ func (x *reqMyServiceLobDataById) readField2(p thrift.Decoder) error {  // Data
 
 
 
+
 func (x *reqMyServiceLobDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceLobDataById"); err != nil {
         return thrift.PrependError("reqMyServiceLobDataById write struct begin error: ", err)
@@ -4492,6 +4517,7 @@ func newRespMyServiceLobDataById() *respMyServiceLobDataById {
 
 
 
+
 func (x *respMyServiceLobDataById) Exception() thrift.WritableException {
     return nil
 }
@@ -4568,6 +4594,7 @@ type MyServiceInvalidReturnForHackArgsDeprecated = reqMyServiceInvalidReturnForH
 func newReqMyServiceInvalidReturnForHack() *reqMyServiceInvalidReturnForHack {
     return (&reqMyServiceInvalidReturnForHack{}).setDefaults()
 }
+
 
 
 
@@ -4728,6 +4755,7 @@ func (x *respMyServiceInvalidReturnForHack) readField0(p thrift.Decoder) error {
 
 
 
+
 func (x *respMyServiceInvalidReturnForHack) Exception() thrift.WritableException {
     return nil
 }
@@ -4812,6 +4840,7 @@ func newReqMyServiceRpcSkippedCodegen() *reqMyServiceRpcSkippedCodegen {
 
 
 
+
 func (x *reqMyServiceRpcSkippedCodegen) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceRpcSkippedCodegen"); err != nil {
         return thrift.PrependError("reqMyServiceRpcSkippedCodegen write struct begin error: ", err)
@@ -4885,6 +4914,7 @@ type MyServiceRpcSkippedCodegenResultDeprecated = respMyServiceRpcSkippedCodegen
 func newRespMyServiceRpcSkippedCodegen() *respMyServiceRpcSkippedCodegen {
     return (&respMyServiceRpcSkippedCodegen{}).setDefaults()
 }
+
 
 
 
@@ -5005,6 +5035,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) readField1(p thrift.Decoder) err
     x.Key = result
     return nil
 }
+
 
 
 
@@ -5142,6 +5173,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) readField0(p thrift.Decoder) er
 
 
 
+
 func (x *respDbMixedStackArgumentsGetDataByKey0) Exception() thrift.WritableException {
     return nil
 }
@@ -5264,6 +5296,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) readField1(p thrift.Decoder) err
     x.Key = result
     return nil
 }
+
 
 
 
@@ -5398,6 +5431,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) readField0(p thrift.Decoder) er
     x.Success = result
     return nil
 }
+
 
 
 

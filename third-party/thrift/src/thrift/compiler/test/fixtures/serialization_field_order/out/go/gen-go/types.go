@@ -153,6 +153,7 @@ func (x *Foo) readField3(p thrift.Decoder) error {  // Field1
 
 
 
+
 func (x *Foo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Foo"); err != nil {
         return thrift.PrependError("Foo write struct begin error: ", err)
@@ -367,6 +368,7 @@ func (x *Foo2) readField3(p thrift.Decoder) error {  // Field1
     x.Field1 = result
     return nil
 }
+
 
 
 

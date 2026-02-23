@@ -71,6 +71,7 @@ func (x *Foo) readField1(p thrift.Decoder) error {  // MyInt
 
 
 
+
 func (x *Foo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Foo"); err != nil {
         return thrift.PrependError("Foo write struct begin error: ", err)
@@ -194,6 +195,7 @@ func (x *reqTestServiceInit) readField1(p thrift.Decoder) error {  // Int1
     x.Int1 = result
     return nil
 }
+
 
 
 
@@ -328,6 +330,7 @@ func (x *respTestServiceInit) readField0(p thrift.Decoder) error {  // Success
     x.Success = &result
     return nil
 }
+
 
 
 

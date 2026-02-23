@@ -112,6 +112,7 @@ func (x *Accessory) readField2(p thrift.Decoder) error {  // Name
 
 
 
+
 func (x *Accessory) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Accessory"); err != nil {
         return thrift.PrependError("Accessory write struct begin error: ", err)
@@ -279,6 +280,7 @@ func (x *PartName) readField2(p thrift.Decoder) error {  // Name
     x.Name = result
     return nil
 }
+
 
 
 

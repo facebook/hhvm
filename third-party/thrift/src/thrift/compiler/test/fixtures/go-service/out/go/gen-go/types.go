@@ -71,6 +71,7 @@ func (x *GetEntityRequest) readField1(p thrift.Decoder) error {  // Id
 
 
 
+
 func (x *GetEntityRequest) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("GetEntityRequest"); err != nil {
         return thrift.PrependError("GetEntityRequest write struct begin error: ", err)
@@ -191,6 +192,7 @@ func (x *GetEntityResponse) readField1(p thrift.Decoder) error {  // Entity
     x.Entity = result
     return nil
 }
+
 
 
 
@@ -493,6 +495,7 @@ func (x *NonComparableStruct) readField3(p thrift.Decoder) error {  // Baz
 
 
 
+
 func (x *NonComparableStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("NonComparableStruct"); err != nil {
         return thrift.PrependError("NonComparableStruct write struct begin error: ", err)
@@ -644,6 +647,7 @@ func (x *reqGetEntityGetEntity) readField1(p thrift.Decoder) error {  // R
 
 
 
+
 func (x *reqGetEntityGetEntity) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetEntity"); err != nil {
         return thrift.PrependError("reqGetEntityGetEntity write struct begin error: ", err)
@@ -780,6 +784,7 @@ func (x *respGetEntityGetEntity) readField0(p thrift.Decoder) error {  // Succes
 
 
 
+
 func (x *respGetEntityGetEntity) Exception() thrift.WritableException {
     return nil
 }
@@ -861,6 +866,7 @@ type GetEntityGetBoolArgsDeprecated = reqGetEntityGetBool
 func newReqGetEntityGetBool() *reqGetEntityGetBool {
     return (&reqGetEntityGetBool{}).setDefaults()
 }
+
 
 
 
@@ -993,6 +999,7 @@ func (x *respGetEntityGetBool) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respGetEntityGetBool) Exception() thrift.WritableException {
     return nil
 }
@@ -1074,6 +1081,7 @@ type GetEntityGetByteArgsDeprecated = reqGetEntityGetByte
 func newReqGetEntityGetByte() *reqGetEntityGetByte {
     return (&reqGetEntityGetByte{}).setDefaults()
 }
+
 
 
 
@@ -1207,6 +1215,7 @@ func (x *respGetEntityGetByte) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respGetEntityGetByte) Exception() thrift.WritableException {
     return nil
 }
@@ -1288,6 +1297,7 @@ type GetEntityGetI16ArgsDeprecated = reqGetEntityGetI16
 func newReqGetEntityGetI16() *reqGetEntityGetI16 {
     return (&reqGetEntityGetI16{}).setDefaults()
 }
+
 
 
 
@@ -1420,6 +1430,7 @@ func (x *respGetEntityGetI16) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respGetEntityGetI16) Exception() thrift.WritableException {
     return nil
 }
@@ -1501,6 +1512,7 @@ type GetEntityGetI32ArgsDeprecated = reqGetEntityGetI32
 func newReqGetEntityGetI32() *reqGetEntityGetI32 {
     return (&reqGetEntityGetI32{}).setDefaults()
 }
+
 
 
 
@@ -1633,6 +1645,7 @@ func (x *respGetEntityGetI32) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respGetEntityGetI32) Exception() thrift.WritableException {
     return nil
 }
@@ -1714,6 +1727,7 @@ type GetEntityGetI64ArgsDeprecated = reqGetEntityGetI64
 func newReqGetEntityGetI64() *reqGetEntityGetI64 {
     return (&reqGetEntityGetI64{}).setDefaults()
 }
+
 
 
 
@@ -1846,6 +1860,7 @@ func (x *respGetEntityGetI64) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respGetEntityGetI64) Exception() thrift.WritableException {
     return nil
 }
@@ -1927,6 +1942,7 @@ type GetEntityGetDoubleArgsDeprecated = reqGetEntityGetDouble
 func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
     return (&reqGetEntityGetDouble{}).setDefaults()
 }
+
 
 
 
@@ -2059,6 +2075,7 @@ func (x *respGetEntityGetDouble) readField0(p thrift.Decoder) error {  // Succes
 
 
 
+
 func (x *respGetEntityGetDouble) Exception() thrift.WritableException {
     return nil
 }
@@ -2140,6 +2157,7 @@ type GetEntityGetStringArgsDeprecated = reqGetEntityGetString
 func newReqGetEntityGetString() *reqGetEntityGetString {
     return (&reqGetEntityGetString{}).setDefaults()
 }
+
 
 
 
@@ -2272,6 +2290,7 @@ func (x *respGetEntityGetString) readField0(p thrift.Decoder) error {  // Succes
 
 
 
+
 func (x *respGetEntityGetString) Exception() thrift.WritableException {
     return nil
 }
@@ -2353,6 +2372,7 @@ type GetEntityGetBinaryArgsDeprecated = reqGetEntityGetBinary
 func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
     return (&reqGetEntityGetBinary{}).setDefaults()
 }
+
 
 
 
@@ -2484,6 +2504,7 @@ func (x *respGetEntityGetBinary) readField0(p thrift.Decoder) error {  // Succes
 
 
 
+
 func (x *respGetEntityGetBinary) Exception() thrift.WritableException {
     return nil
 }
@@ -2565,6 +2586,7 @@ type GetEntityGetMapArgsDeprecated = reqGetEntityGetMap
 func newReqGetEntityGetMap() *reqGetEntityGetMap {
     return (&reqGetEntityGetMap{}).setDefaults()
 }
+
 
 
 
@@ -2742,6 +2764,7 @@ func (x *respGetEntityGetMap) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respGetEntityGetMap) Exception() thrift.WritableException {
     return nil
 }
@@ -2823,6 +2846,7 @@ type GetEntityGetSetArgsDeprecated = reqGetEntityGetSet
 func newReqGetEntityGetSet() *reqGetEntityGetSet {
     return (&reqGetEntityGetSet{}).setDefaults()
 }
+
 
 
 
@@ -2983,6 +3007,7 @@ func (x *respGetEntityGetSet) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respGetEntityGetSet) Exception() thrift.WritableException {
     return nil
 }
@@ -3064,6 +3089,7 @@ type GetEntityGetListArgsDeprecated = reqGetEntityGetList
 func newReqGetEntityGetList() *reqGetEntityGetList {
     return (&reqGetEntityGetList{}).setDefaults()
 }
+
 
 
 
@@ -3221,6 +3247,7 @@ func (x *respGetEntityGetList) readField0(p thrift.Decoder) error {  // Success
     x.Success = result
     return nil
 }
+
 
 
 
@@ -3431,6 +3458,7 @@ func (x *reqGetEntityGetLegacyStuff) readField1(p thrift.Decoder) error {  // Nu
 
 
 
+
 func (x *reqGetEntityGetLegacyStuff) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetLegacyStuff"); err != nil {
         return thrift.PrependError("reqGetEntityGetLegacyStuff write struct begin error: ", err)
@@ -3578,6 +3606,7 @@ func (x *respGetEntityGetLegacyStuff) readField0(p thrift.Decoder) error {  // S
 
 
 
+
 func (x *respGetEntityGetLegacyStuff) Exception() thrift.WritableException {
     return nil
 }
@@ -3700,6 +3729,7 @@ func (x *reqGetEntityGetCtxCollision) readField1(p thrift.Decoder) error {  // C
     x.Ctx = result
     return nil
 }
+
 
 
 
@@ -3834,6 +3864,7 @@ func (x *respGetEntityGetCtxCollision) readField0(p thrift.Decoder) error {  // 
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -4004,6 +4035,7 @@ func (x *reqGetEntityGetCtx1Collision) readField2(p thrift.Decoder) error {  // 
 
 
 
+
 func (x *reqGetEntityGetCtx1Collision) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetCtx1Collision"); err != nil {
         return thrift.PrependError("reqGetEntityGetCtx1Collision write struct begin error: ", err)
@@ -4145,6 +4177,7 @@ func (x *respGetEntityGetCtx1Collision) readField0(p thrift.Decoder) error {  //
 
 
 
+
 func (x *respGetEntityGetCtx1Collision) Exception() thrift.WritableException {
     return nil
 }
@@ -4267,6 +4300,7 @@ func (x *reqGetEntityGetContextCollision) readField1(p thrift.Decoder) error {  
     x.Context = result
     return nil
 }
+
 
 
 
@@ -4405,6 +4439,7 @@ func (x *respGetEntityGetContextCollision) readField0(p thrift.Decoder) error { 
 
 
 
+
 func (x *respGetEntityGetContextCollision) Exception() thrift.WritableException {
     return nil
 }
@@ -4527,6 +4562,7 @@ func (x *reqGetEntityGetOutCollision) readField1(p thrift.Decoder) error {  // O
     x.Out = result
     return nil
 }
+
 
 
 
@@ -4661,6 +4697,7 @@ func (x *respGetEntityGetOutCollision) readField0(p thrift.Decoder) error {  // 
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -4831,6 +4868,7 @@ func (x *reqGetEntityGetOut1Collision) readField2(p thrift.Decoder) error {  // 
 
 
 
+
 func (x *reqGetEntityGetOut1Collision) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetOut1Collision"); err != nil {
         return thrift.PrependError("reqGetEntityGetOut1Collision write struct begin error: ", err)
@@ -4972,6 +5010,7 @@ func (x *respGetEntityGetOut1Collision) readField0(p thrift.Decoder) error {  //
 
 
 
+
 func (x *respGetEntityGetOut1Collision) Exception() thrift.WritableException {
     return nil
 }
@@ -5094,6 +5133,7 @@ func (x *reqGetEntityGetInCollision) readField1(p thrift.Decoder) error {  // In
     x.In = result
     return nil
 }
+
 
 
 
@@ -5228,6 +5268,7 @@ func (x *respGetEntityGetInCollision) readField0(p thrift.Decoder) error {  // S
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -5398,6 +5439,7 @@ func (x *reqGetEntityGetIn1Collision) readField2(p thrift.Decoder) error {  // I
 
 
 
+
 func (x *reqGetEntityGetIn1Collision) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetIn1Collision"); err != nil {
         return thrift.PrependError("reqGetEntityGetIn1Collision write struct begin error: ", err)
@@ -5539,6 +5581,7 @@ func (x *respGetEntityGetIn1Collision) readField0(p thrift.Decoder) error {  // 
 
 
 
+
 func (x *respGetEntityGetIn1Collision) Exception() thrift.WritableException {
     return nil
 }
@@ -5661,6 +5704,7 @@ func (x *reqGetEntityGetErrCollision) readField1(p thrift.Decoder) error {  // E
     x.Err = result
     return nil
 }
+
 
 
 
@@ -5795,6 +5839,7 @@ func (x *respGetEntityGetErrCollision) readField0(p thrift.Decoder) error {  // 
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -5965,6 +6010,7 @@ func (x *reqGetEntityGetErr1Collision) readField2(p thrift.Decoder) error {  // 
 
 
 
+
 func (x *reqGetEntityGetErr1Collision) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetErr1Collision"); err != nil {
         return thrift.PrependError("reqGetEntityGetErr1Collision write struct begin error: ", err)
@@ -6102,6 +6148,7 @@ func (x *respGetEntityGetErr1Collision) readField0(p thrift.Decoder) error {  //
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -6272,6 +6319,7 @@ func (x *reqGetEntityMyMethodWithConflictingParamAccessors) readField2(p thrift.
 
 
 
+
 func (x *reqGetEntityMyMethodWithConflictingParamAccessors) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityMyMethodWithConflictingParamAccessors"); err != nil {
         return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write struct begin error: ", err)
@@ -6357,6 +6405,7 @@ type GetEntityMyMethodWithConflictingParamAccessorsResultDeprecated = respGetEnt
 func newRespGetEntityMyMethodWithConflictingParamAccessors() *respGetEntityMyMethodWithConflictingParamAccessors {
     return (&respGetEntityMyMethodWithConflictingParamAccessors{}).setDefaults()
 }
+
 
 
 

@@ -28,6 +28,19 @@
 {{! methods }}
 {{> types/struct_methods}}
 
+{{! countSetFields }}
+{{#struct:union?}}
+func (x *{{struct:go_name}}) CountSetFields() int {
+    count := int(0)
+    {{#struct:fields_sorted}}
+    if (x.IsSet{{field:go_name}}()) {
+        count++
+    }
+    {{/struct:fields_sorted}}
+    return count
+}
+{{/struct:union?}}
+
 {{#if (or struct:resp? struct:stream? struct:sink?)}}
 
 {{! exception }}

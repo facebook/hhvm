@@ -199,6 +199,7 @@ func (x *reqMyServiceQuery) readField2(p thrift.Decoder) error {  // I
 
 
 
+
 func (x *reqMyServiceQuery) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceQuery"); err != nil {
         return thrift.PrependError("reqMyServiceQuery write struct begin error: ", err)
@@ -284,6 +285,7 @@ type MyServiceQueryResultDeprecated = respMyServiceQuery
 func newRespMyServiceQuery() *respMyServiceQuery {
     return (&respMyServiceQuery{}).setDefaults()
 }
+
 
 
 
@@ -474,6 +476,7 @@ func (x *reqMyServiceHasArgDocs) readField2(p thrift.Decoder) error {  // I
 
 
 
+
 func (x *reqMyServiceHasArgDocs) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceHasArgDocs"); err != nil {
         return thrift.PrependError("reqMyServiceHasArgDocs write struct begin error: ", err)
@@ -559,6 +562,7 @@ type MyServiceHasArgDocsResultDeprecated = respMyServiceHasArgDocs
 func newRespMyServiceHasArgDocs() *respMyServiceHasArgDocs {
     return (&respMyServiceHasArgDocs{}).setDefaults()
 }
+
 
 
 

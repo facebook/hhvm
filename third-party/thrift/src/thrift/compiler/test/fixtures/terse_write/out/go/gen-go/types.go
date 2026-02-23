@@ -91,6 +91,7 @@ func NewMyStruct() *MyStruct {
 
 
 
+
 func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError("MyStruct write struct begin error: ", err)
@@ -1010,6 +1011,7 @@ func (x *MyUnion) readField14(p thrift.Decoder) error {  // StructField
 
 
 
+
 func (x *MyUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetBoolField()) {
@@ -1056,7 +1058,6 @@ func (x *MyUnion) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *MyUnion) Write(p thrift.Encoder) error {
@@ -1246,6 +1247,7 @@ func (x *MyStructWithCustomDefault) readField1(p thrift.Decoder) error {  // Fie
     x.Field1 = result
     return nil
 }
+
 
 
 
@@ -2101,6 +2103,7 @@ func (x *StructLevelTerseStruct) readField15(p thrift.Decoder) error {  // Union
     x.UnionField = result
     return nil
 }
+
 
 
 
@@ -3822,6 +3825,7 @@ func (x *FieldLevelTerseStruct) readField30(p thrift.Decoder) error {  // UnionF
 
 
 
+
 func (x *FieldLevelTerseStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("FieldLevelTerseStruct"); err != nil {
         return thrift.PrependError("FieldLevelTerseStruct write struct begin error: ", err)
@@ -4203,6 +4207,7 @@ func (x *AdaptedFields) readField3(p thrift.Decoder) error {  // Field3
 
 
 
+
 func (x *AdaptedFields) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("AdaptedFields"); err != nil {
         return thrift.PrependError("AdaptedFields write struct begin error: ", err)
@@ -4336,6 +4341,7 @@ func (x *TerseException) readField1(p thrift.Decoder) error {  // Msg
     x.Msg = result
     return nil
 }
+
 
 
 

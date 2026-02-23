@@ -640,6 +640,7 @@ func NewEmptyStruct() *EmptyStruct {
 
 
 
+
 func (x *EmptyStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("empty_struct"); err != nil {
         return thrift.PrependError("EmptyStruct write struct begin error: ", err)
@@ -754,6 +755,7 @@ func (x *DecoratedStruct) readField1(p thrift.Decoder) error {  // Field
     x.Field = result
     return nil
 }
+
 
 
 
@@ -1371,6 +1373,7 @@ func (x *ContainerStruct) readField12(p thrift.Decoder) error {  // FieldA
 
 
 
+
 func (x *ContainerStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ContainerStruct"); err != nil {
         return thrift.PrependError("ContainerStruct write struct begin error: ", err)
@@ -1572,6 +1575,7 @@ func (x *CppTypeStruct) readField1(p thrift.Decoder) error {  // FieldA
 
 
 
+
 func (x *CppTypeStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CppTypeStruct"); err != nil {
         return thrift.PrependError("CppTypeStruct write struct begin error: ", err)
@@ -1692,6 +1696,7 @@ func (x *VirtualStruct) readField1(p thrift.Decoder) error {  // MyIntField
     x.MyIntField = result
     return nil
 }
+
 
 
 
@@ -1858,6 +1863,7 @@ func (x *MyStructWithForwardRefEnum) readField2(p thrift.Decoder) error {  // B
     x.B = result
     return nil
 }
+
 
 
 
@@ -2032,6 +2038,7 @@ func (x *TrivialNumeric) readField2(p thrift.Decoder) error {  // B
     x.B = result
     return nil
 }
+
 
 
 
@@ -2214,6 +2221,7 @@ func (x *TrivialNestedWithDefault) readField2(p thrift.Decoder) error {  // N
     x.N = result
     return nil
 }
+
 
 
 
@@ -2445,6 +2453,7 @@ func (x *ComplexString) readField2(p thrift.Decoder) error {  // B
 
 
 
+
 func (x *ComplexString) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ComplexString"); err != nil {
         return thrift.PrependError("ComplexString write struct begin error: ", err)
@@ -2624,6 +2633,7 @@ func (x *ComplexNestedWithDefault) readField2(p thrift.Decoder) error {  // N
     x.N = result
     return nil
 }
+
 
 
 
@@ -2928,6 +2938,7 @@ func (x *MinPadding) readField5(p thrift.Decoder) error {  // Tiny
     x.Tiny = result
     return nil
 }
+
 
 
 
@@ -3244,6 +3255,7 @@ func (x *MinPaddingWithCustomType) readField5(p thrift.Decoder) error {  // Tiny
 
 
 
+
 func (x *MinPaddingWithCustomType) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MinPaddingWithCustomType"); err != nil {
         return thrift.PrependError("MinPaddingWithCustomType write struct begin error: ", err)
@@ -3527,6 +3539,7 @@ func (x *MyStruct) readField4(p thrift.Decoder) error {  // Data
 
 
 
+
 func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError("MyStruct write struct begin error: ", err)
@@ -3624,6 +3637,7 @@ var _ thrift.Struct = (*MyDataItem)(nil)
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{}).setDefaults()
 }
+
 
 
 
@@ -3741,6 +3755,7 @@ func (x *Renaming) readField1(p thrift.Decoder) error {  // Foo
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -3921,6 +3936,7 @@ func (x *AnnotatedTypes) readField2(p thrift.Decoder) error {  // ListField
     x.ListField = result
     return nil
 }
+
 
 
 
@@ -4120,6 +4136,7 @@ func (x *ForwardUsageRoot) readField2(p thrift.Decoder) error {  // ForwardUsage
 
 
 
+
 func (x *ForwardUsageRoot) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ForwardUsageRoot"); err != nil {
         return thrift.PrependError("ForwardUsageRoot write struct begin error: ", err)
@@ -4260,6 +4277,7 @@ func (x *ForwardUsageStruct) readField1(p thrift.Decoder) error {  // Foo
 
 
 
+
 func (x *ForwardUsageStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ForwardUsageStruct"); err != nil {
         return thrift.PrependError("ForwardUsageStruct write struct begin error: ", err)
@@ -4391,6 +4409,7 @@ func (x *ForwardUsageByRef) readField1(p thrift.Decoder) error {  // Foo
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -4575,6 +4594,7 @@ func (x *IncompleteMap) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *IncompleteMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("IncompleteMap"); err != nil {
         return thrift.PrependError("IncompleteMap write struct begin error: ", err)
@@ -4653,6 +4673,7 @@ var _ thrift.Struct = (*IncompleteMapDep)(nil)
 func NewIncompleteMapDep() *IncompleteMapDep {
     return (&IncompleteMapDep{}).setDefaults()
 }
+
 
 
 
@@ -4831,6 +4852,7 @@ func (x *CompleteMap) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *CompleteMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CompleteMap"); err != nil {
         return thrift.PrependError("CompleteMap write struct begin error: ", err)
@@ -4909,6 +4931,7 @@ var _ thrift.Struct = (*CompleteMapDep)(nil)
 func NewCompleteMapDep() *CompleteMapDep {
     return (&CompleteMapDep{}).setDefaults()
 }
+
 
 
 
@@ -5070,6 +5093,7 @@ func (x *IncompleteList) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *IncompleteList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("IncompleteList"); err != nil {
         return thrift.PrependError("IncompleteList write struct begin error: ", err)
@@ -5148,6 +5172,7 @@ var _ thrift.Struct = (*IncompleteListDep)(nil)
 func NewIncompleteListDep() *IncompleteListDep {
     return (&IncompleteListDep{}).setDefaults()
 }
+
 
 
 
@@ -5309,6 +5334,7 @@ func (x *CompleteList) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *CompleteList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CompleteList"); err != nil {
         return thrift.PrependError("CompleteList write struct begin error: ", err)
@@ -5387,6 +5413,7 @@ var _ thrift.Struct = (*CompleteListDep)(nil)
 func NewCompleteListDep() *CompleteListDep {
     return (&CompleteListDep{}).setDefaults()
 }
+
 
 
 
@@ -5548,6 +5575,7 @@ func (x *AdaptedList) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *AdaptedList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("AdaptedList"); err != nil {
         return thrift.PrependError("AdaptedList write struct begin error: ", err)
@@ -5679,6 +5707,7 @@ func (x *AdaptedListDep) readField1(p thrift.Decoder) error {  // Field
     x.Field = result
     return nil
 }
+
 
 
 
@@ -5847,6 +5876,7 @@ func (x *DependentAdaptedList) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *DependentAdaptedList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("DependentAdaptedList"); err != nil {
         return thrift.PrependError("DependentAdaptedList write struct begin error: ", err)
@@ -5977,6 +6007,7 @@ func (x *DependentAdaptedListDep) readField1(p thrift.Decoder) error {  // Field
     x.Field = &result
     return nil
 }
+
 
 
 
@@ -6376,6 +6407,7 @@ func (x *AllocatorAware) readField7(p thrift.Decoder) error {  // AaShared
 
 
 
+
 func (x *AllocatorAware) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("AllocatorAware"); err != nil {
         return thrift.PrependError("AllocatorAware write struct begin error: ", err)
@@ -6584,6 +6616,7 @@ func (x *AllocatorAware2) readField2(p thrift.Decoder) error {  // BoxField
     x.BoxField = &result
     return nil
 }
+
 
 
 
@@ -6800,6 +6833,7 @@ func (x *TypedefStruct) readField3(p thrift.Decoder) error {  // UintTypedefFiel
 
 
 
+
 func (x *TypedefStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("TypedefStruct"); err != nil {
         return thrift.PrependError("TypedefStruct write struct begin error: ", err)
@@ -6932,6 +6966,7 @@ func (x *StructWithDoubleUnderscores) readField1(p thrift.Decoder) error {  // _
     x._Field = result
     return nil
 }
+
 
 
 
@@ -7069,6 +7104,7 @@ func (x *reqSomeServiceBounceMap) readField1(p thrift.Decoder) error {  // M
 
 
 
+
 func (x *reqSomeServiceBounceMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSomeServiceBounceMap"); err != nil {
         return thrift.PrependError("reqSomeServiceBounceMap write struct begin error: ", err)
@@ -7201,6 +7237,7 @@ func (x *respSomeServiceBounceMap) readField0(p thrift.Decoder) error {  // Succ
     x.Success = result
     return nil
 }
+
 
 
 
@@ -7362,6 +7399,7 @@ func (x *reqSomeServiceBinaryKeyedMap) readField1(p thrift.Decoder) error {  // 
     x.R = result
     return nil
 }
+
 
 
 
@@ -7547,6 +7585,7 @@ func (x *respSomeServiceBinaryKeyedMap) readField0(p thrift.Decoder) error {  //
     x.Success = result
     return nil
 }
+
 
 
 

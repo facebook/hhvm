@@ -33,6 +33,7 @@ func newReqMyRootDoRoot() *reqMyRootDoRoot {
 
 
 
+
 func (x *reqMyRootDoRoot) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyRootDoRoot"); err != nil {
         return thrift.PrependError("reqMyRootDoRoot write struct begin error: ", err)
@@ -106,6 +107,7 @@ type MyRootDoRootResultDeprecated = respMyRootDoRoot
 func newRespMyRootDoRoot() *respMyRootDoRoot {
     return (&respMyRootDoRoot{}).setDefaults()
 }
+
 
 
 
@@ -188,6 +190,7 @@ func newReqMyNodeDoMid() *reqMyNodeDoMid {
 
 
 
+
 func (x *reqMyNodeDoMid) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyNodeDoMid"); err != nil {
         return thrift.PrependError("reqMyNodeDoMid write struct begin error: ", err)
@@ -261,6 +264,7 @@ type MyNodeDoMidResultDeprecated = respMyNodeDoMid
 func newRespMyNodeDoMid() *respMyNodeDoMid {
     return (&respMyNodeDoMid{}).setDefaults()
 }
+
 
 
 
@@ -343,6 +347,7 @@ func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
 
 
 
+
 func (x *reqMyLeafDoLeaf) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyLeafDoLeaf"); err != nil {
         return thrift.PrependError("reqMyLeafDoLeaf write struct begin error: ", err)
@@ -416,6 +421,7 @@ type MyLeafDoLeafResultDeprecated = respMyLeafDoLeaf
 func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
     return (&respMyLeafDoLeaf{}).setDefaults()
 }
+
 
 
 

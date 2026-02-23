@@ -31,6 +31,7 @@ func NewFooStreamEx() *FooStreamEx {
 
 
 
+
 func (x *FooStreamEx) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("FooStreamEx"); err != nil {
         return thrift.PrependError("FooStreamEx write struct begin error: ", err)
@@ -116,6 +117,7 @@ func NewFooEx() *FooEx {
 
 
 
+
 func (x *FooEx) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("FooEx"); err != nil {
         return thrift.PrependError("FooEx write struct begin error: ", err)
@@ -198,6 +200,7 @@ var _ thrift.WritableException = (*FooEx2)(nil)
 func NewFooEx2() *FooEx2 {
     return (&FooEx2{}).setDefaults()
 }
+
 
 
 
@@ -370,6 +373,7 @@ func (x *reqPubSubStreamingServiceReturnstream) readField2(p thrift.Decoder) err
 
 
 
+
 func (x *reqPubSubStreamingServiceReturnstream) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceReturnstream"); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceReturnstream write struct begin error: ", err)
@@ -455,6 +459,7 @@ type PubSubStreamingServiceReturnstreamResultDeprecated = respPubSubStreamingSer
 func newRespPubSubStreamingServiceReturnstream() *respPubSubStreamingServiceReturnstream {
     return (&respPubSubStreamingServiceReturnstream{}).setDefaults()
 }
+
 
 
 
@@ -591,6 +596,7 @@ func (x *streamPubSubStreamingServiceReturnstream) readField0(p thrift.Decoder) 
 
 
 
+
 func (x *streamPubSubStreamingServiceReturnstream) Exception() thrift.WritableException {
     return nil
 }
@@ -716,6 +722,7 @@ func (x *reqPubSubStreamingServiceStreamthrows) readField1(p thrift.Decoder) err
 
 
 
+
 func (x *reqPubSubStreamingServiceStreamthrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceStreamthrows"); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write struct begin error: ", err)
@@ -795,6 +802,7 @@ type PubSubStreamingServiceStreamthrowsResultDeprecated = respPubSubStreamingSer
 func newRespPubSubStreamingServiceStreamthrows() *respPubSubStreamingServiceStreamthrows {
     return (&respPubSubStreamingServiceStreamthrows{}).setDefaults()
 }
+
 
 
 
@@ -985,6 +993,7 @@ func (x *streamPubSubStreamingServiceStreamthrows) readField1(p thrift.Decoder) 
 
 
 
+
 func (x *streamPubSubStreamingServiceStreamthrows) Exception() thrift.WritableException {
     if x.E != nil {
         return x.E
@@ -1115,6 +1124,7 @@ func (x *reqPubSubStreamingServiceServicethrows) readField1(p thrift.Decoder) er
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -1250,6 +1260,7 @@ func (x *respPubSubStreamingServiceServicethrows) readField1(p thrift.Decoder) e
     x.E = result
     return nil
 }
+
 
 
 
@@ -1395,6 +1406,7 @@ func (x *streamPubSubStreamingServiceServicethrows) readField0(p thrift.Decoder)
 
 
 
+
 func (x *streamPubSubStreamingServiceServicethrows) Exception() thrift.WritableException {
     return nil
 }
@@ -1517,6 +1529,7 @@ func (x *reqPubSubStreamingServiceServicethrows2) readField1(p thrift.Decoder) e
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -1710,6 +1723,7 @@ func (x *respPubSubStreamingServiceServicethrows2) readField2(p thrift.Decoder) 
 
 
 
+
 func (x *respPubSubStreamingServiceServicethrows2) Exception() thrift.WritableException {
     if x.E1 != nil {
         return x.E1
@@ -1859,6 +1873,7 @@ func (x *streamPubSubStreamingServiceServicethrows2) readField0(p thrift.Decoder
 
 
 
+
 func (x *streamPubSubStreamingServiceServicethrows2) Exception() thrift.WritableException {
     return nil
 }
@@ -1981,6 +1996,7 @@ func (x *reqPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) error
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -2116,6 +2132,7 @@ func (x *respPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) erro
     x.E = result
     return nil
 }
+
 
 
 
@@ -2315,6 +2332,7 @@ func (x *streamPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) er
 
 
 
+
 func (x *streamPubSubStreamingServiceBoththrows) Exception() thrift.WritableException {
     if x.E != nil {
         return x.E
@@ -2445,6 +2463,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) readField1(p th
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -2579,6 +2598,7 @@ func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) readField0(p t
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -2775,6 +2795,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) readField1(p
 
 
 
+
 func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) Exception() thrift.WritableException {
     if x.E != nil {
         return x.E
@@ -2905,6 +2926,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) readField1(p t
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -3097,6 +3119,7 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) readField1(p 
 
 
 
+
 func (x *respPubSubStreamingServiceResponseandstreamservicethrows) Exception() thrift.WritableException {
     if x.E != nil {
         return x.E
@@ -3243,6 +3266,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) readField0(
 
 
 
+
 func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) Exception() thrift.WritableException {
     return nil
 }
@@ -3365,6 +3389,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamboththrows) readField1(p thri
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -3552,6 +3577,7 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) readField1(p thr
     x.E = result
     return nil
 }
+
 
 
 
@@ -3757,6 +3783,7 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) readField1(p t
 
 
 
+
 func (x *streamPubSubStreamingServiceResponseandstreamboththrows) Exception() thrift.WritableException {
     if x.E != nil {
         return x.E
@@ -3931,6 +3958,7 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) readField2(p thrift.Decoder)
 
 
 
+
 func (x *reqPubSubStreamingServiceReturnstreamFast) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceReturnstreamFast"); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write struct begin error: ", err)
@@ -4016,6 +4044,7 @@ type PubSubStreamingServiceReturnstreamFastResultDeprecated = respPubSubStreamin
 func newRespPubSubStreamingServiceReturnstreamFast() *respPubSubStreamingServiceReturnstreamFast {
     return (&respPubSubStreamingServiceReturnstreamFast{}).setDefaults()
 }
+
 
 
 
@@ -4148,6 +4177,7 @@ func (x *streamPubSubStreamingServiceReturnstreamFast) readField0(p thrift.Decod
     x.Success = &result
     return nil
 }
+
 
 
 

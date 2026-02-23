@@ -74,6 +74,7 @@ func (x *CustomException) readField1(p thrift.Decoder) error {  // Message
 
 
 
+
 func (x *CustomException) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CustomException"); err != nil {
         return thrift.PrependError("CustomException write struct begin error: ", err)
@@ -205,6 +206,7 @@ func (x *ShouldBeBoxed) readField1(p thrift.Decoder) error {  // SessionId
 
 
 
+
 func (x *ShouldBeBoxed) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ShouldBeBoxed"); err != nil {
         return thrift.PrependError("ShouldBeBoxed write struct begin error: ", err)
@@ -290,6 +292,7 @@ func newReqMyServiceFoo() *reqMyServiceFoo {
 
 
 
+
 func (x *reqMyServiceFoo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceFoo"); err != nil {
         return thrift.PrependError("reqMyServiceFoo write struct begin error: ", err)
@@ -363,6 +366,7 @@ type MyServiceFooResultDeprecated = respMyServiceFoo
 func newRespMyServiceFoo() *respMyServiceFoo {
     return (&respMyServiceFoo{}).setDefaults()
 }
+
 
 
 
@@ -486,6 +490,7 @@ func (x *reqMyServiceInteract) readField1(p thrift.Decoder) error {  // Arg
 
 
 
+
 func (x *reqMyServiceInteract) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceInteract"); err != nil {
         return thrift.PrependError("reqMyServiceInteract write struct begin error: ", err)
@@ -568,6 +573,7 @@ func newRespMyServiceInteract() *respMyServiceInteract {
 
 
 
+
 func (x *respMyServiceInteract) Exception() thrift.WritableException {
     return nil
 }
@@ -644,6 +650,7 @@ type MyServiceInteractFastArgsDeprecated = reqMyServiceInteractFast
 func newReqMyServiceInteractFast() *reqMyServiceInteractFast {
     return (&reqMyServiceInteractFast{}).setDefaults()
 }
+
 
 
 
@@ -776,6 +783,7 @@ func (x *respMyServiceInteractFast) readField0(p thrift.Decoder) error {  // Suc
 
 
 
+
 func (x *respMyServiceInteractFast) Exception() thrift.WritableException {
     return nil
 }
@@ -857,6 +865,7 @@ type MyServiceSerializeArgsDeprecated = reqMyServiceSerialize
 func newReqMyServiceSerialize() *reqMyServiceSerialize {
     return (&reqMyServiceSerialize{}).setDefaults()
 }
+
 
 
 
@@ -985,6 +994,7 @@ func (x *respMyServiceSerialize) readField0(p thrift.Decoder) error {  // Succes
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -1127,6 +1137,7 @@ func (x *streamMyServiceSerialize) readField0(p thrift.Decoder) error {  // Succ
 
 
 
+
 func (x *streamMyServiceSerialize) Exception() thrift.WritableException {
     return nil
 }
@@ -1211,6 +1222,7 @@ func newReqFactoriesFoo() *reqFactoriesFoo {
 
 
 
+
 func (x *reqFactoriesFoo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFactoriesFoo"); err != nil {
         return thrift.PrependError("reqFactoriesFoo write struct begin error: ", err)
@@ -1284,6 +1296,7 @@ type FactoriesFooResultDeprecated = respFactoriesFoo
 func newRespFactoriesFoo() *respFactoriesFoo {
     return (&respFactoriesFoo{}).setDefaults()
 }
+
 
 
 
@@ -1407,6 +1420,7 @@ func (x *reqFactoriesInteract) readField1(p thrift.Decoder) error {  // Arg
 
 
 
+
 func (x *reqFactoriesInteract) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFactoriesInteract"); err != nil {
         return thrift.PrependError("reqFactoriesInteract write struct begin error: ", err)
@@ -1489,6 +1503,7 @@ func newRespFactoriesInteract() *respFactoriesInteract {
 
 
 
+
 func (x *respFactoriesInteract) Exception() thrift.WritableException {
     return nil
 }
@@ -1565,6 +1580,7 @@ type FactoriesInteractFastArgsDeprecated = reqFactoriesInteractFast
 func newReqFactoriesInteractFast() *reqFactoriesInteractFast {
     return (&reqFactoriesInteractFast{}).setDefaults()
 }
+
 
 
 
@@ -1697,6 +1713,7 @@ func (x *respFactoriesInteractFast) readField0(p thrift.Decoder) error {  // Suc
 
 
 
+
 func (x *respFactoriesInteractFast) Exception() thrift.WritableException {
     return nil
 }
@@ -1778,6 +1795,7 @@ type FactoriesSerializeArgsDeprecated = reqFactoriesSerialize
 func newReqFactoriesSerialize() *reqFactoriesSerialize {
     return (&reqFactoriesSerialize{}).setDefaults()
 }
+
 
 
 
@@ -1906,6 +1924,7 @@ func (x *respFactoriesSerialize) readField0(p thrift.Decoder) error {  // Succes
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -2048,6 +2067,7 @@ func (x *streamFactoriesSerialize) readField0(p thrift.Decoder) error {  // Succ
 
 
 
+
 func (x *streamFactoriesSerialize) Exception() thrift.WritableException {
     return nil
 }
@@ -2132,6 +2152,7 @@ func newReqPerformFoo() *reqPerformFoo {
 
 
 
+
 func (x *reqPerformFoo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPerformFoo"); err != nil {
         return thrift.PrependError("reqPerformFoo write struct begin error: ", err)
@@ -2205,6 +2226,7 @@ type PerformFooResultDeprecated = respPerformFoo
 func newRespPerformFoo() *respPerformFoo {
     return (&respPerformFoo{}).setDefaults()
 }
+
 
 
 
@@ -2284,6 +2306,7 @@ type InteractWithSharedDoSomeSimilarThingsArgsDeprecated = reqInteractWithShared
 func newReqInteractWithSharedDoSomeSimilarThings() *reqInteractWithSharedDoSomeSimilarThings {
     return (&reqInteractWithSharedDoSomeSimilarThings{}).setDefaults()
 }
+
 
 
 
@@ -2413,6 +2436,7 @@ func (x *respInteractWithSharedDoSomeSimilarThings) readField0(p thrift.Decoder)
     x.Success = result
     return nil
 }
+
 
 
 
@@ -2555,6 +2579,7 @@ func (x *reqBoxServiceGetABoxSession) readField1(p thrift.Decoder) error {  // R
 
 
 
+
 func (x *reqBoxServiceGetABoxSession) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqBoxServiceGetABoxSession"); err != nil {
         return thrift.PrependError("reqBoxServiceGetABoxSession write struct begin error: ", err)
@@ -2691,6 +2716,7 @@ func (x *respBoxServiceGetABoxSession) readField0(p thrift.Decoder) error {  // 
 
 
 
+
 func (x *respBoxServiceGetABoxSession) Exception() thrift.WritableException {
     return nil
 }
@@ -2772,6 +2798,7 @@ type MyInteractionFrobnicateArgsDeprecated = reqMyInteractionFrobnicate
 func newReqMyInteractionFrobnicate() *reqMyInteractionFrobnicate {
     return (&reqMyInteractionFrobnicate{}).setDefaults()
 }
+
 
 
 
@@ -2958,6 +2985,7 @@ func (x *respMyInteractionFrobnicate) readField1(p thrift.Decoder) error {  // E
 
 
 
+
 func (x *respMyInteractionFrobnicate) Exception() thrift.WritableException {
     if x.Ex != nil {
         return x.Ex
@@ -3050,6 +3078,7 @@ func newReqMyInteractionPing() *reqMyInteractionPing {
 
 
 
+
 func (x *reqMyInteractionPing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyInteractionPing"); err != nil {
         return thrift.PrependError("reqMyInteractionPing write struct begin error: ", err)
@@ -3123,6 +3152,7 @@ type MyInteractionPingResultDeprecated = respMyInteractionPing
 func newRespMyInteractionPing() *respMyInteractionPing {
     return (&respMyInteractionPing{}).setDefaults()
 }
+
 
 
 
@@ -3205,6 +3235,7 @@ func newReqMyInteractionTruthify() *reqMyInteractionTruthify {
 
 
 
+
 func (x *reqMyInteractionTruthify) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyInteractionTruthify"); err != nil {
         return thrift.PrependError("reqMyInteractionTruthify write struct begin error: ", err)
@@ -3278,6 +3309,7 @@ type MyInteractionTruthifyResultDeprecated = respMyInteractionTruthify
 func newRespMyInteractionTruthify() *respMyInteractionTruthify {
     return (&respMyInteractionTruthify{}).setDefaults()
 }
+
 
 
 
@@ -3414,6 +3446,7 @@ func (x *streamMyInteractionTruthify) readField0(p thrift.Decoder) error {  // S
 
 
 
+
 func (x *streamMyInteractionTruthify) Exception() thrift.WritableException {
     return nil
 }
@@ -3495,6 +3528,7 @@ type MyInteractionEncodeArgsDeprecated = reqMyInteractionEncode
 func newReqMyInteractionEncode() *reqMyInteractionEncode {
     return (&reqMyInteractionEncode{}).setDefaults()
 }
+
 
 
 
@@ -3655,6 +3689,7 @@ func (x *respMyInteractionEncode) readField0(p thrift.Decoder) error {  // Succe
 
 
 
+
 func (x *respMyInteractionEncode) Exception() thrift.WritableException {
     return nil
 }
@@ -3789,6 +3824,7 @@ func (x *sinkMyInteractionEncode) readField0(p thrift.Decoder) error {  // Succe
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -3930,6 +3966,7 @@ func (x *respFinalMyInteractionEncode) readField0(p thrift.Decoder) error {  // 
 
 
 
+
 func (x *respFinalMyInteractionEncode) Exception() thrift.WritableException {
     return nil
 }
@@ -4011,6 +4048,7 @@ type MyInteractionFastFrobnicateArgsDeprecated = reqMyInteractionFastFrobnicate
 func newReqMyInteractionFastFrobnicate() *reqMyInteractionFastFrobnicate {
     return (&reqMyInteractionFastFrobnicate{}).setDefaults()
 }
+
 
 
 
@@ -4143,6 +4181,7 @@ func (x *respMyInteractionFastFrobnicate) readField0(p thrift.Decoder) error {  
 
 
 
+
 func (x *respMyInteractionFastFrobnicate) Exception() thrift.WritableException {
     return nil
 }
@@ -4227,6 +4266,7 @@ func newReqMyInteractionFastPing() *reqMyInteractionFastPing {
 
 
 
+
 func (x *reqMyInteractionFastPing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyInteractionFastPing"); err != nil {
         return thrift.PrependError("reqMyInteractionFastPing write struct begin error: ", err)
@@ -4300,6 +4340,7 @@ type MyInteractionFastPingResultDeprecated = respMyInteractionFastPing
 func newRespMyInteractionFastPing() *respMyInteractionFastPing {
     return (&respMyInteractionFastPing{}).setDefaults()
 }
+
 
 
 
@@ -4382,6 +4423,7 @@ func newReqMyInteractionFastTruthify() *reqMyInteractionFastTruthify {
 
 
 
+
 func (x *reqMyInteractionFastTruthify) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyInteractionFastTruthify"); err != nil {
         return thrift.PrependError("reqMyInteractionFastTruthify write struct begin error: ", err)
@@ -4455,6 +4497,7 @@ type MyInteractionFastTruthifyResultDeprecated = respMyInteractionFastTruthify
 func newRespMyInteractionFastTruthify() *respMyInteractionFastTruthify {
     return (&respMyInteractionFastTruthify{}).setDefaults()
 }
+
 
 
 
@@ -4591,6 +4634,7 @@ func (x *streamMyInteractionFastTruthify) readField0(p thrift.Decoder) error {  
 
 
 
+
 func (x *streamMyInteractionFastTruthify) Exception() thrift.WritableException {
     return nil
 }
@@ -4672,6 +4716,7 @@ type MyInteractionFastEncodeArgsDeprecated = reqMyInteractionFastEncode
 func newReqMyInteractionFastEncode() *reqMyInteractionFastEncode {
     return (&reqMyInteractionFastEncode{}).setDefaults()
 }
+
 
 
 
@@ -4832,6 +4877,7 @@ func (x *respMyInteractionFastEncode) readField0(p thrift.Decoder) error {  // S
 
 
 
+
 func (x *respMyInteractionFastEncode) Exception() thrift.WritableException {
     return nil
 }
@@ -4966,6 +5012,7 @@ func (x *sinkMyInteractionFastEncode) readField0(p thrift.Decoder) error {  // S
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -5107,6 +5154,7 @@ func (x *respFinalMyInteractionFastEncode) readField0(p thrift.Decoder) error { 
 
 
 
+
 func (x *respFinalMyInteractionFastEncode) Exception() thrift.WritableException {
     return nil
 }
@@ -5191,6 +5239,7 @@ func newReqSerialInteractionFrobnicate() *reqSerialInteractionFrobnicate {
 
 
 
+
 func (x *reqSerialInteractionFrobnicate) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSerialInteractionFrobnicate"); err != nil {
         return thrift.PrependError("reqSerialInteractionFrobnicate write struct begin error: ", err)
@@ -5264,6 +5313,7 @@ type SerialInteractionFrobnicateResultDeprecated = respSerialInteractionFrobnica
 func newRespSerialInteractionFrobnicate() *respSerialInteractionFrobnicate {
     return (&respSerialInteractionFrobnicate{}).setDefaults()
 }
+
 
 
 
@@ -5343,6 +5393,7 @@ type BoxedInteractionGetABoxArgsDeprecated = reqBoxedInteractionGetABox
 func newReqBoxedInteractionGetABox() *reqBoxedInteractionGetABox {
     return (&reqBoxedInteractionGetABox{}).setDefaults()
 }
+
 
 
 
@@ -5472,6 +5523,7 @@ func (x *respBoxedInteractionGetABox) readField0(p thrift.Decoder) error {  // S
     x.Success = result
     return nil
 }
+
 
 
 

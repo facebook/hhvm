@@ -218,6 +218,7 @@ func (x *MyStructNestedAnnotation) readField1(p thrift.Decoder) error {  // Name
 
 
 
+
 func (x *MyStructNestedAnnotation) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyStructNestedAnnotation"); err != nil {
         return thrift.PrependError("MyStructNestedAnnotation write struct begin error: ", err)
@@ -298,11 +299,11 @@ func NewMyUnion() *MyUnion {
     return (&MyUnion{}).setDefaults()
 }
 
+
 func (x *MyUnion) CountSetFields() int {
     count := int(0)
     return count
 }
-
 
 
 func (x *MyUnion) Write(p thrift.Encoder) error {
@@ -382,6 +383,7 @@ var _ thrift.WritableException = (*MyException)(nil)
 func NewMyException() *MyException {
     return (&MyException{}).setDefaults()
 }
+
 
 
 
@@ -860,6 +862,7 @@ func (x *MyStruct) readField9(p thrift.Decoder) error {  // MyUnion
 
 
 
+
 func (x *MyStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError("MyStruct write struct begin error: ", err)
@@ -1072,6 +1075,7 @@ func (x *SecretStruct) readField2(p thrift.Decoder) error {  // Password
 
 
 
+
 func (x *SecretStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("SecretStruct"); err != nil {
         return thrift.PrependError("SecretStruct write struct begin error: ", err)
@@ -1160,6 +1164,7 @@ type MyServicePingArgsDeprecated = reqMyServicePing
 func newReqMyServicePing() *reqMyServicePing {
     return (&reqMyServicePing{}).setDefaults()
 }
+
 
 
 
@@ -1293,6 +1298,7 @@ func (x *respMyServicePing) readField1(p thrift.Decoder) error {  // MyExcept
 
 
 
+
 func (x *respMyServicePing) Exception() thrift.WritableException {
     if x.MyExcept != nil {
         return x.MyExcept
@@ -1377,6 +1383,7 @@ type MyServiceGetRandomDataArgsDeprecated = reqMyServiceGetRandomData
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{}).setDefaults()
 }
+
 
 
 
@@ -1509,6 +1516,7 @@ func (x *respMyServiceGetRandomData) readField0(p thrift.Decoder) error {  // Su
 
 
 
+
 func (x *respMyServiceGetRandomData) Exception() thrift.WritableException {
     return nil
 }
@@ -1631,6 +1639,7 @@ func (x *reqMyServiceHasDataById) readField1(p thrift.Decoder) error {  // Id
     x.Id = result
     return nil
 }
+
 
 
 
@@ -1769,6 +1778,7 @@ func (x *respMyServiceHasDataById) readField0(p thrift.Decoder) error {  // Succ
 
 
 
+
 func (x *respMyServiceHasDataById) Exception() thrift.WritableException {
     return nil
 }
@@ -1891,6 +1901,7 @@ func (x *reqMyServiceGoGetDataById) readField1(p thrift.Decoder) error {  // Id
     x.Id = result
     return nil
 }
+
 
 
 
@@ -2025,6 +2036,7 @@ func (x *respMyServiceGoGetDataById) readField0(p thrift.Decoder) error {  // Su
     x.Success = &result
     return nil
 }
+
 
 
 
@@ -2195,6 +2207,7 @@ func (x *reqMyServicePutDataById) readField2(p thrift.Decoder) error {  // Data
 
 
 
+
 func (x *reqMyServicePutDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePutDataById"); err != nil {
         return thrift.PrependError("reqMyServicePutDataById write struct begin error: ", err)
@@ -2280,6 +2293,7 @@ type MyServicePutDataByIdResultDeprecated = respMyServicePutDataById
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{}).setDefaults()
 }
+
 
 
 
@@ -2444,6 +2458,7 @@ func (x *reqMyServiceLobDataById) readField2(p thrift.Decoder) error {  // Data
 
 
 
+
 func (x *reqMyServiceLobDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceLobDataById"); err != nil {
         return thrift.PrependError("reqMyServiceLobDataById write struct begin error: ", err)
@@ -2532,6 +2547,7 @@ func newRespMyServiceLobDataById() *respMyServiceLobDataById {
 
 
 
+
 func (x *respMyServiceLobDataById) Exception() thrift.WritableException {
     return nil
 }
@@ -2611,6 +2627,7 @@ func newReqMyServiceGoDoNothing() *reqMyServiceGoDoNothing {
 
 
 
+
 func (x *reqMyServiceGoDoNothing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceGoDoNothing"); err != nil {
         return thrift.PrependError("reqMyServiceGoDoNothing write struct begin error: ", err)
@@ -2684,6 +2701,7 @@ type MyServiceGoDoNothingResultDeprecated = respMyServiceGoDoNothing
 func newRespMyServiceGoDoNothing() *respMyServiceGoDoNothing {
     return (&respMyServiceGoDoNothing{}).setDefaults()
 }
+
 
 
 
@@ -2766,6 +2784,7 @@ func newReqMyServicePrioParentPing() *reqMyServicePrioParentPing {
 
 
 
+
 func (x *reqMyServicePrioParentPing) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePrioParentPing"); err != nil {
         return thrift.PrependError("reqMyServicePrioParentPing write struct begin error: ", err)
@@ -2839,6 +2858,7 @@ type MyServicePrioParentPingResultDeprecated = respMyServicePrioParentPing
 func newRespMyServicePrioParentPing() *respMyServicePrioParentPing {
     return (&respMyServicePrioParentPing{}).setDefaults()
 }
+
 
 
 
@@ -2921,6 +2941,7 @@ func newReqMyServicePrioParentPong() *reqMyServicePrioParentPong {
 
 
 
+
 func (x *reqMyServicePrioParentPong) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePrioParentPong"); err != nil {
         return thrift.PrependError("reqMyServicePrioParentPong write struct begin error: ", err)
@@ -2994,6 +3015,7 @@ type MyServicePrioParentPongResultDeprecated = respMyServicePrioParentPong
 func newRespMyServicePrioParentPong() *respMyServicePrioParentPong {
     return (&respMyServicePrioParentPong{}).setDefaults()
 }
+
 
 
 
@@ -3076,6 +3098,7 @@ func newReqMyServicePrioChildPang() *reqMyServicePrioChildPang {
 
 
 
+
 func (x *reqMyServicePrioChildPang) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServicePrioChildPang"); err != nil {
         return thrift.PrependError("reqMyServicePrioChildPang write struct begin error: ", err)
@@ -3149,6 +3172,7 @@ type MyServicePrioChildPangResultDeprecated = respMyServicePrioChildPang
 func newRespMyServicePrioChildPang() *respMyServicePrioChildPang {
     return (&respMyServicePrioChildPang{}).setDefaults()
 }
+
 
 
 
@@ -3228,6 +3252,7 @@ type BadServiceBarArgsDeprecated = reqBadServiceBar
 func newReqBadServiceBar() *reqBadServiceBar {
     return (&reqBadServiceBar{}).setDefaults()
 }
+
 
 
 
@@ -3360,6 +3385,7 @@ func (x *respBadServiceBar) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respBadServiceBar) Exception() thrift.WritableException {
     return nil
 }
@@ -3444,6 +3470,7 @@ func newReqFooBarBazServiceFooStructured() *reqFooBarBazServiceFooStructured {
 
 
 
+
 func (x *reqFooBarBazServiceFooStructured) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFooBarBazServiceFooStructured"); err != nil {
         return thrift.PrependError("reqFooBarBazServiceFooStructured write struct begin error: ", err)
@@ -3517,6 +3544,7 @@ type FooBarBazServiceFooStructuredResultDeprecated = respFooBarBazServiceFooStru
 func newRespFooBarBazServiceFooStructured() *respFooBarBazServiceFooStructured {
     return (&respFooBarBazServiceFooStructured{}).setDefaults()
 }
+
 
 
 
@@ -3599,6 +3627,7 @@ func newReqFooBarBazServiceBarNonStructured() *reqFooBarBazServiceBarNonStructur
 
 
 
+
 func (x *reqFooBarBazServiceBarNonStructured) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFooBarBazServiceBarNonStructured"); err != nil {
         return thrift.PrependError("reqFooBarBazServiceBarNonStructured write struct begin error: ", err)
@@ -3672,6 +3701,7 @@ type FooBarBazServiceBarNonStructuredResultDeprecated = respFooBarBazServiceBarN
 func newRespFooBarBazServiceBarNonStructured() *respFooBarBazServiceBarNonStructured {
     return (&respFooBarBazServiceBarNonStructured{}).setDefaults()
 }
+
 
 
 
@@ -3754,6 +3784,7 @@ func newReqFooBarBazServiceBaz() *reqFooBarBazServiceBaz {
 
 
 
+
 func (x *reqFooBarBazServiceBaz) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFooBarBazServiceBaz"); err != nil {
         return thrift.PrependError("reqFooBarBazServiceBaz write struct begin error: ", err)
@@ -3827,6 +3858,7 @@ type FooBarBazServiceBazResultDeprecated = respFooBarBazServiceBaz
 func newRespFooBarBazServiceBaz() *respFooBarBazServiceBaz {
     return (&respFooBarBazServiceBaz{}).setDefaults()
 }
+
 
 
 
@@ -3909,6 +3941,7 @@ func newReqBadInteractionFoo() *reqBadInteractionFoo {
 
 
 
+
 func (x *reqBadInteractionFoo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqBadInteractionFoo"); err != nil {
         return thrift.PrependError("reqBadInteractionFoo write struct begin error: ", err)
@@ -3982,6 +4015,7 @@ type BadInteractionFooResultDeprecated = respBadInteractionFoo
 func newRespBadInteractionFoo() *respBadInteractionFoo {
     return (&respBadInteractionFoo{}).setDefaults()
 }
+
 
 
 

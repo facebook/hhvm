@@ -570,6 +570,7 @@ func (x *SomeStruct) readField4(p thrift.Decoder) error {  // Tags
 
 
 
+
 func (x *SomeStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("SomeStruct"); err != nil {
         return thrift.PrependError("SomeStruct write struct begin error: ", err)
@@ -844,6 +845,7 @@ func (x *MyStruct) readField6(p thrift.Decoder) error {  // Me1T2
     x.Me1T2 = result
     return nil
 }
+
 
 
 

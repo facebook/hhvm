@@ -30,6 +30,7 @@ func NewEmptyStruct() *EmptyStruct {
 
 
 
+
 func (x *EmptyStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("EmptyStruct"); err != nil {
         return thrift.PrependError("EmptyStruct write struct begin error: ", err)
@@ -553,6 +554,7 @@ func (x *TestStruct) readField8(p thrift.Decoder) error {  // OptionalStructFiel
     x.OptionalStructField = result
     return nil
 }
+
 
 
 

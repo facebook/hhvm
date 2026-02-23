@@ -71,6 +71,7 @@ func (x *TrivialStruct) readField1(p thrift.Decoder) error {  // IntValue
 
 
 
+
 func (x *TrivialStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("TrivialStruct"); err != nil {
         return thrift.PrependError("TrivialStruct write struct begin error: ", err)
@@ -232,6 +233,7 @@ func (x *TrivialStructWithDefault) readField2(p thrift.Decoder) error {  // IntV
     x.IntValue_2 = result
     return nil
 }
+
 
 
 
@@ -613,6 +615,7 @@ func (x *StructWithNoCustomDefaultValues) readField6(p thrift.Decoder) error {  
     x.RequiredStruct = result
     return nil
 }
+
 
 
 
@@ -1126,6 +1129,7 @@ func (x *StructWithCustomDefaultValues) readField8(p thrift.Decoder) error {  //
     x.StructWithDefaultSpecified = result
     return nil
 }
+
 
 
 
@@ -1772,6 +1776,7 @@ func (x *StructWithCollectionDefaultValues) readField6(p thrift.Decoder) error {
     x.MapWithListValue = result
     return nil
 }
+
 
 
 

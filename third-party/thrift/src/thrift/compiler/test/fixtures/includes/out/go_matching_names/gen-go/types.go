@@ -86,6 +86,7 @@ func (x *IncludesAlso) readField1(p thrift.Decoder) error {  // Also
 
 
 
+
 func (x *IncludesAlso) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("IncludesAlso"); err != nil {
         return thrift.PrependError("IncludesAlso write struct begin error: ", err)

@@ -72,6 +72,7 @@ func (x *Fiery) readField1(p thrift.Decoder) error {  // Message
 
 
 
+
 func (x *Fiery) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Fiery"); err != nil {
         return thrift.PrependError("Fiery write struct begin error: ", err)
@@ -212,6 +213,7 @@ func (x *Serious) readField1(p thrift.Decoder) error {  // Sonnet
     x.Sonnet = &result
     return nil
 }
+
 
 
 
@@ -385,6 +387,7 @@ func (x *ComplexFieldNames) readField2(p thrift.Decoder) error {  // InternalErr
     x.InternalErrorMessage = result
     return nil
 }
+
 
 
 
@@ -567,6 +570,7 @@ func (x *CustomFieldNames) readField2(p thrift.Decoder) error {  // InternalErro
 
 
 
+
 func (x *CustomFieldNames) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CustomFieldNames"); err != nil {
         return thrift.PrependError("CustomFieldNames write struct begin error: ", err)
@@ -743,6 +747,7 @@ func (x *ExceptionWithPrimitiveField) readField2(p thrift.Decoder) error {  // E
     x.ErrorCode = result
     return nil
 }
+
 
 
 
@@ -925,6 +930,7 @@ func (x *ExceptionWithStructuredAnnotation) readField2(p thrift.Decoder) error {
 
 
 
+
 func (x *ExceptionWithStructuredAnnotation) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ExceptionWithStructuredAnnotation"); err != nil {
         return thrift.PrependError("ExceptionWithStructuredAnnotation write struct begin error: ", err)
@@ -1022,6 +1028,7 @@ func NewBanal() *Banal {
 
 
 
+
 func (x *Banal) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Banal"); err != nil {
         return thrift.PrependError("Banal write struct begin error: ", err)
@@ -1109,6 +1116,7 @@ func newReqRaiserDoBland() *reqRaiserDoBland {
 
 
 
+
 func (x *reqRaiserDoBland) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqRaiserDoBland"); err != nil {
         return thrift.PrependError("reqRaiserDoBland write struct begin error: ", err)
@@ -1182,6 +1190,7 @@ type RaiserDoBlandResultDeprecated = respRaiserDoBland
 func newRespRaiserDoBland() *respRaiserDoBland {
     return (&respRaiserDoBland{}).setDefaults()
 }
+
 
 
 
@@ -1261,6 +1270,7 @@ type RaiserDoRaiseArgsDeprecated = reqRaiserDoRaise
 func newReqRaiserDoRaise() *reqRaiserDoRaise {
     return (&reqRaiserDoRaise{}).setDefaults()
 }
+
 
 
 
@@ -1502,6 +1512,7 @@ func (x *respRaiserDoRaise) readField3(p thrift.Decoder) error {  // S
 
 
 
+
 func (x *respRaiserDoRaise) Exception() thrift.WritableException {
     if x.B != nil {
         return x.B
@@ -1602,6 +1613,7 @@ type RaiserGet200ArgsDeprecated = reqRaiserGet200
 func newReqRaiserGet200() *reqRaiserGet200 {
     return (&reqRaiserGet200{}).setDefaults()
 }
+
 
 
 
@@ -1734,6 +1746,7 @@ func (x *respRaiserGet200) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respRaiserGet200) Exception() thrift.WritableException {
     return nil
 }
@@ -1815,6 +1828,7 @@ type RaiserGet500ArgsDeprecated = reqRaiserGet500
 func newReqRaiserGet500() *reqRaiserGet500 {
     return (&reqRaiserGet500{}).setDefaults()
 }
+
 
 
 
@@ -2102,6 +2116,7 @@ func (x *respRaiserGet500) readField3(p thrift.Decoder) error {  // S
     x.S = result
     return nil
 }
+
 
 
 

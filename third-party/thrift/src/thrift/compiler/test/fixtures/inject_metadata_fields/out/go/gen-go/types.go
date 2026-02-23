@@ -73,6 +73,7 @@ func (x *Fields) readField100(p thrift.Decoder) error {  // InjectedField
 
 
 
+
 func (x *Fields) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Fields"); err != nil {
         return thrift.PrependError("Fields write struct begin error: ", err)
@@ -193,6 +194,7 @@ func (x *FieldsInjectedToEmptyStruct) readField_1100(p thrift.Decoder) error {  
     x.InjectedField = result
     return nil
 }
+
 
 
 
@@ -357,6 +359,7 @@ func (x *FieldsInjectedToStruct) readField1(p thrift.Decoder) error {  // String
     x.StringField = result
     return nil
 }
+
 
 
 
@@ -636,6 +639,7 @@ func (x *FieldsInjectedWithIncludedStruct) readField1(p thrift.Decoder) error { 
 
 
 
+
 func (x *FieldsInjectedWithIncludedStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("FieldsInjectedWithIncludedStruct"); err != nil {
         return thrift.PrependError("FieldsInjectedWithIncludedStruct write struct begin error: ", err)
@@ -825,6 +829,7 @@ func (x *FieldsInjectedWithFieldsWithIncludedStruct) readField1(p thrift.Decoder
     x.StringField = result
     return nil
 }
+
 
 
 

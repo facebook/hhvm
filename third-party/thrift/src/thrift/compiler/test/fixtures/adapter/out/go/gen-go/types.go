@@ -1401,6 +1401,7 @@ func (x *MyAnnotation) readField2(p thrift.Decoder) error {  // Color
 
 
 
+
 func (x *MyAnnotation) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyAnnotation"); err != nil {
         return thrift.PrependError("MyAnnotation write struct begin error: ", err)
@@ -2408,6 +2409,7 @@ func (x *Foo) readField15(p thrift.Decoder) error {  // AdaptedListNested
 
 
 
+
 func (x *Foo) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Foo"); err != nil {
         return thrift.PrependError("Foo write struct begin error: ", err)
@@ -2836,6 +2838,7 @@ func (x *Baz) readField9(p thrift.Decoder) error {  // LongField
 
 
 
+
 func (x *Baz) CountSetFields() int {
     count := int(0)
     if (x.IsSetIntField()) {
@@ -2855,7 +2858,6 @@ func (x *Baz) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *Baz) Write(p thrift.Encoder) error {
@@ -3441,6 +3443,7 @@ func (x *Bar) readField8(p thrift.Decoder) error {  // StructListFieldWithTypede
 
 
 
+
 func (x *Bar) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Bar"); err != nil {
         return thrift.PrependError("Bar write struct begin error: ", err)
@@ -3603,6 +3606,7 @@ func (x *DirectlyAdapted) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *DirectlyAdapted) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("DirectlyAdapted"); err != nil {
         return thrift.PrependError("DirectlyAdapted write struct begin error: ", err)
@@ -3723,6 +3727,7 @@ func (x *IndependentDirectlyAdapted) readField1(p thrift.Decoder) error {  // Fi
     x.Field = result
     return nil
 }
+
 
 
 
@@ -3996,6 +4001,7 @@ func (x *StructWithFieldAdapter) readField4(p thrift.Decoder) error {  // OptBox
 
 
 
+
 func (x *StructWithFieldAdapter) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("StructWithFieldAdapter"); err != nil {
         return thrift.PrependError("StructWithFieldAdapter write struct begin error: ", err)
@@ -4253,6 +4259,7 @@ func (x *TerseAdaptedFields) readField3(p thrift.Decoder) error {  // SetField
 
 
 
+
 func (x *TerseAdaptedFields) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("TerseAdaptedFields"); err != nil {
         return thrift.PrependError("TerseAdaptedFields write struct begin error: ", err)
@@ -4401,6 +4408,7 @@ func (x *B) readField1(p thrift.Decoder) error {  // A
 
 
 
+
 func (x *B) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("B"); err != nil {
         return thrift.PrependError("B write struct begin error: ", err)
@@ -4480,6 +4488,7 @@ var _ thrift.Struct = (*A)(nil)
 func NewA() *A {
     return (&A{}).setDefaults()
 }
+
 
 
 
@@ -4597,6 +4606,7 @@ func (x *Config) readField1(p thrift.Decoder) error {  // Path
     x.Path = result
     return nil
 }
+
 
 
 
@@ -4769,6 +4779,7 @@ func (x *MyStruct) readField2(p thrift.Decoder) error {  // SetString
     x.SetString = result
     return nil
 }
+
 
 
 
@@ -5286,6 +5297,7 @@ func (x *AdaptTestStruct) readField10(p thrift.Decoder) error {  // BinaryData
     x.BinaryData = result
     return nil
 }
+
 
 
 
@@ -6599,6 +6611,7 @@ func (x *AdaptTemplatedTestStruct) readField22(p thrift.Decoder) error {  // Dou
 
 
 
+
 func (x *AdaptTemplatedTestStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("AdaptTemplatedTestStruct"); err != nil {
         return thrift.PrependError("AdaptTemplatedTestStruct write struct begin error: ", err)
@@ -6875,6 +6888,7 @@ func (x *AdaptTemplatedNestedTestStruct) readField1(p thrift.Decoder) error {  /
 
 
 
+
 func (x *AdaptTemplatedNestedTestStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("AdaptTemplatedNestedTestStruct"); err != nil {
         return thrift.PrependError("AdaptTemplatedNestedTestStruct write struct begin error: ", err)
@@ -7062,6 +7076,7 @@ func (x *AdaptTestUnion) readField2(p thrift.Decoder) error {  // Custom
 }
 
 
+
 func (x *AdaptTestUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetDelay()) {
@@ -7072,7 +7087,6 @@ func (x *AdaptTestUnion) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *AdaptTestUnion) Write(p thrift.Encoder) error {
@@ -7205,6 +7219,7 @@ func (x *AdaptedStruct) readField1(p thrift.Decoder) error {  // Data
 
 
 
+
 func (x *AdaptedStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("AdaptedStruct"); err != nil {
         return thrift.PrependError("AdaptedStruct write struct begin error: ", err)
@@ -7325,6 +7340,7 @@ func (x *DirectlyAdaptedStruct) readField1(p thrift.Decoder) error {  // Data
     x.Data = result
     return nil
 }
+
 
 
 
@@ -7626,6 +7642,7 @@ func (x *StructFieldAdaptedStruct) readField4(p thrift.Decoder) error {  // Type
 
 
 
+
 func (x *StructFieldAdaptedStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("StructFieldAdaptedStruct"); err != nil {
         return thrift.PrependError("StructFieldAdaptedStruct write struct begin error: ", err)
@@ -7780,6 +7797,7 @@ func (x *CircularAdaptee) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *CircularAdaptee) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CircularAdaptee"); err != nil {
         return thrift.PrependError("CircularAdaptee write struct begin error: ", err)
@@ -7912,6 +7930,7 @@ func (x *CircularStruct) readField1(p thrift.Decoder) error {  // Field
     x.Field = result
     return nil
 }
+
 
 
 
@@ -8051,6 +8070,7 @@ func (x *ReorderedStruct) readField1(p thrift.Decoder) error {  // ReorderedDepe
 
 
 
+
 func (x *ReorderedStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ReorderedStruct"); err != nil {
         return thrift.PrependError("ReorderedStruct write struct begin error: ", err)
@@ -8130,6 +8150,7 @@ var _ thrift.Struct = (*DeclaredAfterStruct)(nil)
 func NewDeclaredAfterStruct() *DeclaredAfterStruct {
     return (&DeclaredAfterStruct{}).setDefaults()
 }
+
 
 
 
@@ -8247,6 +8268,7 @@ func (x *RenamedStruct) readField1(p thrift.Decoder) error {  // Data
     x.Data = result
     return nil
 }
+
 
 
 
@@ -8373,6 +8395,7 @@ func (x *SameNamespaceStruct) readField1(p thrift.Decoder) error {  // Data
 
 
 
+
 func (x *SameNamespaceStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("SameNamespaceStruct"); err != nil {
         return thrift.PrependError("SameNamespaceStruct write struct begin error: ", err)
@@ -8452,6 +8475,7 @@ var _ thrift.Struct = (*HeapAllocated)(nil)
 func NewHeapAllocated() *HeapAllocated {
     return (&HeapAllocated{}).setDefaults()
 }
+
 
 
 
@@ -8585,6 +8609,7 @@ func (x *MoveOnly) readField1(p thrift.Decoder) error {  // Ptr
 
 
 
+
 func (x *MoveOnly) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MoveOnly"); err != nil {
         return thrift.PrependError("MoveOnly write struct begin error: ", err)
@@ -8708,6 +8733,7 @@ func (x *AlsoMoveOnly) readField1(p thrift.Decoder) error {  // Ptr
 
 
 
+
 func (x *AlsoMoveOnly) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("AlsoMoveOnly"); err != nil {
         return thrift.PrependError("AlsoMoveOnly write struct begin error: ", err)
@@ -8790,6 +8816,7 @@ func NewApplyAdapter() *ApplyAdapter {
 
 
 
+
 func (x *ApplyAdapter) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ApplyAdapter"); err != nil {
         return thrift.PrependError("ApplyAdapter write struct begin error: ", err)
@@ -8863,6 +8890,7 @@ var _ thrift.Struct = (*TransitiveAdapted)(nil)
 func NewTransitiveAdapted() *TransitiveAdapted {
     return (&TransitiveAdapted{}).setDefaults()
 }
+
 
 
 
@@ -9102,6 +9130,7 @@ func (x *CountingStruct) readField3(p thrift.Decoder) error {  // RegularString
 
 
 
+
 func (x *CountingStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CountingStruct"); err != nil {
         return thrift.PrependError("CountingStruct write struct begin error: ", err)
@@ -9234,6 +9263,7 @@ func (x *Person) readField1(p thrift.Decoder) error {  // Name
 
 
 
+
 func (x *Person) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Person"); err != nil {
         return thrift.PrependError("Person write struct begin error: ", err)
@@ -9357,6 +9387,7 @@ func (x *Person2) readField1(p thrift.Decoder) error {  // Name
 
 
 
+
 func (x *Person2) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Person2"); err != nil {
         return thrift.PrependError("Person2 write struct begin error: ", err)
@@ -9477,6 +9508,7 @@ func (x *RenamedStructWithStructAdapterAndFieldAdapter) readField1(p thrift.Deco
     x.Field = result
     return nil
 }
+
 
 
 
@@ -9703,6 +9735,7 @@ func (x *reqServiceFunc) readField3(p thrift.Decoder) error {  // Arg3
 
 
 
+
 func (x *reqServiceFunc) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqServiceFunc"); err != nil {
         return thrift.PrependError("reqServiceFunc write struct begin error: ", err)
@@ -9851,6 +9884,7 @@ func (x *respServiceFunc) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respServiceFunc) Exception() thrift.WritableException {
     return nil
 }
@@ -9932,6 +9966,7 @@ type AdapterServiceCountArgsDeprecated = reqAdapterServiceCount
 func newReqAdapterServiceCount() *reqAdapterServiceCount {
     return (&reqAdapterServiceCount{}).setDefaults()
 }
+
 
 
 
@@ -10061,6 +10096,7 @@ func (x *respAdapterServiceCount) readField0(p thrift.Decoder) error {  // Succe
     x.Success = result
     return nil
 }
+
 
 
 
@@ -10203,6 +10239,7 @@ func (x *reqAdapterServiceAdaptedTypes) readField1(p thrift.Decoder) error {  //
 
 
 
+
 func (x *reqAdapterServiceAdaptedTypes) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqAdapterServiceAdaptedTypes"); err != nil {
         return thrift.PrependError("reqAdapterServiceAdaptedTypes write struct begin error: ", err)
@@ -10335,6 +10372,7 @@ func (x *respAdapterServiceAdaptedTypes) readField0(p thrift.Decoder) error {  /
     x.Success = result
     return nil
 }
+
 
 
 

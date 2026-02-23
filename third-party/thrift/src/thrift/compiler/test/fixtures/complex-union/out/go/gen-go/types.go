@@ -474,6 +474,7 @@ func (x *ComplexUnion) readField14(p thrift.Decoder) error {  // StringRef
 
 
 
+
 func (x *ComplexUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetIntValue()) {
@@ -496,7 +497,6 @@ func (x *ComplexUnion) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *ComplexUnion) Write(p thrift.Encoder) error {
@@ -768,6 +768,7 @@ func (x *ListUnion) readField3(p thrift.Decoder) error {  // StringListValue
     return nil
 }
 
+
 func (x *ListUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetIntListValue()) {
@@ -778,7 +779,6 @@ func (x *ListUnion) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *ListUnion) Write(p thrift.Encoder) error {
@@ -973,6 +973,7 @@ func (x *DataUnion) readField2(p thrift.Decoder) error {  // StringData
 }
 
 
+
 func (x *DataUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetBinaryData()) {
@@ -983,7 +984,6 @@ func (x *DataUnion) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *DataUnion) Write(p thrift.Encoder) error {
@@ -1206,6 +1206,7 @@ func (x *Val) readField9(p thrift.Decoder) error {  // TypedefValue
 
 
 
+
 func (x *Val) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Val"); err != nil {
         return thrift.PrependError("Val write struct begin error: ", err)
@@ -1406,6 +1407,7 @@ func (x *ValUnion) readField2(p thrift.Decoder) error {  // V2
 
 
 
+
 func (x *ValUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetV1()) {
@@ -1416,7 +1418,6 @@ func (x *ValUnion) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *ValUnion) Write(p thrift.Encoder) error {
@@ -1612,6 +1613,7 @@ func (x *VirtualComplexUnion) readField2(p thrift.Decoder) error {  // ThingTwo
 
 
 
+
 func (x *VirtualComplexUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetThingOne()) {
@@ -1622,7 +1624,6 @@ func (x *VirtualComplexUnion) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *VirtualComplexUnion) Write(p thrift.Encoder) error {
@@ -1752,6 +1753,7 @@ func (x *NonCopyableStruct) readField1(p thrift.Decoder) error {  // Num
     x.Num = result
     return nil
 }
+
 
 
 
@@ -1889,6 +1891,7 @@ func (x *NonCopyableUnion) readField1(p thrift.Decoder) error {  // S
 }
 
 
+
 func (x *NonCopyableUnion) CountSetFields() int {
     count := int(0)
     if (x.IsSetS()) {
@@ -1896,7 +1899,6 @@ func (x *NonCopyableUnion) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *NonCopyableUnion) Write(p thrift.Encoder) error {

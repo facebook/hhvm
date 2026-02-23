@@ -659,6 +659,7 @@ func (x *Internship) readField5(p thrift.Decoder) error {  // School
 
 
 
+
 func (x *Internship) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Internship"); err != nil {
         return thrift.PrependError("Internship write struct begin error: ", err)
@@ -844,6 +845,7 @@ func (x *Range) readField2(p thrift.Decoder) error {  // Max
 
 
 
+
 func (x *Range) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Range"); err != nil {
         return thrift.PrependError("Range write struct begin error: ", err)
@@ -1011,6 +1013,7 @@ func (x *Struct1) readField2(p thrift.Decoder) error {  // B
     x.B = result
     return nil
 }
+
 
 
 
@@ -1315,6 +1318,7 @@ func (x *Struct2) readField4(p thrift.Decoder) error {  // D
 
 
 
+
 func (x *Struct2) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("struct2"); err != nil {
         return thrift.PrependError("Struct2 write struct begin error: ", err)
@@ -1547,6 +1551,7 @@ func (x *Struct3) readField3(p thrift.Decoder) error {  // C
     x.C = result
     return nil
 }
+
 
 
 
@@ -1793,6 +1798,7 @@ func (x *Struct4) readField3(p thrift.Decoder) error {  // C
 
 
 
+
 func (x *Struct4) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("struct4"); err != nil {
         return thrift.PrependError("Struct4 write struct begin error: ", err)
@@ -1989,6 +1995,7 @@ func (x *Union1) readField2(p thrift.Decoder) error {  // D
 
 
 
+
 func (x *Union1) CountSetFields() int {
     count := int(0)
     if (x.IsSetI()) {
@@ -1999,7 +2006,6 @@ func (x *Union1) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *Union1) Write(p thrift.Encoder) error {
@@ -2303,6 +2309,7 @@ func (x *Union2) readField4(p thrift.Decoder) error {  // U
 
 
 
+
 func (x *Union2) CountSetFields() int {
     count := int(0)
     if (x.IsSetI()) {
@@ -2319,7 +2326,6 @@ func (x *Union2) CountSetFields() int {
     }
     return count
 }
-
 
 
 func (x *Union2) Write(p thrift.Encoder) error {

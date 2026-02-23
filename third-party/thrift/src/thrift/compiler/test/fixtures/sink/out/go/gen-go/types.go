@@ -71,6 +71,7 @@ func (x *InitialResponse) readField1(p thrift.Decoder) error {  // Content
 
 
 
+
 func (x *InitialResponse) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("InitialResponse"); err != nil {
         return thrift.PrependError("InitialResponse write struct begin error: ", err)
@@ -191,6 +192,7 @@ func (x *FinalResponse) readField1(p thrift.Decoder) error {  // Content
     x.Content = result
     return nil
 }
+
 
 
 
@@ -317,6 +319,7 @@ func (x *SinkPayload) readField1(p thrift.Decoder) error {  // Content
 
 
 
+
 func (x *SinkPayload) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("SinkPayload"); err != nil {
         return thrift.PrependError("SinkPayload write struct begin error: ", err)
@@ -437,6 +440,7 @@ func (x *CompatibleWithKeywordSink) readField1(p thrift.Decoder) error {  // Sin
     x.Sink = result
     return nil
 }
+
 
 
 
@@ -561,6 +565,7 @@ func (x *InitialException) readField1(p thrift.Decoder) error {  // Reason
     x.Reason = result
     return nil
 }
+
 
 
 
@@ -696,6 +701,7 @@ func (x *SinkException1) readField1(p thrift.Decoder) error {  // Reason
 
 
 
+
 func (x *SinkException1) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("SinkException1"); err != nil {
         return thrift.PrependError("SinkException1 write struct begin error: ", err)
@@ -828,6 +834,7 @@ func (x *SinkException2) readField1(p thrift.Decoder) error {  // Reason
 
 
 
+
 func (x *SinkException2) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("SinkException2"); err != nil {
         return thrift.PrependError("SinkException2 write struct begin error: ", err)
@@ -921,6 +928,7 @@ func newReqSinkServiceMethod() *reqSinkServiceMethod {
 
 
 
+
 func (x *reqSinkServiceMethod) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethod"); err != nil {
         return thrift.PrependError("reqSinkServiceMethod write struct begin error: ", err)
@@ -994,6 +1002,7 @@ type SinkServiceMethodResultDeprecated = respSinkServiceMethod
 func newRespSinkServiceMethod() *respSinkServiceMethod {
     return (&respSinkServiceMethod{}).setDefaults()
 }
+
 
 
 
@@ -1127,6 +1136,7 @@ func (x *sinkSinkServiceMethod) readField0(p thrift.Decoder) error {  // Success
     x.Success = result
     return nil
 }
+
 
 
 
@@ -1270,6 +1280,7 @@ func (x *respFinalSinkServiceMethod) readField0(p thrift.Decoder) error {  // Su
 
 
 
+
 func (x *respFinalSinkServiceMethod) Exception() thrift.WritableException {
     return nil
 }
@@ -1351,6 +1362,7 @@ type SinkServiceMethodAndReponseArgsDeprecated = reqSinkServiceMethodAndReponse
 func newReqSinkServiceMethodAndReponse() *reqSinkServiceMethodAndReponse {
     return (&reqSinkServiceMethodAndReponse{}).setDefaults()
 }
+
 
 
 
@@ -1480,6 +1492,7 @@ func (x *respSinkServiceMethodAndReponse) readField0(p thrift.Decoder) error {  
     x.Success = result
     return nil
 }
+
 
 
 
@@ -1623,6 +1636,7 @@ func (x *sinkSinkServiceMethodAndReponse) readField0(p thrift.Decoder) error {  
 
 
 
+
 func (x *sinkSinkServiceMethodAndReponse) Exception() thrift.WritableException {
     return nil
 }
@@ -1762,6 +1776,7 @@ func (x *respFinalSinkServiceMethodAndReponse) readField0(p thrift.Decoder) erro
 
 
 
+
 func (x *respFinalSinkServiceMethodAndReponse) Exception() thrift.WritableException {
     return nil
 }
@@ -1843,6 +1858,7 @@ type SinkServiceMethodThrowArgsDeprecated = reqSinkServiceMethodThrow
 func newReqSinkServiceMethodThrow() *reqSinkServiceMethodThrow {
     return (&reqSinkServiceMethodThrow{}).setDefaults()
 }
+
 
 
 
@@ -1972,6 +1988,7 @@ func (x *respSinkServiceMethodThrow) readField1(p thrift.Decoder) error {  // Ex
     x.Ex = result
     return nil
 }
+
 
 
 
@@ -2118,6 +2135,7 @@ func (x *sinkSinkServiceMethodThrow) readField0(p thrift.Decoder) error {  // Su
 
 
 
+
 func (x *sinkSinkServiceMethodThrow) Exception() thrift.WritableException {
     return nil
 }
@@ -2257,6 +2275,7 @@ func (x *respFinalSinkServiceMethodThrow) readField0(p thrift.Decoder) error {  
 
 
 
+
 func (x *respFinalSinkServiceMethodThrow) Exception() thrift.WritableException {
     return nil
 }
@@ -2341,6 +2360,7 @@ func newReqSinkServiceMethodSinkThrow() *reqSinkServiceMethodSinkThrow {
 
 
 
+
 func (x *reqSinkServiceMethodSinkThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethodSinkThrow"); err != nil {
         return thrift.PrependError("reqSinkServiceMethodSinkThrow write struct begin error: ", err)
@@ -2414,6 +2434,7 @@ type SinkServiceMethodSinkThrowResultDeprecated = respSinkServiceMethodSinkThrow
 func newRespSinkServiceMethodSinkThrow() *respSinkServiceMethodSinkThrow {
     return (&respSinkServiceMethodSinkThrow{}).setDefaults()
 }
+
 
 
 
@@ -2605,6 +2626,7 @@ func (x *sinkSinkServiceMethodSinkThrow) readField1(p thrift.Decoder) error {  /
 
 
 
+
 func (x *sinkSinkServiceMethodSinkThrow) Exception() thrift.WritableException {
     if x.Ex != nil {
         return x.Ex
@@ -2752,6 +2774,7 @@ func (x *respFinalSinkServiceMethodSinkThrow) readField0(p thrift.Decoder) error
 
 
 
+
 func (x *respFinalSinkServiceMethodSinkThrow) Exception() thrift.WritableException {
     return nil
 }
@@ -2836,6 +2859,7 @@ func newReqSinkServiceMethodFinalThrow() *reqSinkServiceMethodFinalThrow {
 
 
 
+
 func (x *reqSinkServiceMethodFinalThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethodFinalThrow"); err != nil {
         return thrift.PrependError("reqSinkServiceMethodFinalThrow write struct begin error: ", err)
@@ -2909,6 +2933,7 @@ type SinkServiceMethodFinalThrowResultDeprecated = respSinkServiceMethodFinalThr
 func newRespSinkServiceMethodFinalThrow() *respSinkServiceMethodFinalThrow {
     return (&respSinkServiceMethodFinalThrow{}).setDefaults()
 }
+
 
 
 
@@ -3042,6 +3067,7 @@ func (x *sinkSinkServiceMethodFinalThrow) readField0(p thrift.Decoder) error {  
     x.Success = result
     return nil
 }
+
 
 
 
@@ -3239,6 +3265,7 @@ func (x *respFinalSinkServiceMethodFinalThrow) readField1(p thrift.Decoder) erro
 
 
 
+
 func (x *respFinalSinkServiceMethodFinalThrow) Exception() thrift.WritableException {
     if x.Ex != nil {
         return x.Ex
@@ -3331,6 +3358,7 @@ func newReqSinkServiceMethodBothThrow() *reqSinkServiceMethodBothThrow {
 
 
 
+
 func (x *reqSinkServiceMethodBothThrow) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethodBothThrow"); err != nil {
         return thrift.PrependError("reqSinkServiceMethodBothThrow write struct begin error: ", err)
@@ -3404,6 +3432,7 @@ type SinkServiceMethodBothThrowResultDeprecated = respSinkServiceMethodBothThrow
 func newRespSinkServiceMethodBothThrow() *respSinkServiceMethodBothThrow {
     return (&respSinkServiceMethodBothThrow{}).setDefaults()
 }
+
 
 
 
@@ -3590,6 +3619,7 @@ func (x *sinkSinkServiceMethodBothThrow) readField1(p thrift.Decoder) error {  /
     x.Ex = result
     return nil
 }
+
 
 
 
@@ -3796,6 +3826,7 @@ func (x *respFinalSinkServiceMethodBothThrow) readField1(p thrift.Decoder) error
 
 
 
+
 func (x *respFinalSinkServiceMethodBothThrow) Exception() thrift.WritableException {
     if x.Ex != nil {
         return x.Ex
@@ -3888,6 +3919,7 @@ func newReqSinkServiceMethodFast() *reqSinkServiceMethodFast {
 
 
 
+
 func (x *reqSinkServiceMethodFast) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSinkServiceMethodFast"); err != nil {
         return thrift.PrependError("reqSinkServiceMethodFast write struct begin error: ", err)
@@ -3961,6 +3993,7 @@ type SinkServiceMethodFastResultDeprecated = respSinkServiceMethodFast
 func newRespSinkServiceMethodFast() *respSinkServiceMethodFast {
     return (&respSinkServiceMethodFast{}).setDefaults()
 }
+
 
 
 
@@ -4094,6 +4127,7 @@ func (x *sinkSinkServiceMethodFast) readField0(p thrift.Decoder) error {  // Suc
     x.Success = result
     return nil
 }
+
 
 
 
@@ -4233,6 +4267,7 @@ func (x *respFinalSinkServiceMethodFast) readField0(p thrift.Decoder) error {  /
     x.Success = result
     return nil
 }
+
 
 
 

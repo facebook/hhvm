@@ -20,7 +20,7 @@
 
 }}
 {{! type definition }}
-{{> types/struct_definition}}
+{{#partial struct_methods.definition struct=struct:self}}
 
 {{! new function }}
 {{#partial struct_methods.new struct=struct:self}}

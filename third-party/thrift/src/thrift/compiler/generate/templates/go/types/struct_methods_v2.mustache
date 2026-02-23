@@ -18,6 +18,35 @@
 {{#import "codec/codec" as codec}}
 {{#import "common/constants" as constants}}
 {{#import "common/type" as types}}
+{{#import "types/field" as m_field}}
+
+{{! Type definition for a thrift struct. }}
+{{#let export partial definition |struct| captures |m_field|}}
+type {{struct.go_name}} struct {
+  {{#each struct.fields_sorted as |field|}}
+    {{#partial m_field.definition field=field}}
+
+  {{/each}}
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*{{struct.go_name}})(nil)
+{{#if struct.exception?}}
+var _ thrift.WritableException = (*{{struct.go_name}})(nil)
+{{/if struct.exception?}}
+{{#if (or struct.resp? struct.stream? struct.sink?)}}
+var _ thrift.WritableResult = (*{{struct.go_name}})(nil)
+
+{{! TODO: resp struct is an internal implementation detail. Can we unexport it? }}
+// Deprecated: {{struct.go_public_resp_name}} is deprecated, since it is supposed to be internal.
+type {{struct.go_public_resp_name}} = {{struct.go_name}}
+{{/if (or struct.resp? struct.stream? struct.sink?)}}
+{{#if struct.req?}}
+
+{{! TODO: req struct is an internal implementation detail. Can we unexport it? }}
+// Deprecated: {{struct.go_public_req_name}} is deprecated, since it is supposed to be internal.
+type {{struct.go_public_req_name}} = {{struct.go_name}}
+{{/if struct.req?}}
+{{/let partial}}
 
 {{! New*() }}
 {{#let export partial new |struct|}}

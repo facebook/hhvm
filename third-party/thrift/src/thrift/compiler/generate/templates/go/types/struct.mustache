@@ -14,86 +14,88 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-
-  This template generate a Thrift struct
-
 }}
+{{#import "types/field" as m_field}}
+{{#import "types/struct_methods_v2" as struct_methods}}
+
+{{! This partial generates a Thrift struct. }}
+{{#let export partial struct |s| captures |m_field struct_methods|}}
 {{! type definition }}
-{{#partial struct_methods.definition struct=struct:self}}
+{{#partial struct_methods.definition struct=s}}
 
 {{! new function }}
-{{#partial struct_methods.new struct=struct:self}}
+{{#partial struct_methods.new struct=s}}
 
 {{! methods }}
-{{#struct:fields_sorted}}
-{{#partial m_field.get struct=struct:self field=field:self}}
+{{#each s.fields_sorted as |field|}}
+{{#partial m_field.get struct=s field=field}}
 
-{{#partial m_field.set struct=struct:self field=field:self}}
+{{#partial m_field.set struct=s field=field}}
 
-{{#if field:nilable?}}
-{{#partial m_field.is_set struct=struct:self field=field:self}}
-{{/if field:nilable?}}
+{{#if field.nilable?}}
+{{#partial m_field.is_set struct=s field=field}}
+{{/if field.nilable?}}
 
-{{#if (not struct:use_reflect_codec?)}}
-{{#partial m_field.write struct=struct:self field=field:self}}
+{{#if (not s.use_reflect_codec?)}}
+{{#partial m_field.write struct=s field=field}}
 
-{{#partial m_field.read struct=struct:self field=field:self}}
-{{/if (not struct:use_reflect_codec?)}}
+{{#partial m_field.read struct=s field=field}}
+{{/if (not s.use_reflect_codec?)}}
 
-{{#if (and field:pointer? program:gen_default_get?)}}
-{{#partial m_field.default_get struct=struct:self field=field:self}}
-{{/if (and field:pointer? program:gen_default_get?)}}
+{{#if (and field.pointer? root_program.gen_default_get?)}}
+{{#partial m_field.default_get struct=s field=field}}
+{{/if (and field.pointer? root_program.gen_default_get?)}}
 
-{{/struct:fields_sorted}}
+{{/each}}
 
 {{! countSetFields }}
-{{#struct:union?}}
-{{#partial struct_methods.count_set_fields struct=struct:self}}
-{{/struct:union?}}
+{{#if s.union?}}
+{{#partial struct_methods.count_set_fields struct=s}}
+{{/if s.union?}}
 
-{{#if (or struct:resp? struct:stream? struct:sink?)}}
+{{#if (or s.resp? s.stream? s.sink?)}}
 
 {{! exception }}
-{{#partial struct_methods.exception struct=struct:self}}
-{{/if (or struct:resp? struct:stream? struct:sink?)}}
+{{#partial struct_methods.exception struct=s}}
+{{/if (or s.resp? s.stream? s.sink?)}}
 
 {{! write (serialize) }}
-{{#if struct:use_reflect_codec?}}
-{{#partial struct_methods.write_v2 struct=struct:self}}
+{{#if s.use_reflect_codec?}}
+{{#partial struct_methods.write_v2 struct=s}}
 {{#else}}
-{{#partial struct_methods.write struct=struct:self}}
-{{/if struct:use_reflect_codec?}}
+{{#partial struct_methods.write struct=s}}
+{{/if s.use_reflect_codec?}}
 
 {{! read (deserialize) }}
-{{#if struct:use_reflect_codec?}}
-{{#partial struct_methods.read_v2 struct=struct:self}}
+{{#if s.use_reflect_codec?}}
+{{#partial struct_methods.read_v2 struct=s}}
 {{#else}}
-{{#partial struct_methods.read struct=struct:self}}
-{{/if struct:use_reflect_codec?}}
+{{#partial struct_methods.read struct=s}}
+{{/if s.use_reflect_codec?}}
 
 {{! string }}
-{{#partial struct_methods.string struct=struct:self}}
+{{#partial struct_methods.string struct=s}}
 
 {{! setDefaults }}
-{{#partial struct_methods.set_defaults struct=struct:self}}
-{{#struct:use_reflect_codec?}}
+{{#partial struct_methods.set_defaults struct=s}}
+{{#if s.use_reflect_codec?}}
 
 {{! getStructSpec }}
-{{#partial struct_methods.get_spec struct=struct:self}}
-{{/struct:use_reflect_codec?}}
-{{#program:gen_metadata?}}
-{{^struct:req_resp?}}
+{{#partial struct_methods.get_spec struct=s}}
+{{/if s.use_reflect_codec?}}
+{{#if root_program.gen_metadata?}}
+{{#if (not s.req_resp?)}}
 
 {{! GetThrift(Struct|Exception)Metadata }}
-{{#partial struct_methods.get_thrift_metadata struct=struct:self}}
-{{/struct:req_resp?}}
-{{/program:gen_metadata?}}
-{{#struct:exception?}}
+{{#partial struct_methods.get_thrift_metadata struct=s}}
+{{/if (not s.req_resp?)}}
+{{/if root_program.gen_metadata?}}
+{{#if s.exception?}}
 
 {{! error }}
-{{#partial struct_methods.error struct=struct:self}}
+{{#partial struct_methods.error struct=s}}
 
 {{! TypeName }}
-{{#partial struct_methods.type_name struct=struct:self}}
-{{/struct:exception?}}
+{{#partial struct_methods.type_name struct=s}}
+{{/if s.exception?}}
+{{/let partial}}

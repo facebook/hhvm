@@ -18,6 +18,7 @@
 {{#import "common/type" as types}}
 {{#import "codec/codec" as codec}}
 {{#import "types/field" as m_field}}
+{{#import "types/struct" as m_struct}}
 {{#import "types/struct_methods_v2" as struct_methods}}
 {{> common/auto_generated_go}}
 
@@ -61,12 +62,12 @@ var _ = metadata.GoUnusedProtection__
 {{/program:enums}}
 {{! Structs }}
 {{#program:structs}}
-{{> types/struct}}
+{{#partial m_struct.struct s=struct:self}}
 
 {{/program:structs}}
 {{! Req/resp srtucts }}
 {{#program:req_resp_structs}}
-{{> types/struct}}
+{{#partial m_struct.struct s=struct:self}}
 
 {{/program:req_resp_structs}}
 

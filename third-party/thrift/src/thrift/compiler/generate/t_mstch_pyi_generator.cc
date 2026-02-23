@@ -396,15 +396,6 @@ class t_mstch_pyi_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
-  whisker_options render_options() const override {
-    whisker_options opts;
-    opts.allowed_undefined_variables = {
-        "service:autogen_path",
-        "program:autogen_path",
-    };
-    return opts;
-  }
-
   std::string template_prefix() const override { return "pyi"; }
 
   void generate_program() override;

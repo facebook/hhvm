@@ -269,52 +269,6 @@ class pyi_mstch_field : public mstch_field {
   std::string filtered_name_;
 };
 
-// Type
-
-class pyi_mstch_type : public mstch_type {
- public:
-  pyi_mstch_type(
-      const t_type* type,
-      mstch_context& context,
-      mstch_element_position position,
-      const t_program* program)
-      : mstch_type(type, context, position), program_(program) {
-    register_methods(
-        this,
-        {
-            {"type:modulePath", &pyi_mstch_type::get_module_path},
-            {"type:externalProgram?", &pyi_mstch_type::is_external_program},
-            {"type:adapter", &pyi_mstch_type::get_adapter},
-            {"type:has_adapter?", &pyi_mstch_type::has_adapter},
-        });
-  }
-
-  mstch::node get_module_path() {
-    return create_string_array(get_py_namespaces_raw(
-        this->get_type_program(), mstch_base::has_option("asyncio"), "ttypes"));
-  }
-
-  mstch::node is_external_program() {
-    return (this->get_type_program()->path() != this->program_->path());
-  }
-
-  mstch::node get_adapter() {
-    return std::string(*get_py_adapter(mstch_type::type_));
-  }
-
-  mstch::node has_adapter() {
-    return (get_py_adapter(mstch_type::type_) != nullptr);
-  }
-
- private:
-  const t_program* program_;
-
-  const t_program* get_type_program() const {
-    const auto* typeProgram = mstch_type::resolved_type_->program();
-    return (typeProgram != nullptr) ? typeProgram : this->program_;
-  }
-};
-
 // Service
 
 class pyi_mstch_service : public mstch_service {
@@ -366,30 +320,6 @@ class pyi_mstch_service : public mstch_service {
   }
 };
 
-// Function
-
-class pyi_mstch_function : public mstch_function {
- public:
-  pyi_mstch_function(
-      const t_function* function,
-      mstch_context& context,
-      mstch_element_position position)
-      : mstch_function(function, context, position) {
-    register_methods(
-        this,
-        {
-            {"function:isSupported?", &pyi_mstch_function::is_supported},
-        });
-  }
-
-  mstch::node is_supported() {
-    // Stream and sink functions are not supported, see
-    // t_py_generator::get_functions.
-    return !function_->sink_or_stream() &&
-        !function_->is_interaction_constructor();
-  }
-};
-
 // Generator
 
 class t_mstch_pyi_generator : public t_mstch_generator {
@@ -413,6 +343,55 @@ class t_mstch_pyi_generator : public t_mstch_generator {
       const std::filesystem::path& path,
       const t_service* service = nullptr);
   std::filesystem::path get_root_path() const;
+
+  const t_program* get_true_type_program(const t_type& type) const {
+    const t_program* prog = type.get_true_type()->program();
+    return prog != nullptr ? prog : program_;
+  }
+
+  prototype<t_function>::ptr make_prototype_for_function(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_function(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_function>::extends(std::move(base));
+
+    def.property("isSupported?", [](const t_function& self) {
+      // Stream and sink functions are not supported, see
+      // t_py_generator::get_functions.
+      return !self.is_interaction_constructor() &&
+          self.sink_or_stream() == nullptr;
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_type>::ptr make_prototype_for_type(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_type(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_type>::extends(std::move(base));
+
+    def.property("modulePath", [this](const t_type& self) {
+      std::vector<std::string> namespaces = get_py_namespaces_raw(
+          get_true_type_program(self),
+          has_compiler_option("asyncio"),
+          "ttypes");
+      return fmt::format("{}", fmt::join(namespaces, "."));
+    });
+    def.property("externalProgram?", [this](const t_type& self) {
+      return get_true_type_program(self) != program_;
+    });
+    def.property("adapter", [](const t_type& self) {
+      const std::string* adapter = get_py_adapter(&self);
+      return adapter == nullptr ? whisker::make::null
+                                : whisker::make::string(*adapter);
+    });
+    def.property("has_adapter?", [](const t_type& self) {
+      return get_py_adapter(&self) != nullptr;
+    });
+
+    return std::move(def).make();
+  }
 };
 
 void t_mstch_pyi_generator::generate_program() {
@@ -430,9 +409,7 @@ void t_mstch_pyi_generator::generate_program() {
 void t_mstch_pyi_generator::create_factories() {
   t_mstch_generator::mstch_context_.add<pyi_mstch_program>();
   t_mstch_generator::mstch_context_.add<pyi_mstch_field>();
-  t_mstch_generator::mstch_context_.add<pyi_mstch_type>(this->get_program());
   t_mstch_generator::mstch_context_.add<pyi_mstch_service>(this->get_program());
-  t_mstch_generator::mstch_context_.add<pyi_mstch_function>();
 }
 
 void t_mstch_pyi_generator::generate_init_files() {

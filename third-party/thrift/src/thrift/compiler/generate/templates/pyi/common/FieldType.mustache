@@ -35,10 +35,10 @@ Recursive.
   }}{{#type:double?}}float{{/type:double?}}{{!
   }}{{#type:string?}}str{{/type:string?}}{{!
   }}{{#type:binary?}}bytes{{/type:binary?}}{{!
-  }}{{#type:structured}}{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{struct:name}}{{/type:structured}}{{!
+  }}{{#type:structured}}{{#type:externalProgram?}}{{type:modulePath}}.{{/type:externalProgram?}}{{struct:name}}{{/type:structured}}{{!
   }}{{#type:list?}}__T.List[{{#type:list_elem_type}}{{> common/FieldType}}{{/type:list_elem_type}}]{{/type:list?}}{{!
   }}{{#type:set?}}__T.Set[{{#type:set_elem_type}}{{> common/FieldType}}{{/type:set_elem_type}}]{{/type:set?}}{{!
   }}{{#type:map?}}__T.Dict[{{#type:key_type}}{{> common/FieldType}}{{/type:key_type}},{{!
   }} {{#type:value_type}}{{> common/FieldType}}{{/type:value_type}}]{{/type:map?}}{{!
-  }}{{#type:enum}}{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{enum:name}}{{/type:enum}}{{!
+  }}{{#type:enum}}{{#type:externalProgram?}}{{type:modulePath}}.{{/type:externalProgram?}}{{enum:name}}{{/type:enum}}{{!
 }}{{/type:has_adapter?}}

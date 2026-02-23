@@ -26,7 +26,26 @@
 {{#partial struct_methods.new struct=struct:self}}
 
 {{! methods }}
-{{> types/struct_methods}}
+{{#struct:fields_sorted}}
+{{#partial m_field.get struct=struct:self field=field:self}}
+
+{{#partial m_field.set struct=struct:self field=field:self}}
+
+{{#if field:nilable?}}
+{{#partial m_field.is_set struct=struct:self field=field:self}}
+{{/if field:nilable?}}
+
+{{#if (not struct:use_reflect_codec?)}}
+{{#partial m_field.write struct=struct:self field=field:self}}
+
+{{#partial m_field.read struct=struct:self field=field:self}}
+{{/if (not struct:use_reflect_codec?)}}
+
+{{#if (and field:pointer? program:gen_default_get?)}}
+{{#partial m_field.default_get struct=struct:self field=field:self}}
+{{/if (and field:pointer? program:gen_default_get?)}}
+
+{{/struct:fields_sorted}}
 
 {{! countSetFields }}
 {{#struct:union?}}

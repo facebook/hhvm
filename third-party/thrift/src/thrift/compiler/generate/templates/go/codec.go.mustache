@@ -43,13 +43,13 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    {{#program:thrift_metadata_types}}
-    {{type:codec_type_spec_name}} = &thrift.TypeSpec{
-        FullName: "{{type:full_name}}",
-        {{#partial spec.codec_type_spec_setter type=type:self}}:
-            {{#partial spec.codec_type_spec_instance type=type:self}}
+    {{#each program:self.thrift_metadata_types as |type|}}
+    {{type.codec_type_spec_name}} = &thrift.TypeSpec{
+        FullName: "{{type.full_name}}",
+        {{#partial spec.codec_type_spec_setter type=type}}:
+            {{#partial spec.codec_type_spec_instance type=type}}
     }
-    {{/program:thrift_metadata_types}}
+    {{/each}}
 )
 
 // Premade struct specs
@@ -66,11 +66,11 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    {{#program:thrift_metadata_types}}
-    {{#type:named?}}
-    fbthriftTypeSpecsMap[{{type:codec_type_spec_name}}.FullName] = {{type:codec_type_spec_name}}
-    {{/type:named?}}
-    {{/program:thrift_metadata_types}}
+    {{#each program:self.thrift_metadata_types as |type|}}
+    {{#if type.named?}}
+    fbthriftTypeSpecsMap[{{type.codec_type_spec_name}}.FullName] = {{type.codec_type_spec_name}}
+    {{/if type.named?}}
+    {{/each}}
     return fbthriftTypeSpecsMap
 }()
 

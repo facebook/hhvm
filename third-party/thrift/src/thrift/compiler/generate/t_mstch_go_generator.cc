@@ -146,6 +146,14 @@ class t_mstch_go_generator : public t_mstch_generator {
     def.property("req_resp_structs", [this, &proto](const t_program&) {
       return to_array(data_.req_resp_structs, proto.of<t_struct>());
     });
+    def.property("thrift_metadata_types", [this, &proto](const t_program&) {
+      whisker::array::raw result;
+      result.reserve(data_.thrift_metadata_types.size());
+      for (const t_type* type : data_.thrift_metadata_types) {
+        result.emplace_back(resolve_derived_t_type(proto, *type));
+      }
+      return whisker::array::of(std::move(result));
+    });
 
     return std::move(def).make();
   }
@@ -509,35 +517,8 @@ class t_mstch_go_generator : public t_mstch_generator {
   }
 };
 
-class mstch_go_program : public mstch_program {
- public:
-  mstch_go_program(
-      const t_program* p,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      go::codegen_data* data)
-      : mstch_program(p, ctx, pos), data_(*data) {
-    register_methods(
-        this,
-        {
-            {"program:thrift_metadata_types",
-             &mstch_go_program::thrift_metadata_types},
-        });
-  }
-
-  mstch::node thrift_metadata_types() {
-    return make_mstch_array(
-        data_.thrift_metadata_types, *context_.type_factory);
-  }
-
- private:
-  go::codegen_data& data_;
-};
-
 void t_mstch_go_generator::generate_program() {
   out_dir_base_ = "gen-go";
-
-  mstch_context_.add<mstch_go_program>(&data_);
 
   const auto& prog = cached_program(program_);
   render_to_file(prog, "const.go", "const.go");

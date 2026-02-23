@@ -51,13 +51,13 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    {{#program:thrift_metadata_types}}
-    {{type:metadata_name}} =
-        &{{program:metadata_qualifier}}ThriftType{
-            {{#partial m_metadata.thrift_type_setter type=type:self}}:
-                {{#partial m_metadata.thrift_type_instance type=type:self}}
+    {{#each program:self.thrift_metadata_types as |type|}}
+    {{type.metadata_name}} =
+        &{{root_program.metadata_qualifier}}ThriftType{
+            {{#partial m_metadata.thrift_type_setter type=type}}:
+                {{#partial m_metadata.thrift_type_instance type=type}}
         }
-    {{/program:thrift_metadata_types}}
+    {{/each}}
 )
 
 // Premade struct metadatas
@@ -75,11 +75,11 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*{{program:metadata_qualifier}}ThriftType {
     fbthriftThriftTypesMap := make(map[string]*{{program:metadata_qualifier}}ThriftType)
-    {{#program:thrift_metadata_types}}
-    {{#type:named?}}
-    fbthriftThriftTypesMap["{{type:full_name}}"] = {{type:metadata_name}}
-    {{/type:named?}}
-    {{/program:thrift_metadata_types}}
+    {{#each program:self.thrift_metadata_types as |type|}}
+    {{#if type.named?}}
+    fbthriftThriftTypesMap["{{type.full_name}}"] = {{type.metadata_name}}
+    {{/if type.named?}}
+    {{/each}}
     return fbthriftThriftTypesMap
 }()
 

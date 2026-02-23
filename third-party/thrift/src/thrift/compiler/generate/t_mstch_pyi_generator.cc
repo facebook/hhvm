@@ -291,9 +291,6 @@ class t_mstch_pyi_generator : public t_mstch_generator {
       return adapter == nullptr ? whisker::make::null
                                 : whisker::make::string(*adapter);
     });
-    def.property("has_adapter?", [](const t_type& self) {
-      return get_py_adapter(&self) != nullptr;
-    });
 
     return std::move(def).make();
   }

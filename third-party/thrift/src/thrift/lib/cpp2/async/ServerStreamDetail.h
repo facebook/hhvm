@@ -21,9 +21,10 @@
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
-#include <thrift/lib/cpp2/server/StreamInterceptorContext.h>
 
 namespace apache::thrift::detail {
+
+class StreamInterceptorContext;
 
 // Full function signature with StreamInterceptorContext support
 using ServerStreamFactoryFn = folly::Function<void(

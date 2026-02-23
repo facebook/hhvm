@@ -30,9 +30,9 @@
 #include <thrift/lib/cpp2/async/StreamMessage.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 #include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
+#include <thrift/lib/cpp2/server/StreamInterceptorContext.h>
 
 namespace apache::thrift::detail {
-class StreamInterceptorContext;
 
 namespace test {
 class TestProducerCallback;

@@ -194,7 +194,6 @@ class py3_mstch_program : public mstch_program {
              &py3_mstch_program::capi_converter},
             {"program:capi_module_prefix",
              &py3_mstch_program::capi_module_prefix},
-            {"program:intercompatible?", &py3_mstch_program::intercompatible},
             {"program:auto_migrate?", &py3_mstch_program::auto_migrate},
             {"program:gen_legacy_container_converters?",
              &py3_mstch_program::legacy_container_converters},
@@ -339,8 +338,6 @@ class py3_mstch_program : public mstch_program {
   mstch::node capi_module_prefix() {
     return python::gen_capi_module_prefix_impl(program_);
   }
-
-  mstch::node intercompatible() { return has_option("intercompatible"); }
 
   mstch::node auto_migrate() { return has_option("auto_migrate"); }
 
@@ -661,8 +658,6 @@ class py3_mstch_type : public mstch_type {
             {"type:key_needs_convert?", &py3_mstch_type::map_key_needs_convert},
             {"type:val_needs_convert?",
              &py3_mstch_type::map_value_needs_convert},
-            {"type:resolves_to_complex_return?",
-             &py3_mstch_type::resolves_to_complex_return},
 
             {"type:need_cbinding_path?",
              {with_no_caching, &py3_mstch_type::need_cbinding_path}},
@@ -780,12 +775,6 @@ class py3_mstch_type : public mstch_type {
       return type_needs_convert(map->val_type().get_type());
     }
     return false;
-  }
-
-  mstch::node resolves_to_complex_return() {
-    return resolved_type_->is<t_container>() ||
-        resolved_type_->is_string_or_binary() ||
-        resolved_type_->is<t_structured>();
   }
 
   bool is_custom_cpp_type() const { return cached_props_.cpp_type() != ""; }
@@ -1088,14 +1077,8 @@ class py3_mstch_enum : public mstch_enum {
     register_methods(
         this,
         {
-            {"enum:flags?", &py3_mstch_enum::hasFlags},
             {"enum:cpp_name", &py3_mstch_enum::cpp_name},
         });
-  }
-
-  mstch::node hasFlags() {
-    return enum_->has_unstructured_annotation("py3.flags") ||
-        enum_->has_structured_annotation(kPythonFlagsUri);
   }
 
   mstch::node cpp_name() { return cpp2::get_name(enum_); }
@@ -1360,16 +1343,6 @@ class t_mstch_py3_generator : public t_mstch_generator {
           : "";
     });
 
-    return std::move(def).make();
-  }
-
-  prototype<t_field>::ptr make_prototype_for_field(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_field(proto);
-    auto def = whisker::dsl::prototype_builder<h_field>::extends(base);
-    def.property("hasModifiedName?", [](const t_field& self) {
-      return python::get_py3_name(self) != cpp2::get_name(&self);
-    });
     return std::move(def).make();
   }
 

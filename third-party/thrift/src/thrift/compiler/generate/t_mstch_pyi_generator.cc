@@ -34,22 +34,28 @@ namespace apache::thrift::compiler {
 
 namespace {
 
-// Reserved Python keywords that are not blocked by thrift grammar - note that
-// this is actually a longer list than what t_py_generator checks, but may
-// as well fix up more of them here.
-const std::unordered_set<std::string> kKeywords = {
-    "async",
-    "await",
-    "from",
-    "nonlocal",
-    "DEF",
-    "ELIF",
-    "ELSE",
-    "False",
-    "IF",
-    "None",
-    "True",
-};
+std::string get_filtered_name(const t_named& node) {
+  // Reserved Python keywords that are not blocked by thrift grammar - note that
+  // this is actually a longer list than what t_py_generator checks, but may
+  // as well fix up more of them here.
+  static const std::unordered_set<std::string> kKeywords = {
+      "async",
+      "await",
+      "from",
+      "nonlocal",
+      "DEF",
+      "ELIF",
+      "ELSE",
+      "False",
+      "IF",
+      "None",
+      "True",
+  };
+
+  return kKeywords.contains(node.name())
+      ? fmt::format("{}_PY_RESERVED_KEYWORD", node.name())
+      : node.name();
+}
 
 // TO-DO: remove duplicate in py3
 mstch::array create_string_array(const std::vector<std::string>& values) {
@@ -219,56 +225,6 @@ class pyi_mstch_program : public mstch_program {
   }
 };
 
-// Field
-
-class pyi_mstch_field : public mstch_field {
- public:
-  pyi_mstch_field(
-      const t_field* field,
-      mstch_context& context,
-      mstch_element_position position)
-      : mstch_field(field, context, position) {
-    register_methods(
-        this,
-        {
-            {"field:PEP484Optional?", &pyi_mstch_field::get_PEP484_optional},
-            {"field:capitalizedName", &pyi_mstch_field::get_capitalized_name},
-            {"field:py_name", &pyi_mstch_field::get_filtered_name},
-        });
-
-    auto field_type = mstch_field::field_->qualifier();
-    bool is_required = (field_type == t_field_qualifier::required);
-    bool is_optional = (field_type == t_field_qualifier::optional);
-    bool is_unqualified = !is_required && !is_optional;
-    bool has_value = (mstch_field::field_->default_value() != nullptr);
-    bool has_default_value = has_value || is_unqualified;
-
-    this->pep484_optional_ =
-        (is_optional || (!has_default_value && !is_required));
-
-    auto filteredName = mstch_field::field_->name();
-    if (kKeywords.find(filteredName) != kKeywords.end()) {
-      filteredName += "_PY_RESERVED_KEYWORD";
-    }
-    this->filtered_name_ = filteredName;
-  }
-
-  mstch::node get_PEP484_optional() { return this->pep484_optional_; }
-
-  mstch::node get_filtered_name() { return this->filtered_name_; }
-
-  mstch::node get_capitalized_name() {
-    std::string name(this->filtered_name_);
-    std::transform(name.begin(), name.end(), name.begin(), ::toupper);
-
-    return name;
-  }
-
- private:
-  bool pep484_optional_;
-  std::string filtered_name_;
-};
-
 // Service
 
 class pyi_mstch_service : public mstch_service {
@@ -349,6 +305,22 @@ class t_mstch_pyi_generator : public t_mstch_generator {
     return prog != nullptr ? prog : program_;
   }
 
+  prototype<t_field>::ptr make_prototype_for_field(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_field(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_field>::extends(std::move(base));
+
+    def.property("py_name", &get_filtered_name);
+    def.property("capitalizedName", [](const t_field& self) {
+      std::string name = get_filtered_name(self);
+      std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+      return name;
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_function>::ptr make_prototype_for_function(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_function(proto);
@@ -408,7 +380,6 @@ void t_mstch_pyi_generator::generate_program() {
 
 void t_mstch_pyi_generator::create_factories() {
   t_mstch_generator::mstch_context_.add<pyi_mstch_program>();
-  t_mstch_generator::mstch_context_.add<pyi_mstch_field>();
   t_mstch_generator::mstch_context_.add<pyi_mstch_service>(this->get_program());
 }
 

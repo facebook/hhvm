@@ -144,16 +144,28 @@ struct ResourceData : public PeriodicStatsDataBase {
     return usedMemBytes_;
   }
 
-  [[nodiscard]] double getMemPressureAvg10Pct() const {
-    return memPressureAvg10Pct_;
+  [[nodiscard]] double getMemPressureFullAvg10Pct() const {
+    return memPressureFullAvg10Pct_;
   }
 
-  [[nodiscard]] double getMemPressureAvg60Pct() const {
-    return memPressureAvg60Pct_;
+  [[nodiscard]] double getMemPressureFullAvg60Pct() const {
+    return memPressureFullAvg60Pct_;
   }
 
-  [[nodiscard]] double getMemPressureAvg300Pct() const {
-    return memPressureAvg300Pct_;
+  [[nodiscard]] double getMemPressureFullAvg300Pct() const {
+    return memPressureFullAvg300Pct_;
+  }
+
+  [[nodiscard]] double getMemPressureSomeAvg10Pct() const {
+    return memPressureSomeAvg10Pct_;
+  }
+
+  [[nodiscard]] double getMemPressureSomeAvg60Pct() const {
+    return memPressureSomeAvg60Pct_;
+  }
+
+  [[nodiscard]] double getMemPressureSomeAvg300Pct() const {
+    return memPressureSomeAvg300Pct_;
   }
 
   [[nodiscard]] double getCpuPressureAvg10Pct() const {
@@ -343,10 +355,16 @@ struct ResourceData : public PeriodicStatsDataBase {
     cpuPressureAvg300Pct_ = avg300;
   }
 
-  void setMemPressureStats(double avg10, double avg60, double avg300) {
-    memPressureAvg10Pct_ = avg10;
-    memPressureAvg60Pct_ = avg60;
-    memPressureAvg300Pct_ = avg300;
+  void setMemPressureFullStats(double avg10, double avg60, double avg300) {
+    memPressureFullAvg10Pct_ = avg10;
+    memPressureFullAvg60Pct_ = avg60;
+    memPressureFullAvg300Pct_ = avg300;
+  }
+
+  void setMemPressureSomeStats(double avg10, double avg60, double avg300) {
+    memPressureSomeAvg10Pct_ = avg10;
+    memPressureSomeAvg60Pct_ = avg60;
+    memPressureSomeAvg300Pct_ = avg300;
   }
 
   void setIoPressureStats(double avg10, double avg60, double avg300) {
@@ -413,9 +431,13 @@ struct ResourceData : public PeriodicStatsDataBase {
   double cpuPressureAvg60Pct_{0};
   double cpuPressureAvg300Pct_{0};
 
-  double memPressureAvg10Pct_{0};
-  double memPressureAvg60Pct_{0};
-  double memPressureAvg300Pct_{0};
+  double memPressureFullAvg10Pct_{0};
+  double memPressureFullAvg60Pct_{0};
+  double memPressureFullAvg300Pct_{0};
+
+  double memPressureSomeAvg10Pct_{0};
+  double memPressureSomeAvg60Pct_{0};
+  double memPressureSomeAvg300Pct_{0};
 
   double ioPressureAvg10Pct_{0};
   double ioPressureAvg60Pct_{0};

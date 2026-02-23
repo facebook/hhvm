@@ -235,11 +235,15 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
 }
 
 static std::atomic_flag s_did_log = ATOMIC_FLAG_INIT;
+// After DataBlockFull exception is raised consecutively this number of times,
+// we consider TC as being full.
+static constexpr size_t kConsecutiveTransBlocksFull = 3;
+static std::atomic<int> s_transBlocksFull{0};
 static std::atomic<bool> s_TCisFull{false};
 
 TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
                                          bool noThreshold) {
-  if (s_TCisFull.load(std::memory_order_acquire)) {
+  if (tcIsFull()) {
     return TranslationResult::Scope::Process;
   }
 
@@ -250,16 +254,13 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
   const bool reachedMaxLiveMainLimit =
     getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage;
 
-  if (!reachedMaxLiveMainLimit && !code().isAnySectionFull()) {
+  if (!reachedMaxLiveMainLimit) {
     return shouldTranslateNoSizeLimit(sk, kind, noThreshold);
   }
 
   auto const main_under = code().mainUsed() < Cfg::CodeCache::AMaxUsage;
   auto const cold_under = code().coldUsed() < Cfg::CodeCache::AColdMaxUsage;
   auto const froz_under = code().frozenUsed() < Cfg::CodeCache::AFrozenMaxUsage;
-  // Set a flag so we quickly bail from trying to generate new
-  // translations next time.
-  s_TCisFull.store(true, std::memory_order_release);
 
   if (!Cfg::Jit::DynamicTCSections && main_under && !s_did_log.test_and_set() &&
       Cfg::Eval::ProfBranchSampleFreq == 0) {
@@ -411,7 +412,7 @@ void checkFreeProfData() {
   // generated.
   if (profData() &&
       !Cfg::Eval::EnableReusableTC &&
-      (code().isAnySectionFull() ||
+      (tcIsFull() ||
        getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) &&
       !transdb::enabled() &&
       !mcgen::retranslateAllEnabled()) {
@@ -437,7 +438,7 @@ bool profileFunc(const Func* func) {
   // being added to ProfData.
   if (mcgen::retranslateAllScheduled()) return false;
 
-  if (code().isAnySectionFull()) return false;
+  if (tcIsFull()) return false;
 
   if (getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) {
     return false;
@@ -614,7 +615,13 @@ Translator::translate(Optional<CodeCache::View> view) {
   // Generate vasm into the code view, retrying if we fill hot.
   while (true) {
     if (!view.has_value() || !view->isLocal()) {
-      view.emplace(code().view(kind));
+      try {
+        view.emplace(code().view(kind));
+      } catch (const DataBlockFull&) {
+        setTcIsFull();
+        reset();
+        return TranslationResult::failForProcess();
+      }
     }
     CGMeta fixups;
     TransLocMaker maker{*view};
@@ -689,22 +696,24 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
   RelocationInfo rel;
   {
     auto codeLock = lockCode();
+    std::optional<TransLocMaker> maker;
+    std::optional<CodeCache::View> finalView;
     while (true) {
-      auto finalView = code().view(kind, &range);
-      CodeReuseBlock crb;
-      auto dstView = crb.getMaybeReusedView(finalView, range);
-      auto& srcView = transMeta->view;
-      TransLocMaker maker{dstView};
-
       try {
+        finalView = code().view(kind, &range);
+        CodeReuseBlock crb;
+        auto dstView = crb.getMaybeReusedView(*finalView, range);
+        auto& srcView = transMeta->view;
+
+        maker.emplace(dstView);
         dstView.alignForTranslation(alignMain);
-        maker.markStart();
+        maker->markStart();
         auto origin = range.data;
         if (!origin.empty()) {
           dstView.data().bytes(origin.size(),
                                srcView.data().toDestAddress(origin.begin()));
 
-          auto dest = maker.dataRange();
+          auto dest = maker->dataRange();
           auto oAddr = origin.begin();
           auto dAddr = dest.begin();
           while (oAddr != origin.end()) {
@@ -724,8 +733,13 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
         }
 
       } catch (const DataBlockFull& dbFull) {
+        // Set a flag so we quickly bail from trying to generate new
+        // translations next time.
+        setTcIsFull();
         // Rollback so the area can be used by something else.
-        maker.rollback();
+        if (maker) {
+          maker->rollback();
+        }
         auto const bytes = range.main.size() + range.cold.size() +
                            range.frozen.size();
         // There should be few of these.  They mean there is wasted work
@@ -739,14 +753,15 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
         reset();
         return TranslationResult::failForProcess();
       }
-      transMeta->range = maker.markEnd();
-      transMeta->view = finalView;
+      transMeta->range = maker->markEnd();
+      transMeta->view = *finalView;
       break;
     }
   }
   adjustForRelocation(rel);
   adjustMetaDataForRelocation(rel, nullptr, fixups);
   adjustCodeForRelocation(rel, fixups);
+  s_transBlocksFull.store(0, std::memory_order_release);
   return std::nullopt;
 }
 
@@ -833,6 +848,22 @@ void incrementLiveFuncTransBytes(FuncId funcId, uint32_t bytes) {
   auto prev = g_funcLiveTransBytes[funcId];
   while (!g_funcLiveTransBytes.assign_if_equal(funcId, prev, prev + bytes)) {
     prev = g_funcLiveTransBytes[funcId];
+  }
+}
+
+bool tcIsFull() {
+  if (Cfg::Jit::DynamicTCSections) {
+    return s_TCisFull.load(std::memory_order_acquire);
+  }
+
+  return code().main().used() >= Cfg::CodeCache::AMaxUsage ||
+         code().cold().used() >= Cfg::CodeCache::AColdMaxUsage ||
+         code().frozen().used() >= Cfg::CodeCache::AFrozenMaxUsage;
+}
+
+void setTcIsFull() {
+  if (s_transBlocksFull.fetch_add(1, std::memory_order_release) >= kConsecutiveTransBlocksFull - 1) {
+    s_TCisFull.store(true, std::memory_order_release);
   }
 }
 

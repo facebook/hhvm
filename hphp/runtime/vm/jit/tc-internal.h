@@ -27,6 +27,10 @@
 
 namespace HPHP::jit::tc {
 
+bool tcIsFull();
+
+void setTcIsFull();
+
 /*
  * Convenience class for creating TransLocs and TransRecs for new translations.
  *

@@ -102,8 +102,14 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
   tracing::Block _{"svcreq::emitStub"};
 
   auto codeLock = tc::lockCode();
-
-  auto view = tc::code().view(TransKind::Anchor);
+  std::optional<CodeCache::View> viewOpt;
+  try {
+    viewOpt = tc::code().view(TransKind::Anchor);
+  } catch (const DataBlockFull&) {
+    tc::setTcIsFull();
+    return nullptr;
+  }
+  auto view = viewOpt.value();
   TCA mainStart = view.main().frontier();
   TCA coldStart = view.cold().frontier();
   TCA frozenStart = view.frozen().frontier();
@@ -210,7 +216,15 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
   auto codeLock = tc::lockCode();
   auto metaLock = tc::lockMetadata();
 
-  auto view = tc::code().view();
+  std::optional<CodeCache::View> viewOpt;
+  try {
+    viewOpt = tc::code().view(TransKind::Anchor);
+  } catch (const DataBlockFull&) {
+    tc::setTcIsFull();
+    return nullptr;
+  }
+
+  auto view = viewOpt.value();
   auto& cb = view.frozen();
   auto& data = view.data();
 

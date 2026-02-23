@@ -52,8 +52,6 @@ struct CodeCache {
   static constexpr uint32_t kNullptrOffset =
     std::numeric_limits<uint32_t>::max();
 
-  static constexpr size_t MinUnassigned = 4 * (2u << 20);
-
   CodeCache();
 
   template<typename L>
@@ -133,7 +131,6 @@ struct CodeCache {
   const CodeBlock& main()   const { return m_main.block(); }
   const CodeBlock& cold()   const { return m_cold.block(); }
   const CodeBlock& frozen() const { return m_frozen.block(); }
-  const bool isAnySectionFull() const;
 
   const CodeBlock& bytecode() const { return m_bytecode; }
         CodeBlock& bytecode()       { return m_bytecode; }

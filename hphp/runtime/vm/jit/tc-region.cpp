@@ -216,7 +216,7 @@ void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
     // make sure we don't get ahead of the translation threads
     mcgen::waitForTranslate(finfo);
 
-    if (code().isAnySectionFull()) {
+    if (tcIsFull()) {
       FTRACE(1, "relocateSortedOptFuncs: ran out of space in the TC. "
              "Skipping function {} {}\n", finfo.func->getFuncId(),
              finfo.func->fullName());

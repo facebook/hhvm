@@ -388,16 +388,6 @@ void CodeCache::unprotect() {
   mprotect(m_base, m_codeSize, PROT_READ | PROT_WRITE | PROT_EXEC);
 }
 
-const bool CodeCache::isAnySectionFull() const {
-  if (Cfg::Jit::DynamicTCSections) {
-    return m_all.available() < CodeCache::MinUnassigned;
-  }
-
-  return main().used() >= Cfg::CodeCache::AMaxUsage ||
-         cold().used() >= Cfg::CodeCache::AColdMaxUsage ||
-         frozen().used() >= Cfg::CodeCache::AFrozenMaxUsage;
-}
-
 size_t CodeCache::Section::numFrees() const {
   return !Cfg::Jit::DynamicTCSections ? block().numFrees() : 0;
 }

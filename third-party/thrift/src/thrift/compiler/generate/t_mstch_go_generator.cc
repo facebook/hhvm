@@ -534,42 +534,10 @@ class mstch_go_program : public mstch_program {
   go::codegen_data& data_;
 };
 
-class mstch_go_struct : public mstch_struct {
- public:
-  mstch_go_struct(
-      const t_structured* s,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      go::codegen_data* data)
-      : mstch_struct(s, ctx, pos), data_(*data) {
-    register_methods(
-        this,
-        {
-            {"struct:fields_sorted", &mstch_go_struct::fields_sorted},
-        });
-  }
-
-  mstch::node fields_sorted() {
-    // Fields (optionally) in the most optimal (memory-saving) layout order.
-    if (struct_->has_structured_annotation(kGoMinimizePaddingUri)) {
-      std::vector<const t_field*> fields_in_layout_order =
-          struct_->fields_id_order();
-      go::optimize_fields_layout(
-          fields_in_layout_order, struct_->is<t_union>());
-      return make_mstch_fields(fields_in_layout_order);
-    }
-    return make_mstch_fields(struct_->fields_id_order());
-  }
-
- private:
-  go::codegen_data& data_;
-};
-
 void t_mstch_go_generator::generate_program() {
   out_dir_base_ = "gen-go";
 
   mstch_context_.add<mstch_go_program>(&data_);
-  mstch_context_.add<mstch_go_struct>(&data_);
 
   const auto& prog = cached_program(program_);
   render_to_file(prog, "const.go", "const.go");

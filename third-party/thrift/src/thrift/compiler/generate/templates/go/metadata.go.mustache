@@ -24,7 +24,7 @@
 
 }}
 {{#import "common/constants" as constants}}
-{{#import "common/metadata" as metadata}}
+{{#import "metadata/metadata" as m_metadata}}
 {{> common/auto_generated_go}}
 
 package {{program:go_pkg_name}}
@@ -54,8 +54,8 @@ var (
     {{#program:thrift_metadata_types}}
     {{type:metadata_name}} =
         &{{program:metadata_qualifier}}ThriftType{
-            {{> metadata/thrift_type_setter}}:
-                {{> metadata/thrift_type_instance}}
+            {{#partial m_metadata.thrift_type_setter type=type:self}}:
+                {{#partial m_metadata.thrift_type_instance type=type:self}}
         }
     {{/program:thrift_metadata_types}}
 )
@@ -65,10 +65,10 @@ var (
     {{#program:structs}}
     {{#if struct:exception?}}
     {{struct:struct_metadata_name}} =
-        {{> metadata/thrift_metadata_exception}}
+        {{#partial m_metadata.thrift_metadata_exception struct=struct:self}}
     {{#else}}
     {{struct:struct_metadata_name}} =
-        {{> metadata/thrift_metadata_struct}}
+        {{#partial m_metadata.thrift_metadata_struct struct=struct:self}}
     {{/if struct:exception?}}
     {{/program:structs}}
 )
@@ -107,7 +107,7 @@ var enumMetadatas = func() []*{{program:metadata_qualifier}}ThriftEnum {
     fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftEnum, 0)
     {{#program:enums}}
     fbthriftResults = append(fbthriftResults,
-        {{> metadata/thrift_metadata_enum}}
+        {{#partial m_metadata.thrift_metadata_enum enum=enum:self}}
     )
     {{/program:enums}}
     return fbthriftResults
@@ -117,7 +117,7 @@ var serviceMetadatas = func() []*{{program:metadata_qualifier}}ThriftService {
     fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftService, 0)
     {{#program:services}}
     fbthriftResults = append(fbthriftResults,
-        {{> metadata/thrift_metadata_service}}
+        {{#partial m_metadata.thrift_metadata_service service=service:self}}
     )
     {{/program:services}}
     return fbthriftResults

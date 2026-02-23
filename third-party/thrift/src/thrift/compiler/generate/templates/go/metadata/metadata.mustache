@@ -1,0 +1,318 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{! Defines the mapping from an AST type to Thrift metadata primitive type. }}
+{{#let export partial thrift_primitive_type |type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.string?}}THRIFT_STRING_TYPE
+{{#else if type.binary?}}THRIFT_BINARY_TYPE
+{{#else if type.bool?}}THRIFT_BOOL_TYPE
+{{#else if type.byte?}}THRIFT_BYTE_TYPE
+{{#else if type.i16?}}THRIFT_I16_TYPE
+{{#else if type.i32?}}THRIFT_I32_TYPE
+{{#else if type.i64?}}THRIFT_I64_TYPE
+{{#else if type.double?}}THRIFT_DOUBLE_TYPE
+{{#else if type.float?}}THRIFT_FLOAT_TYPE
+{{#else if type.void?}}THRIFT_VOID_TYPE
+{{/if type.string?}}
+{{/let partial}}
+
+{{! Defines the mapping from an AST type to Thrift metadata type field name. }}
+{{#let export partial thrift_type_setter |type|}}
+  {{#pragma ignore-newlines}}
+{{#if (and type.typedef? type.defined_kind?)}}TTypedef
+{{#else if type.typedef?}}{{#partial thrift_type_setter type=type.typedef_type}}
+{{#else if type.metadata_primitive?}}TPrimitive
+{{#else if type.enum?}}TEnum
+{{#else if (and type.structured? type.union?)}}TUnion
+{{#else if type.structured?}}TStruct
+{{#else if type.list?}}TList
+{{#else if type.map?}}TMap
+{{#else if type.set?}}TSet
+{{/if (and type.typedef? type.defined_kind?)}}
+{{/let partial}}
+
+{{!
+  Recursively renders a const value's metadata.
+}}
+{{#let partial const_value |value|}}
+{{!
+  Nested partial for const value pair and struct values, so we can leverage
+  standalone indentation.
+  They must be nested partials to support rendering circular references by
+  capturing the parent in the nested partial:
+    const_value -> const_value_pair -> const_value
+}}
+  {{#let partial const_value_pair |elem| captures |const_value|}}
+&{{root_program.metadata_qualifier}}ThriftConstValuePair{
+    Key: {{#partial const_value value=elem.key}}
+    Value: {{#partial const_value value=elem.value}}
+},
+  {{/let partial}}
+  {{#let partial const_struct captures |const_value value|}}
+&{{root_program.metadata_qualifier}}ThriftConstStruct{
+    Type: &{{root_program.metadata_qualifier}}ThriftStructType{
+        Name: "{{value.type.true_type.scoped_name}}",
+    },
+    Fields: map[string]*{{root_program.metadata_qualifier}}ThriftConstValue{
+  {{#each value.structured_elements as |elem|}}
+        "{{elem.field.name}}":
+            {{#partial const_value value=elem.value}}
+  {{/each}}
+    },
+},
+  {{/let partial}}
+{{! Main const value content }}
+&{{root_program.metadata_qualifier}}ThriftConstValue{
+  {{#if value.bool?}}
+    CvBool: thrift.Pointerize({{value.bool_value}}),
+  {{#else if value.integer?}}
+    CvInteger: thrift.Pointerize(int64({{value.integer_value}})),
+  {{#else if value.double?}}
+    CvDouble: thrift.Pointerize(float64({{value.double_value}})),
+  {{#else if value.string?}}
+    CvString: thrift.Pointerize({{value.go_quoted_value}}),
+  {{#else if value.map?}}
+    CvMap: []*{{root_program.metadata_qualifier}}ThriftConstValuePair{
+    {{#each value.map_elements as |elem|}}
+        {{#partial const_value_pair elem=elem}}
+    {{/each}}
+    },
+  {{#else if value.list?}}
+    CvList: []*{{root_program.metadata_qualifier}}ThriftConstValue{
+    {{#each value.list_elements as |elem|}}
+        {{#partial const_value value=elem}}
+    {{/each}}
+    },
+  {{#else if value.structured?}}
+    CvStruct: {{#partial const_struct}}
+  {{/if value.bool?}}
+},
+{{/let partial}}
+
+{{!
+  Structured annotation const metadata.
+  This is the same as the `const_struct` nested partial in `const_value`, but
+  emitted WITHOUT an outer `ThriftConstValue` wrapper, exported for structured
+  annotations.
+}}
+{{#let export partial structured_annotation |value| captures |const_value|}}
+&{{root_program.metadata_qualifier}}ThriftConstStruct{
+    Type: &{{root_program.metadata_qualifier}}ThriftStructType{
+        Name: "{{value.type.true_type.scoped_name}}",
+    },
+    Fields: map[string]*{{root_program.metadata_qualifier}}ThriftConstValue{
+  {{#each value.structured_elements as |elem|}}
+        "{{elem.field.name}}":
+            {{#partial const_value value=elem.value}}
+  {{/each}}
+    },
+},
+{{/let partial}}
+
+{{! Defines the mapping from an AST type to Thrift metadata type. }}
+{{#let export partial thrift_type_instance |type| captures |thrift_primitive_type structured_annotation|}}
+{{#if type.typedef?}}
+{{#if type.defined_kind?}}
+&{{root_program.metadata_qualifier}}ThriftTypedefType{
+    Name:           "{{type.scoped_name}}",
+    UnderlyingType: {{type.resolved.metadata_thrift_type_getter}},
+    {{#if (not (array.empty? type.structured_annotations))}}
+    StructuredAnnotations: []*{{root_program.metadata_qualifier}}ThriftConstStruct{
+      {{#each type.structured_annotations as |annot|}}
+        {{#partial structured_annotation value=annot.value}}
+      {{/each}}
+    },
+    {{/if (not (array.empty? type.structured_annotations))}}
+},
+{{#else}}
+{{#partial thrift_type_instance type=type.resolved}}
+{{/if type.defined_kind?}}
+{{#else if type.metadata_primitive?}}
+thrift.Pointerize({{root_program.metadata_qualifier}}ThriftPrimitiveType_{{#partial thrift_primitive_type type=type}}),
+{{#else if type.enum?}}
+&{{root_program.metadata_qualifier}}ThriftEnumType{
+    Name: "{{type.scoped_name}}",
+},
+{{#else if (and type.structured? type.union?)}}
+&{{root_program.metadata_qualifier}}ThriftUnionType{
+    Name: "{{type.scoped_name}}",
+},
+{{#else if type.structured?}}
+&{{root_program.metadata_qualifier}}ThriftStructType{
+    Name: "{{type.scoped_name}}",
+},
+{{#else if type.list?}}
+&{{root_program.metadata_qualifier}}ThriftListType{
+    ValueType: {{type.elem_type.metadata_thrift_type_getter}},
+},
+{{#else if type.map?}}
+&{{root_program.metadata_qualifier}}ThriftMapType{
+    KeyType:   {{type.key_type.metadata_thrift_type_getter}},
+    ValueType: {{type.val_type.metadata_thrift_type_getter}},
+},
+{{#else if type.set?}}
+&{{root_program.metadata_qualifier}}ThriftSetType{
+    ValueType: {{type.elem_type.metadata_thrift_type_getter}},
+},
+{{/if type.typedef?}}
+{{/let partial}}
+
+{{! Defines metadata for a Thrift struct field. }}
+{{#let export partial thrift_metadata_field |field|}}
+&{{root_program.metadata_qualifier}}ThriftField{
+    Id:         {{field.id}},
+    Name:       "{{field.name}}",
+    IsOptional: {{field.optional?}},
+    Type:       {{field.type.metadata_thrift_type_getter}},
+},
+{{/let partial}}
+
+{{! Defines metadata for a Thrift struct. }}
+{{#let export partial thrift_metadata_struct |struct| captures |thrift_metadata_field structured_annotation|}}
+&{{root_program.metadata_qualifier}}ThriftStruct{
+    Name:    "{{struct.scoped_name}}",
+    IsUnion: {{struct.union?}},
+    Fields:  []*{{root_program.metadata_qualifier}}ThriftField{
+        {{#each struct.fields_sorted as |field|}}
+        {{#partial thrift_metadata_field field=field}}
+        {{/each}}
+    },
+    {{#if (not (array.empty? struct.structured_annotations))}}
+    StructuredAnnotations: []*{{root_program.metadata_qualifier}}ThriftConstStruct{
+      {{#each struct.structured_annotations as |annot|}}
+        {{#partial structured_annotation value=annot.value}}
+      {{/each}}
+    },
+    {{/if (not (array.empty? struct.structured_annotations))}}
+}
+{{/let partial}}
+
+{{! Defines metadata for a Thrift exception. }}
+{{#let export partial thrift_metadata_exception |struct| captures |thrift_metadata_field structured_annotation|}}
+&{{root_program.metadata_qualifier}}ThriftException{
+    Name: "{{struct.scoped_name}}",
+    Fields: []*{{root_program.metadata_qualifier}}ThriftField{
+        {{#each struct.fields_sorted as |field|}}
+        {{#partial thrift_metadata_field field=field}}
+        {{/each}}
+    },
+    {{#if (not (array.empty? struct.structured_annotations))}}
+    StructuredAnnotations: []*{{root_program.metadata_qualifier}}ThriftConstStruct{
+      {{#each struct.structured_annotations as |annot|}}
+        {{#partial structured_annotation value=annot.value}}
+      {{/each}}
+    },
+    {{/if (not (array.empty? struct.structured_annotations))}}
+}
+{{/let partial}}
+
+{{! Defines metadata for a Thrift service function. }}
+{{#let export partial thrift_metadata_function |function| captures |thrift_metadata_field structured_annotation|}}
+&{{root_program.metadata_qualifier}}ThriftFunction{
+    Name:       "{{function.name}}",
+    IsOneway:   {{function.oneway?}},
+    {{#if function.stream?}}
+    ReturnType: &{{root_program.metadata_qualifier}}ThriftType{
+        TStream: &{{root_program.metadata_qualifier}}ThriftStreamType{
+            ElemType: {{function.stream.elem_type.metadata_thrift_type_getter}},
+            {{#if function.stream_has_first_response?}}
+            InitialResponseType: {{function.return_type.metadata_thrift_type_getter}},
+            {{/if function.stream_has_first_response?}}
+        },
+    },
+    {{#else if function.sink?}}
+    ReturnType: &{{root_program.metadata_qualifier}}ThriftType{
+        TSink: &{{root_program.metadata_qualifier}}ThriftSinkType{
+            ElemType: {{function.sink.elem_type.metadata_thrift_type_getter}},
+            FinalResponseType: {{function.sink.final_response_type.metadata_thrift_type_getter}},
+            {{#if function.sink_has_first_response?}}
+            InitialResponseType: {{function.return_type.metadata_thrift_type_getter}},
+            {{/if function.sink_has_first_response?}}
+        },
+    },
+    {{#else}}
+    ReturnType: {{function.return_type.metadata_thrift_type_getter}},
+    {{/if function.stream?}}
+    {{#if function.params.fields?}}
+    Arguments:  []*{{root_program.metadata_qualifier}}ThriftField{
+        {{#each function.params.fields as |field|}}
+        {{#partial thrift_metadata_field field=field}}
+        {{/each}}
+    },
+    {{/if function.params.fields?}}
+    {{#if function.exceptions?}}
+    Exceptions: []*{{root_program.metadata_qualifier}}ThriftField{
+        {{#each function.exceptions as |field|}}
+        {{#partial thrift_metadata_field field=field}}
+        {{/each}}
+    },
+    {{/if function.exceptions?}}
+    {{#if (not (array.empty? function.structured_annotations))}}
+    StructuredAnnotations: []*{{root_program.metadata_qualifier}}ThriftConstStruct{
+      {{#each function.structured_annotations as |annot|}}
+        {{#partial structured_annotation value=annot.value}}
+      {{/each}}
+    },
+    {{/if (not (array.empty? function.structured_annotations))}}
+},
+{{/let partial}}
+
+{{! Defines metadata for a Thrift enum. }}
+
+{{! Defines metadata for a Thrift service. }}
+{{#let export partial thrift_metadata_service |service| captures |thrift_metadata_function structured_annotation|}}
+&{{root_program.metadata_qualifier}}ThriftService{
+    Name:      "{{service.scoped_name}}",
+    {{#if (object.notnull? service.extends)}}
+    Parent:    thrift.Pointerize("{{service.extends.scoped_name}}"),
+    {{/if (object.notnull? service.extends)}}
+    Functions: []*{{root_program.metadata_qualifier}}ThriftFunction{
+        {{#each service.functions as |function|}}
+        {{#if function.go_server_supported?}}
+        {{#partial thrift_metadata_function function=function}}
+        {{/if function.go_server_supported?}}
+        {{/each}}
+    },
+    {{#if (not (array.empty? service.structured_annotations))}}
+    StructuredAnnotations: []*{{root_program.metadata_qualifier}}ThriftConstStruct{
+      {{#each service.structured_annotations as |annot|}}
+        {{#partial structured_annotation value=annot.value}}
+      {{/each}}
+    },
+    {{/if (not (array.empty? service.structured_annotations))}}
+},
+{{/let partial}}
+
+{{! Defines metadata for a Thrift enum. }}
+{{#let export partial thrift_metadata_enum |enum| captures |structured_annotation|}}
+&{{root_program.metadata_qualifier}}ThriftEnum{
+    Name:     "{{enum.scoped_name}}",
+    Elements: map[int32]string{
+        {{#each enum.values as |val|}}
+        {{val.value}}: "{{val.name}}",
+        {{/each}}
+    },
+    {{#if (not (array.empty? enum.structured_annotations))}}
+    StructuredAnnotations: []*{{root_program.metadata_qualifier}}ThriftConstStruct{
+      {{#each enum.structured_annotations as |annot|}}
+        {{#partial structured_annotation value=annot.value}}
+      {{/each}}
+    },
+    {{/if (not (array.empty? enum.structured_annotations))}}
+},
+{{/let partial}}

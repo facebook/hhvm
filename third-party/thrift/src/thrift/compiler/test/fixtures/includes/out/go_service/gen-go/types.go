@@ -98,13 +98,6 @@ func (x *reqMyServiceQuery) GetS() *module.MyStruct {
     return x.S
 }
 
-func (x *reqMyServiceQuery) GetI() *includes.Included {
-    if !x.IsSetI() {
-        return nil
-    }
-    return x.I
-}
-
 func (x *reqMyServiceQuery) SetSNonCompat(value *module.MyStruct) *reqMyServiceQuery {
     x.S = value
     return x
@@ -115,22 +108,8 @@ func (x *reqMyServiceQuery) SetS(value *module.MyStruct) *reqMyServiceQuery {
     return x
 }
 
-func (x *reqMyServiceQuery) SetINonCompat(value *includes.Included) *reqMyServiceQuery {
-    x.I = value
-    return x
-}
-
-func (x *reqMyServiceQuery) SetI(value *includes.Included) *reqMyServiceQuery {
-    x.I = value
-    return x
-}
-
 func (x *reqMyServiceQuery) IsSetS() bool {
     return x != nil && x.S != nil
-}
-
-func (x *reqMyServiceQuery) IsSetI() bool {
-    return x != nil && x.I != nil
 }
 
 func (x *reqMyServiceQuery) writeField1(p thrift.Encoder) error {  // S
@@ -153,6 +132,39 @@ func (x *reqMyServiceQuery) writeField1(p thrift.Encoder) error {  // S
     return nil
 }
 
+func (x *reqMyServiceQuery) readField1(p thrift.Decoder) error {  // S
+    result := module.NewMyStruct()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.S = result
+    return nil
+}
+
+
+func (x *reqMyServiceQuery) GetI() *includes.Included {
+    if !x.IsSetI() {
+        return nil
+    }
+    return x.I
+}
+
+func (x *reqMyServiceQuery) SetINonCompat(value *includes.Included) *reqMyServiceQuery {
+    x.I = value
+    return x
+}
+
+func (x *reqMyServiceQuery) SetI(value *includes.Included) *reqMyServiceQuery {
+    x.I = value
+    return x
+}
+
+func (x *reqMyServiceQuery) IsSetI() bool {
+    return x != nil && x.I != nil
+}
+
 func (x *reqMyServiceQuery) writeField2(p thrift.Encoder) error {  // I
     if !x.IsSetI() {
         return nil
@@ -173,17 +185,6 @@ func (x *reqMyServiceQuery) writeField2(p thrift.Encoder) error {  // I
     return nil
 }
 
-func (x *reqMyServiceQuery) readField1(p thrift.Decoder) error {  // S
-    result := module.NewMyStruct()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.S = result
-    return nil
-}
-
 func (x *reqMyServiceQuery) readField2(p thrift.Decoder) error {  // I
     result := includes.NewIncluded()
     err := result.Read(p)
@@ -194,7 +195,6 @@ func (x *reqMyServiceQuery) readField2(p thrift.Decoder) error {  // I
     x.I = result
     return nil
 }
-
 
 
 
@@ -375,13 +375,6 @@ func (x *reqMyServiceHasArgDocs) GetS() *module.MyStruct {
     return x.S
 }
 
-func (x *reqMyServiceHasArgDocs) GetI() *includes.Included {
-    if !x.IsSetI() {
-        return nil
-    }
-    return x.I
-}
-
 func (x *reqMyServiceHasArgDocs) SetSNonCompat(value *module.MyStruct) *reqMyServiceHasArgDocs {
     x.S = value
     return x
@@ -392,22 +385,8 @@ func (x *reqMyServiceHasArgDocs) SetS(value *module.MyStruct) *reqMyServiceHasAr
     return x
 }
 
-func (x *reqMyServiceHasArgDocs) SetINonCompat(value *includes.Included) *reqMyServiceHasArgDocs {
-    x.I = value
-    return x
-}
-
-func (x *reqMyServiceHasArgDocs) SetI(value *includes.Included) *reqMyServiceHasArgDocs {
-    x.I = value
-    return x
-}
-
 func (x *reqMyServiceHasArgDocs) IsSetS() bool {
     return x != nil && x.S != nil
-}
-
-func (x *reqMyServiceHasArgDocs) IsSetI() bool {
-    return x != nil && x.I != nil
 }
 
 func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Encoder) error {  // S
@@ -430,6 +409,39 @@ func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Encoder) error {  // S
     return nil
 }
 
+func (x *reqMyServiceHasArgDocs) readField1(p thrift.Decoder) error {  // S
+    result := module.NewMyStruct()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.S = result
+    return nil
+}
+
+
+func (x *reqMyServiceHasArgDocs) GetI() *includes.Included {
+    if !x.IsSetI() {
+        return nil
+    }
+    return x.I
+}
+
+func (x *reqMyServiceHasArgDocs) SetINonCompat(value *includes.Included) *reqMyServiceHasArgDocs {
+    x.I = value
+    return x
+}
+
+func (x *reqMyServiceHasArgDocs) SetI(value *includes.Included) *reqMyServiceHasArgDocs {
+    x.I = value
+    return x
+}
+
+func (x *reqMyServiceHasArgDocs) IsSetI() bool {
+    return x != nil && x.I != nil
+}
+
 func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Encoder) error {  // I
     if !x.IsSetI() {
         return nil
@@ -450,17 +462,6 @@ func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Encoder) error {  // I
     return nil
 }
 
-func (x *reqMyServiceHasArgDocs) readField1(p thrift.Decoder) error {  // S
-    result := module.NewMyStruct()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.S = result
-    return nil
-}
-
 func (x *reqMyServiceHasArgDocs) readField2(p thrift.Decoder) error {  // I
     result := includes.NewIncluded()
     err := result.Read(p)
@@ -471,7 +472,6 @@ func (x *reqMyServiceHasArgDocs) readField2(p thrift.Decoder) error {  // I
     x.I = result
     return nil
 }
-
 
 
 

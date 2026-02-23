@@ -43,6 +43,7 @@ func (x *GetEntityRequest) SetId(value string) *GetEntityRequest {
     return x
 }
 
+
 func (x *GetEntityRequest) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.STRING, 1); err != nil {
         return thrift.PrependError("GetEntityRequest write field begin error: ", err)
@@ -68,6 +69,7 @@ func (x *GetEntityRequest) readField1(p thrift.Decoder) error {  // Id
     x.Id = result
     return nil
 }
+
 
 
 
@@ -167,6 +169,7 @@ func (x *GetEntityResponse) SetEntity(value string) *GetEntityResponse {
     return x
 }
 
+
 func (x *GetEntityResponse) writeField1(p thrift.Encoder) error {  // Entity
     if err := p.WriteFieldBegin("entity", thrift.STRING, 1); err != nil {
         return thrift.PrependError("GetEntityResponse write field begin error: ", err)
@@ -192,6 +195,7 @@ func (x *GetEntityResponse) readField1(p thrift.Decoder) error {  // Entity
     x.Entity = result
     return nil
 }
+
 
 
 
@@ -283,20 +287,6 @@ func (x *NonComparableStruct) GetFoo() string {
     return x.Foo
 }
 
-func (x *NonComparableStruct) GetBar() []string {
-    if !x.IsSetBar() {
-        return make([]string, 0)
-    }
-    return x.Bar
-}
-
-func (x *NonComparableStruct) GetBaz() map[*NonComparableStruct]int64 {
-    if !x.IsSetBaz() {
-        return make(map[*NonComparableStruct]int64)
-    }
-    return x.Baz
-}
-
 func (x *NonComparableStruct) SetFooNonCompat(value string) *NonComparableStruct {
     x.Foo = value
     return x
@@ -307,33 +297,6 @@ func (x *NonComparableStruct) SetFoo(value string) *NonComparableStruct {
     return x
 }
 
-func (x *NonComparableStruct) SetBarNonCompat(value []string) *NonComparableStruct {
-    x.Bar = value
-    return x
-}
-
-func (x *NonComparableStruct) SetBar(value []string) *NonComparableStruct {
-    x.Bar = value
-    return x
-}
-
-func (x *NonComparableStruct) SetBazNonCompat(value map[*NonComparableStruct]int64) *NonComparableStruct {
-    x.Baz = value
-    return x
-}
-
-func (x *NonComparableStruct) SetBaz(value map[*NonComparableStruct]int64) *NonComparableStruct {
-    x.Baz = value
-    return x
-}
-
-func (x *NonComparableStruct) IsSetBar() bool {
-    return x != nil && x.Bar != nil
-}
-
-func (x *NonComparableStruct) IsSetBaz() bool {
-    return x != nil && x.Baz != nil
-}
 
 func (x *NonComparableStruct) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.STRING, 1); err != nil {
@@ -349,6 +312,38 @@ func (x *NonComparableStruct) writeField1(p thrift.Encoder) error {  // Foo
         return thrift.PrependError("NonComparableStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *NonComparableStruct) readField1(p thrift.Decoder) error {  // Foo
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Foo = result
+    return nil
+}
+
+
+func (x *NonComparableStruct) GetBar() []string {
+    if !x.IsSetBar() {
+        return make([]string, 0)
+    }
+    return x.Bar
+}
+
+func (x *NonComparableStruct) SetBarNonCompat(value []string) *NonComparableStruct {
+    x.Bar = value
+    return x
+}
+
+func (x *NonComparableStruct) SetBar(value []string) *NonComparableStruct {
+    x.Bar = value
+    return x
+}
+
+func (x *NonComparableStruct) IsSetBar() bool {
+    return x != nil && x.Bar != nil
 }
 
 func (x *NonComparableStruct) writeField2(p thrift.Encoder) error {  // Bar
@@ -376,6 +371,56 @@ func (x *NonComparableStruct) writeField2(p thrift.Encoder) error {  // Bar
         return thrift.PrependError("NonComparableStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *NonComparableStruct) readField2(p thrift.Decoder) error {  // Bar
+    _ /* elemType */, size, err := p.ReadListBegin()
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
+    }
+    
+    listResult := make([]string, 0, size)
+    for i := 0; i < size; i++ {
+        var elem string
+        {
+            result, err := p.ReadString()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
+
+    x.Bar = result
+    return nil
+}
+
+
+func (x *NonComparableStruct) GetBaz() map[*NonComparableStruct]int64 {
+    if !x.IsSetBaz() {
+        return make(map[*NonComparableStruct]int64)
+    }
+    return x.Baz
+}
+
+func (x *NonComparableStruct) SetBazNonCompat(value map[*NonComparableStruct]int64) *NonComparableStruct {
+    x.Baz = value
+    return x
+}
+
+func (x *NonComparableStruct) SetBaz(value map[*NonComparableStruct]int64) *NonComparableStruct {
+    x.Baz = value
+    return x
+}
+
+func (x *NonComparableStruct) IsSetBaz() bool {
+    return x != nil && x.Baz != nil
 }
 
 func (x *NonComparableStruct) writeField3(p thrift.Encoder) error {  // Baz
@@ -413,44 +458,6 @@ func (x *NonComparableStruct) writeField3(p thrift.Encoder) error {  // Baz
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("NonComparableStruct write field end error: ", err)
     }
-    return nil
-}
-
-func (x *NonComparableStruct) readField1(p thrift.Decoder) error {  // Foo
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Foo = result
-    return nil
-}
-
-func (x *NonComparableStruct) readField2(p thrift.Decoder) error {  // Bar
-    _ /* elemType */, size, err := p.ReadListBegin()
-    if err != nil {
-        return thrift.PrependError("error reading list begin: ", err)
-    }
-    
-    listResult := make([]string, 0, size)
-    for i := 0; i < size; i++ {
-        var elem string
-        {
-            result, err := p.ReadString()
-            if err != nil {
-                return err
-            }
-            elem = result
-        }
-        listResult = append(listResult, elem)
-    }
-    
-    if err := p.ReadListEnd(); err != nil {
-        return thrift.PrependError("error reading list end: ", err)
-    }
-    result := listResult
-
-    x.Bar = result
     return nil
 }
 
@@ -492,6 +499,7 @@ func (x *NonComparableStruct) readField3(p thrift.Decoder) error {  // Baz
     x.Baz = result
     return nil
 }
+
 
 
 
@@ -2505,6 +2513,7 @@ func (x *respGetEntityGetBinary) readField0(p thrift.Decoder) error {  // Succes
 
 
 
+
 func (x *respGetEntityGetBinary) Exception() thrift.WritableException {
     return nil
 }
@@ -2765,6 +2774,7 @@ func (x *respGetEntityGetMap) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respGetEntityGetMap) Exception() thrift.WritableException {
     return nil
 }
@@ -3004,6 +3014,7 @@ func (x *respGetEntityGetSet) readField0(p thrift.Decoder) error {  // Success
     x.Success = result
     return nil
 }
+
 
 
 
@@ -3251,6 +3262,7 @@ func (x *respGetEntityGetList) readField0(p thrift.Decoder) error {  // Success
 
 
 
+
 func (x *respGetEntityGetList) Exception() thrift.WritableException {
     return nil
 }
@@ -3340,14 +3352,6 @@ func (x *reqGetEntityGetLegacyStuff) GetNumNeg2() int64 {
     return x.NumNeg2
 }
 
-func (x *reqGetEntityGetLegacyStuff) GetNumNeg1() int64 {
-    return x.NumNeg1
-}
-
-func (x *reqGetEntityGetLegacyStuff) GetNumPos() int64 {
-    return x.NumPos
-}
-
 func (x *reqGetEntityGetLegacyStuff) SetNumNeg2NonCompat(value int64) *reqGetEntityGetLegacyStuff {
     x.NumNeg2 = value
     return x
@@ -3358,25 +3362,6 @@ func (x *reqGetEntityGetLegacyStuff) SetNumNeg2(value int64) *reqGetEntityGetLeg
     return x
 }
 
-func (x *reqGetEntityGetLegacyStuff) SetNumNeg1NonCompat(value int64) *reqGetEntityGetLegacyStuff {
-    x.NumNeg1 = value
-    return x
-}
-
-func (x *reqGetEntityGetLegacyStuff) SetNumNeg1(value int64) *reqGetEntityGetLegacyStuff {
-    x.NumNeg1 = value
-    return x
-}
-
-func (x *reqGetEntityGetLegacyStuff) SetNumPosNonCompat(value int64) *reqGetEntityGetLegacyStuff {
-    x.NumPos = value
-    return x
-}
-
-func (x *reqGetEntityGetLegacyStuff) SetNumPos(value int64) *reqGetEntityGetLegacyStuff {
-    x.NumPos = value
-    return x
-}
 
 func (x *reqGetEntityGetLegacyStuff) writeField_2(p thrift.Encoder) error {  // NumNeg2
     if err := p.WriteFieldBegin("numNeg2", thrift.I64, -2); err != nil {
@@ -3384,38 +3369,6 @@ func (x *reqGetEntityGetLegacyStuff) writeField_2(p thrift.Encoder) error {  // 
     }
 
     item := x.NumNeg2
-    if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqGetEntityGetLegacyStuff write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqGetEntityGetLegacyStuff) writeField_1(p thrift.Encoder) error {  // NumNeg1
-    if err := p.WriteFieldBegin("numNeg1", thrift.I64, -1); err != nil {
-        return thrift.PrependError("reqGetEntityGetLegacyStuff write field begin error: ", err)
-    }
-
-    item := x.NumNeg1
-    if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqGetEntityGetLegacyStuff write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqGetEntityGetLegacyStuff) writeField1(p thrift.Encoder) error {  // NumPos
-    if err := p.WriteFieldBegin("numPos", thrift.I64, 1); err != nil {
-        return thrift.PrependError("reqGetEntityGetLegacyStuff write field begin error: ", err)
-    }
-
-    item := x.NumPos
     if err := p.WriteI64(item); err != nil {
         return err
     }
@@ -3436,6 +3389,38 @@ func (x *reqGetEntityGetLegacyStuff) readField_2(p thrift.Decoder) error {  // N
     return nil
 }
 
+
+func (x *reqGetEntityGetLegacyStuff) GetNumNeg1() int64 {
+    return x.NumNeg1
+}
+
+func (x *reqGetEntityGetLegacyStuff) SetNumNeg1NonCompat(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumNeg1 = value
+    return x
+}
+
+func (x *reqGetEntityGetLegacyStuff) SetNumNeg1(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumNeg1 = value
+    return x
+}
+
+
+func (x *reqGetEntityGetLegacyStuff) writeField_1(p thrift.Encoder) error {  // NumNeg1
+    if err := p.WriteFieldBegin("numNeg1", thrift.I64, -1); err != nil {
+        return thrift.PrependError("reqGetEntityGetLegacyStuff write field begin error: ", err)
+    }
+
+    item := x.NumNeg1
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqGetEntityGetLegacyStuff write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *reqGetEntityGetLegacyStuff) readField_1(p thrift.Decoder) error {  // NumNeg1
     result, err := p.ReadI64()
     if err != nil {
@@ -3443,6 +3428,38 @@ func (x *reqGetEntityGetLegacyStuff) readField_1(p thrift.Decoder) error {  // N
     }
 
     x.NumNeg1 = result
+    return nil
+}
+
+
+func (x *reqGetEntityGetLegacyStuff) GetNumPos() int64 {
+    return x.NumPos
+}
+
+func (x *reqGetEntityGetLegacyStuff) SetNumPosNonCompat(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumPos = value
+    return x
+}
+
+func (x *reqGetEntityGetLegacyStuff) SetNumPos(value int64) *reqGetEntityGetLegacyStuff {
+    x.NumPos = value
+    return x
+}
+
+
+func (x *reqGetEntityGetLegacyStuff) writeField1(p thrift.Encoder) error {  // NumPos
+    if err := p.WriteFieldBegin("numPos", thrift.I64, 1); err != nil {
+        return thrift.PrependError("reqGetEntityGetLegacyStuff write field begin error: ", err)
+    }
+
+    item := x.NumPos
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqGetEntityGetLegacyStuff write field end error: ", err)
+    }
     return nil
 }
 
@@ -3455,6 +3472,7 @@ func (x *reqGetEntityGetLegacyStuff) readField1(p thrift.Decoder) error {  // Nu
     x.NumPos = result
     return nil
 }
+
 
 
 
@@ -3704,6 +3722,7 @@ func (x *reqGetEntityGetCtxCollision) SetCtx(value int64) *reqGetEntityGetCtxCol
     return x
 }
 
+
 func (x *reqGetEntityGetCtxCollision) writeField1(p thrift.Encoder) error {  // Ctx
     if err := p.WriteFieldBegin("ctx", thrift.I64, 1); err != nil {
         return thrift.PrependError("reqGetEntityGetCtxCollision write field begin error: ", err)
@@ -3729,6 +3748,7 @@ func (x *reqGetEntityGetCtxCollision) readField1(p thrift.Decoder) error {  // C
     x.Ctx = result
     return nil
 }
+
 
 
 
@@ -3957,10 +3977,6 @@ func (x *reqGetEntityGetCtx1Collision) GetCtx() int64 {
     return x.Ctx
 }
 
-func (x *reqGetEntityGetCtx1Collision) GetCtx1() int64 {
-    return x.Ctx1
-}
-
 func (x *reqGetEntityGetCtx1Collision) SetCtxNonCompat(value int64) *reqGetEntityGetCtx1Collision {
     x.Ctx = value
     return x
@@ -3971,15 +3987,6 @@ func (x *reqGetEntityGetCtx1Collision) SetCtx(value int64) *reqGetEntityGetCtx1C
     return x
 }
 
-func (x *reqGetEntityGetCtx1Collision) SetCtx1NonCompat(value int64) *reqGetEntityGetCtx1Collision {
-    x.Ctx1 = value
-    return x
-}
-
-func (x *reqGetEntityGetCtx1Collision) SetCtx1(value int64) *reqGetEntityGetCtx1Collision {
-    x.Ctx1 = value
-    return x
-}
 
 func (x *reqGetEntityGetCtx1Collision) writeField1(p thrift.Encoder) error {  // Ctx
     if err := p.WriteFieldBegin("ctx", thrift.I64, 1); err != nil {
@@ -3987,22 +3994,6 @@ func (x *reqGetEntityGetCtx1Collision) writeField1(p thrift.Encoder) error {  //
     }
 
     item := x.Ctx
-    if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqGetEntityGetCtx1Collision write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqGetEntityGetCtx1Collision) writeField2(p thrift.Encoder) error {  // Ctx1
-    if err := p.WriteFieldBegin("ctx1", thrift.I64, 2); err != nil {
-        return thrift.PrependError("reqGetEntityGetCtx1Collision write field begin error: ", err)
-    }
-
-    item := x.Ctx1
     if err := p.WriteI64(item); err != nil {
         return err
     }
@@ -4023,6 +4014,38 @@ func (x *reqGetEntityGetCtx1Collision) readField1(p thrift.Decoder) error {  // 
     return nil
 }
 
+
+func (x *reqGetEntityGetCtx1Collision) GetCtx1() int64 {
+    return x.Ctx1
+}
+
+func (x *reqGetEntityGetCtx1Collision) SetCtx1NonCompat(value int64) *reqGetEntityGetCtx1Collision {
+    x.Ctx1 = value
+    return x
+}
+
+func (x *reqGetEntityGetCtx1Collision) SetCtx1(value int64) *reqGetEntityGetCtx1Collision {
+    x.Ctx1 = value
+    return x
+}
+
+
+func (x *reqGetEntityGetCtx1Collision) writeField2(p thrift.Encoder) error {  // Ctx1
+    if err := p.WriteFieldBegin("ctx1", thrift.I64, 2); err != nil {
+        return thrift.PrependError("reqGetEntityGetCtx1Collision write field begin error: ", err)
+    }
+
+    item := x.Ctx1
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqGetEntityGetCtx1Collision write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *reqGetEntityGetCtx1Collision) readField2(p thrift.Decoder) error {  // Ctx1
     result, err := p.ReadI64()
     if err != nil {
@@ -4032,6 +4055,7 @@ func (x *reqGetEntityGetCtx1Collision) readField2(p thrift.Decoder) error {  // 
     x.Ctx1 = result
     return nil
 }
+
 
 
 
@@ -4275,6 +4299,7 @@ func (x *reqGetEntityGetContextCollision) SetContext(value int64) *reqGetEntityG
     return x
 }
 
+
 func (x *reqGetEntityGetContextCollision) writeField1(p thrift.Encoder) error {  // Context
     if err := p.WriteFieldBegin("context", thrift.I64, 1); err != nil {
         return thrift.PrependError("reqGetEntityGetContextCollision write field begin error: ", err)
@@ -4300,6 +4325,7 @@ func (x *reqGetEntityGetContextCollision) readField1(p thrift.Decoder) error {  
     x.Context = result
     return nil
 }
+
 
 
 
@@ -4537,6 +4563,7 @@ func (x *reqGetEntityGetOutCollision) SetOut(value int64) *reqGetEntityGetOutCol
     return x
 }
 
+
 func (x *reqGetEntityGetOutCollision) writeField1(p thrift.Encoder) error {  // Out
     if err := p.WriteFieldBegin("out", thrift.I64, 1); err != nil {
         return thrift.PrependError("reqGetEntityGetOutCollision write field begin error: ", err)
@@ -4562,6 +4589,7 @@ func (x *reqGetEntityGetOutCollision) readField1(p thrift.Decoder) error {  // O
     x.Out = result
     return nil
 }
+
 
 
 
@@ -4790,10 +4818,6 @@ func (x *reqGetEntityGetOut1Collision) GetOut() int64 {
     return x.Out
 }
 
-func (x *reqGetEntityGetOut1Collision) GetOut1() int64 {
-    return x.Out1
-}
-
 func (x *reqGetEntityGetOut1Collision) SetOutNonCompat(value int64) *reqGetEntityGetOut1Collision {
     x.Out = value
     return x
@@ -4804,15 +4828,6 @@ func (x *reqGetEntityGetOut1Collision) SetOut(value int64) *reqGetEntityGetOut1C
     return x
 }
 
-func (x *reqGetEntityGetOut1Collision) SetOut1NonCompat(value int64) *reqGetEntityGetOut1Collision {
-    x.Out1 = value
-    return x
-}
-
-func (x *reqGetEntityGetOut1Collision) SetOut1(value int64) *reqGetEntityGetOut1Collision {
-    x.Out1 = value
-    return x
-}
 
 func (x *reqGetEntityGetOut1Collision) writeField1(p thrift.Encoder) error {  // Out
     if err := p.WriteFieldBegin("out", thrift.I64, 1); err != nil {
@@ -4820,22 +4835,6 @@ func (x *reqGetEntityGetOut1Collision) writeField1(p thrift.Encoder) error {  //
     }
 
     item := x.Out
-    if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqGetEntityGetOut1Collision write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqGetEntityGetOut1Collision) writeField2(p thrift.Encoder) error {  // Out1
-    if err := p.WriteFieldBegin("out1", thrift.I64, 2); err != nil {
-        return thrift.PrependError("reqGetEntityGetOut1Collision write field begin error: ", err)
-    }
-
-    item := x.Out1
     if err := p.WriteI64(item); err != nil {
         return err
     }
@@ -4856,6 +4855,38 @@ func (x *reqGetEntityGetOut1Collision) readField1(p thrift.Decoder) error {  // 
     return nil
 }
 
+
+func (x *reqGetEntityGetOut1Collision) GetOut1() int64 {
+    return x.Out1
+}
+
+func (x *reqGetEntityGetOut1Collision) SetOut1NonCompat(value int64) *reqGetEntityGetOut1Collision {
+    x.Out1 = value
+    return x
+}
+
+func (x *reqGetEntityGetOut1Collision) SetOut1(value int64) *reqGetEntityGetOut1Collision {
+    x.Out1 = value
+    return x
+}
+
+
+func (x *reqGetEntityGetOut1Collision) writeField2(p thrift.Encoder) error {  // Out1
+    if err := p.WriteFieldBegin("out1", thrift.I64, 2); err != nil {
+        return thrift.PrependError("reqGetEntityGetOut1Collision write field begin error: ", err)
+    }
+
+    item := x.Out1
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqGetEntityGetOut1Collision write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *reqGetEntityGetOut1Collision) readField2(p thrift.Decoder) error {  // Out1
     result, err := p.ReadI64()
     if err != nil {
@@ -4865,6 +4896,7 @@ func (x *reqGetEntityGetOut1Collision) readField2(p thrift.Decoder) error {  // 
     x.Out1 = result
     return nil
 }
+
 
 
 
@@ -5108,6 +5140,7 @@ func (x *reqGetEntityGetInCollision) SetIn(value int64) *reqGetEntityGetInCollis
     return x
 }
 
+
 func (x *reqGetEntityGetInCollision) writeField1(p thrift.Encoder) error {  // In
     if err := p.WriteFieldBegin("in", thrift.I64, 1); err != nil {
         return thrift.PrependError("reqGetEntityGetInCollision write field begin error: ", err)
@@ -5133,6 +5166,7 @@ func (x *reqGetEntityGetInCollision) readField1(p thrift.Decoder) error {  // In
     x.In = result
     return nil
 }
+
 
 
 
@@ -5361,10 +5395,6 @@ func (x *reqGetEntityGetIn1Collision) GetIn() int64 {
     return x.In
 }
 
-func (x *reqGetEntityGetIn1Collision) GetIn1() int64 {
-    return x.In1
-}
-
 func (x *reqGetEntityGetIn1Collision) SetInNonCompat(value int64) *reqGetEntityGetIn1Collision {
     x.In = value
     return x
@@ -5375,15 +5405,6 @@ func (x *reqGetEntityGetIn1Collision) SetIn(value int64) *reqGetEntityGetIn1Coll
     return x
 }
 
-func (x *reqGetEntityGetIn1Collision) SetIn1NonCompat(value int64) *reqGetEntityGetIn1Collision {
-    x.In1 = value
-    return x
-}
-
-func (x *reqGetEntityGetIn1Collision) SetIn1(value int64) *reqGetEntityGetIn1Collision {
-    x.In1 = value
-    return x
-}
 
 func (x *reqGetEntityGetIn1Collision) writeField1(p thrift.Encoder) error {  // In
     if err := p.WriteFieldBegin("in", thrift.I64, 1); err != nil {
@@ -5391,22 +5412,6 @@ func (x *reqGetEntityGetIn1Collision) writeField1(p thrift.Encoder) error {  // 
     }
 
     item := x.In
-    if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqGetEntityGetIn1Collision write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqGetEntityGetIn1Collision) writeField2(p thrift.Encoder) error {  // In1
-    if err := p.WriteFieldBegin("in1", thrift.I64, 2); err != nil {
-        return thrift.PrependError("reqGetEntityGetIn1Collision write field begin error: ", err)
-    }
-
-    item := x.In1
     if err := p.WriteI64(item); err != nil {
         return err
     }
@@ -5427,6 +5432,38 @@ func (x *reqGetEntityGetIn1Collision) readField1(p thrift.Decoder) error {  // I
     return nil
 }
 
+
+func (x *reqGetEntityGetIn1Collision) GetIn1() int64 {
+    return x.In1
+}
+
+func (x *reqGetEntityGetIn1Collision) SetIn1NonCompat(value int64) *reqGetEntityGetIn1Collision {
+    x.In1 = value
+    return x
+}
+
+func (x *reqGetEntityGetIn1Collision) SetIn1(value int64) *reqGetEntityGetIn1Collision {
+    x.In1 = value
+    return x
+}
+
+
+func (x *reqGetEntityGetIn1Collision) writeField2(p thrift.Encoder) error {  // In1
+    if err := p.WriteFieldBegin("in1", thrift.I64, 2); err != nil {
+        return thrift.PrependError("reqGetEntityGetIn1Collision write field begin error: ", err)
+    }
+
+    item := x.In1
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqGetEntityGetIn1Collision write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *reqGetEntityGetIn1Collision) readField2(p thrift.Decoder) error {  // In1
     result, err := p.ReadI64()
     if err != nil {
@@ -5436,6 +5473,7 @@ func (x *reqGetEntityGetIn1Collision) readField2(p thrift.Decoder) error {  // I
     x.In1 = result
     return nil
 }
+
 
 
 
@@ -5679,6 +5717,7 @@ func (x *reqGetEntityGetErrCollision) SetErr(value int64) *reqGetEntityGetErrCol
     return x
 }
 
+
 func (x *reqGetEntityGetErrCollision) writeField1(p thrift.Encoder) error {  // Err
     if err := p.WriteFieldBegin("err", thrift.I64, 1); err != nil {
         return thrift.PrependError("reqGetEntityGetErrCollision write field begin error: ", err)
@@ -5704,6 +5743,7 @@ func (x *reqGetEntityGetErrCollision) readField1(p thrift.Decoder) error {  // E
     x.Err = result
     return nil
 }
+
 
 
 
@@ -5932,10 +5972,6 @@ func (x *reqGetEntityGetErr1Collision) GetErr() int64 {
     return x.Err
 }
 
-func (x *reqGetEntityGetErr1Collision) GetErr1() int64 {
-    return x.Err1
-}
-
 func (x *reqGetEntityGetErr1Collision) SetErrNonCompat(value int64) *reqGetEntityGetErr1Collision {
     x.Err = value
     return x
@@ -5946,15 +5982,6 @@ func (x *reqGetEntityGetErr1Collision) SetErr(value int64) *reqGetEntityGetErr1C
     return x
 }
 
-func (x *reqGetEntityGetErr1Collision) SetErr1NonCompat(value int64) *reqGetEntityGetErr1Collision {
-    x.Err1 = value
-    return x
-}
-
-func (x *reqGetEntityGetErr1Collision) SetErr1(value int64) *reqGetEntityGetErr1Collision {
-    x.Err1 = value
-    return x
-}
 
 func (x *reqGetEntityGetErr1Collision) writeField1(p thrift.Encoder) error {  // Err
     if err := p.WriteFieldBegin("err", thrift.I64, 1); err != nil {
@@ -5962,22 +5989,6 @@ func (x *reqGetEntityGetErr1Collision) writeField1(p thrift.Encoder) error {  //
     }
 
     item := x.Err
-    if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqGetEntityGetErr1Collision write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqGetEntityGetErr1Collision) writeField2(p thrift.Encoder) error {  // Err1
-    if err := p.WriteFieldBegin("err1", thrift.I64, 2); err != nil {
-        return thrift.PrependError("reqGetEntityGetErr1Collision write field begin error: ", err)
-    }
-
-    item := x.Err1
     if err := p.WriteI64(item); err != nil {
         return err
     }
@@ -5998,6 +6009,38 @@ func (x *reqGetEntityGetErr1Collision) readField1(p thrift.Decoder) error {  // 
     return nil
 }
 
+
+func (x *reqGetEntityGetErr1Collision) GetErr1() int64 {
+    return x.Err1
+}
+
+func (x *reqGetEntityGetErr1Collision) SetErr1NonCompat(value int64) *reqGetEntityGetErr1Collision {
+    x.Err1 = value
+    return x
+}
+
+func (x *reqGetEntityGetErr1Collision) SetErr1(value int64) *reqGetEntityGetErr1Collision {
+    x.Err1 = value
+    return x
+}
+
+
+func (x *reqGetEntityGetErr1Collision) writeField2(p thrift.Encoder) error {  // Err1
+    if err := p.WriteFieldBegin("err1", thrift.I64, 2); err != nil {
+        return thrift.PrependError("reqGetEntityGetErr1Collision write field begin error: ", err)
+    }
+
+    item := x.Err1
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqGetEntityGetErr1Collision write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *reqGetEntityGetErr1Collision) readField2(p thrift.Decoder) error {  // Err1
     result, err := p.ReadI64()
     if err != nil {
@@ -6007,6 +6050,7 @@ func (x *reqGetEntityGetErr1Collision) readField2(p thrift.Decoder) error {  // 
     x.Err1 = result
     return nil
 }
+
 
 
 
@@ -6241,10 +6285,6 @@ func (x *reqGetEntityMyMethodWithConflictingParamAccessors) GetSetFoo() bool {
     return x.SetFoo
 }
 
-func (x *reqGetEntityMyMethodWithConflictingParamAccessors) GetFoo() string {
-    return x.Foo
-}
-
 func (x *reqGetEntityMyMethodWithConflictingParamAccessors) SetSetFooNonCompat(value bool) *reqGetEntityMyMethodWithConflictingParamAccessors {
     x.SetFoo = value
     return x
@@ -6255,15 +6295,6 @@ func (x *reqGetEntityMyMethodWithConflictingParamAccessors) SetSetFoo(value bool
     return x
 }
 
-func (x *reqGetEntityMyMethodWithConflictingParamAccessors) SetFoo_NonCompat(value string) *reqGetEntityMyMethodWithConflictingParamAccessors {
-    x.Foo = value
-    return x
-}
-
-func (x *reqGetEntityMyMethodWithConflictingParamAccessors) SetFoo_(value string) *reqGetEntityMyMethodWithConflictingParamAccessors {
-    x.Foo = value
-    return x
-}
 
 func (x *reqGetEntityMyMethodWithConflictingParamAccessors) writeField1(p thrift.Encoder) error {  // SetFoo
     if err := p.WriteFieldBegin("set_foo", thrift.BOOL, 1); err != nil {
@@ -6272,22 +6303,6 @@ func (x *reqGetEntityMyMethodWithConflictingParamAccessors) writeField1(p thrift
 
     item := x.SetFoo
     if err := p.WriteBool(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqGetEntityMyMethodWithConflictingParamAccessors) writeField2(p thrift.Encoder) error {  // Foo
-    if err := p.WriteFieldBegin("foo", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write field begin error: ", err)
-    }
-
-    item := x.Foo
-    if err := p.WriteString(item); err != nil {
         return err
     }
 
@@ -6307,6 +6322,38 @@ func (x *reqGetEntityMyMethodWithConflictingParamAccessors) readField1(p thrift.
     return nil
 }
 
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) GetFoo() string {
+    return x.Foo
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) SetFoo_NonCompat(value string) *reqGetEntityMyMethodWithConflictingParamAccessors {
+    x.Foo = value
+    return x
+}
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) SetFoo_(value string) *reqGetEntityMyMethodWithConflictingParamAccessors {
+    x.Foo = value
+    return x
+}
+
+
+func (x *reqGetEntityMyMethodWithConflictingParamAccessors) writeField2(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write field begin error: ", err)
+    }
+
+    item := x.Foo
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqGetEntityMyMethodWithConflictingParamAccessors write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *reqGetEntityMyMethodWithConflictingParamAccessors) readField2(p thrift.Decoder) error {  // Foo
     result, err := p.ReadString()
     if err != nil {
@@ -6316,6 +6363,7 @@ func (x *reqGetEntityMyMethodWithConflictingParamAccessors) readField2(p thrift.
     x.Foo = result
     return nil
 }
+
 
 
 

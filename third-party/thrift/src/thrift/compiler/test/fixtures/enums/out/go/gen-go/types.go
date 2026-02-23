@@ -372,22 +372,6 @@ func (x *SomeStruct) GetReasonable() Metasyntactic {
     return x.Reasonable
 }
 
-func (x *SomeStruct) GetFine() Metasyntactic {
-    return x.Fine
-}
-
-func (x *SomeStruct) GetQuestionable() Metasyntactic {
-    return x.Questionable
-}
-
-func (x *SomeStruct) GetTags() []int32 {
-    if !x.IsSetTags() {
-        return []int32{
-}
-    }
-    return x.Tags
-}
-
 func (x *SomeStruct) SetReasonableNonCompat(value Metasyntactic) *SomeStruct {
     x.Reasonable = value
     return x
@@ -398,39 +382,6 @@ func (x *SomeStruct) SetReasonable(value Metasyntactic) *SomeStruct {
     return x
 }
 
-func (x *SomeStruct) SetFineNonCompat(value Metasyntactic) *SomeStruct {
-    x.Fine = value
-    return x
-}
-
-func (x *SomeStruct) SetFine(value Metasyntactic) *SomeStruct {
-    x.Fine = value
-    return x
-}
-
-func (x *SomeStruct) SetQuestionableNonCompat(value Metasyntactic) *SomeStruct {
-    x.Questionable = value
-    return x
-}
-
-func (x *SomeStruct) SetQuestionable(value Metasyntactic) *SomeStruct {
-    x.Questionable = value
-    return x
-}
-
-func (x *SomeStruct) SetTagsNonCompat(value []int32) *SomeStruct {
-    x.Tags = value
-    return x
-}
-
-func (x *SomeStruct) SetTags(value []int32) *SomeStruct {
-    x.Tags = value
-    return x
-}
-
-func (x *SomeStruct) IsSetTags() bool {
-    return x != nil && x.Tags != nil
-}
 
 func (x *SomeStruct) writeField1(p thrift.Encoder) error {  // Reasonable
     if err := p.WriteFieldBegin("reasonable", thrift.I32, 1); err != nil {
@@ -448,6 +399,33 @@ func (x *SomeStruct) writeField1(p thrift.Encoder) error {  // Reasonable
     return nil
 }
 
+func (x *SomeStruct) readField1(p thrift.Decoder) error {  // Reasonable
+    enumResult, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+    result := Metasyntactic(enumResult)
+
+    x.Reasonable = result
+    return nil
+}
+
+
+func (x *SomeStruct) GetFine() Metasyntactic {
+    return x.Fine
+}
+
+func (x *SomeStruct) SetFineNonCompat(value Metasyntactic) *SomeStruct {
+    x.Fine = value
+    return x
+}
+
+func (x *SomeStruct) SetFine(value Metasyntactic) *SomeStruct {
+    x.Fine = value
+    return x
+}
+
+
 func (x *SomeStruct) writeField2(p thrift.Encoder) error {  // Fine
     if err := p.WriteFieldBegin("fine", thrift.I32, 2); err != nil {
         return thrift.PrependError("SomeStruct write field begin error: ", err)
@@ -464,6 +442,33 @@ func (x *SomeStruct) writeField2(p thrift.Encoder) error {  // Fine
     return nil
 }
 
+func (x *SomeStruct) readField2(p thrift.Decoder) error {  // Fine
+    enumResult, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+    result := Metasyntactic(enumResult)
+
+    x.Fine = result
+    return nil
+}
+
+
+func (x *SomeStruct) GetQuestionable() Metasyntactic {
+    return x.Questionable
+}
+
+func (x *SomeStruct) SetQuestionableNonCompat(value Metasyntactic) *SomeStruct {
+    x.Questionable = value
+    return x
+}
+
+func (x *SomeStruct) SetQuestionable(value Metasyntactic) *SomeStruct {
+    x.Questionable = value
+    return x
+}
+
+
 func (x *SomeStruct) writeField3(p thrift.Encoder) error {  // Questionable
     if err := p.WriteFieldBegin("questionable", thrift.I32, 3); err != nil {
         return thrift.PrependError("SomeStruct write field begin error: ", err)
@@ -478,6 +483,40 @@ func (x *SomeStruct) writeField3(p thrift.Encoder) error {  // Questionable
         return thrift.PrependError("SomeStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *SomeStruct) readField3(p thrift.Decoder) error {  // Questionable
+    enumResult, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+    result := Metasyntactic(enumResult)
+
+    x.Questionable = result
+    return nil
+}
+
+
+func (x *SomeStruct) GetTags() []int32 {
+    if !x.IsSetTags() {
+        return []int32{
+}
+    }
+    return x.Tags
+}
+
+func (x *SomeStruct) SetTagsNonCompat(value []int32) *SomeStruct {
+    x.Tags = value
+    return x
+}
+
+func (x *SomeStruct) SetTags(value []int32) *SomeStruct {
+    x.Tags = value
+    return x
+}
+
+func (x *SomeStruct) IsSetTags() bool {
+    return x != nil && x.Tags != nil
 }
 
 func (x *SomeStruct) writeField4(p thrift.Encoder) error {  // Tags
@@ -504,39 +543,6 @@ func (x *SomeStruct) writeField4(p thrift.Encoder) error {  // Tags
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("SomeStruct write field end error: ", err)
     }
-    return nil
-}
-
-func (x *SomeStruct) readField1(p thrift.Decoder) error {  // Reasonable
-    enumResult, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-    result := Metasyntactic(enumResult)
-
-    x.Reasonable = result
-    return nil
-}
-
-func (x *SomeStruct) readField2(p thrift.Decoder) error {  // Fine
-    enumResult, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-    result := Metasyntactic(enumResult)
-
-    x.Fine = result
-    return nil
-}
-
-func (x *SomeStruct) readField3(p thrift.Decoder) error {  // Questionable
-    enumResult, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-    result := Metasyntactic(enumResult)
-
-    x.Questionable = result
     return nil
 }
 
@@ -567,6 +573,7 @@ func (x *SomeStruct) readField4(p thrift.Decoder) error {  // Tags
     x.Tags = result
     return nil
 }
+
 
 
 
@@ -686,18 +693,6 @@ func (x *MyStruct) GetMe2_3() MyEnum2 {
     return x.Me2_3
 }
 
-func (x *MyStruct) GetMe3N3() MyEnum3 {
-    return x.Me3N3
-}
-
-func (x *MyStruct) GetMe1T1() MyEnum1 {
-    return x.Me1T1
-}
-
-func (x *MyStruct) GetMe1T2() MyEnum1 {
-    return x.Me1T2
-}
-
 func (x *MyStruct) SetMe2_3NonCompat(value MyEnum2) *MyStruct {
     x.Me2_3 = value
     return x
@@ -708,35 +703,6 @@ func (x *MyStruct) SetMe2_3(value MyEnum2) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetMe3N3NonCompat(value MyEnum3) *MyStruct {
-    x.Me3N3 = value
-    return x
-}
-
-func (x *MyStruct) SetMe3N3(value MyEnum3) *MyStruct {
-    x.Me3N3 = value
-    return x
-}
-
-func (x *MyStruct) SetMe1T1NonCompat(value MyEnum1) *MyStruct {
-    x.Me1T1 = value
-    return x
-}
-
-func (x *MyStruct) SetMe1T1(value MyEnum1) *MyStruct {
-    x.Me1T1 = value
-    return x
-}
-
-func (x *MyStruct) SetMe1T2NonCompat(value MyEnum1) *MyStruct {
-    x.Me1T2 = value
-    return x
-}
-
-func (x *MyStruct) SetMe1T2(value MyEnum1) *MyStruct {
-    x.Me1T2 = value
-    return x
-}
 
 func (x *MyStruct) writeField1(p thrift.Encoder) error {  // Me2_3
     if err := p.WriteFieldBegin("me2_3", thrift.I32, 1); err != nil {
@@ -744,54 +710,6 @@ func (x *MyStruct) writeField1(p thrift.Encoder) error {  // Me2_3
     }
 
     item := x.Me2_3
-    if err := p.WriteI32(int32(item)); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField2(p thrift.Encoder) error {  // Me3N3
-    if err := p.WriteFieldBegin("me3_n3", thrift.I32, 2); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.Me3N3
-    if err := p.WriteI32(int32(item)); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField4(p thrift.Encoder) error {  // Me1T1
-    if err := p.WriteFieldBegin("me1_t1", thrift.I32, 4); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.Me1T1
-    if err := p.WriteI32(int32(item)); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField6(p thrift.Encoder) error {  // Me1T2
-    if err := p.WriteFieldBegin("me1_t2", thrift.I32, 6); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.Me1T2
     if err := p.WriteI32(int32(item)); err != nil {
         return err
     }
@@ -813,6 +731,38 @@ func (x *MyStruct) readField1(p thrift.Decoder) error {  // Me2_3
     return nil
 }
 
+
+func (x *MyStruct) GetMe3N3() MyEnum3 {
+    return x.Me3N3
+}
+
+func (x *MyStruct) SetMe3N3NonCompat(value MyEnum3) *MyStruct {
+    x.Me3N3 = value
+    return x
+}
+
+func (x *MyStruct) SetMe3N3(value MyEnum3) *MyStruct {
+    x.Me3N3 = value
+    return x
+}
+
+
+func (x *MyStruct) writeField2(p thrift.Encoder) error {  // Me3N3
+    if err := p.WriteFieldBegin("me3_n3", thrift.I32, 2); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.Me3N3
+    if err := p.WriteI32(int32(item)); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MyStruct) readField2(p thrift.Decoder) error {  // Me3N3
     enumResult, err := p.ReadI32()
     if err != nil {
@@ -821,6 +771,38 @@ func (x *MyStruct) readField2(p thrift.Decoder) error {  // Me3N3
     result := MyEnum3(enumResult)
 
     x.Me3N3 = result
+    return nil
+}
+
+
+func (x *MyStruct) GetMe1T1() MyEnum1 {
+    return x.Me1T1
+}
+
+func (x *MyStruct) SetMe1T1NonCompat(value MyEnum1) *MyStruct {
+    x.Me1T1 = value
+    return x
+}
+
+func (x *MyStruct) SetMe1T1(value MyEnum1) *MyStruct {
+    x.Me1T1 = value
+    return x
+}
+
+
+func (x *MyStruct) writeField4(p thrift.Encoder) error {  // Me1T1
+    if err := p.WriteFieldBegin("me1_t1", thrift.I32, 4); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.Me1T1
+    if err := p.WriteI32(int32(item)); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -835,6 +817,38 @@ func (x *MyStruct) readField4(p thrift.Decoder) error {  // Me1T1
     return nil
 }
 
+
+func (x *MyStruct) GetMe1T2() MyEnum1 {
+    return x.Me1T2
+}
+
+func (x *MyStruct) SetMe1T2NonCompat(value MyEnum1) *MyStruct {
+    x.Me1T2 = value
+    return x
+}
+
+func (x *MyStruct) SetMe1T2(value MyEnum1) *MyStruct {
+    x.Me1T2 = value
+    return x
+}
+
+
+func (x *MyStruct) writeField6(p thrift.Encoder) error {  // Me1T2
+    if err := p.WriteFieldBegin("me1_t2", thrift.I32, 6); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.Me1T2
+    if err := p.WriteI32(int32(item)); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MyStruct) readField6(p thrift.Decoder) error {  // Me1T2
     enumResult, err := p.ReadI32()
     if err != nil {
@@ -845,6 +859,7 @@ func (x *MyStruct) readField6(p thrift.Decoder) error {  // Me1T2
     x.Me1T2 = result
     return nil
 }
+
 
 
 

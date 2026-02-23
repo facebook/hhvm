@@ -301,45 +301,6 @@ func (x *Automobile) GetPlate() Plate {
     return x.Plate
 }
 
-func (x *Automobile) GetPreviousPlate() Plate {
-    if !x.IsSetPreviousPlate() {
-        return NewPlate()
-    }
-    return *x.PreviousPlate
-}
-
-func (x *Automobile) GetFirstPlate() Plate {
-    if !x.IsSetFirstPlate() {
-        return "0000"
-    }
-    return *x.FirstPlate
-}
-
-func (x *Automobile) GetYear() Year {
-    return x.Year
-}
-
-func (x *Automobile) GetDrivers() Drivers {
-    if !x.IsSetDrivers() {
-        return NewDrivers()
-    }
-    return x.Drivers
-}
-
-func (x *Automobile) GetAccessories() []*Accessory {
-    if !x.IsSetAccessories() {
-        return make([]*Accessory, 0)
-    }
-    return x.Accessories
-}
-
-func (x *Automobile) GetPartNames() map[int32]*CarPartName {
-    if !x.IsSetPartNames() {
-        return make(map[int32]*CarPartName)
-    }
-    return x.PartNames
-}
-
 func (x *Automobile) SetPlateNonCompat(value Plate) *Automobile {
     x.Plate = value
     return x
@@ -350,85 +311,6 @@ func (x *Automobile) SetPlate(value Plate) *Automobile {
     return x
 }
 
-func (x *Automobile) SetPreviousPlateNonCompat(value Plate) *Automobile {
-    x.PreviousPlate = &value
-    return x
-}
-
-func (x *Automobile) SetPreviousPlate(value *Plate) *Automobile {
-    x.PreviousPlate = value
-    return x
-}
-
-func (x *Automobile) SetFirstPlateNonCompat(value Plate) *Automobile {
-    x.FirstPlate = &value
-    return x
-}
-
-func (x *Automobile) SetFirstPlate(value *Plate) *Automobile {
-    x.FirstPlate = value
-    return x
-}
-
-func (x *Automobile) SetYearNonCompat(value Year) *Automobile {
-    x.Year = value
-    return x
-}
-
-func (x *Automobile) SetYear(value Year) *Automobile {
-    x.Year = value
-    return x
-}
-
-func (x *Automobile) SetDriversNonCompat(value Drivers) *Automobile {
-    x.Drivers = value
-    return x
-}
-
-func (x *Automobile) SetDrivers(value Drivers) *Automobile {
-    x.Drivers = value
-    return x
-}
-
-func (x *Automobile) SetAccessoriesNonCompat(value []*Accessory) *Automobile {
-    x.Accessories = value
-    return x
-}
-
-func (x *Automobile) SetAccessories(value []*Accessory) *Automobile {
-    x.Accessories = value
-    return x
-}
-
-func (x *Automobile) SetPartNamesNonCompat(value map[int32]*CarPartName) *Automobile {
-    x.PartNames = value
-    return x
-}
-
-func (x *Automobile) SetPartNames(value map[int32]*CarPartName) *Automobile {
-    x.PartNames = value
-    return x
-}
-
-func (x *Automobile) IsSetPreviousPlate() bool {
-    return x != nil && x.PreviousPlate != nil
-}
-
-func (x *Automobile) IsSetFirstPlate() bool {
-    return x != nil && x.FirstPlate != nil
-}
-
-func (x *Automobile) IsSetDrivers() bool {
-    return x != nil && x.Drivers != nil
-}
-
-func (x *Automobile) IsSetAccessories() bool {
-    return x != nil && x.Accessories != nil
-}
-
-func (x *Automobile) IsSetPartNames() bool {
-    return x != nil && x.PartNames != nil
-}
 
 func (x *Automobile) writeField1(p thrift.Encoder) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
@@ -445,6 +327,38 @@ func (x *Automobile) writeField1(p thrift.Encoder) error {  // Plate
         return thrift.PrependError("Automobile write field end error: ", err)
     }
     return nil
+}
+
+func (x *Automobile) readField1(p thrift.Decoder) error {  // Plate
+    result, err := ReadPlate(p)
+    if err != nil {
+        return err
+    }
+
+    x.Plate = result
+    return nil
+}
+
+
+func (x *Automobile) GetPreviousPlate() Plate {
+    if !x.IsSetPreviousPlate() {
+        return NewPlate()
+    }
+    return *x.PreviousPlate
+}
+
+func (x *Automobile) SetPreviousPlateNonCompat(value Plate) *Automobile {
+    x.PreviousPlate = &value
+    return x
+}
+
+func (x *Automobile) SetPreviousPlate(value *Plate) *Automobile {
+    x.PreviousPlate = value
+    return x
+}
+
+func (x *Automobile) IsSetPreviousPlate() bool {
+    return x != nil && x.PreviousPlate != nil
 }
 
 func (x *Automobile) writeField2(p thrift.Encoder) error {  // PreviousPlate
@@ -468,6 +382,38 @@ func (x *Automobile) writeField2(p thrift.Encoder) error {  // PreviousPlate
     return nil
 }
 
+func (x *Automobile) readField2(p thrift.Decoder) error {  // PreviousPlate
+    result, err := ReadPlate(p)
+    if err != nil {
+        return err
+    }
+
+    x.PreviousPlate = &result
+    return nil
+}
+
+
+func (x *Automobile) GetFirstPlate() Plate {
+    if !x.IsSetFirstPlate() {
+        return "0000"
+    }
+    return *x.FirstPlate
+}
+
+func (x *Automobile) SetFirstPlateNonCompat(value Plate) *Automobile {
+    x.FirstPlate = &value
+    return x
+}
+
+func (x *Automobile) SetFirstPlate(value *Plate) *Automobile {
+    x.FirstPlate = value
+    return x
+}
+
+func (x *Automobile) IsSetFirstPlate() bool {
+    return x != nil && x.FirstPlate != nil
+}
+
 func (x *Automobile) writeField3(p thrift.Encoder) error {  // FirstPlate
     if !x.IsSetFirstPlate() {
         return nil
@@ -489,6 +435,32 @@ func (x *Automobile) writeField3(p thrift.Encoder) error {  // FirstPlate
     return nil
 }
 
+func (x *Automobile) readField3(p thrift.Decoder) error {  // FirstPlate
+    result, err := ReadPlate(p)
+    if err != nil {
+        return err
+    }
+
+    x.FirstPlate = &result
+    return nil
+}
+
+
+func (x *Automobile) GetYear() Year {
+    return x.Year
+}
+
+func (x *Automobile) SetYearNonCompat(value Year) *Automobile {
+    x.Year = value
+    return x
+}
+
+func (x *Automobile) SetYear(value Year) *Automobile {
+    x.Year = value
+    return x
+}
+
+
 func (x *Automobile) writeField4(p thrift.Encoder) error {  // Year
     if err := p.WriteFieldBegin("year", thrift.I32, 4); err != nil {
         return thrift.PrependError("Automobile write field begin error: ", err)
@@ -506,6 +478,38 @@ func (x *Automobile) writeField4(p thrift.Encoder) error {  // Year
     return nil
 }
 
+func (x *Automobile) readField4(p thrift.Decoder) error {  // Year
+    result, err := ReadYear(p)
+    if err != nil {
+        return err
+    }
+
+    x.Year = result
+    return nil
+}
+
+
+func (x *Automobile) GetDrivers() Drivers {
+    if !x.IsSetDrivers() {
+        return NewDrivers()
+    }
+    return x.Drivers
+}
+
+func (x *Automobile) SetDriversNonCompat(value Drivers) *Automobile {
+    x.Drivers = value
+    return x
+}
+
+func (x *Automobile) SetDrivers(value Drivers) *Automobile {
+    x.Drivers = value
+    return x
+}
+
+func (x *Automobile) IsSetDrivers() bool {
+    return x != nil && x.Drivers != nil
+}
+
 func (x *Automobile) writeField5(p thrift.Encoder) error {  // Drivers
     if err := p.WriteFieldBegin("drivers", thrift.LIST, 5); err != nil {
         return thrift.PrependError("Automobile write field begin error: ", err)
@@ -521,6 +525,38 @@ func (x *Automobile) writeField5(p thrift.Encoder) error {  // Drivers
         return thrift.PrependError("Automobile write field end error: ", err)
     }
     return nil
+}
+
+func (x *Automobile) readField5(p thrift.Decoder) error {  // Drivers
+    result, err := ReadDrivers(p)
+    if err != nil {
+        return err
+    }
+
+    x.Drivers = result
+    return nil
+}
+
+
+func (x *Automobile) GetAccessories() []*Accessory {
+    if !x.IsSetAccessories() {
+        return make([]*Accessory, 0)
+    }
+    return x.Accessories
+}
+
+func (x *Automobile) SetAccessoriesNonCompat(value []*Accessory) *Automobile {
+    x.Accessories = value
+    return x
+}
+
+func (x *Automobile) SetAccessories(value []*Accessory) *Automobile {
+    x.Accessories = value
+    return x
+}
+
+func (x *Automobile) IsSetAccessories() bool {
+    return x != nil && x.Accessories != nil
 }
 
 func (x *Automobile) writeField6(p thrift.Encoder) error {  // Accessories
@@ -549,6 +585,56 @@ func (x *Automobile) writeField6(p thrift.Encoder) error {  // Accessories
         return thrift.PrependError("Automobile write field end error: ", err)
     }
     return nil
+}
+
+func (x *Automobile) readField6(p thrift.Decoder) error {  // Accessories
+    _ /* elemType */, size, err := p.ReadListBegin()
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
+    }
+    
+    listResult := make([]*Accessory, 0, size)
+    for i := 0; i < size; i++ {
+        var elem *Accessory
+        {
+            result, err := ReadAccessory(p)
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
+
+    x.Accessories = result
+    return nil
+}
+
+
+func (x *Automobile) GetPartNames() map[int32]*CarPartName {
+    if !x.IsSetPartNames() {
+        return make(map[int32]*CarPartName)
+    }
+    return x.PartNames
+}
+
+func (x *Automobile) SetPartNamesNonCompat(value map[int32]*CarPartName) *Automobile {
+    x.PartNames = value
+    return x
+}
+
+func (x *Automobile) SetPartNames(value map[int32]*CarPartName) *Automobile {
+    x.PartNames = value
+    return x
+}
+
+func (x *Automobile) IsSetPartNames() bool {
+    return x != nil && x.PartNames != nil
 }
 
 func (x *Automobile) writeField7(p thrift.Encoder) error {  // PartNames
@@ -583,84 +669,6 @@ func (x *Automobile) writeField7(p thrift.Encoder) error {  // PartNames
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("Automobile write field end error: ", err)
     }
-    return nil
-}
-
-func (x *Automobile) readField1(p thrift.Decoder) error {  // Plate
-    result, err := ReadPlate(p)
-    if err != nil {
-        return err
-    }
-
-    x.Plate = result
-    return nil
-}
-
-func (x *Automobile) readField2(p thrift.Decoder) error {  // PreviousPlate
-    result, err := ReadPlate(p)
-    if err != nil {
-        return err
-    }
-
-    x.PreviousPlate = &result
-    return nil
-}
-
-func (x *Automobile) readField3(p thrift.Decoder) error {  // FirstPlate
-    result, err := ReadPlate(p)
-    if err != nil {
-        return err
-    }
-
-    x.FirstPlate = &result
-    return nil
-}
-
-func (x *Automobile) readField4(p thrift.Decoder) error {  // Year
-    result, err := ReadYear(p)
-    if err != nil {
-        return err
-    }
-
-    x.Year = result
-    return nil
-}
-
-func (x *Automobile) readField5(p thrift.Decoder) error {  // Drivers
-    result, err := ReadDrivers(p)
-    if err != nil {
-        return err
-    }
-
-    x.Drivers = result
-    return nil
-}
-
-func (x *Automobile) readField6(p thrift.Decoder) error {  // Accessories
-    _ /* elemType */, size, err := p.ReadListBegin()
-    if err != nil {
-        return thrift.PrependError("error reading list begin: ", err)
-    }
-    
-    listResult := make([]*Accessory, 0, size)
-    for i := 0; i < size; i++ {
-        var elem *Accessory
-        {
-            result, err := ReadAccessory(p)
-            if err != nil {
-                return err
-            }
-            elem = result
-        }
-        listResult = append(listResult, elem)
-    }
-    
-    if err := p.ReadListEnd(); err != nil {
-        return thrift.PrependError("error reading list end: ", err)
-    }
-    result := listResult
-
-    x.Accessories = result
     return nil
 }
 
@@ -701,7 +709,6 @@ func (x *Automobile) readField7(p thrift.Decoder) error {  // PartNames
     x.PartNames = result
     return nil
 }
-
 
 
 
@@ -828,10 +835,6 @@ func (x *MapKey) GetNum() int64 {
     return x.Num
 }
 
-func (x *MapKey) GetStrval() string {
-    return x.Strval
-}
-
 func (x *MapKey) SetNumNonCompat(value int64) *MapKey {
     x.Num = value
     return x
@@ -842,15 +845,6 @@ func (x *MapKey) SetNum(value int64) *MapKey {
     return x
 }
 
-func (x *MapKey) SetStrvalNonCompat(value string) *MapKey {
-    x.Strval = value
-    return x
-}
-
-func (x *MapKey) SetStrval(value string) *MapKey {
-    x.Strval = value
-    return x
-}
 
 func (x *MapKey) writeField1(p thrift.Encoder) error {  // Num
     if err := p.WriteFieldBegin("num", thrift.I64, 1); err != nil {
@@ -859,22 +853,6 @@ func (x *MapKey) writeField1(p thrift.Encoder) error {  // Num
 
     item := x.Num
     if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MapKey write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MapKey) writeField2(p thrift.Encoder) error {  // Strval
-    if err := p.WriteFieldBegin("strval", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("MapKey write field begin error: ", err)
-    }
-
-    item := x.Strval
-    if err := p.WriteString(item); err != nil {
         return err
     }
 
@@ -894,6 +872,38 @@ func (x *MapKey) readField1(p thrift.Decoder) error {  // Num
     return nil
 }
 
+
+func (x *MapKey) GetStrval() string {
+    return x.Strval
+}
+
+func (x *MapKey) SetStrvalNonCompat(value string) *MapKey {
+    x.Strval = value
+    return x
+}
+
+func (x *MapKey) SetStrval(value string) *MapKey {
+    x.Strval = value
+    return x
+}
+
+
+func (x *MapKey) writeField2(p thrift.Encoder) error {  // Strval
+    if err := p.WriteFieldBegin("strval", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("MapKey write field begin error: ", err)
+    }
+
+    item := x.Strval
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MapKey write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MapKey) readField2(p thrift.Decoder) error {  // Strval
     result, err := p.ReadString()
     if err != nil {
@@ -903,6 +913,7 @@ func (x *MapKey) readField2(p thrift.Decoder) error {  // Strval
     x.Strval = result
     return nil
 }
+
 
 
 
@@ -1091,6 +1102,7 @@ func (x *MapContainer) readField1(p thrift.Decoder) error {  // Mapval
 
 
 
+
 func (x *MapContainer) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MapContainer"); err != nil {
         return thrift.PrependError("MapContainer write struct begin error: ", err)
@@ -1180,13 +1192,6 @@ func (x *Pair) GetAutomobile() *Automobile {
     return x.Automobile
 }
 
-func (x *Pair) GetCar() *Car {
-    if !x.IsSetCar() {
-        return nil
-    }
-    return x.Car
-}
-
 func (x *Pair) SetAutomobileNonCompat(value *Automobile) *Pair {
     x.Automobile = value
     return x
@@ -1197,22 +1202,8 @@ func (x *Pair) SetAutomobile(value *Automobile) *Pair {
     return x
 }
 
-func (x *Pair) SetCarNonCompat(value *Car) *Pair {
-    x.Car = value
-    return x
-}
-
-func (x *Pair) SetCar(value *Car) *Pair {
-    x.Car = value
-    return x
-}
-
 func (x *Pair) IsSetAutomobile() bool {
     return x != nil && x.Automobile != nil
-}
-
-func (x *Pair) IsSetCar() bool {
-    return x != nil && x.Car != nil
 }
 
 func (x *Pair) writeField1(p thrift.Encoder) error {  // Automobile
@@ -1233,6 +1224,39 @@ func (x *Pair) writeField1(p thrift.Encoder) error {  // Automobile
         return thrift.PrependError("Pair write field end error: ", err)
     }
     return nil
+}
+
+func (x *Pair) readField1(p thrift.Decoder) error {  // Automobile
+    result := NewAutomobile()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Automobile = result
+    return nil
+}
+
+
+func (x *Pair) GetCar() *Car {
+    if !x.IsSetCar() {
+        return nil
+    }
+    return x.Car
+}
+
+func (x *Pair) SetCarNonCompat(value *Car) *Pair {
+    x.Car = value
+    return x
+}
+
+func (x *Pair) SetCar(value *Car) *Pair {
+    x.Car = value
+    return x
+}
+
+func (x *Pair) IsSetCar() bool {
+    return x != nil && x.Car != nil
 }
 
 func (x *Pair) writeField2(p thrift.Encoder) error {  // Car
@@ -1256,17 +1280,6 @@ func (x *Pair) writeField2(p thrift.Encoder) error {  // Car
     return nil
 }
 
-func (x *Pair) readField1(p thrift.Decoder) error {  // Automobile
-    result := NewAutomobile()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.Automobile = result
-    return nil
-}
-
 func (x *Pair) readField2(p thrift.Decoder) error {  // Car
     result, err := ReadCar(p)
     if err != nil {
@@ -1276,7 +1289,6 @@ func (x *Pair) readField2(p thrift.Decoder) error {  // Car
     x.Car = result
     return nil
 }
-
 
 
 
@@ -1377,13 +1389,6 @@ func (x *Collection) GetAutomobiles() []*Automobile {
     return x.Automobiles
 }
 
-func (x *Collection) GetCars() []*Car {
-    if !x.IsSetCars() {
-        return make([]*Car, 0)
-    }
-    return x.Cars
-}
-
 func (x *Collection) SetAutomobilesNonCompat(value []*Automobile) *Collection {
     x.Automobiles = value
     return x
@@ -1394,22 +1399,8 @@ func (x *Collection) SetAutomobiles(value []*Automobile) *Collection {
     return x
 }
 
-func (x *Collection) SetCarsNonCompat(value []*Car) *Collection {
-    x.Cars = value
-    return x
-}
-
-func (x *Collection) SetCars(value []*Car) *Collection {
-    x.Cars = value
-    return x
-}
-
 func (x *Collection) IsSetAutomobiles() bool {
     return x != nil && x.Automobiles != nil
-}
-
-func (x *Collection) IsSetCars() bool {
-    return x != nil && x.Cars != nil
 }
 
 func (x *Collection) writeField1(p thrift.Encoder) error {  // Automobiles
@@ -1425,34 +1416,6 @@ func (x *Collection) writeField1(p thrift.Encoder) error {  // Automobiles
         {
             item := v
             if err := item.Write(p); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteListEnd(); err != nil {
-        return thrift.PrependError("error writing list end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Collection write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Collection) writeField2(p thrift.Encoder) error {  // Cars
-    if err := p.WriteFieldBegin("cars", thrift.LIST, 2); err != nil {
-        return thrift.PrependError("Collection write field begin error: ", err)
-    }
-
-    item := x.Cars
-    if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
-        return thrift.PrependError("error writing list begin: ", err)
-    }
-    for _, v := range item {
-        {
-            item := v
-            err := WriteCar(item, p)
-            if err != nil {
                 return err
             }
         }
@@ -1496,6 +1459,56 @@ func (x *Collection) readField1(p thrift.Decoder) error {  // Automobiles
     return nil
 }
 
+
+func (x *Collection) GetCars() []*Car {
+    if !x.IsSetCars() {
+        return make([]*Car, 0)
+    }
+    return x.Cars
+}
+
+func (x *Collection) SetCarsNonCompat(value []*Car) *Collection {
+    x.Cars = value
+    return x
+}
+
+func (x *Collection) SetCars(value []*Car) *Collection {
+    x.Cars = value
+    return x
+}
+
+func (x *Collection) IsSetCars() bool {
+    return x != nil && x.Cars != nil
+}
+
+func (x *Collection) writeField2(p thrift.Encoder) error {  // Cars
+    if err := p.WriteFieldBegin("cars", thrift.LIST, 2); err != nil {
+        return thrift.PrependError("Collection write field begin error: ", err)
+    }
+
+    item := x.Cars
+    if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            err := WriteCar(item, p)
+            if err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Collection write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *Collection) readField2(p thrift.Decoder) error {  // Cars
     _ /* elemType */, size, err := p.ReadListBegin()
     if err != nil {
@@ -1523,6 +1536,7 @@ func (x *Collection) readField2(p thrift.Decoder) error {  // Cars
     x.Cars = result
     return nil
 }
+
 
 
 
@@ -1631,6 +1645,7 @@ func (x *reqFinderByPlate) SetPlate(value Plate) *reqFinderByPlate {
     return x
 }
 
+
 func (x *reqFinderByPlate) writeField1(p thrift.Encoder) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
         return thrift.PrependError("reqFinderByPlate write field begin error: ", err)
@@ -1657,6 +1672,7 @@ func (x *reqFinderByPlate) readField1(p thrift.Decoder) error {  // Plate
     x.Plate = result
     return nil
 }
+
 
 
 
@@ -1895,6 +1911,7 @@ func (x *reqFinderAliasByPlate) SetPlate(value Plate) *reqFinderAliasByPlate {
     return x
 }
 
+
 func (x *reqFinderAliasByPlate) writeField1(p thrift.Encoder) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
         return thrift.PrependError("reqFinderAliasByPlate write field begin error: ", err)
@@ -1921,6 +1938,7 @@ func (x *reqFinderAliasByPlate) readField1(p thrift.Decoder) error {  // Plate
     x.Plate = result
     return nil
 }
+
 
 
 
@@ -2159,6 +2177,7 @@ func (x *reqFinderPreviousPlate) SetPlate(value Plate) *reqFinderPreviousPlate {
     return x
 }
 
+
 func (x *reqFinderPreviousPlate) writeField1(p thrift.Encoder) error {  // Plate
     if err := p.WriteFieldBegin("plate", thrift.STRING, 1); err != nil {
         return thrift.PrependError("reqFinderPreviousPlate write field begin error: ", err)
@@ -2185,6 +2204,7 @@ func (x *reqFinderPreviousPlate) readField1(p thrift.Decoder) error {  // Plate
     x.Plate = result
     return nil
 }
+
 
 
 

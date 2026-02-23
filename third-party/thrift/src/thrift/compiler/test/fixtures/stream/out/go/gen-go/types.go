@@ -295,10 +295,6 @@ func (x *reqPubSubStreamingServiceReturnstream) GetI32From() int32 {
     return x.I32From
 }
 
-func (x *reqPubSubStreamingServiceReturnstream) GetI32To() int32 {
-    return x.I32To
-}
-
 func (x *reqPubSubStreamingServiceReturnstream) SetI32FromNonCompat(value int32) *reqPubSubStreamingServiceReturnstream {
     x.I32From = value
     return x
@@ -309,15 +305,6 @@ func (x *reqPubSubStreamingServiceReturnstream) SetI32From(value int32) *reqPubS
     return x
 }
 
-func (x *reqPubSubStreamingServiceReturnstream) SetI32ToNonCompat(value int32) *reqPubSubStreamingServiceReturnstream {
-    x.I32To = value
-    return x
-}
-
-func (x *reqPubSubStreamingServiceReturnstream) SetI32To(value int32) *reqPubSubStreamingServiceReturnstream {
-    x.I32To = value
-    return x
-}
 
 func (x *reqPubSubStreamingServiceReturnstream) writeField1(p thrift.Encoder) error {  // I32From
     if err := p.WriteFieldBegin("i32_from", thrift.I32, 1); err != nil {
@@ -325,22 +312,6 @@ func (x *reqPubSubStreamingServiceReturnstream) writeField1(p thrift.Encoder) er
     }
 
     item := x.I32From
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqPubSubStreamingServiceReturnstream) writeField2(p thrift.Encoder) error {  // I32To
-    if err := p.WriteFieldBegin("i32_to", thrift.I32, 2); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field begin error: ", err)
-    }
-
-    item := x.I32To
     if err := p.WriteI32(item); err != nil {
         return err
     }
@@ -361,6 +332,38 @@ func (x *reqPubSubStreamingServiceReturnstream) readField1(p thrift.Decoder) err
     return nil
 }
 
+
+func (x *reqPubSubStreamingServiceReturnstream) GetI32To() int32 {
+    return x.I32To
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) SetI32ToNonCompat(value int32) *reqPubSubStreamingServiceReturnstream {
+    x.I32To = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceReturnstream) SetI32To(value int32) *reqPubSubStreamingServiceReturnstream {
+    x.I32To = value
+    return x
+}
+
+
+func (x *reqPubSubStreamingServiceReturnstream) writeField2(p thrift.Encoder) error {  // I32To
+    if err := p.WriteFieldBegin("i32_to", thrift.I32, 2); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field begin error: ", err)
+    }
+
+    item := x.I32To
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstream write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *reqPubSubStreamingServiceReturnstream) readField2(p thrift.Decoder) error {  // I32To
     result, err := p.ReadI32()
     if err != nil {
@@ -370,6 +373,7 @@ func (x *reqPubSubStreamingServiceReturnstream) readField2(p thrift.Decoder) err
     x.I32To = result
     return nil
 }
+
 
 
 
@@ -694,6 +698,7 @@ func (x *reqPubSubStreamingServiceStreamthrows) SetFoo(value int32) *reqPubSubSt
     return x
 }
 
+
 func (x *reqPubSubStreamingServiceStreamthrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceStreamthrows write field begin error: ", err)
@@ -719,6 +724,7 @@ func (x *reqPubSubStreamingServiceStreamthrows) readField1(p thrift.Decoder) err
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -893,13 +899,6 @@ func (x *streamPubSubStreamingServiceStreamthrows) GetSuccess() int32 {
     return *x.Success
 }
 
-func (x *streamPubSubStreamingServiceStreamthrows) GetE() *FooStreamEx {
-    if !x.IsSetE() {
-        return nil
-    }
-    return x.E
-}
-
 func (x *streamPubSubStreamingServiceStreamthrows) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceStreamthrows {
     x.Success = &value
     return x
@@ -910,22 +909,8 @@ func (x *streamPubSubStreamingServiceStreamthrows) SetSuccess(value *int32) *str
     return x
 }
 
-func (x *streamPubSubStreamingServiceStreamthrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceStreamthrows {
-    x.E = value
-    return x
-}
-
-func (x *streamPubSubStreamingServiceStreamthrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceStreamthrows {
-    x.E = value
-    return x
-}
-
 func (x *streamPubSubStreamingServiceStreamthrows) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *streamPubSubStreamingServiceStreamthrows) IsSetE() bool {
-    return x != nil && x.E != nil
 }
 
 func (x *streamPubSubStreamingServiceStreamthrows) writeField0(p thrift.Encoder) error {  // Success
@@ -948,6 +933,38 @@ func (x *streamPubSubStreamingServiceStreamthrows) writeField0(p thrift.Encoder)
     return nil
 }
 
+func (x *streamPubSubStreamingServiceStreamthrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+func (x *streamPubSubStreamingServiceStreamthrows) GetE() *FooStreamEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceStreamthrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceStreamthrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceStreamthrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
 func (x *streamPubSubStreamingServiceStreamthrows) writeField1(p thrift.Encoder) error {  // E
     if !x.IsSetE() {
         return nil
@@ -968,16 +985,6 @@ func (x *streamPubSubStreamingServiceStreamthrows) writeField1(p thrift.Encoder)
     return nil
 }
 
-func (x *streamPubSubStreamingServiceStreamthrows) readField0(p thrift.Decoder) error {  // Success
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.Success = &result
-    return nil
-}
-
 func (x *streamPubSubStreamingServiceStreamthrows) readField1(p thrift.Decoder) error {  // E
     result := NewFooStreamEx()
     err := result.Read(p)
@@ -988,7 +995,6 @@ func (x *streamPubSubStreamingServiceStreamthrows) readField1(p thrift.Decoder) 
     x.E = result
     return nil
 }
-
 
 
 
@@ -1099,6 +1105,7 @@ func (x *reqPubSubStreamingServiceServicethrows) SetFoo(value int32) *reqPubSubS
     return x
 }
 
+
 func (x *reqPubSubStreamingServiceServicethrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceServicethrows write field begin error: ", err)
@@ -1124,6 +1131,7 @@ func (x *reqPubSubStreamingServiceServicethrows) readField1(p thrift.Decoder) er
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -1504,6 +1512,7 @@ func (x *reqPubSubStreamingServiceServicethrows2) SetFoo(value int32) *reqPubSub
     return x
 }
 
+
 func (x *reqPubSubStreamingServiceServicethrows2) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceServicethrows2 write field begin error: ", err)
@@ -1529,6 +1538,7 @@ func (x *reqPubSubStreamingServiceServicethrows2) readField1(p thrift.Decoder) e
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -1622,13 +1632,6 @@ func (x *respPubSubStreamingServiceServicethrows2) GetE1() *FooEx {
     return x.E1
 }
 
-func (x *respPubSubStreamingServiceServicethrows2) GetE2() *FooEx2 {
-    if !x.IsSetE2() {
-        return nil
-    }
-    return x.E2
-}
-
 func (x *respPubSubStreamingServiceServicethrows2) SetE1NonCompat(value *FooEx) *respPubSubStreamingServiceServicethrows2 {
     x.E1 = value
     return x
@@ -1639,22 +1642,8 @@ func (x *respPubSubStreamingServiceServicethrows2) SetE1(value *FooEx) *respPubS
     return x
 }
 
-func (x *respPubSubStreamingServiceServicethrows2) SetE2NonCompat(value *FooEx2) *respPubSubStreamingServiceServicethrows2 {
-    x.E2 = value
-    return x
-}
-
-func (x *respPubSubStreamingServiceServicethrows2) SetE2(value *FooEx2) *respPubSubStreamingServiceServicethrows2 {
-    x.E2 = value
-    return x
-}
-
 func (x *respPubSubStreamingServiceServicethrows2) IsSetE1() bool {
     return x != nil && x.E1 != nil
-}
-
-func (x *respPubSubStreamingServiceServicethrows2) IsSetE2() bool {
-    return x != nil && x.E2 != nil
 }
 
 func (x *respPubSubStreamingServiceServicethrows2) writeField1(p thrift.Encoder) error {  // E1
@@ -1677,6 +1666,39 @@ func (x *respPubSubStreamingServiceServicethrows2) writeField1(p thrift.Encoder)
     return nil
 }
 
+func (x *respPubSubStreamingServiceServicethrows2) readField1(p thrift.Decoder) error {  // E1
+    result := NewFooEx()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.E1 = result
+    return nil
+}
+
+
+func (x *respPubSubStreamingServiceServicethrows2) GetE2() *FooEx2 {
+    if !x.IsSetE2() {
+        return nil
+    }
+    return x.E2
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) SetE2NonCompat(value *FooEx2) *respPubSubStreamingServiceServicethrows2 {
+    x.E2 = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) SetE2(value *FooEx2) *respPubSubStreamingServiceServicethrows2 {
+    x.E2 = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceServicethrows2) IsSetE2() bool {
+    return x != nil && x.E2 != nil
+}
+
 func (x *respPubSubStreamingServiceServicethrows2) writeField2(p thrift.Encoder) error {  // E2
     if !x.IsSetE2() {
         return nil
@@ -1697,17 +1719,6 @@ func (x *respPubSubStreamingServiceServicethrows2) writeField2(p thrift.Encoder)
     return nil
 }
 
-func (x *respPubSubStreamingServiceServicethrows2) readField1(p thrift.Decoder) error {  // E1
-    result := NewFooEx()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.E1 = result
-    return nil
-}
-
 func (x *respPubSubStreamingServiceServicethrows2) readField2(p thrift.Decoder) error {  // E2
     result := NewFooEx2()
     err := result.Read(p)
@@ -1718,7 +1729,6 @@ func (x *respPubSubStreamingServiceServicethrows2) readField2(p thrift.Decoder) 
     x.E2 = result
     return nil
 }
-
 
 
 
@@ -1971,6 +1981,7 @@ func (x *reqPubSubStreamingServiceBoththrows) SetFoo(value int32) *reqPubSubStre
     return x
 }
 
+
 func (x *reqPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceBoththrows write field begin error: ", err)
@@ -1996,6 +2007,7 @@ func (x *reqPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) error
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -2232,13 +2244,6 @@ func (x *streamPubSubStreamingServiceBoththrows) GetSuccess() int32 {
     return *x.Success
 }
 
-func (x *streamPubSubStreamingServiceBoththrows) GetE() *FooStreamEx {
-    if !x.IsSetE() {
-        return nil
-    }
-    return x.E
-}
-
 func (x *streamPubSubStreamingServiceBoththrows) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceBoththrows {
     x.Success = &value
     return x
@@ -2249,22 +2254,8 @@ func (x *streamPubSubStreamingServiceBoththrows) SetSuccess(value *int32) *strea
     return x
 }
 
-func (x *streamPubSubStreamingServiceBoththrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceBoththrows {
-    x.E = value
-    return x
-}
-
-func (x *streamPubSubStreamingServiceBoththrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceBoththrows {
-    x.E = value
-    return x
-}
-
 func (x *streamPubSubStreamingServiceBoththrows) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *streamPubSubStreamingServiceBoththrows) IsSetE() bool {
-    return x != nil && x.E != nil
 }
 
 func (x *streamPubSubStreamingServiceBoththrows) writeField0(p thrift.Encoder) error {  // Success
@@ -2287,6 +2278,38 @@ func (x *streamPubSubStreamingServiceBoththrows) writeField0(p thrift.Encoder) e
     return nil
 }
 
+func (x *streamPubSubStreamingServiceBoththrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+func (x *streamPubSubStreamingServiceBoththrows) GetE() *FooStreamEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceBoththrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceBoththrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceBoththrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
 func (x *streamPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) error {  // E
     if !x.IsSetE() {
         return nil
@@ -2307,16 +2330,6 @@ func (x *streamPubSubStreamingServiceBoththrows) writeField1(p thrift.Encoder) e
     return nil
 }
 
-func (x *streamPubSubStreamingServiceBoththrows) readField0(p thrift.Decoder) error {  // Success
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.Success = &result
-    return nil
-}
-
 func (x *streamPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) error {  // E
     result := NewFooStreamEx()
     err := result.Read(p)
@@ -2327,7 +2340,6 @@ func (x *streamPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) er
     x.E = result
     return nil
 }
-
 
 
 
@@ -2438,6 +2450,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) SetFoo(value in
     return x
 }
 
+
 func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write field begin error: ", err)
@@ -2463,6 +2476,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) readField1(p th
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -2695,13 +2709,6 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) GetSuccess()
     return *x.Success
 }
 
-func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) GetE() *FooStreamEx {
-    if !x.IsSetE() {
-        return nil
-    }
-    return x.E
-}
-
 func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceResponseandstreamstreamthrows {
     x.Success = &value
     return x
@@ -2712,22 +2719,8 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) SetSuccess(v
     return x
 }
 
-func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamstreamthrows {
-    x.E = value
-    return x
-}
-
-func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamstreamthrows {
-    x.E = value
-    return x
-}
-
 func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) IsSetE() bool {
-    return x != nil && x.E != nil
 }
 
 func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) writeField0(p thrift.Encoder) error {  // Success
@@ -2750,6 +2743,38 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) writeField0(
     return nil
 }
 
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) GetE() *FooStreamEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamstreamthrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamstreamthrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
 func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) writeField1(p thrift.Encoder) error {  // E
     if !x.IsSetE() {
         return nil
@@ -2770,16 +2795,6 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) writeField1(
     return nil
 }
 
-func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) readField0(p thrift.Decoder) error {  // Success
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.Success = &result
-    return nil
-}
-
 func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) readField1(p thrift.Decoder) error {  // E
     result := NewFooStreamEx()
     err := result.Read(p)
@@ -2790,7 +2805,6 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) readField1(p
     x.E = result
     return nil
 }
-
 
 
 
@@ -2901,6 +2915,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) SetFoo(value i
     return x
 }
 
+
 func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write field begin error: ", err)
@@ -2926,6 +2941,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) readField1(p t
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -3019,13 +3035,6 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) GetSuccess() 
     return *x.Success
 }
 
-func (x *respPubSubStreamingServiceResponseandstreamservicethrows) GetE() *FooEx {
-    if !x.IsSetE() {
-        return nil
-    }
-    return x.E
-}
-
 func (x *respPubSubStreamingServiceResponseandstreamservicethrows) SetSuccessNonCompat(value int32) *respPubSubStreamingServiceResponseandstreamservicethrows {
     x.Success = &value
     return x
@@ -3036,22 +3045,8 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) SetSuccess(va
     return x
 }
 
-func (x *respPubSubStreamingServiceResponseandstreamservicethrows) SetENonCompat(value *FooEx) *respPubSubStreamingServiceResponseandstreamservicethrows {
-    x.E = value
-    return x
-}
-
-func (x *respPubSubStreamingServiceResponseandstreamservicethrows) SetE(value *FooEx) *respPubSubStreamingServiceResponseandstreamservicethrows {
-    x.E = value
-    return x
-}
-
 func (x *respPubSubStreamingServiceResponseandstreamservicethrows) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *respPubSubStreamingServiceResponseandstreamservicethrows) IsSetE() bool {
-    return x != nil && x.E != nil
 }
 
 func (x *respPubSubStreamingServiceResponseandstreamservicethrows) writeField0(p thrift.Encoder) error {  // Success
@@ -3074,6 +3069,38 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) writeField0(p
     return nil
 }
 
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) GetE() *FooEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) SetENonCompat(value *FooEx) *respPubSubStreamingServiceResponseandstreamservicethrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) SetE(value *FooEx) *respPubSubStreamingServiceResponseandstreamservicethrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamservicethrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
 func (x *respPubSubStreamingServiceResponseandstreamservicethrows) writeField1(p thrift.Encoder) error {  // E
     if !x.IsSetE() {
         return nil
@@ -3094,16 +3121,6 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) writeField1(p
     return nil
 }
 
-func (x *respPubSubStreamingServiceResponseandstreamservicethrows) readField0(p thrift.Decoder) error {  // Success
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.Success = &result
-    return nil
-}
-
 func (x *respPubSubStreamingServiceResponseandstreamservicethrows) readField1(p thrift.Decoder) error {  // E
     result := NewFooEx()
     err := result.Read(p)
@@ -3114,7 +3131,6 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) readField1(p 
     x.E = result
     return nil
 }
-
 
 
 
@@ -3364,6 +3380,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamboththrows) SetFoo(value int3
     return x
 }
 
+
 func (x *reqPubSubStreamingServiceResponseandstreamboththrows) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I32, 1); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamboththrows write field begin error: ", err)
@@ -3389,6 +3406,7 @@ func (x *reqPubSubStreamingServiceResponseandstreamboththrows) readField1(p thri
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -3482,13 +3500,6 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) GetSuccess() int
     return *x.Success
 }
 
-func (x *respPubSubStreamingServiceResponseandstreamboththrows) GetE() *FooEx {
-    if !x.IsSetE() {
-        return nil
-    }
-    return x.E
-}
-
 func (x *respPubSubStreamingServiceResponseandstreamboththrows) SetSuccessNonCompat(value int32) *respPubSubStreamingServiceResponseandstreamboththrows {
     x.Success = &value
     return x
@@ -3499,22 +3510,8 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) SetSuccess(value
     return x
 }
 
-func (x *respPubSubStreamingServiceResponseandstreamboththrows) SetENonCompat(value *FooEx) *respPubSubStreamingServiceResponseandstreamboththrows {
-    x.E = value
-    return x
-}
-
-func (x *respPubSubStreamingServiceResponseandstreamboththrows) SetE(value *FooEx) *respPubSubStreamingServiceResponseandstreamboththrows {
-    x.E = value
-    return x
-}
-
 func (x *respPubSubStreamingServiceResponseandstreamboththrows) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *respPubSubStreamingServiceResponseandstreamboththrows) IsSetE() bool {
-    return x != nil && x.E != nil
 }
 
 func (x *respPubSubStreamingServiceResponseandstreamboththrows) writeField0(p thrift.Encoder) error {  // Success
@@ -3537,6 +3534,38 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) writeField0(p th
     return nil
 }
 
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) GetE() *FooEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) SetENonCompat(value *FooEx) *respPubSubStreamingServiceResponseandstreamboththrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) SetE(value *FooEx) *respPubSubStreamingServiceResponseandstreamboththrows {
+    x.E = value
+    return x
+}
+
+func (x *respPubSubStreamingServiceResponseandstreamboththrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
 func (x *respPubSubStreamingServiceResponseandstreamboththrows) writeField1(p thrift.Encoder) error {  // E
     if !x.IsSetE() {
         return nil
@@ -3557,16 +3586,6 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) writeField1(p th
     return nil
 }
 
-func (x *respPubSubStreamingServiceResponseandstreamboththrows) readField0(p thrift.Decoder) error {  // Success
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.Success = &result
-    return nil
-}
-
 func (x *respPubSubStreamingServiceResponseandstreamboththrows) readField1(p thrift.Decoder) error {  // E
     result := NewFooEx()
     err := result.Read(p)
@@ -3577,7 +3596,6 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) readField1(p thr
     x.E = result
     return nil
 }
-
 
 
 
@@ -3683,13 +3701,6 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) GetSuccess() i
     return *x.Success
 }
 
-func (x *streamPubSubStreamingServiceResponseandstreamboththrows) GetE() *FooStreamEx {
-    if !x.IsSetE() {
-        return nil
-    }
-    return x.E
-}
-
 func (x *streamPubSubStreamingServiceResponseandstreamboththrows) SetSuccessNonCompat(value int32) *streamPubSubStreamingServiceResponseandstreamboththrows {
     x.Success = &value
     return x
@@ -3700,22 +3711,8 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) SetSuccess(val
     return x
 }
 
-func (x *streamPubSubStreamingServiceResponseandstreamboththrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamboththrows {
-    x.E = value
-    return x
-}
-
-func (x *streamPubSubStreamingServiceResponseandstreamboththrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamboththrows {
-    x.E = value
-    return x
-}
-
 func (x *streamPubSubStreamingServiceResponseandstreamboththrows) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *streamPubSubStreamingServiceResponseandstreamboththrows) IsSetE() bool {
-    return x != nil && x.E != nil
 }
 
 func (x *streamPubSubStreamingServiceResponseandstreamboththrows) writeField0(p thrift.Encoder) error {  // Success
@@ -3738,6 +3735,38 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) writeField0(p 
     return nil
 }
 
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) GetE() *FooStreamEx {
+    if !x.IsSetE() {
+        return nil
+    }
+    return x.E
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) SetENonCompat(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamboththrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) SetE(value *FooStreamEx) *streamPubSubStreamingServiceResponseandstreamboththrows {
+    x.E = value
+    return x
+}
+
+func (x *streamPubSubStreamingServiceResponseandstreamboththrows) IsSetE() bool {
+    return x != nil && x.E != nil
+}
+
 func (x *streamPubSubStreamingServiceResponseandstreamboththrows) writeField1(p thrift.Encoder) error {  // E
     if !x.IsSetE() {
         return nil
@@ -3758,16 +3787,6 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) writeField1(p 
     return nil
 }
 
-func (x *streamPubSubStreamingServiceResponseandstreamboththrows) readField0(p thrift.Decoder) error {  // Success
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.Success = &result
-    return nil
-}
-
 func (x *streamPubSubStreamingServiceResponseandstreamboththrows) readField1(p thrift.Decoder) error {  // E
     result := NewFooStreamEx()
     err := result.Read(p)
@@ -3778,7 +3797,6 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) readField1(p t
     x.E = result
     return nil
 }
-
 
 
 
@@ -3880,10 +3898,6 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) GetI32From() int32 {
     return x.I32From
 }
 
-func (x *reqPubSubStreamingServiceReturnstreamFast) GetI32To() int32 {
-    return x.I32To
-}
-
 func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32FromNonCompat(value int32) *reqPubSubStreamingServiceReturnstreamFast {
     x.I32From = value
     return x
@@ -3894,15 +3908,6 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32From(value int32) *req
     return x
 }
 
-func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32ToNonCompat(value int32) *reqPubSubStreamingServiceReturnstreamFast {
-    x.I32To = value
-    return x
-}
-
-func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32To(value int32) *reqPubSubStreamingServiceReturnstreamFast {
-    x.I32To = value
-    return x
-}
 
 func (x *reqPubSubStreamingServiceReturnstreamFast) writeField1(p thrift.Encoder) error {  // I32From
     if err := p.WriteFieldBegin("i32_from", thrift.I32, 1); err != nil {
@@ -3910,22 +3915,6 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) writeField1(p thrift.Encoder
     }
 
     item := x.I32From
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqPubSubStreamingServiceReturnstreamFast) writeField2(p thrift.Encoder) error {  // I32To
-    if err := p.WriteFieldBegin("i32_to", thrift.I32, 2); err != nil {
-        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field begin error: ", err)
-    }
-
-    item := x.I32To
     if err := p.WriteI32(item); err != nil {
         return err
     }
@@ -3946,6 +3935,38 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) readField1(p thrift.Decoder)
     return nil
 }
 
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) GetI32To() int32 {
+    return x.I32To
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32ToNonCompat(value int32) *reqPubSubStreamingServiceReturnstreamFast {
+    x.I32To = value
+    return x
+}
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) SetI32To(value int32) *reqPubSubStreamingServiceReturnstreamFast {
+    x.I32To = value
+    return x
+}
+
+
+func (x *reqPubSubStreamingServiceReturnstreamFast) writeField2(p thrift.Encoder) error {  // I32To
+    if err := p.WriteFieldBegin("i32_to", thrift.I32, 2); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field begin error: ", err)
+    }
+
+    item := x.I32To
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqPubSubStreamingServiceReturnstreamFast write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *reqPubSubStreamingServiceReturnstreamFast) readField2(p thrift.Decoder) error {  // I32To
     result, err := p.ReadI32()
     if err != nil {
@@ -3955,6 +3976,7 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) readField2(p thrift.Decoder)
     x.I32To = result
     return nil
 }
+
 
 
 

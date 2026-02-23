@@ -127,6 +127,7 @@ func (x *A) SetUselessField(value int32) *A {
     return x
 }
 
+
 func (x *A) writeField1(p thrift.Encoder) error {  // UselessField
     if err := p.WriteFieldBegin("useless_field", thrift.I32, 1); err != nil {
         return thrift.PrependError("A write field begin error: ", err)
@@ -152,6 +153,7 @@ func (x *A) readField1(p thrift.Decoder) error {  // UselessField
     x.UselessField = result
     return nil
 }
+
 
 
 
@@ -245,13 +247,6 @@ func (x *U) GetI() int32 {
     return *x.I
 }
 
-func (x *U) GetS() string {
-    if !x.IsSetS() {
-        return ""
-    }
-    return *x.S
-}
-
 func (x *U) SetINonCompat(value int32) *U {
     x.I = &value
     return x
@@ -262,22 +257,8 @@ func (x *U) SetI(value *int32) *U {
     return x
 }
 
-func (x *U) SetSNonCompat(value string) *U {
-    x.S = &value
-    return x
-}
-
-func (x *U) SetS(value *string) *U {
-    x.S = value
-    return x
-}
-
 func (x *U) IsSetI() bool {
     return x != nil && x.I != nil
-}
-
-func (x *U) IsSetS() bool {
-    return x != nil && x.S != nil
 }
 
 func (x *U) writeField1(p thrift.Encoder) error {  // I
@@ -300,6 +281,38 @@ func (x *U) writeField1(p thrift.Encoder) error {  // I
     return nil
 }
 
+func (x *U) readField1(p thrift.Decoder) error {  // I
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.I = &result
+    return nil
+}
+
+
+func (x *U) GetS() string {
+    if !x.IsSetS() {
+        return ""
+    }
+    return *x.S
+}
+
+func (x *U) SetSNonCompat(value string) *U {
+    x.S = &value
+    return x
+}
+
+func (x *U) SetS(value *string) *U {
+    x.S = value
+    return x
+}
+
+func (x *U) IsSetS() bool {
+    return x != nil && x.S != nil
+}
+
 func (x *U) writeField2(p thrift.Encoder) error {  // S
     if !x.IsSetS() {
         return nil
@@ -320,16 +333,6 @@ func (x *U) writeField2(p thrift.Encoder) error {  // S
     return nil
 }
 
-func (x *U) readField1(p thrift.Decoder) error {  // I
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.I = &result
-    return nil
-}
-
 func (x *U) readField2(p thrift.Decoder) error {  // S
     result, err := p.ReadString()
     if err != nil {
@@ -339,7 +342,6 @@ func (x *U) readField2(p thrift.Decoder) error {  // S
     x.S = &result
     return nil
 }
-
 
 
 
@@ -458,6 +460,7 @@ func (x *Bang) SetMessage(value string) *Bang {
     return x
 }
 
+
 func (x *Bang) writeField1(p thrift.Encoder) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
         return thrift.PrependError("Bang write field begin error: ", err)
@@ -483,6 +486,7 @@ func (x *Bang) readField1(p thrift.Decoder) error {  // Message
     x.Message = result
     return nil
 }
+
 
 
 
@@ -1039,17 +1043,6 @@ func (x *reqCThing) GetA() int32 {
     return x.A
 }
 
-func (x *reqCThing) GetB() string {
-    return x.B
-}
-
-func (x *reqCThing) GetC() []int32 {
-    if !x.IsSetC() {
-        return make([]int32, 0)
-    }
-    return x.C
-}
-
 func (x *reqCThing) SetANonCompat(value int32) *reqCThing {
     x.A = value
     return x
@@ -1060,29 +1053,6 @@ func (x *reqCThing) SetA(value int32) *reqCThing {
     return x
 }
 
-func (x *reqCThing) SetBNonCompat(value string) *reqCThing {
-    x.B = value
-    return x
-}
-
-func (x *reqCThing) SetB(value string) *reqCThing {
-    x.B = value
-    return x
-}
-
-func (x *reqCThing) SetCNonCompat(value []int32) *reqCThing {
-    x.C = value
-    return x
-}
-
-func (x *reqCThing) SetC(value []int32) *reqCThing {
-    x.C = value
-    return x
-}
-
-func (x *reqCThing) IsSetC() bool {
-    return x != nil && x.C != nil
-}
 
 func (x *reqCThing) writeField1(p thrift.Encoder) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I32, 1); err != nil {
@@ -1100,6 +1070,32 @@ func (x *reqCThing) writeField1(p thrift.Encoder) error {  // A
     return nil
 }
 
+func (x *reqCThing) readField1(p thrift.Decoder) error {  // A
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.A = result
+    return nil
+}
+
+
+func (x *reqCThing) GetB() string {
+    return x.B
+}
+
+func (x *reqCThing) SetBNonCompat(value string) *reqCThing {
+    x.B = value
+    return x
+}
+
+func (x *reqCThing) SetB(value string) *reqCThing {
+    x.B = value
+    return x
+}
+
+
 func (x *reqCThing) writeField2(p thrift.Encoder) error {  // B
     if err := p.WriteFieldBegin("b", thrift.STRING, 2); err != nil {
         return thrift.PrependError("reqCThing write field begin error: ", err)
@@ -1114,6 +1110,38 @@ func (x *reqCThing) writeField2(p thrift.Encoder) error {  // B
         return thrift.PrependError("reqCThing write field end error: ", err)
     }
     return nil
+}
+
+func (x *reqCThing) readField2(p thrift.Decoder) error {  // B
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.B = result
+    return nil
+}
+
+
+func (x *reqCThing) GetC() []int32 {
+    if !x.IsSetC() {
+        return make([]int32, 0)
+    }
+    return x.C
+}
+
+func (x *reqCThing) SetCNonCompat(value []int32) *reqCThing {
+    x.C = value
+    return x
+}
+
+func (x *reqCThing) SetC(value []int32) *reqCThing {
+    x.C = value
+    return x
+}
+
+func (x *reqCThing) IsSetC() bool {
+    return x != nil && x.C != nil
 }
 
 func (x *reqCThing) writeField3(p thrift.Encoder) error {  // C
@@ -1140,26 +1168,6 @@ func (x *reqCThing) writeField3(p thrift.Encoder) error {  // C
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("reqCThing write field end error: ", err)
     }
-    return nil
-}
-
-func (x *reqCThing) readField1(p thrift.Decoder) error {  // A
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.A = result
-    return nil
-}
-
-func (x *reqCThing) readField2(p thrift.Decoder) error {  // B
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.B = result
     return nil
 }
 
@@ -1190,6 +1198,7 @@ func (x *reqCThing) readField3(p thrift.Decoder) error {  // C
     x.C = result
     return nil
 }
+
 
 
 
@@ -1295,13 +1304,6 @@ func (x *respCThing) GetSuccess() string {
     return *x.Success
 }
 
-func (x *respCThing) GetBang() *Bang {
-    if !x.IsSetBang() {
-        return nil
-    }
-    return x.Bang
-}
-
 func (x *respCThing) SetSuccessNonCompat(value string) *respCThing {
     x.Success = &value
     return x
@@ -1312,22 +1314,8 @@ func (x *respCThing) SetSuccess(value *string) *respCThing {
     return x
 }
 
-func (x *respCThing) SetBangNonCompat(value *Bang) *respCThing {
-    x.Bang = value
-    return x
-}
-
-func (x *respCThing) SetBang(value *Bang) *respCThing {
-    x.Bang = value
-    return x
-}
-
 func (x *respCThing) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *respCThing) IsSetBang() bool {
-    return x != nil && x.Bang != nil
 }
 
 func (x *respCThing) writeField0(p thrift.Encoder) error {  // Success
@@ -1350,6 +1338,38 @@ func (x *respCThing) writeField0(p thrift.Encoder) error {  // Success
     return nil
 }
 
+func (x *respCThing) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+func (x *respCThing) GetBang() *Bang {
+    if !x.IsSetBang() {
+        return nil
+    }
+    return x.Bang
+}
+
+func (x *respCThing) SetBangNonCompat(value *Bang) *respCThing {
+    x.Bang = value
+    return x
+}
+
+func (x *respCThing) SetBang(value *Bang) *respCThing {
+    x.Bang = value
+    return x
+}
+
+func (x *respCThing) IsSetBang() bool {
+    return x != nil && x.Bang != nil
+}
+
 func (x *respCThing) writeField1(p thrift.Encoder) error {  // Bang
     if !x.IsSetBang() {
         return nil
@@ -1370,16 +1390,6 @@ func (x *respCThing) writeField1(p thrift.Encoder) error {  // Bang
     return nil
 }
 
-func (x *respCThing) readField0(p thrift.Decoder) error {  // Success
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Success = &result
-    return nil
-}
-
 func (x *respCThing) readField1(p thrift.Decoder) error {  // Bang
     result := NewBang()
     err := result.Read(p)
@@ -1390,7 +1400,6 @@ func (x *respCThing) readField1(p thrift.Decoder) error {  // Bang
     x.Bang = result
     return nil
 }
-
 
 
 

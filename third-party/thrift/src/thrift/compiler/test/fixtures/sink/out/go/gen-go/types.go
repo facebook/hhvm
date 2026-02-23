@@ -43,6 +43,7 @@ func (x *InitialResponse) SetContent(value string) *InitialResponse {
     return x
 }
 
+
 func (x *InitialResponse) writeField1(p thrift.Encoder) error {  // Content
     if err := p.WriteFieldBegin("content", thrift.STRING, 1); err != nil {
         return thrift.PrependError("InitialResponse write field begin error: ", err)
@@ -68,6 +69,7 @@ func (x *InitialResponse) readField1(p thrift.Decoder) error {  // Content
     x.Content = result
     return nil
 }
+
 
 
 
@@ -167,6 +169,7 @@ func (x *FinalResponse) SetContent(value string) *FinalResponse {
     return x
 }
 
+
 func (x *FinalResponse) writeField1(p thrift.Encoder) error {  // Content
     if err := p.WriteFieldBegin("content", thrift.STRING, 1); err != nil {
         return thrift.PrependError("FinalResponse write field begin error: ", err)
@@ -192,6 +195,7 @@ func (x *FinalResponse) readField1(p thrift.Decoder) error {  // Content
     x.Content = result
     return nil
 }
+
 
 
 
@@ -291,6 +295,7 @@ func (x *SinkPayload) SetContent(value string) *SinkPayload {
     return x
 }
 
+
 func (x *SinkPayload) writeField1(p thrift.Encoder) error {  // Content
     if err := p.WriteFieldBegin("content", thrift.STRING, 1); err != nil {
         return thrift.PrependError("SinkPayload write field begin error: ", err)
@@ -316,6 +321,7 @@ func (x *SinkPayload) readField1(p thrift.Decoder) error {  // Content
     x.Content = result
     return nil
 }
+
 
 
 
@@ -415,6 +421,7 @@ func (x *CompatibleWithKeywordSink) SetSink(value string) *CompatibleWithKeyword
     return x
 }
 
+
 func (x *CompatibleWithKeywordSink) writeField1(p thrift.Encoder) error {  // Sink
     if err := p.WriteFieldBegin("sink", thrift.STRING, 1); err != nil {
         return thrift.PrependError("CompatibleWithKeywordSink write field begin error: ", err)
@@ -440,6 +447,7 @@ func (x *CompatibleWithKeywordSink) readField1(p thrift.Decoder) error {  // Sin
     x.Sink = result
     return nil
 }
+
 
 
 
@@ -540,6 +548,7 @@ func (x *InitialException) SetReason(value string) *InitialException {
     return x
 }
 
+
 func (x *InitialException) writeField1(p thrift.Encoder) error {  // Reason
     if err := p.WriteFieldBegin("reason", thrift.STRING, 1); err != nil {
         return thrift.PrependError("InitialException write field begin error: ", err)
@@ -565,6 +574,7 @@ func (x *InitialException) readField1(p thrift.Decoder) error {  // Reason
     x.Reason = result
     return nil
 }
+
 
 
 
@@ -673,6 +683,7 @@ func (x *SinkException1) SetReason(value string) *SinkException1 {
     return x
 }
 
+
 func (x *SinkException1) writeField1(p thrift.Encoder) error {  // Reason
     if err := p.WriteFieldBegin("reason", thrift.STRING, 1); err != nil {
         return thrift.PrependError("SinkException1 write field begin error: ", err)
@@ -698,6 +709,7 @@ func (x *SinkException1) readField1(p thrift.Decoder) error {  // Reason
     x.Reason = result
     return nil
 }
+
 
 
 
@@ -806,6 +818,7 @@ func (x *SinkException2) SetReason(value int64) *SinkException2 {
     return x
 }
 
+
 func (x *SinkException2) writeField1(p thrift.Encoder) error {  // Reason
     if err := p.WriteFieldBegin("reason", thrift.I64, 1); err != nil {
         return thrift.PrependError("SinkException2 write field begin error: ", err)
@@ -831,6 +844,7 @@ func (x *SinkException2) readField1(p thrift.Decoder) error {  // Reason
     x.Reason = result
     return nil
 }
+
 
 
 
@@ -2525,13 +2539,6 @@ func (x *sinkSinkServiceMethodSinkThrow) GetSuccess() *SinkPayload {
     return x.Success
 }
 
-func (x *sinkSinkServiceMethodSinkThrow) GetEx() *SinkException1 {
-    if !x.IsSetEx() {
-        return nil
-    }
-    return x.Ex
-}
-
 func (x *sinkSinkServiceMethodSinkThrow) SetSuccessNonCompat(value *SinkPayload) *sinkSinkServiceMethodSinkThrow {
     x.Success = value
     return x
@@ -2542,22 +2549,8 @@ func (x *sinkSinkServiceMethodSinkThrow) SetSuccess(value *SinkPayload) *sinkSin
     return x
 }
 
-func (x *sinkSinkServiceMethodSinkThrow) SetExNonCompat(value *SinkException1) *sinkSinkServiceMethodSinkThrow {
-    x.Ex = value
-    return x
-}
-
-func (x *sinkSinkServiceMethodSinkThrow) SetEx(value *SinkException1) *sinkSinkServiceMethodSinkThrow {
-    x.Ex = value
-    return x
-}
-
 func (x *sinkSinkServiceMethodSinkThrow) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *sinkSinkServiceMethodSinkThrow) IsSetEx() bool {
-    return x != nil && x.Ex != nil
 }
 
 func (x *sinkSinkServiceMethodSinkThrow) writeField0(p thrift.Encoder) error {  // Success
@@ -2580,6 +2573,39 @@ func (x *sinkSinkServiceMethodSinkThrow) writeField0(p thrift.Encoder) error {  
     return nil
 }
 
+func (x *sinkSinkServiceMethodSinkThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewSinkPayload()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+func (x *sinkSinkServiceMethodSinkThrow) GetEx() *SinkException1 {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) SetExNonCompat(value *SinkException1) *sinkSinkServiceMethodSinkThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) SetEx(value *SinkException1) *sinkSinkServiceMethodSinkThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodSinkThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
 func (x *sinkSinkServiceMethodSinkThrow) writeField1(p thrift.Encoder) error {  // Ex
     if !x.IsSetEx() {
         return nil
@@ -2600,17 +2626,6 @@ func (x *sinkSinkServiceMethodSinkThrow) writeField1(p thrift.Encoder) error {  
     return nil
 }
 
-func (x *sinkSinkServiceMethodSinkThrow) readField0(p thrift.Decoder) error {  // Success
-    result := NewSinkPayload()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.Success = result
-    return nil
-}
-
 func (x *sinkSinkServiceMethodSinkThrow) readField1(p thrift.Decoder) error {  // Ex
     result := NewSinkException1()
     err := result.Read(p)
@@ -2621,7 +2636,6 @@ func (x *sinkSinkServiceMethodSinkThrow) readField1(p thrift.Decoder) error {  /
     x.Ex = result
     return nil
 }
-
 
 
 
@@ -3164,13 +3178,6 @@ func (x *respFinalSinkServiceMethodFinalThrow) GetSuccess() *FinalResponse {
     return x.Success
 }
 
-func (x *respFinalSinkServiceMethodFinalThrow) GetEx() *SinkException2 {
-    if !x.IsSetEx() {
-        return nil
-    }
-    return x.Ex
-}
-
 func (x *respFinalSinkServiceMethodFinalThrow) SetSuccessNonCompat(value *FinalResponse) *respFinalSinkServiceMethodFinalThrow {
     x.Success = value
     return x
@@ -3181,22 +3188,8 @@ func (x *respFinalSinkServiceMethodFinalThrow) SetSuccess(value *FinalResponse) 
     return x
 }
 
-func (x *respFinalSinkServiceMethodFinalThrow) SetExNonCompat(value *SinkException2) *respFinalSinkServiceMethodFinalThrow {
-    x.Ex = value
-    return x
-}
-
-func (x *respFinalSinkServiceMethodFinalThrow) SetEx(value *SinkException2) *respFinalSinkServiceMethodFinalThrow {
-    x.Ex = value
-    return x
-}
-
 func (x *respFinalSinkServiceMethodFinalThrow) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *respFinalSinkServiceMethodFinalThrow) IsSetEx() bool {
-    return x != nil && x.Ex != nil
 }
 
 func (x *respFinalSinkServiceMethodFinalThrow) writeField0(p thrift.Encoder) error {  // Success
@@ -3219,6 +3212,39 @@ func (x *respFinalSinkServiceMethodFinalThrow) writeField0(p thrift.Encoder) err
     return nil
 }
 
+func (x *respFinalSinkServiceMethodFinalThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewFinalResponse()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+func (x *respFinalSinkServiceMethodFinalThrow) GetEx() *SinkException2 {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) SetExNonCompat(value *SinkException2) *respFinalSinkServiceMethodFinalThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) SetEx(value *SinkException2) *respFinalSinkServiceMethodFinalThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodFinalThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
 func (x *respFinalSinkServiceMethodFinalThrow) writeField1(p thrift.Encoder) error {  // Ex
     if !x.IsSetEx() {
         return nil
@@ -3239,17 +3265,6 @@ func (x *respFinalSinkServiceMethodFinalThrow) writeField1(p thrift.Encoder) err
     return nil
 }
 
-func (x *respFinalSinkServiceMethodFinalThrow) readField0(p thrift.Decoder) error {  // Success
-    result := NewFinalResponse()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.Success = result
-    return nil
-}
-
 func (x *respFinalSinkServiceMethodFinalThrow) readField1(p thrift.Decoder) error {  // Ex
     result := NewSinkException2()
     err := result.Read(p)
@@ -3260,7 +3275,6 @@ func (x *respFinalSinkServiceMethodFinalThrow) readField1(p thrift.Decoder) erro
     x.Ex = result
     return nil
 }
-
 
 
 
@@ -3523,13 +3537,6 @@ func (x *sinkSinkServiceMethodBothThrow) GetSuccess() *SinkPayload {
     return x.Success
 }
 
-func (x *sinkSinkServiceMethodBothThrow) GetEx() *SinkException1 {
-    if !x.IsSetEx() {
-        return nil
-    }
-    return x.Ex
-}
-
 func (x *sinkSinkServiceMethodBothThrow) SetSuccessNonCompat(value *SinkPayload) *sinkSinkServiceMethodBothThrow {
     x.Success = value
     return x
@@ -3540,22 +3547,8 @@ func (x *sinkSinkServiceMethodBothThrow) SetSuccess(value *SinkPayload) *sinkSin
     return x
 }
 
-func (x *sinkSinkServiceMethodBothThrow) SetExNonCompat(value *SinkException1) *sinkSinkServiceMethodBothThrow {
-    x.Ex = value
-    return x
-}
-
-func (x *sinkSinkServiceMethodBothThrow) SetEx(value *SinkException1) *sinkSinkServiceMethodBothThrow {
-    x.Ex = value
-    return x
-}
-
 func (x *sinkSinkServiceMethodBothThrow) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *sinkSinkServiceMethodBothThrow) IsSetEx() bool {
-    return x != nil && x.Ex != nil
 }
 
 func (x *sinkSinkServiceMethodBothThrow) writeField0(p thrift.Encoder) error {  // Success
@@ -3578,6 +3571,39 @@ func (x *sinkSinkServiceMethodBothThrow) writeField0(p thrift.Encoder) error {  
     return nil
 }
 
+func (x *sinkSinkServiceMethodBothThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewSinkPayload()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+func (x *sinkSinkServiceMethodBothThrow) GetEx() *SinkException1 {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *sinkSinkServiceMethodBothThrow) SetExNonCompat(value *SinkException1) *sinkSinkServiceMethodBothThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodBothThrow) SetEx(value *SinkException1) *sinkSinkServiceMethodBothThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *sinkSinkServiceMethodBothThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
 func (x *sinkSinkServiceMethodBothThrow) writeField1(p thrift.Encoder) error {  // Ex
     if !x.IsSetEx() {
         return nil
@@ -3598,17 +3624,6 @@ func (x *sinkSinkServiceMethodBothThrow) writeField1(p thrift.Encoder) error {  
     return nil
 }
 
-func (x *sinkSinkServiceMethodBothThrow) readField0(p thrift.Decoder) error {  // Success
-    result := NewSinkPayload()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.Success = result
-    return nil
-}
-
 func (x *sinkSinkServiceMethodBothThrow) readField1(p thrift.Decoder) error {  // Ex
     result := NewSinkException1()
     err := result.Read(p)
@@ -3619,7 +3634,6 @@ func (x *sinkSinkServiceMethodBothThrow) readField1(p thrift.Decoder) error {  /
     x.Ex = result
     return nil
 }
-
 
 
 
@@ -3725,13 +3739,6 @@ func (x *respFinalSinkServiceMethodBothThrow) GetSuccess() *FinalResponse {
     return x.Success
 }
 
-func (x *respFinalSinkServiceMethodBothThrow) GetEx() *SinkException2 {
-    if !x.IsSetEx() {
-        return nil
-    }
-    return x.Ex
-}
-
 func (x *respFinalSinkServiceMethodBothThrow) SetSuccessNonCompat(value *FinalResponse) *respFinalSinkServiceMethodBothThrow {
     x.Success = value
     return x
@@ -3742,22 +3749,8 @@ func (x *respFinalSinkServiceMethodBothThrow) SetSuccess(value *FinalResponse) *
     return x
 }
 
-func (x *respFinalSinkServiceMethodBothThrow) SetExNonCompat(value *SinkException2) *respFinalSinkServiceMethodBothThrow {
-    x.Ex = value
-    return x
-}
-
-func (x *respFinalSinkServiceMethodBothThrow) SetEx(value *SinkException2) *respFinalSinkServiceMethodBothThrow {
-    x.Ex = value
-    return x
-}
-
 func (x *respFinalSinkServiceMethodBothThrow) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *respFinalSinkServiceMethodBothThrow) IsSetEx() bool {
-    return x != nil && x.Ex != nil
 }
 
 func (x *respFinalSinkServiceMethodBothThrow) writeField0(p thrift.Encoder) error {  // Success
@@ -3780,6 +3773,39 @@ func (x *respFinalSinkServiceMethodBothThrow) writeField0(p thrift.Encoder) erro
     return nil
 }
 
+func (x *respFinalSinkServiceMethodBothThrow) readField0(p thrift.Decoder) error {  // Success
+    result := NewFinalResponse()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Success = result
+    return nil
+}
+
+
+func (x *respFinalSinkServiceMethodBothThrow) GetEx() *SinkException2 {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) SetExNonCompat(value *SinkException2) *respFinalSinkServiceMethodBothThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) SetEx(value *SinkException2) *respFinalSinkServiceMethodBothThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respFinalSinkServiceMethodBothThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
 func (x *respFinalSinkServiceMethodBothThrow) writeField1(p thrift.Encoder) error {  // Ex
     if !x.IsSetEx() {
         return nil
@@ -3800,17 +3826,6 @@ func (x *respFinalSinkServiceMethodBothThrow) writeField1(p thrift.Encoder) erro
     return nil
 }
 
-func (x *respFinalSinkServiceMethodBothThrow) readField0(p thrift.Decoder) error {  // Success
-    result := NewFinalResponse()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.Success = result
-    return nil
-}
-
 func (x *respFinalSinkServiceMethodBothThrow) readField1(p thrift.Decoder) error {  // Ex
     result := NewSinkException2()
     err := result.Read(p)
@@ -3821,7 +3836,6 @@ func (x *respFinalSinkServiceMethodBothThrow) readField1(p thrift.Decoder) error
     x.Ex = result
     return nil
 }
-
 
 
 

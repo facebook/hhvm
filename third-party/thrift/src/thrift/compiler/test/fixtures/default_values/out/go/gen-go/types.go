@@ -43,6 +43,7 @@ func (x *TrivialStruct) SetIntValue(value int32) *TrivialStruct {
     return x
 }
 
+
 func (x *TrivialStruct) writeField1(p thrift.Encoder) error {  // IntValue
     if err := p.WriteFieldBegin("int_value", thrift.I32, 1); err != nil {
         return thrift.PrependError("TrivialStruct write field begin error: ", err)
@@ -68,6 +69,7 @@ func (x *TrivialStruct) readField1(p thrift.Decoder) error {  // IntValue
     x.IntValue = result
     return nil
 }
+
 
 
 
@@ -158,10 +160,6 @@ func (x *TrivialStructWithDefault) GetIntValue_1() int32 {
     return x.IntValue_1
 }
 
-func (x *TrivialStructWithDefault) GetIntValue_2() int32 {
-    return x.IntValue_2
-}
-
 func (x *TrivialStructWithDefault) SetIntValue_1NonCompat(value int32) *TrivialStructWithDefault {
     x.IntValue_1 = value
     return x
@@ -172,15 +170,6 @@ func (x *TrivialStructWithDefault) SetIntValue_1(value int32) *TrivialStructWith
     return x
 }
 
-func (x *TrivialStructWithDefault) SetIntValue_2NonCompat(value int32) *TrivialStructWithDefault {
-    x.IntValue_2 = value
-    return x
-}
-
-func (x *TrivialStructWithDefault) SetIntValue_2(value int32) *TrivialStructWithDefault {
-    x.IntValue_2 = value
-    return x
-}
 
 func (x *TrivialStructWithDefault) writeField1(p thrift.Encoder) error {  // IntValue_1
     if err := p.WriteFieldBegin("int_value_1", thrift.I32, 1); err != nil {
@@ -188,22 +177,6 @@ func (x *TrivialStructWithDefault) writeField1(p thrift.Encoder) error {  // Int
     }
 
     item := x.IntValue_1
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("TrivialStructWithDefault write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *TrivialStructWithDefault) writeField2(p thrift.Encoder) error {  // IntValue_2
-    if err := p.WriteFieldBegin("int_value_2", thrift.I32, 2); err != nil {
-        return thrift.PrependError("TrivialStructWithDefault write field begin error: ", err)
-    }
-
-    item := x.IntValue_2
     if err := p.WriteI32(item); err != nil {
         return err
     }
@@ -224,6 +197,38 @@ func (x *TrivialStructWithDefault) readField1(p thrift.Decoder) error {  // IntV
     return nil
 }
 
+
+func (x *TrivialStructWithDefault) GetIntValue_2() int32 {
+    return x.IntValue_2
+}
+
+func (x *TrivialStructWithDefault) SetIntValue_2NonCompat(value int32) *TrivialStructWithDefault {
+    x.IntValue_2 = value
+    return x
+}
+
+func (x *TrivialStructWithDefault) SetIntValue_2(value int32) *TrivialStructWithDefault {
+    x.IntValue_2 = value
+    return x
+}
+
+
+func (x *TrivialStructWithDefault) writeField2(p thrift.Encoder) error {  // IntValue_2
+    if err := p.WriteFieldBegin("int_value_2", thrift.I32, 2); err != nil {
+        return thrift.PrependError("TrivialStructWithDefault write field begin error: ", err)
+    }
+
+    item := x.IntValue_2
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("TrivialStructWithDefault write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *TrivialStructWithDefault) readField2(p thrift.Decoder) error {  // IntValue_2
     result, err := p.ReadI32()
     if err != nil {
@@ -233,6 +238,7 @@ func (x *TrivialStructWithDefault) readField2(p thrift.Decoder) error {  // IntV
     x.IntValue_2 = result
     return nil
 }
+
 
 
 
@@ -333,38 +339,6 @@ func (x *StructWithNoCustomDefaultValues) GetUnqualifiedInteger() int32 {
     return x.UnqualifiedInteger
 }
 
-func (x *StructWithNoCustomDefaultValues) GetOptionalInteger() int32 {
-    if !x.IsSetOptionalInteger() {
-        return 0
-    }
-    return *x.OptionalInteger
-}
-
-func (x *StructWithNoCustomDefaultValues) GetRequiredInteger() int32 {
-    return x.RequiredInteger
-}
-
-func (x *StructWithNoCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct {
-    if !x.IsSetUnqualifiedStruct() {
-        return nil
-    }
-    return x.UnqualifiedStruct
-}
-
-func (x *StructWithNoCustomDefaultValues) GetOptionalStruct() *TrivialStruct {
-    if !x.IsSetOptionalStruct() {
-        return nil
-    }
-    return x.OptionalStruct
-}
-
-func (x *StructWithNoCustomDefaultValues) GetRequiredStruct() *TrivialStruct {
-    if !x.IsSetRequiredStruct() {
-        return nil
-    }
-    return x.RequiredStruct
-}
-
 func (x *StructWithNoCustomDefaultValues) SetUnqualifiedIntegerNonCompat(value int32) *StructWithNoCustomDefaultValues {
     x.UnqualifiedInteger = value
     return x
@@ -375,71 +349,6 @@ func (x *StructWithNoCustomDefaultValues) SetUnqualifiedInteger(value int32) *St
     return x
 }
 
-func (x *StructWithNoCustomDefaultValues) SetOptionalIntegerNonCompat(value int32) *StructWithNoCustomDefaultValues {
-    x.OptionalInteger = &value
-    return x
-}
-
-func (x *StructWithNoCustomDefaultValues) SetOptionalInteger(value *int32) *StructWithNoCustomDefaultValues {
-    x.OptionalInteger = value
-    return x
-}
-
-func (x *StructWithNoCustomDefaultValues) SetRequiredIntegerNonCompat(value int32) *StructWithNoCustomDefaultValues {
-    x.RequiredInteger = value
-    return x
-}
-
-func (x *StructWithNoCustomDefaultValues) SetRequiredInteger(value int32) *StructWithNoCustomDefaultValues {
-    x.RequiredInteger = value
-    return x
-}
-
-func (x *StructWithNoCustomDefaultValues) SetUnqualifiedStructNonCompat(value *TrivialStruct) *StructWithNoCustomDefaultValues {
-    x.UnqualifiedStruct = value
-    return x
-}
-
-func (x *StructWithNoCustomDefaultValues) SetUnqualifiedStruct(value *TrivialStruct) *StructWithNoCustomDefaultValues {
-    x.UnqualifiedStruct = value
-    return x
-}
-
-func (x *StructWithNoCustomDefaultValues) SetOptionalStructNonCompat(value *TrivialStruct) *StructWithNoCustomDefaultValues {
-    x.OptionalStruct = value
-    return x
-}
-
-func (x *StructWithNoCustomDefaultValues) SetOptionalStruct(value *TrivialStruct) *StructWithNoCustomDefaultValues {
-    x.OptionalStruct = value
-    return x
-}
-
-func (x *StructWithNoCustomDefaultValues) SetRequiredStructNonCompat(value *TrivialStruct) *StructWithNoCustomDefaultValues {
-    x.RequiredStruct = value
-    return x
-}
-
-func (x *StructWithNoCustomDefaultValues) SetRequiredStruct(value *TrivialStruct) *StructWithNoCustomDefaultValues {
-    x.RequiredStruct = value
-    return x
-}
-
-func (x *StructWithNoCustomDefaultValues) IsSetOptionalInteger() bool {
-    return x != nil && x.OptionalInteger != nil
-}
-
-func (x *StructWithNoCustomDefaultValues) IsSetUnqualifiedStruct() bool {
-    return x != nil && x.UnqualifiedStruct != nil
-}
-
-func (x *StructWithNoCustomDefaultValues) IsSetOptionalStruct() bool {
-    return x != nil && x.OptionalStruct != nil
-}
-
-func (x *StructWithNoCustomDefaultValues) IsSetRequiredStruct() bool {
-    return x != nil && x.RequiredStruct != nil
-}
 
 func (x *StructWithNoCustomDefaultValues) writeField1(p thrift.Encoder) error {  // UnqualifiedInteger
     if err := p.WriteFieldBegin("unqualified_integer", thrift.I32, 1); err != nil {
@@ -455,6 +364,38 @@ func (x *StructWithNoCustomDefaultValues) writeField1(p thrift.Encoder) error { 
         return thrift.PrependError("StructWithNoCustomDefaultValues write field end error: ", err)
     }
     return nil
+}
+
+func (x *StructWithNoCustomDefaultValues) readField1(p thrift.Decoder) error {  // UnqualifiedInteger
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.UnqualifiedInteger = result
+    return nil
+}
+
+
+func (x *StructWithNoCustomDefaultValues) GetOptionalInteger() int32 {
+    if !x.IsSetOptionalInteger() {
+        return 0
+    }
+    return *x.OptionalInteger
+}
+
+func (x *StructWithNoCustomDefaultValues) SetOptionalIntegerNonCompat(value int32) *StructWithNoCustomDefaultValues {
+    x.OptionalInteger = &value
+    return x
+}
+
+func (x *StructWithNoCustomDefaultValues) SetOptionalInteger(value *int32) *StructWithNoCustomDefaultValues {
+    x.OptionalInteger = value
+    return x
+}
+
+func (x *StructWithNoCustomDefaultValues) IsSetOptionalInteger() bool {
+    return x != nil && x.OptionalInteger != nil
 }
 
 func (x *StructWithNoCustomDefaultValues) writeField2(p thrift.Encoder) error {  // OptionalInteger
@@ -477,6 +418,32 @@ func (x *StructWithNoCustomDefaultValues) writeField2(p thrift.Encoder) error { 
     return nil
 }
 
+func (x *StructWithNoCustomDefaultValues) readField2(p thrift.Decoder) error {  // OptionalInteger
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.OptionalInteger = &result
+    return nil
+}
+
+
+func (x *StructWithNoCustomDefaultValues) GetRequiredInteger() int32 {
+    return x.RequiredInteger
+}
+
+func (x *StructWithNoCustomDefaultValues) SetRequiredIntegerNonCompat(value int32) *StructWithNoCustomDefaultValues {
+    x.RequiredInteger = value
+    return x
+}
+
+func (x *StructWithNoCustomDefaultValues) SetRequiredInteger(value int32) *StructWithNoCustomDefaultValues {
+    x.RequiredInteger = value
+    return x
+}
+
+
 func (x *StructWithNoCustomDefaultValues) writeField3(p thrift.Encoder) error {  // RequiredInteger
     if err := p.WriteFieldBegin("required_integer", thrift.I32, 3); err != nil {
         return thrift.PrependError("StructWithNoCustomDefaultValues write field begin error: ", err)
@@ -491,6 +458,38 @@ func (x *StructWithNoCustomDefaultValues) writeField3(p thrift.Encoder) error { 
         return thrift.PrependError("StructWithNoCustomDefaultValues write field end error: ", err)
     }
     return nil
+}
+
+func (x *StructWithNoCustomDefaultValues) readField3(p thrift.Decoder) error {  // RequiredInteger
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.RequiredInteger = result
+    return nil
+}
+
+
+func (x *StructWithNoCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct {
+    if !x.IsSetUnqualifiedStruct() {
+        return nil
+    }
+    return x.UnqualifiedStruct
+}
+
+func (x *StructWithNoCustomDefaultValues) SetUnqualifiedStructNonCompat(value *TrivialStruct) *StructWithNoCustomDefaultValues {
+    x.UnqualifiedStruct = value
+    return x
+}
+
+func (x *StructWithNoCustomDefaultValues) SetUnqualifiedStruct(value *TrivialStruct) *StructWithNoCustomDefaultValues {
+    x.UnqualifiedStruct = value
+    return x
+}
+
+func (x *StructWithNoCustomDefaultValues) IsSetUnqualifiedStruct() bool {
+    return x != nil && x.UnqualifiedStruct != nil
 }
 
 func (x *StructWithNoCustomDefaultValues) writeField4(p thrift.Encoder) error {  // UnqualifiedStruct
@@ -513,6 +512,39 @@ func (x *StructWithNoCustomDefaultValues) writeField4(p thrift.Encoder) error { 
     return nil
 }
 
+func (x *StructWithNoCustomDefaultValues) readField4(p thrift.Decoder) error {  // UnqualifiedStruct
+    result := NewTrivialStruct()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.UnqualifiedStruct = result
+    return nil
+}
+
+
+func (x *StructWithNoCustomDefaultValues) GetOptionalStruct() *TrivialStruct {
+    if !x.IsSetOptionalStruct() {
+        return nil
+    }
+    return x.OptionalStruct
+}
+
+func (x *StructWithNoCustomDefaultValues) SetOptionalStructNonCompat(value *TrivialStruct) *StructWithNoCustomDefaultValues {
+    x.OptionalStruct = value
+    return x
+}
+
+func (x *StructWithNoCustomDefaultValues) SetOptionalStruct(value *TrivialStruct) *StructWithNoCustomDefaultValues {
+    x.OptionalStruct = value
+    return x
+}
+
+func (x *StructWithNoCustomDefaultValues) IsSetOptionalStruct() bool {
+    return x != nil && x.OptionalStruct != nil
+}
+
 func (x *StructWithNoCustomDefaultValues) writeField5(p thrift.Encoder) error {  // OptionalStruct
     if !x.IsSetOptionalStruct() {
         return nil
@@ -531,6 +563,39 @@ func (x *StructWithNoCustomDefaultValues) writeField5(p thrift.Encoder) error { 
         return thrift.PrependError("StructWithNoCustomDefaultValues write field end error: ", err)
     }
     return nil
+}
+
+func (x *StructWithNoCustomDefaultValues) readField5(p thrift.Decoder) error {  // OptionalStruct
+    result := NewTrivialStruct()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.OptionalStruct = result
+    return nil
+}
+
+
+func (x *StructWithNoCustomDefaultValues) GetRequiredStruct() *TrivialStruct {
+    if !x.IsSetRequiredStruct() {
+        return nil
+    }
+    return x.RequiredStruct
+}
+
+func (x *StructWithNoCustomDefaultValues) SetRequiredStructNonCompat(value *TrivialStruct) *StructWithNoCustomDefaultValues {
+    x.RequiredStruct = value
+    return x
+}
+
+func (x *StructWithNoCustomDefaultValues) SetRequiredStruct(value *TrivialStruct) *StructWithNoCustomDefaultValues {
+    x.RequiredStruct = value
+    return x
+}
+
+func (x *StructWithNoCustomDefaultValues) IsSetRequiredStruct() bool {
+    return x != nil && x.RequiredStruct != nil
 }
 
 func (x *StructWithNoCustomDefaultValues) writeField6(p thrift.Encoder) error {  // RequiredStruct
@@ -553,58 +618,6 @@ func (x *StructWithNoCustomDefaultValues) writeField6(p thrift.Encoder) error { 
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) readField1(p thrift.Decoder) error {  // UnqualifiedInteger
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.UnqualifiedInteger = result
-    return nil
-}
-
-func (x *StructWithNoCustomDefaultValues) readField2(p thrift.Decoder) error {  // OptionalInteger
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.OptionalInteger = &result
-    return nil
-}
-
-func (x *StructWithNoCustomDefaultValues) readField3(p thrift.Decoder) error {  // RequiredInteger
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.RequiredInteger = result
-    return nil
-}
-
-func (x *StructWithNoCustomDefaultValues) readField4(p thrift.Decoder) error {  // UnqualifiedStruct
-    result := NewTrivialStruct()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.UnqualifiedStruct = result
-    return nil
-}
-
-func (x *StructWithNoCustomDefaultValues) readField5(p thrift.Decoder) error {  // OptionalStruct
-    result := NewTrivialStruct()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.OptionalStruct = result
-    return nil
-}
-
 func (x *StructWithNoCustomDefaultValues) readField6(p thrift.Decoder) error {  // RequiredStruct
     result := NewTrivialStruct()
     err := result.Read(p)
@@ -615,9 +628,6 @@ func (x *StructWithNoCustomDefaultValues) readField6(p thrift.Decoder) error {  
     x.RequiredStruct = result
     return nil
 }
-
-
-
 
 
 
@@ -743,52 +753,6 @@ func (x *StructWithCustomDefaultValues) GetUnqualifiedInteger() int32 {
     return x.UnqualifiedInteger
 }
 
-func (x *StructWithCustomDefaultValues) GetOptionalInteger() int32 {
-    if !x.IsSetOptionalInteger() {
-        return int32(43)
-    }
-    return *x.OptionalInteger
-}
-
-func (x *StructWithCustomDefaultValues) GetRequiredInteger() int32 {
-    return x.RequiredInteger
-}
-
-func (x *StructWithCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct {
-    if !x.IsSetUnqualifiedStruct() {
-        return nil
-    }
-    return x.UnqualifiedStruct
-}
-
-func (x *StructWithCustomDefaultValues) GetOptionalStruct() *TrivialStruct {
-    if !x.IsSetOptionalStruct() {
-        return nil
-    }
-    return x.OptionalStruct
-}
-
-func (x *StructWithCustomDefaultValues) GetRequiredStruct() *TrivialStruct {
-    if !x.IsSetRequiredStruct() {
-        return nil
-    }
-    return x.RequiredStruct
-}
-
-func (x *StructWithCustomDefaultValues) GetStructWithDefaultUnspecified() *TrivialStructWithDefault {
-    if !x.IsSetStructWithDefaultUnspecified() {
-        return nil
-    }
-    return x.StructWithDefaultUnspecified
-}
-
-func (x *StructWithCustomDefaultValues) GetStructWithDefaultSpecified() *TrivialStructWithDefault {
-    if !x.IsSetStructWithDefaultSpecified() {
-        return nil
-    }
-    return x.StructWithDefaultSpecified
-}
-
 func (x *StructWithCustomDefaultValues) SetUnqualifiedIntegerNonCompat(value int32) *StructWithCustomDefaultValues {
     x.UnqualifiedInteger = value
     return x
@@ -799,99 +763,6 @@ func (x *StructWithCustomDefaultValues) SetUnqualifiedInteger(value int32) *Stru
     return x
 }
 
-func (x *StructWithCustomDefaultValues) SetOptionalIntegerNonCompat(value int32) *StructWithCustomDefaultValues {
-    x.OptionalInteger = &value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetOptionalInteger(value *int32) *StructWithCustomDefaultValues {
-    x.OptionalInteger = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetRequiredIntegerNonCompat(value int32) *StructWithCustomDefaultValues {
-    x.RequiredInteger = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetRequiredInteger(value int32) *StructWithCustomDefaultValues {
-    x.RequiredInteger = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetUnqualifiedStructNonCompat(value *TrivialStruct) *StructWithCustomDefaultValues {
-    x.UnqualifiedStruct = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetUnqualifiedStruct(value *TrivialStruct) *StructWithCustomDefaultValues {
-    x.UnqualifiedStruct = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetOptionalStructNonCompat(value *TrivialStruct) *StructWithCustomDefaultValues {
-    x.OptionalStruct = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetOptionalStruct(value *TrivialStruct) *StructWithCustomDefaultValues {
-    x.OptionalStruct = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetRequiredStructNonCompat(value *TrivialStruct) *StructWithCustomDefaultValues {
-    x.RequiredStruct = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetRequiredStruct(value *TrivialStruct) *StructWithCustomDefaultValues {
-    x.RequiredStruct = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetStructWithDefaultUnspecifiedNonCompat(value *TrivialStructWithDefault) *StructWithCustomDefaultValues {
-    x.StructWithDefaultUnspecified = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetStructWithDefaultUnspecified(value *TrivialStructWithDefault) *StructWithCustomDefaultValues {
-    x.StructWithDefaultUnspecified = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetStructWithDefaultSpecifiedNonCompat(value *TrivialStructWithDefault) *StructWithCustomDefaultValues {
-    x.StructWithDefaultSpecified = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) SetStructWithDefaultSpecified(value *TrivialStructWithDefault) *StructWithCustomDefaultValues {
-    x.StructWithDefaultSpecified = value
-    return x
-}
-
-func (x *StructWithCustomDefaultValues) IsSetOptionalInteger() bool {
-    return x != nil && x.OptionalInteger != nil
-}
-
-func (x *StructWithCustomDefaultValues) IsSetUnqualifiedStruct() bool {
-    return x != nil && x.UnqualifiedStruct != nil
-}
-
-func (x *StructWithCustomDefaultValues) IsSetOptionalStruct() bool {
-    return x != nil && x.OptionalStruct != nil
-}
-
-func (x *StructWithCustomDefaultValues) IsSetRequiredStruct() bool {
-    return x != nil && x.RequiredStruct != nil
-}
-
-func (x *StructWithCustomDefaultValues) IsSetStructWithDefaultUnspecified() bool {
-    return x != nil && x.StructWithDefaultUnspecified != nil
-}
-
-func (x *StructWithCustomDefaultValues) IsSetStructWithDefaultSpecified() bool {
-    return x != nil && x.StructWithDefaultSpecified != nil
-}
 
 func (x *StructWithCustomDefaultValues) writeField1(p thrift.Encoder) error {  // UnqualifiedInteger
     if err := p.WriteFieldBegin("unqualified_integer", thrift.I32, 1); err != nil {
@@ -907,6 +778,38 @@ func (x *StructWithCustomDefaultValues) writeField1(p thrift.Encoder) error {  /
         return thrift.PrependError("StructWithCustomDefaultValues write field end error: ", err)
     }
     return nil
+}
+
+func (x *StructWithCustomDefaultValues) readField1(p thrift.Decoder) error {  // UnqualifiedInteger
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.UnqualifiedInteger = result
+    return nil
+}
+
+
+func (x *StructWithCustomDefaultValues) GetOptionalInteger() int32 {
+    if !x.IsSetOptionalInteger() {
+        return int32(43)
+    }
+    return *x.OptionalInteger
+}
+
+func (x *StructWithCustomDefaultValues) SetOptionalIntegerNonCompat(value int32) *StructWithCustomDefaultValues {
+    x.OptionalInteger = &value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) SetOptionalInteger(value *int32) *StructWithCustomDefaultValues {
+    x.OptionalInteger = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) IsSetOptionalInteger() bool {
+    return x != nil && x.OptionalInteger != nil
 }
 
 func (x *StructWithCustomDefaultValues) writeField2(p thrift.Encoder) error {  // OptionalInteger
@@ -929,6 +832,32 @@ func (x *StructWithCustomDefaultValues) writeField2(p thrift.Encoder) error {  /
     return nil
 }
 
+func (x *StructWithCustomDefaultValues) readField2(p thrift.Decoder) error {  // OptionalInteger
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.OptionalInteger = &result
+    return nil
+}
+
+
+func (x *StructWithCustomDefaultValues) GetRequiredInteger() int32 {
+    return x.RequiredInteger
+}
+
+func (x *StructWithCustomDefaultValues) SetRequiredIntegerNonCompat(value int32) *StructWithCustomDefaultValues {
+    x.RequiredInteger = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) SetRequiredInteger(value int32) *StructWithCustomDefaultValues {
+    x.RequiredInteger = value
+    return x
+}
+
+
 func (x *StructWithCustomDefaultValues) writeField3(p thrift.Encoder) error {  // RequiredInteger
     if err := p.WriteFieldBegin("required_integer", thrift.I32, 3); err != nil {
         return thrift.PrependError("StructWithCustomDefaultValues write field begin error: ", err)
@@ -943,6 +872,38 @@ func (x *StructWithCustomDefaultValues) writeField3(p thrift.Encoder) error {  /
         return thrift.PrependError("StructWithCustomDefaultValues write field end error: ", err)
     }
     return nil
+}
+
+func (x *StructWithCustomDefaultValues) readField3(p thrift.Decoder) error {  // RequiredInteger
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.RequiredInteger = result
+    return nil
+}
+
+
+func (x *StructWithCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct {
+    if !x.IsSetUnqualifiedStruct() {
+        return nil
+    }
+    return x.UnqualifiedStruct
+}
+
+func (x *StructWithCustomDefaultValues) SetUnqualifiedStructNonCompat(value *TrivialStruct) *StructWithCustomDefaultValues {
+    x.UnqualifiedStruct = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) SetUnqualifiedStruct(value *TrivialStruct) *StructWithCustomDefaultValues {
+    x.UnqualifiedStruct = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) IsSetUnqualifiedStruct() bool {
+    return x != nil && x.UnqualifiedStruct != nil
 }
 
 func (x *StructWithCustomDefaultValues) writeField4(p thrift.Encoder) error {  // UnqualifiedStruct
@@ -965,6 +926,39 @@ func (x *StructWithCustomDefaultValues) writeField4(p thrift.Encoder) error {  /
     return nil
 }
 
+func (x *StructWithCustomDefaultValues) readField4(p thrift.Decoder) error {  // UnqualifiedStruct
+    result := NewTrivialStruct()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.UnqualifiedStruct = result
+    return nil
+}
+
+
+func (x *StructWithCustomDefaultValues) GetOptionalStruct() *TrivialStruct {
+    if !x.IsSetOptionalStruct() {
+        return nil
+    }
+    return x.OptionalStruct
+}
+
+func (x *StructWithCustomDefaultValues) SetOptionalStructNonCompat(value *TrivialStruct) *StructWithCustomDefaultValues {
+    x.OptionalStruct = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) SetOptionalStruct(value *TrivialStruct) *StructWithCustomDefaultValues {
+    x.OptionalStruct = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) IsSetOptionalStruct() bool {
+    return x != nil && x.OptionalStruct != nil
+}
+
 func (x *StructWithCustomDefaultValues) writeField5(p thrift.Encoder) error {  // OptionalStruct
     if !x.IsSetOptionalStruct() {
         return nil
@@ -983,6 +977,39 @@ func (x *StructWithCustomDefaultValues) writeField5(p thrift.Encoder) error {  /
         return thrift.PrependError("StructWithCustomDefaultValues write field end error: ", err)
     }
     return nil
+}
+
+func (x *StructWithCustomDefaultValues) readField5(p thrift.Decoder) error {  // OptionalStruct
+    result := NewTrivialStruct()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.OptionalStruct = result
+    return nil
+}
+
+
+func (x *StructWithCustomDefaultValues) GetRequiredStruct() *TrivialStruct {
+    if !x.IsSetRequiredStruct() {
+        return nil
+    }
+    return x.RequiredStruct
+}
+
+func (x *StructWithCustomDefaultValues) SetRequiredStructNonCompat(value *TrivialStruct) *StructWithCustomDefaultValues {
+    x.RequiredStruct = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) SetRequiredStruct(value *TrivialStruct) *StructWithCustomDefaultValues {
+    x.RequiredStruct = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) IsSetRequiredStruct() bool {
+    return x != nil && x.RequiredStruct != nil
 }
 
 func (x *StructWithCustomDefaultValues) writeField6(p thrift.Encoder) error {  // RequiredStruct
@@ -1005,6 +1032,39 @@ func (x *StructWithCustomDefaultValues) writeField6(p thrift.Encoder) error {  /
     return nil
 }
 
+func (x *StructWithCustomDefaultValues) readField6(p thrift.Decoder) error {  // RequiredStruct
+    result := NewTrivialStruct()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.RequiredStruct = result
+    return nil
+}
+
+
+func (x *StructWithCustomDefaultValues) GetStructWithDefaultUnspecified() *TrivialStructWithDefault {
+    if !x.IsSetStructWithDefaultUnspecified() {
+        return nil
+    }
+    return x.StructWithDefaultUnspecified
+}
+
+func (x *StructWithCustomDefaultValues) SetStructWithDefaultUnspecifiedNonCompat(value *TrivialStructWithDefault) *StructWithCustomDefaultValues {
+    x.StructWithDefaultUnspecified = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) SetStructWithDefaultUnspecified(value *TrivialStructWithDefault) *StructWithCustomDefaultValues {
+    x.StructWithDefaultUnspecified = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) IsSetStructWithDefaultUnspecified() bool {
+    return x != nil && x.StructWithDefaultUnspecified != nil
+}
+
 func (x *StructWithCustomDefaultValues) writeField7(p thrift.Encoder) error {  // StructWithDefaultUnspecified
     if !x.IsSetStructWithDefaultUnspecified() {
         return nil
@@ -1023,6 +1083,39 @@ func (x *StructWithCustomDefaultValues) writeField7(p thrift.Encoder) error {  /
         return thrift.PrependError("StructWithCustomDefaultValues write field end error: ", err)
     }
     return nil
+}
+
+func (x *StructWithCustomDefaultValues) readField7(p thrift.Decoder) error {  // StructWithDefaultUnspecified
+    result := NewTrivialStructWithDefault()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.StructWithDefaultUnspecified = result
+    return nil
+}
+
+
+func (x *StructWithCustomDefaultValues) GetStructWithDefaultSpecified() *TrivialStructWithDefault {
+    if !x.IsSetStructWithDefaultSpecified() {
+        return nil
+    }
+    return x.StructWithDefaultSpecified
+}
+
+func (x *StructWithCustomDefaultValues) SetStructWithDefaultSpecifiedNonCompat(value *TrivialStructWithDefault) *StructWithCustomDefaultValues {
+    x.StructWithDefaultSpecified = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) SetStructWithDefaultSpecified(value *TrivialStructWithDefault) *StructWithCustomDefaultValues {
+    x.StructWithDefaultSpecified = value
+    return x
+}
+
+func (x *StructWithCustomDefaultValues) IsSetStructWithDefaultSpecified() bool {
+    return x != nil && x.StructWithDefaultSpecified != nil
 }
 
 func (x *StructWithCustomDefaultValues) writeField8(p thrift.Encoder) error {  // StructWithDefaultSpecified
@@ -1045,80 +1138,6 @@ func (x *StructWithCustomDefaultValues) writeField8(p thrift.Encoder) error {  /
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) readField1(p thrift.Decoder) error {  // UnqualifiedInteger
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.UnqualifiedInteger = result
-    return nil
-}
-
-func (x *StructWithCustomDefaultValues) readField2(p thrift.Decoder) error {  // OptionalInteger
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.OptionalInteger = &result
-    return nil
-}
-
-func (x *StructWithCustomDefaultValues) readField3(p thrift.Decoder) error {  // RequiredInteger
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.RequiredInteger = result
-    return nil
-}
-
-func (x *StructWithCustomDefaultValues) readField4(p thrift.Decoder) error {  // UnqualifiedStruct
-    result := NewTrivialStruct()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.UnqualifiedStruct = result
-    return nil
-}
-
-func (x *StructWithCustomDefaultValues) readField5(p thrift.Decoder) error {  // OptionalStruct
-    result := NewTrivialStruct()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.OptionalStruct = result
-    return nil
-}
-
-func (x *StructWithCustomDefaultValues) readField6(p thrift.Decoder) error {  // RequiredStruct
-    result := NewTrivialStruct()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.RequiredStruct = result
-    return nil
-}
-
-func (x *StructWithCustomDefaultValues) readField7(p thrift.Decoder) error {  // StructWithDefaultUnspecified
-    result := NewTrivialStructWithDefault()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.StructWithDefaultUnspecified = result
-    return nil
-}
-
 func (x *StructWithCustomDefaultValues) readField8(p thrift.Decoder) error {  // StructWithDefaultSpecified
     result := NewTrivialStructWithDefault()
     err := result.Read(p)
@@ -1129,11 +1148,6 @@ func (x *StructWithCustomDefaultValues) readField8(p thrift.Decoder) error {  //
     x.StructWithDefaultSpecified = result
     return nil
 }
-
-
-
-
-
 
 
 
@@ -1289,46 +1303,6 @@ func (x *StructWithCollectionDefaultValues) GetListWithListValue() []int32 {
     return x.ListWithListValue
 }
 
-func (x *StructWithCollectionDefaultValues) GetSetWithListValue() []int32 {
-    if !x.IsSetSetWithListValue() {
-        return []int32{
-}
-    }
-    return x.SetWithListValue
-}
-
-func (x *StructWithCollectionDefaultValues) GetMapWithMapValue() map[int32]int32 {
-    if !x.IsSetMapWithMapValue() {
-        return map[int32]int32{
-}
-    }
-    return x.MapWithMapValue
-}
-
-func (x *StructWithCollectionDefaultValues) GetListWithMapValue() []int32 {
-    if !x.IsSetListWithMapValue() {
-        return []int32{
-}
-    }
-    return x.ListWithMapValue
-}
-
-func (x *StructWithCollectionDefaultValues) GetSetWithMapValue() []int32 {
-    if !x.IsSetSetWithMapValue() {
-        return []int32{
-}
-    }
-    return x.SetWithMapValue
-}
-
-func (x *StructWithCollectionDefaultValues) GetMapWithListValue() map[int32]int32 {
-    if !x.IsSetMapWithListValue() {
-        return map[int32]int32{
-}
-    }
-    return x.MapWithListValue
-}
-
 func (x *StructWithCollectionDefaultValues) SetListWithListValueNonCompat(value []int32) *StructWithCollectionDefaultValues {
     x.ListWithListValue = value
     return x
@@ -1339,78 +1313,8 @@ func (x *StructWithCollectionDefaultValues) SetListWithListValue(value []int32) 
     return x
 }
 
-func (x *StructWithCollectionDefaultValues) SetSetWithListValueNonCompat(value []int32) *StructWithCollectionDefaultValues {
-    x.SetWithListValue = value
-    return x
-}
-
-func (x *StructWithCollectionDefaultValues) SetSetWithListValue(value []int32) *StructWithCollectionDefaultValues {
-    x.SetWithListValue = value
-    return x
-}
-
-func (x *StructWithCollectionDefaultValues) SetMapWithMapValueNonCompat(value map[int32]int32) *StructWithCollectionDefaultValues {
-    x.MapWithMapValue = value
-    return x
-}
-
-func (x *StructWithCollectionDefaultValues) SetMapWithMapValue(value map[int32]int32) *StructWithCollectionDefaultValues {
-    x.MapWithMapValue = value
-    return x
-}
-
-func (x *StructWithCollectionDefaultValues) SetListWithMapValueNonCompat(value []int32) *StructWithCollectionDefaultValues {
-    x.ListWithMapValue = value
-    return x
-}
-
-func (x *StructWithCollectionDefaultValues) SetListWithMapValue(value []int32) *StructWithCollectionDefaultValues {
-    x.ListWithMapValue = value
-    return x
-}
-
-func (x *StructWithCollectionDefaultValues) SetSetWithMapValueNonCompat(value []int32) *StructWithCollectionDefaultValues {
-    x.SetWithMapValue = value
-    return x
-}
-
-func (x *StructWithCollectionDefaultValues) SetSetWithMapValue(value []int32) *StructWithCollectionDefaultValues {
-    x.SetWithMapValue = value
-    return x
-}
-
-func (x *StructWithCollectionDefaultValues) SetMapWithListValueNonCompat(value map[int32]int32) *StructWithCollectionDefaultValues {
-    x.MapWithListValue = value
-    return x
-}
-
-func (x *StructWithCollectionDefaultValues) SetMapWithListValue(value map[int32]int32) *StructWithCollectionDefaultValues {
-    x.MapWithListValue = value
-    return x
-}
-
 func (x *StructWithCollectionDefaultValues) IsSetListWithListValue() bool {
     return x != nil && x.ListWithListValue != nil
-}
-
-func (x *StructWithCollectionDefaultValues) IsSetSetWithListValue() bool {
-    return x != nil && x.SetWithListValue != nil
-}
-
-func (x *StructWithCollectionDefaultValues) IsSetMapWithMapValue() bool {
-    return x != nil && x.MapWithMapValue != nil
-}
-
-func (x *StructWithCollectionDefaultValues) IsSetListWithMapValue() bool {
-    return x != nil && x.ListWithMapValue != nil
-}
-
-func (x *StructWithCollectionDefaultValues) IsSetSetWithMapValue() bool {
-    return x != nil && x.SetWithMapValue != nil
-}
-
-func (x *StructWithCollectionDefaultValues) IsSetMapWithListValue() bool {
-    return x != nil && x.MapWithListValue != nil
 }
 
 func (x *StructWithCollectionDefaultValues) writeField1(p thrift.Encoder) error {  // ListWithListValue
@@ -1432,155 +1336,6 @@ func (x *StructWithCollectionDefaultValues) writeField1(p thrift.Encoder) error 
     }
     if err := p.WriteListEnd(); err != nil {
         return thrift.PrependError("error writing list end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *StructWithCollectionDefaultValues) writeField2(p thrift.Encoder) error {  // SetWithListValue
-    if err := p.WriteFieldBegin("set_with_list_value", thrift.SET, 2); err != nil {
-        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
-    }
-
-    item := x.SetWithListValue
-    if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
-        return thrift.PrependError("error writing set begin: ", err)
-    }
-    for _, v := range item {
-        {
-            item := v
-            if err := p.WriteI32(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteSetEnd(); err != nil {
-        return thrift.PrependError("error writing set end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *StructWithCollectionDefaultValues) writeField3(p thrift.Encoder) error {  // MapWithMapValue
-    if err := p.WriteFieldBegin("map_with_map_value", thrift.MAP, 3); err != nil {
-        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
-    }
-
-    item := x.MapWithMapValue
-    if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
-        return thrift.PrependError("error writing map begin: ", err)
-    }
-    for k, v := range item {
-        {
-            item := k
-            if err := p.WriteI32(item); err != nil {
-                return err
-            }
-        }
-    
-        {
-            item := v
-            if err := p.WriteI32(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteMapEnd(); err != nil {
-        return thrift.PrependError("error writing map end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *StructWithCollectionDefaultValues) writeField4(p thrift.Encoder) error {  // ListWithMapValue
-    if err := p.WriteFieldBegin("list_with_map_value", thrift.LIST, 4); err != nil {
-        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
-    }
-
-    item := x.ListWithMapValue
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-        return thrift.PrependError("error writing list begin: ", err)
-    }
-    for _, v := range item {
-        {
-            item := v
-            if err := p.WriteI32(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteListEnd(); err != nil {
-        return thrift.PrependError("error writing list end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *StructWithCollectionDefaultValues) writeField5(p thrift.Encoder) error {  // SetWithMapValue
-    if err := p.WriteFieldBegin("set_with_map_value", thrift.SET, 5); err != nil {
-        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
-    }
-
-    item := x.SetWithMapValue
-    if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
-        return thrift.PrependError("error writing set begin: ", err)
-    }
-    for _, v := range item {
-        {
-            item := v
-            if err := p.WriteI32(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteSetEnd(); err != nil {
-        return thrift.PrependError("error writing set end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *StructWithCollectionDefaultValues) writeField6(p thrift.Encoder) error {  // MapWithListValue
-    if err := p.WriteFieldBegin("map_with_list_value", thrift.MAP, 6); err != nil {
-        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
-    }
-
-    item := x.MapWithListValue
-    if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
-        return thrift.PrependError("error writing map begin: ", err)
-    }
-    for k, v := range item {
-        {
-            item := k
-            if err := p.WriteI32(item); err != nil {
-                return err
-            }
-        }
-    
-        {
-            item := v
-            if err := p.WriteI32(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteMapEnd(); err != nil {
-        return thrift.PrependError("error writing map end: ", err)
     }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -1617,6 +1372,56 @@ func (x *StructWithCollectionDefaultValues) readField1(p thrift.Decoder) error {
     return nil
 }
 
+
+func (x *StructWithCollectionDefaultValues) GetSetWithListValue() []int32 {
+    if !x.IsSetSetWithListValue() {
+        return []int32{
+}
+    }
+    return x.SetWithListValue
+}
+
+func (x *StructWithCollectionDefaultValues) SetSetWithListValueNonCompat(value []int32) *StructWithCollectionDefaultValues {
+    x.SetWithListValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetSetWithListValue(value []int32) *StructWithCollectionDefaultValues {
+    x.SetWithListValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) IsSetSetWithListValue() bool {
+    return x != nil && x.SetWithListValue != nil
+}
+
+func (x *StructWithCollectionDefaultValues) writeField2(p thrift.Encoder) error {  // SetWithListValue
+    if err := p.WriteFieldBegin("set_with_list_value", thrift.SET, 2); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
+    }
+
+    item := x.SetWithListValue
+    if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing set begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteSetEnd(); err != nil {
+        return thrift.PrependError("error writing set end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *StructWithCollectionDefaultValues) readField2(p thrift.Decoder) error {  // SetWithListValue
     _ /* elemType */, size, err := p.ReadSetBegin()
     if err != nil {
@@ -1642,6 +1447,63 @@ func (x *StructWithCollectionDefaultValues) readField2(p thrift.Decoder) error {
     result := setResult
 
     x.SetWithListValue = result
+    return nil
+}
+
+
+func (x *StructWithCollectionDefaultValues) GetMapWithMapValue() map[int32]int32 {
+    if !x.IsSetMapWithMapValue() {
+        return map[int32]int32{
+}
+    }
+    return x.MapWithMapValue
+}
+
+func (x *StructWithCollectionDefaultValues) SetMapWithMapValueNonCompat(value map[int32]int32) *StructWithCollectionDefaultValues {
+    x.MapWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetMapWithMapValue(value map[int32]int32) *StructWithCollectionDefaultValues {
+    x.MapWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) IsSetMapWithMapValue() bool {
+    return x != nil && x.MapWithMapValue != nil
+}
+
+func (x *StructWithCollectionDefaultValues) writeField3(p thrift.Encoder) error {  // MapWithMapValue
+    if err := p.WriteFieldBegin("map_with_map_value", thrift.MAP, 3); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
+    }
+
+    item := x.MapWithMapValue
+    if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing map begin: ", err)
+    }
+    for k, v := range item {
+        {
+            item := k
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteMapEnd(); err != nil {
+        return thrift.PrependError("error writing map end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
+    }
     return nil
 }
 
@@ -1683,6 +1545,56 @@ func (x *StructWithCollectionDefaultValues) readField3(p thrift.Decoder) error {
     return nil
 }
 
+
+func (x *StructWithCollectionDefaultValues) GetListWithMapValue() []int32 {
+    if !x.IsSetListWithMapValue() {
+        return []int32{
+}
+    }
+    return x.ListWithMapValue
+}
+
+func (x *StructWithCollectionDefaultValues) SetListWithMapValueNonCompat(value []int32) *StructWithCollectionDefaultValues {
+    x.ListWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetListWithMapValue(value []int32) *StructWithCollectionDefaultValues {
+    x.ListWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) IsSetListWithMapValue() bool {
+    return x != nil && x.ListWithMapValue != nil
+}
+
+func (x *StructWithCollectionDefaultValues) writeField4(p thrift.Encoder) error {  // ListWithMapValue
+    if err := p.WriteFieldBegin("list_with_map_value", thrift.LIST, 4); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
+    }
+
+    item := x.ListWithMapValue
+    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *StructWithCollectionDefaultValues) readField4(p thrift.Decoder) error {  // ListWithMapValue
     _ /* elemType */, size, err := p.ReadListBegin()
     if err != nil {
@@ -1711,6 +1623,56 @@ func (x *StructWithCollectionDefaultValues) readField4(p thrift.Decoder) error {
     return nil
 }
 
+
+func (x *StructWithCollectionDefaultValues) GetSetWithMapValue() []int32 {
+    if !x.IsSetSetWithMapValue() {
+        return []int32{
+}
+    }
+    return x.SetWithMapValue
+}
+
+func (x *StructWithCollectionDefaultValues) SetSetWithMapValueNonCompat(value []int32) *StructWithCollectionDefaultValues {
+    x.SetWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetSetWithMapValue(value []int32) *StructWithCollectionDefaultValues {
+    x.SetWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) IsSetSetWithMapValue() bool {
+    return x != nil && x.SetWithMapValue != nil
+}
+
+func (x *StructWithCollectionDefaultValues) writeField5(p thrift.Encoder) error {  // SetWithMapValue
+    if err := p.WriteFieldBegin("set_with_map_value", thrift.SET, 5); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
+    }
+
+    item := x.SetWithMapValue
+    if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing set begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteSetEnd(); err != nil {
+        return thrift.PrependError("error writing set end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *StructWithCollectionDefaultValues) readField5(p thrift.Decoder) error {  // SetWithMapValue
     _ /* elemType */, size, err := p.ReadSetBegin()
     if err != nil {
@@ -1736,6 +1698,63 @@ func (x *StructWithCollectionDefaultValues) readField5(p thrift.Decoder) error {
     result := setResult
 
     x.SetWithMapValue = result
+    return nil
+}
+
+
+func (x *StructWithCollectionDefaultValues) GetMapWithListValue() map[int32]int32 {
+    if !x.IsSetMapWithListValue() {
+        return map[int32]int32{
+}
+    }
+    return x.MapWithListValue
+}
+
+func (x *StructWithCollectionDefaultValues) SetMapWithListValueNonCompat(value map[int32]int32) *StructWithCollectionDefaultValues {
+    x.MapWithListValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetMapWithListValue(value map[int32]int32) *StructWithCollectionDefaultValues {
+    x.MapWithListValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) IsSetMapWithListValue() bool {
+    return x != nil && x.MapWithListValue != nil
+}
+
+func (x *StructWithCollectionDefaultValues) writeField6(p thrift.Encoder) error {  // MapWithListValue
+    if err := p.WriteFieldBegin("map_with_list_value", thrift.MAP, 6); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
+    }
+
+    item := x.MapWithListValue
+    if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing map begin: ", err)
+    }
+    for k, v := range item {
+        {
+            item := k
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteMapEnd(); err != nil {
+        return thrift.PrependError("error writing map end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
+    }
     return nil
 }
 
@@ -1776,6 +1795,7 @@ func (x *StructWithCollectionDefaultValues) readField6(p thrift.Decoder) error {
     x.MapWithListValue = result
     return nil
 }
+
 
 
 

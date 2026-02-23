@@ -19,56 +19,27 @@
   Creates the following methods for Thrift structs:
   Get*, Set*, IsSet*, writeField*, readField*, String
 
-}}{{#import "types/field" as m_field}}{{!
-
-  Get method.
-
-}}{{#struct:fields_sorted}}
+}}
+{{#import "types/field" as m_field}}
+{{#struct:fields_sorted}}
 {{#partial m_field.get struct=struct:self field=field:self}}
 
-{{/struct:fields_sorted}}{{!
-
-  Set method.
-
-}}{{#struct:fields_sorted}}
 {{#partial m_field.set struct=struct:self field=field:self}}
 
-{{/struct:fields_sorted}}{{!
-
-  IsSet method.
-
-}}{{#struct:fields_sorted}}
 {{#field:nilable?}}
 {{#partial m_field.is_set struct=struct:self field=field:self}}
-
 {{/field:nilable?}}
-{{/struct:fields_sorted}}{{!
 
-  writeField method.
-
-}}{{^struct:use_reflect_codec?}}{{!
-}}{{#struct:fields_sorted}}
+{{#if (not struct:use_reflect_codec?)}}
 {{#partial m_field.write struct=struct:self field=field:self}}
 
-{{/struct:fields_sorted}}{{!
-}}{{/struct:use_reflect_codec?}}{{!
-
-  readField method.
-
-}}{{^struct:use_reflect_codec?}}{{!
-}}{{#struct:fields_sorted}}
 {{#partial m_field.read struct=struct:self field=field:self}}
+{{/if (not struct:use_reflect_codec?)}}
 
-{{/struct:fields_sorted}}{{!
-}}{{/struct:use_reflect_codec?}}{{!
-
-  DefaultGet method.
-
-}}{{#struct:fields_sorted}}
 {{#field:pointer?}}
 {{#program:gen_default_get?}}
 {{#partial m_field.default_get struct=struct:self field=field:self}}
 {{/program:gen_default_get?}}
-
 {{/field:pointer?}}
+
 {{/struct:fields_sorted}}

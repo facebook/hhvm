@@ -44,6 +44,7 @@ func (x *Fiery) SetMessage(value string) *Fiery {
     return x
 }
 
+
 func (x *Fiery) writeField1(p thrift.Encoder) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
         return thrift.PrependError("Fiery write field begin error: ", err)
@@ -69,6 +70,7 @@ func (x *Fiery) readField1(p thrift.Decoder) error {  // Message
     x.Message = result
     return nil
 }
+
 
 
 
@@ -312,10 +314,6 @@ func (x *ComplexFieldNames) GetErrorMessage() string {
     return x.ErrorMessage
 }
 
-func (x *ComplexFieldNames) GetInternalErrorMessage() string {
-    return x.InternalErrorMessage
-}
-
 func (x *ComplexFieldNames) SetErrorMessageNonCompat(value string) *ComplexFieldNames {
     x.ErrorMessage = value
     return x
@@ -326,15 +324,6 @@ func (x *ComplexFieldNames) SetErrorMessage(value string) *ComplexFieldNames {
     return x
 }
 
-func (x *ComplexFieldNames) SetInternalErrorMessageNonCompat(value string) *ComplexFieldNames {
-    x.InternalErrorMessage = value
-    return x
-}
-
-func (x *ComplexFieldNames) SetInternalErrorMessage(value string) *ComplexFieldNames {
-    x.InternalErrorMessage = value
-    return x
-}
 
 func (x *ComplexFieldNames) writeField1(p thrift.Encoder) error {  // ErrorMessage
     if err := p.WriteFieldBegin("error_message", thrift.STRING, 1); err != nil {
@@ -342,22 +331,6 @@ func (x *ComplexFieldNames) writeField1(p thrift.Encoder) error {  // ErrorMessa
     }
 
     item := x.ErrorMessage
-    if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("ComplexFieldNames write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *ComplexFieldNames) writeField2(p thrift.Encoder) error {  // InternalErrorMessage
-    if err := p.WriteFieldBegin("internal_error_message", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("ComplexFieldNames write field begin error: ", err)
-    }
-
-    item := x.InternalErrorMessage
     if err := p.WriteString(item); err != nil {
         return err
     }
@@ -378,6 +351,38 @@ func (x *ComplexFieldNames) readField1(p thrift.Decoder) error {  // ErrorMessag
     return nil
 }
 
+
+func (x *ComplexFieldNames) GetInternalErrorMessage() string {
+    return x.InternalErrorMessage
+}
+
+func (x *ComplexFieldNames) SetInternalErrorMessageNonCompat(value string) *ComplexFieldNames {
+    x.InternalErrorMessage = value
+    return x
+}
+
+func (x *ComplexFieldNames) SetInternalErrorMessage(value string) *ComplexFieldNames {
+    x.InternalErrorMessage = value
+    return x
+}
+
+
+func (x *ComplexFieldNames) writeField2(p thrift.Encoder) error {  // InternalErrorMessage
+    if err := p.WriteFieldBegin("internal_error_message", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("ComplexFieldNames write field begin error: ", err)
+    }
+
+    item := x.InternalErrorMessage
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("ComplexFieldNames write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *ComplexFieldNames) readField2(p thrift.Decoder) error {  // InternalErrorMessage
     result, err := p.ReadString()
     if err != nil {
@@ -387,6 +392,7 @@ func (x *ComplexFieldNames) readField2(p thrift.Decoder) error {  // InternalErr
     x.InternalErrorMessage = result
     return nil
 }
+
 
 
 
@@ -492,10 +498,6 @@ func (x *CustomFieldNames) GetErrorMessage() string {
     return x.ErrorMessage
 }
 
-func (x *CustomFieldNames) GetInternalErrorMessage() string {
-    return x.InternalErrorMessage
-}
-
 func (x *CustomFieldNames) SetErrorMessageNonCompat(value string) *CustomFieldNames {
     x.ErrorMessage = value
     return x
@@ -506,15 +508,6 @@ func (x *CustomFieldNames) SetErrorMessage(value string) *CustomFieldNames {
     return x
 }
 
-func (x *CustomFieldNames) SetInternalErrorMessageNonCompat(value string) *CustomFieldNames {
-    x.InternalErrorMessage = value
-    return x
-}
-
-func (x *CustomFieldNames) SetInternalErrorMessage(value string) *CustomFieldNames {
-    x.InternalErrorMessage = value
-    return x
-}
 
 func (x *CustomFieldNames) writeField1(p thrift.Encoder) error {  // ErrorMessage
     if err := p.WriteFieldBegin("error_message", thrift.STRING, 1); err != nil {
@@ -522,22 +515,6 @@ func (x *CustomFieldNames) writeField1(p thrift.Encoder) error {  // ErrorMessag
     }
 
     item := x.ErrorMessage
-    if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("CustomFieldNames write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *CustomFieldNames) writeField2(p thrift.Encoder) error {  // InternalErrorMessage
-    if err := p.WriteFieldBegin("internal_error_message", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("CustomFieldNames write field begin error: ", err)
-    }
-
-    item := x.InternalErrorMessage
     if err := p.WriteString(item); err != nil {
         return err
     }
@@ -558,6 +535,38 @@ func (x *CustomFieldNames) readField1(p thrift.Decoder) error {  // ErrorMessage
     return nil
 }
 
+
+func (x *CustomFieldNames) GetInternalErrorMessage() string {
+    return x.InternalErrorMessage
+}
+
+func (x *CustomFieldNames) SetInternalErrorMessageNonCompat(value string) *CustomFieldNames {
+    x.InternalErrorMessage = value
+    return x
+}
+
+func (x *CustomFieldNames) SetInternalErrorMessage(value string) *CustomFieldNames {
+    x.InternalErrorMessage = value
+    return x
+}
+
+
+func (x *CustomFieldNames) writeField2(p thrift.Encoder) error {  // InternalErrorMessage
+    if err := p.WriteFieldBegin("internal_error_message", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("CustomFieldNames write field begin error: ", err)
+    }
+
+    item := x.InternalErrorMessage
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("CustomFieldNames write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *CustomFieldNames) readField2(p thrift.Decoder) error {  // InternalErrorMessage
     result, err := p.ReadString()
     if err != nil {
@@ -567,6 +576,7 @@ func (x *CustomFieldNames) readField2(p thrift.Decoder) error {  // InternalErro
     x.InternalErrorMessage = result
     return nil
 }
+
 
 
 
@@ -672,10 +682,6 @@ func (x *ExceptionWithPrimitiveField) GetMessage() string {
     return x.Message
 }
 
-func (x *ExceptionWithPrimitiveField) GetErrorCode() int32 {
-    return x.ErrorCode
-}
-
 func (x *ExceptionWithPrimitiveField) SetMessageNonCompat(value string) *ExceptionWithPrimitiveField {
     x.Message = value
     return x
@@ -686,15 +692,6 @@ func (x *ExceptionWithPrimitiveField) SetMessage(value string) *ExceptionWithPri
     return x
 }
 
-func (x *ExceptionWithPrimitiveField) SetErrorCodeNonCompat(value int32) *ExceptionWithPrimitiveField {
-    x.ErrorCode = value
-    return x
-}
-
-func (x *ExceptionWithPrimitiveField) SetErrorCode(value int32) *ExceptionWithPrimitiveField {
-    x.ErrorCode = value
-    return x
-}
 
 func (x *ExceptionWithPrimitiveField) writeField1(p thrift.Encoder) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
@@ -703,22 +700,6 @@ func (x *ExceptionWithPrimitiveField) writeField1(p thrift.Encoder) error {  // 
 
     item := x.Message
     if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("ExceptionWithPrimitiveField write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *ExceptionWithPrimitiveField) writeField2(p thrift.Encoder) error {  // ErrorCode
-    if err := p.WriteFieldBegin("error_code", thrift.I32, 2); err != nil {
-        return thrift.PrependError("ExceptionWithPrimitiveField write field begin error: ", err)
-    }
-
-    item := x.ErrorCode
-    if err := p.WriteI32(item); err != nil {
         return err
     }
 
@@ -738,6 +719,38 @@ func (x *ExceptionWithPrimitiveField) readField1(p thrift.Decoder) error {  // M
     return nil
 }
 
+
+func (x *ExceptionWithPrimitiveField) GetErrorCode() int32 {
+    return x.ErrorCode
+}
+
+func (x *ExceptionWithPrimitiveField) SetErrorCodeNonCompat(value int32) *ExceptionWithPrimitiveField {
+    x.ErrorCode = value
+    return x
+}
+
+func (x *ExceptionWithPrimitiveField) SetErrorCode(value int32) *ExceptionWithPrimitiveField {
+    x.ErrorCode = value
+    return x
+}
+
+
+func (x *ExceptionWithPrimitiveField) writeField2(p thrift.Encoder) error {  // ErrorCode
+    if err := p.WriteFieldBegin("error_code", thrift.I32, 2); err != nil {
+        return thrift.PrependError("ExceptionWithPrimitiveField write field begin error: ", err)
+    }
+
+    item := x.ErrorCode
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("ExceptionWithPrimitiveField write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *ExceptionWithPrimitiveField) readField2(p thrift.Decoder) error {  // ErrorCode
     result, err := p.ReadI32()
     if err != nil {
@@ -747,6 +760,7 @@ func (x *ExceptionWithPrimitiveField) readField2(p thrift.Decoder) error {  // E
     x.ErrorCode = result
     return nil
 }
+
 
 
 
@@ -852,10 +866,6 @@ func (x *ExceptionWithStructuredAnnotation) GetMessageField() string {
     return x.MessageField
 }
 
-func (x *ExceptionWithStructuredAnnotation) GetErrorCode() int32 {
-    return x.ErrorCode
-}
-
 func (x *ExceptionWithStructuredAnnotation) SetMessageFieldNonCompat(value string) *ExceptionWithStructuredAnnotation {
     x.MessageField = value
     return x
@@ -866,15 +876,6 @@ func (x *ExceptionWithStructuredAnnotation) SetMessageField(value string) *Excep
     return x
 }
 
-func (x *ExceptionWithStructuredAnnotation) SetErrorCodeNonCompat(value int32) *ExceptionWithStructuredAnnotation {
-    x.ErrorCode = value
-    return x
-}
-
-func (x *ExceptionWithStructuredAnnotation) SetErrorCode(value int32) *ExceptionWithStructuredAnnotation {
-    x.ErrorCode = value
-    return x
-}
 
 func (x *ExceptionWithStructuredAnnotation) writeField1(p thrift.Encoder) error {  // MessageField
     if err := p.WriteFieldBegin("message_field", thrift.STRING, 1); err != nil {
@@ -883,22 +884,6 @@ func (x *ExceptionWithStructuredAnnotation) writeField1(p thrift.Encoder) error 
 
     item := x.MessageField
     if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("ExceptionWithStructuredAnnotation write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *ExceptionWithStructuredAnnotation) writeField2(p thrift.Encoder) error {  // ErrorCode
-    if err := p.WriteFieldBegin("error_code", thrift.I32, 2); err != nil {
-        return thrift.PrependError("ExceptionWithStructuredAnnotation write field begin error: ", err)
-    }
-
-    item := x.ErrorCode
-    if err := p.WriteI32(item); err != nil {
         return err
     }
 
@@ -918,6 +903,38 @@ func (x *ExceptionWithStructuredAnnotation) readField1(p thrift.Decoder) error {
     return nil
 }
 
+
+func (x *ExceptionWithStructuredAnnotation) GetErrorCode() int32 {
+    return x.ErrorCode
+}
+
+func (x *ExceptionWithStructuredAnnotation) SetErrorCodeNonCompat(value int32) *ExceptionWithStructuredAnnotation {
+    x.ErrorCode = value
+    return x
+}
+
+func (x *ExceptionWithStructuredAnnotation) SetErrorCode(value int32) *ExceptionWithStructuredAnnotation {
+    x.ErrorCode = value
+    return x
+}
+
+
+func (x *ExceptionWithStructuredAnnotation) writeField2(p thrift.Encoder) error {  // ErrorCode
+    if err := p.WriteFieldBegin("error_code", thrift.I32, 2); err != nil {
+        return thrift.PrependError("ExceptionWithStructuredAnnotation write field begin error: ", err)
+    }
+
+    item := x.ErrorCode
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("ExceptionWithStructuredAnnotation write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *ExceptionWithStructuredAnnotation) readField2(p thrift.Decoder) error {  // ErrorCode
     result, err := p.ReadI32()
     if err != nil {
@@ -927,6 +944,7 @@ func (x *ExceptionWithStructuredAnnotation) readField2(p thrift.Decoder) error {
     x.ErrorCode = result
     return nil
 }
+
 
 
 
@@ -1358,20 +1376,6 @@ func (x *respRaiserDoRaise) GetB() *Banal {
     return x.B
 }
 
-func (x *respRaiserDoRaise) GetF() *Fiery {
-    if !x.IsSetF() {
-        return nil
-    }
-    return x.F
-}
-
-func (x *respRaiserDoRaise) GetS() *Serious {
-    if !x.IsSetS() {
-        return nil
-    }
-    return x.S
-}
-
 func (x *respRaiserDoRaise) SetBNonCompat(value *Banal) *respRaiserDoRaise {
     x.B = value
     return x
@@ -1382,36 +1386,8 @@ func (x *respRaiserDoRaise) SetB(value *Banal) *respRaiserDoRaise {
     return x
 }
 
-func (x *respRaiserDoRaise) SetFNonCompat(value *Fiery) *respRaiserDoRaise {
-    x.F = value
-    return x
-}
-
-func (x *respRaiserDoRaise) SetF(value *Fiery) *respRaiserDoRaise {
-    x.F = value
-    return x
-}
-
-func (x *respRaiserDoRaise) SetSNonCompat(value *Serious) *respRaiserDoRaise {
-    x.S = value
-    return x
-}
-
-func (x *respRaiserDoRaise) SetS(value *Serious) *respRaiserDoRaise {
-    x.S = value
-    return x
-}
-
 func (x *respRaiserDoRaise) IsSetB() bool {
     return x != nil && x.B != nil
-}
-
-func (x *respRaiserDoRaise) IsSetF() bool {
-    return x != nil && x.F != nil
-}
-
-func (x *respRaiserDoRaise) IsSetS() bool {
-    return x != nil && x.S != nil
 }
 
 func (x *respRaiserDoRaise) writeField1(p thrift.Encoder) error {  // B
@@ -1434,6 +1410,39 @@ func (x *respRaiserDoRaise) writeField1(p thrift.Encoder) error {  // B
     return nil
 }
 
+func (x *respRaiserDoRaise) readField1(p thrift.Decoder) error {  // B
+    result := NewBanal()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.B = result
+    return nil
+}
+
+
+func (x *respRaiserDoRaise) GetF() *Fiery {
+    if !x.IsSetF() {
+        return nil
+    }
+    return x.F
+}
+
+func (x *respRaiserDoRaise) SetFNonCompat(value *Fiery) *respRaiserDoRaise {
+    x.F = value
+    return x
+}
+
+func (x *respRaiserDoRaise) SetF(value *Fiery) *respRaiserDoRaise {
+    x.F = value
+    return x
+}
+
+func (x *respRaiserDoRaise) IsSetF() bool {
+    return x != nil && x.F != nil
+}
+
 func (x *respRaiserDoRaise) writeField2(p thrift.Encoder) error {  // F
     if !x.IsSetF() {
         return nil
@@ -1452,6 +1461,39 @@ func (x *respRaiserDoRaise) writeField2(p thrift.Encoder) error {  // F
         return thrift.PrependError("respRaiserDoRaise write field end error: ", err)
     }
     return nil
+}
+
+func (x *respRaiserDoRaise) readField2(p thrift.Decoder) error {  // F
+    result := NewFiery()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.F = result
+    return nil
+}
+
+
+func (x *respRaiserDoRaise) GetS() *Serious {
+    if !x.IsSetS() {
+        return nil
+    }
+    return x.S
+}
+
+func (x *respRaiserDoRaise) SetSNonCompat(value *Serious) *respRaiserDoRaise {
+    x.S = value
+    return x
+}
+
+func (x *respRaiserDoRaise) SetS(value *Serious) *respRaiserDoRaise {
+    x.S = value
+    return x
+}
+
+func (x *respRaiserDoRaise) IsSetS() bool {
+    return x != nil && x.S != nil
 }
 
 func (x *respRaiserDoRaise) writeField3(p thrift.Encoder) error {  // S
@@ -1474,28 +1516,6 @@ func (x *respRaiserDoRaise) writeField3(p thrift.Encoder) error {  // S
     return nil
 }
 
-func (x *respRaiserDoRaise) readField1(p thrift.Decoder) error {  // B
-    result := NewBanal()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.B = result
-    return nil
-}
-
-func (x *respRaiserDoRaise) readField2(p thrift.Decoder) error {  // F
-    result := NewFiery()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.F = result
-    return nil
-}
-
 func (x *respRaiserDoRaise) readField3(p thrift.Decoder) error {  // S
     result := NewSerious()
     err := result.Read(p)
@@ -1506,8 +1526,6 @@ func (x *respRaiserDoRaise) readField3(p thrift.Decoder) error {  // S
     x.S = result
     return nil
 }
-
-
 
 
 
@@ -1917,27 +1935,6 @@ func (x *respRaiserGet500) GetSuccess() string {
     return *x.Success
 }
 
-func (x *respRaiserGet500) GetF() *Fiery {
-    if !x.IsSetF() {
-        return nil
-    }
-    return x.F
-}
-
-func (x *respRaiserGet500) GetB() *Banal {
-    if !x.IsSetB() {
-        return nil
-    }
-    return x.B
-}
-
-func (x *respRaiserGet500) GetS() *Serious {
-    if !x.IsSetS() {
-        return nil
-    }
-    return x.S
-}
-
 func (x *respRaiserGet500) SetSuccessNonCompat(value string) *respRaiserGet500 {
     x.Success = &value
     return x
@@ -1948,50 +1945,8 @@ func (x *respRaiserGet500) SetSuccess(value *string) *respRaiserGet500 {
     return x
 }
 
-func (x *respRaiserGet500) SetFNonCompat(value *Fiery) *respRaiserGet500 {
-    x.F = value
-    return x
-}
-
-func (x *respRaiserGet500) SetF(value *Fiery) *respRaiserGet500 {
-    x.F = value
-    return x
-}
-
-func (x *respRaiserGet500) SetBNonCompat(value *Banal) *respRaiserGet500 {
-    x.B = value
-    return x
-}
-
-func (x *respRaiserGet500) SetB(value *Banal) *respRaiserGet500 {
-    x.B = value
-    return x
-}
-
-func (x *respRaiserGet500) SetSNonCompat(value *Serious) *respRaiserGet500 {
-    x.S = value
-    return x
-}
-
-func (x *respRaiserGet500) SetS(value *Serious) *respRaiserGet500 {
-    x.S = value
-    return x
-}
-
 func (x *respRaiserGet500) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *respRaiserGet500) IsSetF() bool {
-    return x != nil && x.F != nil
-}
-
-func (x *respRaiserGet500) IsSetB() bool {
-    return x != nil && x.B != nil
-}
-
-func (x *respRaiserGet500) IsSetS() bool {
-    return x != nil && x.S != nil
 }
 
 func (x *respRaiserGet500) writeField0(p thrift.Encoder) error {  // Success
@@ -2014,6 +1969,38 @@ func (x *respRaiserGet500) writeField0(p thrift.Encoder) error {  // Success
     return nil
 }
 
+func (x *respRaiserGet500) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+func (x *respRaiserGet500) GetF() *Fiery {
+    if !x.IsSetF() {
+        return nil
+    }
+    return x.F
+}
+
+func (x *respRaiserGet500) SetFNonCompat(value *Fiery) *respRaiserGet500 {
+    x.F = value
+    return x
+}
+
+func (x *respRaiserGet500) SetF(value *Fiery) *respRaiserGet500 {
+    x.F = value
+    return x
+}
+
+func (x *respRaiserGet500) IsSetF() bool {
+    return x != nil && x.F != nil
+}
+
 func (x *respRaiserGet500) writeField1(p thrift.Encoder) error {  // F
     if !x.IsSetF() {
         return nil
@@ -2032,6 +2019,39 @@ func (x *respRaiserGet500) writeField1(p thrift.Encoder) error {  // F
         return thrift.PrependError("respRaiserGet500 write field end error: ", err)
     }
     return nil
+}
+
+func (x *respRaiserGet500) readField1(p thrift.Decoder) error {  // F
+    result := NewFiery()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.F = result
+    return nil
+}
+
+
+func (x *respRaiserGet500) GetB() *Banal {
+    if !x.IsSetB() {
+        return nil
+    }
+    return x.B
+}
+
+func (x *respRaiserGet500) SetBNonCompat(value *Banal) *respRaiserGet500 {
+    x.B = value
+    return x
+}
+
+func (x *respRaiserGet500) SetB(value *Banal) *respRaiserGet500 {
+    x.B = value
+    return x
+}
+
+func (x *respRaiserGet500) IsSetB() bool {
+    return x != nil && x.B != nil
 }
 
 func (x *respRaiserGet500) writeField2(p thrift.Encoder) error {  // B
@@ -2054,6 +2074,39 @@ func (x *respRaiserGet500) writeField2(p thrift.Encoder) error {  // B
     return nil
 }
 
+func (x *respRaiserGet500) readField2(p thrift.Decoder) error {  // B
+    result := NewBanal()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.B = result
+    return nil
+}
+
+
+func (x *respRaiserGet500) GetS() *Serious {
+    if !x.IsSetS() {
+        return nil
+    }
+    return x.S
+}
+
+func (x *respRaiserGet500) SetSNonCompat(value *Serious) *respRaiserGet500 {
+    x.S = value
+    return x
+}
+
+func (x *respRaiserGet500) SetS(value *Serious) *respRaiserGet500 {
+    x.S = value
+    return x
+}
+
+func (x *respRaiserGet500) IsSetS() bool {
+    return x != nil && x.S != nil
+}
+
 func (x *respRaiserGet500) writeField3(p thrift.Encoder) error {  // S
     if !x.IsSetS() {
         return nil
@@ -2074,38 +2127,6 @@ func (x *respRaiserGet500) writeField3(p thrift.Encoder) error {  // S
     return nil
 }
 
-func (x *respRaiserGet500) readField0(p thrift.Decoder) error {  // Success
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Success = &result
-    return nil
-}
-
-func (x *respRaiserGet500) readField1(p thrift.Decoder) error {  // F
-    result := NewFiery()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.F = result
-    return nil
-}
-
-func (x *respRaiserGet500) readField2(p thrift.Decoder) error {  // B
-    result := NewBanal()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.B = result
-    return nil
-}
-
 func (x *respRaiserGet500) readField3(p thrift.Decoder) error {  // S
     result := NewSerious()
     err := result.Read(p)
@@ -2116,9 +2137,6 @@ func (x *respRaiserGet500) readField3(p thrift.Decoder) error {  // S
     x.S = result
     return nil
 }
-
-
-
 
 
 

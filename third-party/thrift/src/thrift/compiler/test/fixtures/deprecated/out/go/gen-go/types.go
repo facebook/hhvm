@@ -39,28 +39,6 @@ func (x *User) GetId() int64 {
     return x.Id
 }
 
-func (x *User) GetName() string {
-    return x.Name
-}
-
-func (x *User) GetFullName() string {
-    return x.FullName
-}
-
-func (x *User) GetEmail() string {
-    if !x.IsSetEmail() {
-        return ""
-    }
-    return *x.Email
-}
-
-func (x *User) GetEmailAddress() string {
-    if !x.IsSetEmailAddress() {
-        return ""
-    }
-    return *x.EmailAddress
-}
-
 func (x *User) SetIdNonCompat(value int64) *User {
     x.Id = value
     return x
@@ -71,53 +49,6 @@ func (x *User) SetId(value int64) *User {
     return x
 }
 
-func (x *User) SetNameNonCompat(value string) *User {
-    x.Name = value
-    return x
-}
-
-func (x *User) SetName(value string) *User {
-    x.Name = value
-    return x
-}
-
-func (x *User) SetFullNameNonCompat(value string) *User {
-    x.FullName = value
-    return x
-}
-
-func (x *User) SetFullName(value string) *User {
-    x.FullName = value
-    return x
-}
-
-func (x *User) SetEmailNonCompat(value string) *User {
-    x.Email = &value
-    return x
-}
-
-func (x *User) SetEmail(value *string) *User {
-    x.Email = value
-    return x
-}
-
-func (x *User) SetEmailAddressNonCompat(value string) *User {
-    x.EmailAddress = &value
-    return x
-}
-
-func (x *User) SetEmailAddress(value *string) *User {
-    x.EmailAddress = value
-    return x
-}
-
-func (x *User) IsSetEmail() bool {
-    return x != nil && x.Email != nil
-}
-
-func (x *User) IsSetEmailAddress() bool {
-    return x != nil && x.EmailAddress != nil
-}
 
 func (x *User) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
@@ -135,6 +66,32 @@ func (x *User) writeField1(p thrift.Encoder) error {  // Id
     return nil
 }
 
+func (x *User) readField1(p thrift.Decoder) error {  // Id
+    result, err := p.ReadI64()
+    if err != nil {
+        return err
+    }
+
+    x.Id = result
+    return nil
+}
+
+
+func (x *User) GetName() string {
+    return x.Name
+}
+
+func (x *User) SetNameNonCompat(value string) *User {
+    x.Name = value
+    return x
+}
+
+func (x *User) SetName(value string) *User {
+    x.Name = value
+    return x
+}
+
+
 func (x *User) writeField2(p thrift.Encoder) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 2); err != nil {
         return thrift.PrependError("User write field begin error: ", err)
@@ -151,6 +108,32 @@ func (x *User) writeField2(p thrift.Encoder) error {  // Name
     return nil
 }
 
+func (x *User) readField2(p thrift.Decoder) error {  // Name
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Name = result
+    return nil
+}
+
+
+func (x *User) GetFullName() string {
+    return x.FullName
+}
+
+func (x *User) SetFullNameNonCompat(value string) *User {
+    x.FullName = value
+    return x
+}
+
+func (x *User) SetFullName(value string) *User {
+    x.FullName = value
+    return x
+}
+
+
 func (x *User) writeField3(p thrift.Encoder) error {  // FullName
     if err := p.WriteFieldBegin("full_name", thrift.STRING, 3); err != nil {
         return thrift.PrependError("User write field begin error: ", err)
@@ -165,6 +148,38 @@ func (x *User) writeField3(p thrift.Encoder) error {  // FullName
         return thrift.PrependError("User write field end error: ", err)
     }
     return nil
+}
+
+func (x *User) readField3(p thrift.Decoder) error {  // FullName
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.FullName = result
+    return nil
+}
+
+
+func (x *User) GetEmail() string {
+    if !x.IsSetEmail() {
+        return ""
+    }
+    return *x.Email
+}
+
+func (x *User) SetEmailNonCompat(value string) *User {
+    x.Email = &value
+    return x
+}
+
+func (x *User) SetEmail(value *string) *User {
+    x.Email = value
+    return x
+}
+
+func (x *User) IsSetEmail() bool {
+    return x != nil && x.Email != nil
 }
 
 func (x *User) writeField4(p thrift.Encoder) error {  // Email
@@ -187,6 +202,38 @@ func (x *User) writeField4(p thrift.Encoder) error {  // Email
     return nil
 }
 
+func (x *User) readField4(p thrift.Decoder) error {  // Email
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Email = &result
+    return nil
+}
+
+
+func (x *User) GetEmailAddress() string {
+    if !x.IsSetEmailAddress() {
+        return ""
+    }
+    return *x.EmailAddress
+}
+
+func (x *User) SetEmailAddressNonCompat(value string) *User {
+    x.EmailAddress = &value
+    return x
+}
+
+func (x *User) SetEmailAddress(value *string) *User {
+    x.EmailAddress = value
+    return x
+}
+
+func (x *User) IsSetEmailAddress() bool {
+    return x != nil && x.EmailAddress != nil
+}
+
 func (x *User) writeField5(p thrift.Encoder) error {  // EmailAddress
     if !x.IsSetEmailAddress() {
         return nil
@@ -207,46 +254,6 @@ func (x *User) writeField5(p thrift.Encoder) error {  // EmailAddress
     return nil
 }
 
-func (x *User) readField1(p thrift.Decoder) error {  // Id
-    result, err := p.ReadI64()
-    if err != nil {
-        return err
-    }
-
-    x.Id = result
-    return nil
-}
-
-func (x *User) readField2(p thrift.Decoder) error {  // Name
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Name = result
-    return nil
-}
-
-func (x *User) readField3(p thrift.Decoder) error {  // FullName
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.FullName = result
-    return nil
-}
-
-func (x *User) readField4(p thrift.Decoder) error {  // Email
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Email = &result
-    return nil
-}
-
 func (x *User) readField5(p thrift.Decoder) error {  // EmailAddress
     result, err := p.ReadString()
     if err != nil {
@@ -256,7 +263,6 @@ func (x *User) readField5(p thrift.Decoder) error {  // EmailAddress
     x.EmailAddress = &result
     return nil
 }
-
 
 
 
@@ -375,20 +381,6 @@ func (x *ExampleUnion) GetStringValue() string {
     return *x.StringValue
 }
 
-func (x *ExampleUnion) GetIntValue() int32 {
-    if !x.IsSetIntValue() {
-        return 0
-    }
-    return *x.IntValue
-}
-
-func (x *ExampleUnion) GetDoubleValue() float64 {
-    if !x.IsSetDoubleValue() {
-        return 0.0
-    }
-    return *x.DoubleValue
-}
-
 func (x *ExampleUnion) SetStringValueNonCompat(value string) *ExampleUnion {
     x.StringValue = &value
     return x
@@ -399,36 +391,8 @@ func (x *ExampleUnion) SetStringValue(value *string) *ExampleUnion {
     return x
 }
 
-func (x *ExampleUnion) SetIntValueNonCompat(value int32) *ExampleUnion {
-    x.IntValue = &value
-    return x
-}
-
-func (x *ExampleUnion) SetIntValue(value *int32) *ExampleUnion {
-    x.IntValue = value
-    return x
-}
-
-func (x *ExampleUnion) SetDoubleValueNonCompat(value float64) *ExampleUnion {
-    x.DoubleValue = &value
-    return x
-}
-
-func (x *ExampleUnion) SetDoubleValue(value *float64) *ExampleUnion {
-    x.DoubleValue = value
-    return x
-}
-
 func (x *ExampleUnion) IsSetStringValue() bool {
     return x != nil && x.StringValue != nil
-}
-
-func (x *ExampleUnion) IsSetIntValue() bool {
-    return x != nil && x.IntValue != nil
-}
-
-func (x *ExampleUnion) IsSetDoubleValue() bool {
-    return x != nil && x.DoubleValue != nil
 }
 
 func (x *ExampleUnion) writeField1(p thrift.Encoder) error {  // StringValue
@@ -451,6 +415,38 @@ func (x *ExampleUnion) writeField1(p thrift.Encoder) error {  // StringValue
     return nil
 }
 
+func (x *ExampleUnion) readField1(p thrift.Decoder) error {  // StringValue
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.StringValue = &result
+    return nil
+}
+
+
+func (x *ExampleUnion) GetIntValue() int32 {
+    if !x.IsSetIntValue() {
+        return 0
+    }
+    return *x.IntValue
+}
+
+func (x *ExampleUnion) SetIntValueNonCompat(value int32) *ExampleUnion {
+    x.IntValue = &value
+    return x
+}
+
+func (x *ExampleUnion) SetIntValue(value *int32) *ExampleUnion {
+    x.IntValue = value
+    return x
+}
+
+func (x *ExampleUnion) IsSetIntValue() bool {
+    return x != nil && x.IntValue != nil
+}
+
 func (x *ExampleUnion) writeField2(p thrift.Encoder) error {  // IntValue
     if !x.IsSetIntValue() {
         return nil
@@ -469,6 +465,38 @@ func (x *ExampleUnion) writeField2(p thrift.Encoder) error {  // IntValue
         return thrift.PrependError("ExampleUnion write field end error: ", err)
     }
     return nil
+}
+
+func (x *ExampleUnion) readField2(p thrift.Decoder) error {  // IntValue
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.IntValue = &result
+    return nil
+}
+
+
+func (x *ExampleUnion) GetDoubleValue() float64 {
+    if !x.IsSetDoubleValue() {
+        return 0.0
+    }
+    return *x.DoubleValue
+}
+
+func (x *ExampleUnion) SetDoubleValueNonCompat(value float64) *ExampleUnion {
+    x.DoubleValue = &value
+    return x
+}
+
+func (x *ExampleUnion) SetDoubleValue(value *float64) *ExampleUnion {
+    x.DoubleValue = value
+    return x
+}
+
+func (x *ExampleUnion) IsSetDoubleValue() bool {
+    return x != nil && x.DoubleValue != nil
 }
 
 func (x *ExampleUnion) writeField3(p thrift.Encoder) error {  // DoubleValue
@@ -491,26 +519,6 @@ func (x *ExampleUnion) writeField3(p thrift.Encoder) error {  // DoubleValue
     return nil
 }
 
-func (x *ExampleUnion) readField1(p thrift.Decoder) error {  // StringValue
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.StringValue = &result
-    return nil
-}
-
-func (x *ExampleUnion) readField2(p thrift.Decoder) error {  // IntValue
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.IntValue = &result
-    return nil
-}
-
 func (x *ExampleUnion) readField3(p thrift.Decoder) error {  // DoubleValue
     result, err := p.ReadDouble()
     if err != nil {
@@ -520,8 +528,6 @@ func (x *ExampleUnion) readField3(p thrift.Decoder) error {  // DoubleValue
     x.DoubleValue = &result
     return nil
 }
-
-
 
 
 

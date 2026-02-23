@@ -117,56 +117,6 @@ func (x *TestStruct) GetUnqualifiedIntField() int32 {
     return x.UnqualifiedIntField
 }
 
-func (x *TestStruct) GetUnqualifiedBoolField() bool {
-    return x.UnqualifiedBoolField
-}
-
-func (x *TestStruct) GetUnqualifiedListField() []int32 {
-    if !x.IsSetUnqualifiedListField() {
-        return []int32{
-}
-    }
-    return x.UnqualifiedListField
-}
-
-func (x *TestStruct) GetUnqualifiedStructField() *EmptyStruct {
-    if !x.IsSetUnqualifiedStructField() {
-        return nil
-    }
-    return x.UnqualifiedStructField
-}
-
-func (x *TestStruct) GetOptionalIntField() int32 {
-    if !x.IsSetOptionalIntField() {
-        return int32(42)
-    }
-    return *x.OptionalIntField
-}
-
-func (x *TestStruct) GetOptionalBoolField() bool {
-    if !x.IsSetOptionalBoolField() {
-        return true
-    }
-    return *x.OptionalBoolField
-}
-
-func (x *TestStruct) GetOptionalListField() []int32 {
-    if !x.IsSetOptionalListField() {
-        return []int32{
-    int32(1),
-    int32(2),
-}
-    }
-    return x.OptionalListField
-}
-
-func (x *TestStruct) GetOptionalStructField() *EmptyStruct {
-    if !x.IsSetOptionalStructField() {
-        return nil
-    }
-    return x.OptionalStructField
-}
-
 func (x *TestStruct) SetUnqualifiedIntFieldNonCompat(value int32) *TestStruct {
     x.UnqualifiedIntField = value
     return x
@@ -177,99 +127,6 @@ func (x *TestStruct) SetUnqualifiedIntField(value int32) *TestStruct {
     return x
 }
 
-func (x *TestStruct) SetUnqualifiedBoolFieldNonCompat(value bool) *TestStruct {
-    x.UnqualifiedBoolField = value
-    return x
-}
-
-func (x *TestStruct) SetUnqualifiedBoolField(value bool) *TestStruct {
-    x.UnqualifiedBoolField = value
-    return x
-}
-
-func (x *TestStruct) SetUnqualifiedListFieldNonCompat(value []int32) *TestStruct {
-    x.UnqualifiedListField = value
-    return x
-}
-
-func (x *TestStruct) SetUnqualifiedListField(value []int32) *TestStruct {
-    x.UnqualifiedListField = value
-    return x
-}
-
-func (x *TestStruct) SetUnqualifiedStructFieldNonCompat(value *EmptyStruct) *TestStruct {
-    x.UnqualifiedStructField = value
-    return x
-}
-
-func (x *TestStruct) SetUnqualifiedStructField(value *EmptyStruct) *TestStruct {
-    x.UnqualifiedStructField = value
-    return x
-}
-
-func (x *TestStruct) SetOptionalIntFieldNonCompat(value int32) *TestStruct {
-    x.OptionalIntField = &value
-    return x
-}
-
-func (x *TestStruct) SetOptionalIntField(value *int32) *TestStruct {
-    x.OptionalIntField = value
-    return x
-}
-
-func (x *TestStruct) SetOptionalBoolFieldNonCompat(value bool) *TestStruct {
-    x.OptionalBoolField = &value
-    return x
-}
-
-func (x *TestStruct) SetOptionalBoolField(value *bool) *TestStruct {
-    x.OptionalBoolField = value
-    return x
-}
-
-func (x *TestStruct) SetOptionalListFieldNonCompat(value []int32) *TestStruct {
-    x.OptionalListField = value
-    return x
-}
-
-func (x *TestStruct) SetOptionalListField(value []int32) *TestStruct {
-    x.OptionalListField = value
-    return x
-}
-
-func (x *TestStruct) SetOptionalStructFieldNonCompat(value *EmptyStruct) *TestStruct {
-    x.OptionalStructField = value
-    return x
-}
-
-func (x *TestStruct) SetOptionalStructField(value *EmptyStruct) *TestStruct {
-    x.OptionalStructField = value
-    return x
-}
-
-func (x *TestStruct) IsSetUnqualifiedListField() bool {
-    return x != nil && x.UnqualifiedListField != nil
-}
-
-func (x *TestStruct) IsSetUnqualifiedStructField() bool {
-    return x != nil && x.UnqualifiedStructField != nil
-}
-
-func (x *TestStruct) IsSetOptionalIntField() bool {
-    return x != nil && x.OptionalIntField != nil
-}
-
-func (x *TestStruct) IsSetOptionalBoolField() bool {
-    return x != nil && x.OptionalBoolField != nil
-}
-
-func (x *TestStruct) IsSetOptionalListField() bool {
-    return x != nil && x.OptionalListField != nil
-}
-
-func (x *TestStruct) IsSetOptionalStructField() bool {
-    return x != nil && x.OptionalStructField != nil
-}
 
 func (x *TestStruct) writeField1(p thrift.Encoder) error {  // UnqualifiedIntField
     if err := p.WriteFieldBegin("unqualified_int_field", thrift.I32, 1); err != nil {
@@ -287,6 +144,32 @@ func (x *TestStruct) writeField1(p thrift.Encoder) error {  // UnqualifiedIntFie
     return nil
 }
 
+func (x *TestStruct) readField1(p thrift.Decoder) error {  // UnqualifiedIntField
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.UnqualifiedIntField = result
+    return nil
+}
+
+
+func (x *TestStruct) GetUnqualifiedBoolField() bool {
+    return x.UnqualifiedBoolField
+}
+
+func (x *TestStruct) SetUnqualifiedBoolFieldNonCompat(value bool) *TestStruct {
+    x.UnqualifiedBoolField = value
+    return x
+}
+
+func (x *TestStruct) SetUnqualifiedBoolField(value bool) *TestStruct {
+    x.UnqualifiedBoolField = value
+    return x
+}
+
+
 func (x *TestStruct) writeField2(p thrift.Encoder) error {  // UnqualifiedBoolField
     if err := p.WriteFieldBegin("unqualified_bool_field", thrift.BOOL, 2); err != nil {
         return thrift.PrependError("TestStruct write field begin error: ", err)
@@ -301,6 +184,39 @@ func (x *TestStruct) writeField2(p thrift.Encoder) error {  // UnqualifiedBoolFi
         return thrift.PrependError("TestStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *TestStruct) readField2(p thrift.Decoder) error {  // UnqualifiedBoolField
+    result, err := p.ReadBool()
+    if err != nil {
+        return err
+    }
+
+    x.UnqualifiedBoolField = result
+    return nil
+}
+
+
+func (x *TestStruct) GetUnqualifiedListField() []int32 {
+    if !x.IsSetUnqualifiedListField() {
+        return []int32{
+}
+    }
+    return x.UnqualifiedListField
+}
+
+func (x *TestStruct) SetUnqualifiedListFieldNonCompat(value []int32) *TestStruct {
+    x.UnqualifiedListField = value
+    return x
+}
+
+func (x *TestStruct) SetUnqualifiedListField(value []int32) *TestStruct {
+    x.UnqualifiedListField = value
+    return x
+}
+
+func (x *TestStruct) IsSetUnqualifiedListField() bool {
+    return x != nil && x.UnqualifiedListField != nil
 }
 
 func (x *TestStruct) writeField3(p thrift.Encoder) error {  // UnqualifiedListField
@@ -330,6 +246,56 @@ func (x *TestStruct) writeField3(p thrift.Encoder) error {  // UnqualifiedListFi
     return nil
 }
 
+func (x *TestStruct) readField3(p thrift.Decoder) error {  // UnqualifiedListField
+    _ /* elemType */, size, err := p.ReadListBegin()
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
+    }
+    
+    listResult := make([]int32, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int32
+        {
+            result, err := p.ReadI32()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
+
+    x.UnqualifiedListField = result
+    return nil
+}
+
+
+func (x *TestStruct) GetUnqualifiedStructField() *EmptyStruct {
+    if !x.IsSetUnqualifiedStructField() {
+        return nil
+    }
+    return x.UnqualifiedStructField
+}
+
+func (x *TestStruct) SetUnqualifiedStructFieldNonCompat(value *EmptyStruct) *TestStruct {
+    x.UnqualifiedStructField = value
+    return x
+}
+
+func (x *TestStruct) SetUnqualifiedStructField(value *EmptyStruct) *TestStruct {
+    x.UnqualifiedStructField = value
+    return x
+}
+
+func (x *TestStruct) IsSetUnqualifiedStructField() bool {
+    return x != nil && x.UnqualifiedStructField != nil
+}
+
 func (x *TestStruct) writeField4(p thrift.Encoder) error {  // UnqualifiedStructField
     if !x.IsSetUnqualifiedStructField() {
         return nil
@@ -348,6 +314,39 @@ func (x *TestStruct) writeField4(p thrift.Encoder) error {  // UnqualifiedStruct
         return thrift.PrependError("TestStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *TestStruct) readField4(p thrift.Decoder) error {  // UnqualifiedStructField
+    result := NewEmptyStruct()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.UnqualifiedStructField = result
+    return nil
+}
+
+
+func (x *TestStruct) GetOptionalIntField() int32 {
+    if !x.IsSetOptionalIntField() {
+        return int32(42)
+    }
+    return *x.OptionalIntField
+}
+
+func (x *TestStruct) SetOptionalIntFieldNonCompat(value int32) *TestStruct {
+    x.OptionalIntField = &value
+    return x
+}
+
+func (x *TestStruct) SetOptionalIntField(value *int32) *TestStruct {
+    x.OptionalIntField = value
+    return x
+}
+
+func (x *TestStruct) IsSetOptionalIntField() bool {
+    return x != nil && x.OptionalIntField != nil
 }
 
 func (x *TestStruct) writeField5(p thrift.Encoder) error {  // OptionalIntField
@@ -370,6 +369,38 @@ func (x *TestStruct) writeField5(p thrift.Encoder) error {  // OptionalIntField
     return nil
 }
 
+func (x *TestStruct) readField5(p thrift.Decoder) error {  // OptionalIntField
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.OptionalIntField = &result
+    return nil
+}
+
+
+func (x *TestStruct) GetOptionalBoolField() bool {
+    if !x.IsSetOptionalBoolField() {
+        return true
+    }
+    return *x.OptionalBoolField
+}
+
+func (x *TestStruct) SetOptionalBoolFieldNonCompat(value bool) *TestStruct {
+    x.OptionalBoolField = &value
+    return x
+}
+
+func (x *TestStruct) SetOptionalBoolField(value *bool) *TestStruct {
+    x.OptionalBoolField = value
+    return x
+}
+
+func (x *TestStruct) IsSetOptionalBoolField() bool {
+    return x != nil && x.OptionalBoolField != nil
+}
+
 func (x *TestStruct) writeField6(p thrift.Encoder) error {  // OptionalBoolField
     if !x.IsSetOptionalBoolField() {
         return nil
@@ -388,6 +419,41 @@ func (x *TestStruct) writeField6(p thrift.Encoder) error {  // OptionalBoolField
         return thrift.PrependError("TestStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *TestStruct) readField6(p thrift.Decoder) error {  // OptionalBoolField
+    result, err := p.ReadBool()
+    if err != nil {
+        return err
+    }
+
+    x.OptionalBoolField = &result
+    return nil
+}
+
+
+func (x *TestStruct) GetOptionalListField() []int32 {
+    if !x.IsSetOptionalListField() {
+        return []int32{
+    int32(1),
+    int32(2),
+}
+    }
+    return x.OptionalListField
+}
+
+func (x *TestStruct) SetOptionalListFieldNonCompat(value []int32) *TestStruct {
+    x.OptionalListField = value
+    return x
+}
+
+func (x *TestStruct) SetOptionalListField(value []int32) *TestStruct {
+    x.OptionalListField = value
+    return x
+}
+
+func (x *TestStruct) IsSetOptionalListField() bool {
+    return x != nil && x.OptionalListField != nil
 }
 
 func (x *TestStruct) writeField7(p thrift.Encoder) error {  // OptionalListField
@@ -421,105 +487,6 @@ func (x *TestStruct) writeField7(p thrift.Encoder) error {  // OptionalListField
     return nil
 }
 
-func (x *TestStruct) writeField8(p thrift.Encoder) error {  // OptionalStructField
-    if !x.IsSetOptionalStructField() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("optional_struct_field", thrift.STRUCT, 8); err != nil {
-        return thrift.PrependError("TestStruct write field begin error: ", err)
-    }
-
-    item := x.OptionalStructField
-    if err := item.Write(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("TestStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *TestStruct) readField1(p thrift.Decoder) error {  // UnqualifiedIntField
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.UnqualifiedIntField = result
-    return nil
-}
-
-func (x *TestStruct) readField2(p thrift.Decoder) error {  // UnqualifiedBoolField
-    result, err := p.ReadBool()
-    if err != nil {
-        return err
-    }
-
-    x.UnqualifiedBoolField = result
-    return nil
-}
-
-func (x *TestStruct) readField3(p thrift.Decoder) error {  // UnqualifiedListField
-    _ /* elemType */, size, err := p.ReadListBegin()
-    if err != nil {
-        return thrift.PrependError("error reading list begin: ", err)
-    }
-    
-    listResult := make([]int32, 0, size)
-    for i := 0; i < size; i++ {
-        var elem int32
-        {
-            result, err := p.ReadI32()
-            if err != nil {
-                return err
-            }
-            elem = result
-        }
-        listResult = append(listResult, elem)
-    }
-    
-    if err := p.ReadListEnd(); err != nil {
-        return thrift.PrependError("error reading list end: ", err)
-    }
-    result := listResult
-
-    x.UnqualifiedListField = result
-    return nil
-}
-
-func (x *TestStruct) readField4(p thrift.Decoder) error {  // UnqualifiedStructField
-    result := NewEmptyStruct()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.UnqualifiedStructField = result
-    return nil
-}
-
-func (x *TestStruct) readField5(p thrift.Decoder) error {  // OptionalIntField
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.OptionalIntField = &result
-    return nil
-}
-
-func (x *TestStruct) readField6(p thrift.Decoder) error {  // OptionalBoolField
-    result, err := p.ReadBool()
-    if err != nil {
-        return err
-    }
-
-    x.OptionalBoolField = &result
-    return nil
-}
-
 func (x *TestStruct) readField7(p thrift.Decoder) error {  // OptionalListField
     _ /* elemType */, size, err := p.ReadListBegin()
     if err != nil {
@@ -548,6 +515,48 @@ func (x *TestStruct) readField7(p thrift.Decoder) error {  // OptionalListField
     return nil
 }
 
+
+func (x *TestStruct) GetOptionalStructField() *EmptyStruct {
+    if !x.IsSetOptionalStructField() {
+        return nil
+    }
+    return x.OptionalStructField
+}
+
+func (x *TestStruct) SetOptionalStructFieldNonCompat(value *EmptyStruct) *TestStruct {
+    x.OptionalStructField = value
+    return x
+}
+
+func (x *TestStruct) SetOptionalStructField(value *EmptyStruct) *TestStruct {
+    x.OptionalStructField = value
+    return x
+}
+
+func (x *TestStruct) IsSetOptionalStructField() bool {
+    return x != nil && x.OptionalStructField != nil
+}
+
+func (x *TestStruct) writeField8(p thrift.Encoder) error {  // OptionalStructField
+    if !x.IsSetOptionalStructField() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("optional_struct_field", thrift.STRUCT, 8); err != nil {
+        return thrift.PrependError("TestStruct write field begin error: ", err)
+    }
+
+    item := x.OptionalStructField
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("TestStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *TestStruct) readField8(p thrift.Decoder) error {  // OptionalStructField
     result := NewEmptyStruct()
     err := result.Read(p)
@@ -558,9 +567,6 @@ func (x *TestStruct) readField8(p thrift.Decoder) error {  // OptionalStructFiel
     x.OptionalStructField = result
     return nil
 }
-
-
-
 
 
 

@@ -730,6 +730,7 @@ func (x *DecoratedStruct) SetField(value string) *DecoratedStruct {
     return x
 }
 
+
 func (x *DecoratedStruct) writeField1(p thrift.Encoder) error {  // Field
     if err := p.WriteFieldBegin("field", thrift.STRING, 1); err != nil {
         return thrift.PrependError("DecoratedStruct write field begin error: ", err)
@@ -755,6 +756,7 @@ func (x *DecoratedStruct) readField1(p thrift.Decoder) error {  // Field
     x.Field = result
     return nil
 }
+
 
 
 
@@ -854,55 +856,6 @@ func (x *ContainerStruct) GetFieldB() []int32 {
     return x.FieldB
 }
 
-func (x *ContainerStruct) GetFieldC() []int32 {
-    if !x.IsSetFieldC() {
-        return make([]int32, 0)
-    }
-    return x.FieldC
-}
-
-func (x *ContainerStruct) GetFieldD() []int32 {
-    if !x.IsSetFieldD() {
-        return make([]int32, 0)
-    }
-    return x.FieldD
-}
-
-func (x *ContainerStruct) GetFieldE() []int32 {
-    if !x.IsSetFieldE() {
-        return make([]int32, 0)
-    }
-    return x.FieldE
-}
-
-func (x *ContainerStruct) GetFieldF() SetI32_7194 {
-    if !x.IsSetFieldF() {
-        return NewSetI32_7194()
-    }
-    return x.FieldF
-}
-
-func (x *ContainerStruct) GetFieldG() MapI32String_1261 {
-    if !x.IsSetFieldG() {
-        return NewMapI32String_1261()
-    }
-    return x.FieldG
-}
-
-func (x *ContainerStruct) GetFieldH() included.SomeMap {
-    if !x.IsSetFieldH() {
-        return included.NewSomeMap()
-    }
-    return x.FieldH
-}
-
-func (x *ContainerStruct) GetFieldA() []int32 {
-    if !x.IsSetFieldA() {
-        return make([]int32, 0)
-    }
-    return x.FieldA
-}
-
 func (x *ContainerStruct) SetFieldBNonCompat(value []int32) *ContainerStruct {
     x.FieldB = value
     return x
@@ -913,106 +866,8 @@ func (x *ContainerStruct) SetFieldB(value []int32) *ContainerStruct {
     return x
 }
 
-func (x *ContainerStruct) SetFieldCNonCompat(value []int32) *ContainerStruct {
-    x.FieldC = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldC(value []int32) *ContainerStruct {
-    x.FieldC = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldDNonCompat(value []int32) *ContainerStruct {
-    x.FieldD = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldD(value []int32) *ContainerStruct {
-    x.FieldD = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldENonCompat(value []int32) *ContainerStruct {
-    x.FieldE = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldE(value []int32) *ContainerStruct {
-    x.FieldE = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldFNonCompat(value SetI32_7194) *ContainerStruct {
-    x.FieldF = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldF(value SetI32_7194) *ContainerStruct {
-    x.FieldF = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldGNonCompat(value MapI32String_1261) *ContainerStruct {
-    x.FieldG = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldG(value MapI32String_1261) *ContainerStruct {
-    x.FieldG = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldHNonCompat(value included.SomeMap) *ContainerStruct {
-    x.FieldH = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldH(value included.SomeMap) *ContainerStruct {
-    x.FieldH = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldANonCompat(value []int32) *ContainerStruct {
-    x.FieldA = value
-    return x
-}
-
-func (x *ContainerStruct) SetFieldA(value []int32) *ContainerStruct {
-    x.FieldA = value
-    return x
-}
-
 func (x *ContainerStruct) IsSetFieldB() bool {
     return x != nil && x.FieldB != nil
-}
-
-func (x *ContainerStruct) IsSetFieldC() bool {
-    return x != nil && x.FieldC != nil
-}
-
-func (x *ContainerStruct) IsSetFieldD() bool {
-    return x != nil && x.FieldD != nil
-}
-
-func (x *ContainerStruct) IsSetFieldE() bool {
-    return x != nil && x.FieldE != nil
-}
-
-func (x *ContainerStruct) IsSetFieldF() bool {
-    return x != nil && x.FieldF != nil
-}
-
-func (x *ContainerStruct) IsSetFieldG() bool {
-    return x != nil && x.FieldG != nil
-}
-
-func (x *ContainerStruct) IsSetFieldH() bool {
-    return x != nil && x.FieldH != nil
-}
-
-func (x *ContainerStruct) IsSetFieldA() bool {
-    return x != nil && x.FieldA != nil
 }
 
 func (x *ContainerStruct) writeField2(p thrift.Encoder) error {  // FieldB
@@ -1021,165 +876,6 @@ func (x *ContainerStruct) writeField2(p thrift.Encoder) error {  // FieldB
     }
 
     item := x.FieldB
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-        return thrift.PrependError("error writing list begin: ", err)
-    }
-    for _, v := range item {
-        {
-            item := v
-            if err := p.WriteI32(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteListEnd(); err != nil {
-        return thrift.PrependError("error writing list end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("ContainerStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *ContainerStruct) writeField3(p thrift.Encoder) error {  // FieldC
-    if err := p.WriteFieldBegin("fieldC", thrift.LIST, 3); err != nil {
-        return thrift.PrependError("ContainerStruct write field begin error: ", err)
-    }
-
-    item := x.FieldC
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-        return thrift.PrependError("error writing list begin: ", err)
-    }
-    for _, v := range item {
-        {
-            item := v
-            if err := p.WriteI32(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteListEnd(); err != nil {
-        return thrift.PrependError("error writing list end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("ContainerStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *ContainerStruct) writeField4(p thrift.Encoder) error {  // FieldD
-    if err := p.WriteFieldBegin("fieldD", thrift.LIST, 4); err != nil {
-        return thrift.PrependError("ContainerStruct write field begin error: ", err)
-    }
-
-    item := x.FieldD
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-        return thrift.PrependError("error writing list begin: ", err)
-    }
-    for _, v := range item {
-        {
-            item := v
-            if err := p.WriteI32(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteListEnd(); err != nil {
-        return thrift.PrependError("error writing list end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("ContainerStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *ContainerStruct) writeField5(p thrift.Encoder) error {  // FieldE
-    if err := p.WriteFieldBegin("fieldE", thrift.LIST, 5); err != nil {
-        return thrift.PrependError("ContainerStruct write field begin error: ", err)
-    }
-
-    item := x.FieldE
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-        return thrift.PrependError("error writing list begin: ", err)
-    }
-    for _, v := range item {
-        {
-            item := v
-            if err := p.WriteI32(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteListEnd(); err != nil {
-        return thrift.PrependError("error writing list end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("ContainerStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *ContainerStruct) writeField6(p thrift.Encoder) error {  // FieldF
-    if err := p.WriteFieldBegin("fieldF", thrift.SET, 6); err != nil {
-        return thrift.PrependError("ContainerStruct write field begin error: ", err)
-    }
-
-    item := x.FieldF
-    err := WriteSetI32_7194(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("ContainerStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *ContainerStruct) writeField7(p thrift.Encoder) error {  // FieldG
-    if err := p.WriteFieldBegin("fieldG", thrift.MAP, 7); err != nil {
-        return thrift.PrependError("ContainerStruct write field begin error: ", err)
-    }
-
-    item := x.FieldG
-    err := WriteMapI32String_1261(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("ContainerStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *ContainerStruct) writeField8(p thrift.Encoder) error {  // FieldH
-    if err := p.WriteFieldBegin("fieldH", thrift.MAP, 8); err != nil {
-        return thrift.PrependError("ContainerStruct write field begin error: ", err)
-    }
-
-    item := x.FieldH
-    err := included.WriteSomeMap(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("ContainerStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *ContainerStruct) writeField12(p thrift.Encoder) error {  // FieldA
-    if err := p.WriteFieldBegin("fieldA", thrift.LIST, 12); err != nil {
-        return thrift.PrependError("ContainerStruct write field begin error: ", err)
-    }
-
-    item := x.FieldA
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
         return thrift.PrependError("error writing list begin: ", err)
     }
@@ -1229,6 +925,55 @@ func (x *ContainerStruct) readField2(p thrift.Decoder) error {  // FieldB
     return nil
 }
 
+
+func (x *ContainerStruct) GetFieldC() []int32 {
+    if !x.IsSetFieldC() {
+        return make([]int32, 0)
+    }
+    return x.FieldC
+}
+
+func (x *ContainerStruct) SetFieldCNonCompat(value []int32) *ContainerStruct {
+    x.FieldC = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldC(value []int32) *ContainerStruct {
+    x.FieldC = value
+    return x
+}
+
+func (x *ContainerStruct) IsSetFieldC() bool {
+    return x != nil && x.FieldC != nil
+}
+
+func (x *ContainerStruct) writeField3(p thrift.Encoder) error {  // FieldC
+    if err := p.WriteFieldBegin("fieldC", thrift.LIST, 3); err != nil {
+        return thrift.PrependError("ContainerStruct write field begin error: ", err)
+    }
+
+    item := x.FieldC
+    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("ContainerStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *ContainerStruct) readField3(p thrift.Decoder) error {  // FieldC
     _ /* elemType */, size, err := p.ReadListBegin()
     if err != nil {
@@ -1254,6 +999,55 @@ func (x *ContainerStruct) readField3(p thrift.Decoder) error {  // FieldC
     result := listResult
 
     x.FieldC = result
+    return nil
+}
+
+
+func (x *ContainerStruct) GetFieldD() []int32 {
+    if !x.IsSetFieldD() {
+        return make([]int32, 0)
+    }
+    return x.FieldD
+}
+
+func (x *ContainerStruct) SetFieldDNonCompat(value []int32) *ContainerStruct {
+    x.FieldD = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldD(value []int32) *ContainerStruct {
+    x.FieldD = value
+    return x
+}
+
+func (x *ContainerStruct) IsSetFieldD() bool {
+    return x != nil && x.FieldD != nil
+}
+
+func (x *ContainerStruct) writeField4(p thrift.Encoder) error {  // FieldD
+    if err := p.WriteFieldBegin("fieldD", thrift.LIST, 4); err != nil {
+        return thrift.PrependError("ContainerStruct write field begin error: ", err)
+    }
+
+    item := x.FieldD
+    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("ContainerStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -1285,6 +1079,55 @@ func (x *ContainerStruct) readField4(p thrift.Decoder) error {  // FieldD
     return nil
 }
 
+
+func (x *ContainerStruct) GetFieldE() []int32 {
+    if !x.IsSetFieldE() {
+        return make([]int32, 0)
+    }
+    return x.FieldE
+}
+
+func (x *ContainerStruct) SetFieldENonCompat(value []int32) *ContainerStruct {
+    x.FieldE = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldE(value []int32) *ContainerStruct {
+    x.FieldE = value
+    return x
+}
+
+func (x *ContainerStruct) IsSetFieldE() bool {
+    return x != nil && x.FieldE != nil
+}
+
+func (x *ContainerStruct) writeField5(p thrift.Encoder) error {  // FieldE
+    if err := p.WriteFieldBegin("fieldE", thrift.LIST, 5); err != nil {
+        return thrift.PrependError("ContainerStruct write field begin error: ", err)
+    }
+
+    item := x.FieldE
+    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("ContainerStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *ContainerStruct) readField5(p thrift.Decoder) error {  // FieldE
     _ /* elemType */, size, err := p.ReadListBegin()
     if err != nil {
@@ -1313,6 +1156,45 @@ func (x *ContainerStruct) readField5(p thrift.Decoder) error {  // FieldE
     return nil
 }
 
+
+func (x *ContainerStruct) GetFieldF() SetI32_7194 {
+    if !x.IsSetFieldF() {
+        return NewSetI32_7194()
+    }
+    return x.FieldF
+}
+
+func (x *ContainerStruct) SetFieldFNonCompat(value SetI32_7194) *ContainerStruct {
+    x.FieldF = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldF(value SetI32_7194) *ContainerStruct {
+    x.FieldF = value
+    return x
+}
+
+func (x *ContainerStruct) IsSetFieldF() bool {
+    return x != nil && x.FieldF != nil
+}
+
+func (x *ContainerStruct) writeField6(p thrift.Encoder) error {  // FieldF
+    if err := p.WriteFieldBegin("fieldF", thrift.SET, 6); err != nil {
+        return thrift.PrependError("ContainerStruct write field begin error: ", err)
+    }
+
+    item := x.FieldF
+    err := WriteSetI32_7194(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("ContainerStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *ContainerStruct) readField6(p thrift.Decoder) error {  // FieldF
     result, err := ReadSetI32_7194(p)
     if err != nil {
@@ -1320,6 +1202,45 @@ func (x *ContainerStruct) readField6(p thrift.Decoder) error {  // FieldF
     }
 
     x.FieldF = result
+    return nil
+}
+
+
+func (x *ContainerStruct) GetFieldG() MapI32String_1261 {
+    if !x.IsSetFieldG() {
+        return NewMapI32String_1261()
+    }
+    return x.FieldG
+}
+
+func (x *ContainerStruct) SetFieldGNonCompat(value MapI32String_1261) *ContainerStruct {
+    x.FieldG = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldG(value MapI32String_1261) *ContainerStruct {
+    x.FieldG = value
+    return x
+}
+
+func (x *ContainerStruct) IsSetFieldG() bool {
+    return x != nil && x.FieldG != nil
+}
+
+func (x *ContainerStruct) writeField7(p thrift.Encoder) error {  // FieldG
+    if err := p.WriteFieldBegin("fieldG", thrift.MAP, 7); err != nil {
+        return thrift.PrependError("ContainerStruct write field begin error: ", err)
+    }
+
+    item := x.FieldG
+    err := WriteMapI32String_1261(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("ContainerStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -1333,6 +1254,45 @@ func (x *ContainerStruct) readField7(p thrift.Decoder) error {  // FieldG
     return nil
 }
 
+
+func (x *ContainerStruct) GetFieldH() included.SomeMap {
+    if !x.IsSetFieldH() {
+        return included.NewSomeMap()
+    }
+    return x.FieldH
+}
+
+func (x *ContainerStruct) SetFieldHNonCompat(value included.SomeMap) *ContainerStruct {
+    x.FieldH = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldH(value included.SomeMap) *ContainerStruct {
+    x.FieldH = value
+    return x
+}
+
+func (x *ContainerStruct) IsSetFieldH() bool {
+    return x != nil && x.FieldH != nil
+}
+
+func (x *ContainerStruct) writeField8(p thrift.Encoder) error {  // FieldH
+    if err := p.WriteFieldBegin("fieldH", thrift.MAP, 8); err != nil {
+        return thrift.PrependError("ContainerStruct write field begin error: ", err)
+    }
+
+    item := x.FieldH
+    err := included.WriteSomeMap(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("ContainerStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *ContainerStruct) readField8(p thrift.Decoder) error {  // FieldH
     result, err := included.ReadSomeMap(p)
     if err != nil {
@@ -1340,6 +1300,55 @@ func (x *ContainerStruct) readField8(p thrift.Decoder) error {  // FieldH
     }
 
     x.FieldH = result
+    return nil
+}
+
+
+func (x *ContainerStruct) GetFieldA() []int32 {
+    if !x.IsSetFieldA() {
+        return make([]int32, 0)
+    }
+    return x.FieldA
+}
+
+func (x *ContainerStruct) SetFieldANonCompat(value []int32) *ContainerStruct {
+    x.FieldA = value
+    return x
+}
+
+func (x *ContainerStruct) SetFieldA(value []int32) *ContainerStruct {
+    x.FieldA = value
+    return x
+}
+
+func (x *ContainerStruct) IsSetFieldA() bool {
+    return x != nil && x.FieldA != nil
+}
+
+func (x *ContainerStruct) writeField12(p thrift.Encoder) error {  // FieldA
+    if err := p.WriteFieldBegin("fieldA", thrift.LIST, 12); err != nil {
+        return thrift.PrependError("ContainerStruct write field begin error: ", err)
+    }
+
+    item := x.FieldA
+    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("ContainerStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -1370,6 +1379,7 @@ func (x *ContainerStruct) readField12(p thrift.Decoder) error {  // FieldA
     x.FieldA = result
     return nil
 }
+
 
 
 
@@ -1576,6 +1586,7 @@ func (x *CppTypeStruct) readField1(p thrift.Decoder) error {  // FieldA
 
 
 
+
 func (x *CppTypeStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CppTypeStruct"); err != nil {
         return thrift.PrependError("CppTypeStruct write struct begin error: ", err)
@@ -1671,6 +1682,7 @@ func (x *VirtualStruct) SetMyIntField(value int64) *VirtualStruct {
     return x
 }
 
+
 func (x *VirtualStruct) writeField1(p thrift.Encoder) error {  // MyIntField
     if err := p.WriteFieldBegin("MyIntField", thrift.I64, 1); err != nil {
         return thrift.PrependError("VirtualStruct write field begin error: ", err)
@@ -1696,6 +1708,7 @@ func (x *VirtualStruct) readField1(p thrift.Decoder) error {  // MyIntField
     x.MyIntField = result
     return nil
 }
+
 
 
 
@@ -1786,10 +1799,6 @@ func (x *MyStructWithForwardRefEnum) GetA() MyForwardRefEnum {
     return x.A
 }
 
-func (x *MyStructWithForwardRefEnum) GetB() MyForwardRefEnum {
-    return x.B
-}
-
 func (x *MyStructWithForwardRefEnum) SetANonCompat(value MyForwardRefEnum) *MyStructWithForwardRefEnum {
     x.A = value
     return x
@@ -1800,15 +1809,6 @@ func (x *MyStructWithForwardRefEnum) SetA(value MyForwardRefEnum) *MyStructWithF
     return x
 }
 
-func (x *MyStructWithForwardRefEnum) SetBNonCompat(value MyForwardRefEnum) *MyStructWithForwardRefEnum {
-    x.B = value
-    return x
-}
-
-func (x *MyStructWithForwardRefEnum) SetB(value MyForwardRefEnum) *MyStructWithForwardRefEnum {
-    x.B = value
-    return x
-}
 
 func (x *MyStructWithForwardRefEnum) writeField1(p thrift.Encoder) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I32, 1); err != nil {
@@ -1816,22 +1816,6 @@ func (x *MyStructWithForwardRefEnum) writeField1(p thrift.Encoder) error {  // A
     }
 
     item := x.A
-    if err := p.WriteI32(int32(item)); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStructWithForwardRefEnum write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStructWithForwardRefEnum) writeField2(p thrift.Encoder) error {  // B
-    if err := p.WriteFieldBegin("b", thrift.I32, 2); err != nil {
-        return thrift.PrependError("MyStructWithForwardRefEnum write field begin error: ", err)
-    }
-
-    item := x.B
     if err := p.WriteI32(int32(item)); err != nil {
         return err
     }
@@ -1853,6 +1837,38 @@ func (x *MyStructWithForwardRefEnum) readField1(p thrift.Decoder) error {  // A
     return nil
 }
 
+
+func (x *MyStructWithForwardRefEnum) GetB() MyForwardRefEnum {
+    return x.B
+}
+
+func (x *MyStructWithForwardRefEnum) SetBNonCompat(value MyForwardRefEnum) *MyStructWithForwardRefEnum {
+    x.B = value
+    return x
+}
+
+func (x *MyStructWithForwardRefEnum) SetB(value MyForwardRefEnum) *MyStructWithForwardRefEnum {
+    x.B = value
+    return x
+}
+
+
+func (x *MyStructWithForwardRefEnum) writeField2(p thrift.Encoder) error {  // B
+    if err := p.WriteFieldBegin("b", thrift.I32, 2); err != nil {
+        return thrift.PrependError("MyStructWithForwardRefEnum write field begin error: ", err)
+    }
+
+    item := x.B
+    if err := p.WriteI32(int32(item)); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStructWithForwardRefEnum write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MyStructWithForwardRefEnum) readField2(p thrift.Decoder) error {  // B
     enumResult, err := p.ReadI32()
     if err != nil {
@@ -1863,6 +1879,7 @@ func (x *MyStructWithForwardRefEnum) readField2(p thrift.Decoder) error {  // B
     x.B = result
     return nil
 }
+
 
 
 
@@ -1963,10 +1980,6 @@ func (x *TrivialNumeric) GetA() int32 {
     return x.A
 }
 
-func (x *TrivialNumeric) GetB() bool {
-    return x.B
-}
-
 func (x *TrivialNumeric) SetANonCompat(value int32) *TrivialNumeric {
     x.A = value
     return x
@@ -1977,15 +1990,6 @@ func (x *TrivialNumeric) SetA(value int32) *TrivialNumeric {
     return x
 }
 
-func (x *TrivialNumeric) SetBNonCompat(value bool) *TrivialNumeric {
-    x.B = value
-    return x
-}
-
-func (x *TrivialNumeric) SetB(value bool) *TrivialNumeric {
-    x.B = value
-    return x
-}
 
 func (x *TrivialNumeric) writeField1(p thrift.Encoder) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I32, 1); err != nil {
@@ -1994,22 +1998,6 @@ func (x *TrivialNumeric) writeField1(p thrift.Encoder) error {  // A
 
     item := x.A
     if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("TrivialNumeric write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *TrivialNumeric) writeField2(p thrift.Encoder) error {  // B
-    if err := p.WriteFieldBegin("b", thrift.BOOL, 2); err != nil {
-        return thrift.PrependError("TrivialNumeric write field begin error: ", err)
-    }
-
-    item := x.B
-    if err := p.WriteBool(item); err != nil {
         return err
     }
 
@@ -2029,6 +2017,38 @@ func (x *TrivialNumeric) readField1(p thrift.Decoder) error {  // A
     return nil
 }
 
+
+func (x *TrivialNumeric) GetB() bool {
+    return x.B
+}
+
+func (x *TrivialNumeric) SetBNonCompat(value bool) *TrivialNumeric {
+    x.B = value
+    return x
+}
+
+func (x *TrivialNumeric) SetB(value bool) *TrivialNumeric {
+    x.B = value
+    return x
+}
+
+
+func (x *TrivialNumeric) writeField2(p thrift.Encoder) error {  // B
+    if err := p.WriteFieldBegin("b", thrift.BOOL, 2); err != nil {
+        return thrift.PrependError("TrivialNumeric write field begin error: ", err)
+    }
+
+    item := x.B
+    if err := p.WriteBool(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("TrivialNumeric write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *TrivialNumeric) readField2(p thrift.Decoder) error {  // B
     result, err := p.ReadBool()
     if err != nil {
@@ -2038,6 +2058,7 @@ func (x *TrivialNumeric) readField2(p thrift.Decoder) error {  // B
     x.B = result
     return nil
 }
+
 
 
 
@@ -2134,13 +2155,6 @@ func (x *TrivialNestedWithDefault) GetZ() int32 {
     return x.Z
 }
 
-func (x *TrivialNestedWithDefault) GetN() *TrivialNumeric {
-    if !x.IsSetN() {
-        return nil
-    }
-    return x.N
-}
-
 func (x *TrivialNestedWithDefault) SetZNonCompat(value int32) *TrivialNestedWithDefault {
     x.Z = value
     return x
@@ -2151,19 +2165,6 @@ func (x *TrivialNestedWithDefault) SetZ(value int32) *TrivialNestedWithDefault {
     return x
 }
 
-func (x *TrivialNestedWithDefault) SetNNonCompat(value *TrivialNumeric) *TrivialNestedWithDefault {
-    x.N = value
-    return x
-}
-
-func (x *TrivialNestedWithDefault) SetN(value *TrivialNumeric) *TrivialNestedWithDefault {
-    x.N = value
-    return x
-}
-
-func (x *TrivialNestedWithDefault) IsSetN() bool {
-    return x != nil && x.N != nil
-}
 
 func (x *TrivialNestedWithDefault) writeField1(p thrift.Encoder) error {  // Z
     if err := p.WriteFieldBegin("z", thrift.I32, 1); err != nil {
@@ -2179,6 +2180,38 @@ func (x *TrivialNestedWithDefault) writeField1(p thrift.Encoder) error {  // Z
         return thrift.PrependError("TrivialNestedWithDefault write field end error: ", err)
     }
     return nil
+}
+
+func (x *TrivialNestedWithDefault) readField1(p thrift.Decoder) error {  // Z
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Z = result
+    return nil
+}
+
+
+func (x *TrivialNestedWithDefault) GetN() *TrivialNumeric {
+    if !x.IsSetN() {
+        return nil
+    }
+    return x.N
+}
+
+func (x *TrivialNestedWithDefault) SetNNonCompat(value *TrivialNumeric) *TrivialNestedWithDefault {
+    x.N = value
+    return x
+}
+
+func (x *TrivialNestedWithDefault) SetN(value *TrivialNumeric) *TrivialNestedWithDefault {
+    x.N = value
+    return x
+}
+
+func (x *TrivialNestedWithDefault) IsSetN() bool {
+    return x != nil && x.N != nil
 }
 
 func (x *TrivialNestedWithDefault) writeField2(p thrift.Encoder) error {  // N
@@ -2198,16 +2231,6 @@ func (x *TrivialNestedWithDefault) writeField2(p thrift.Encoder) error {  // N
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("TrivialNestedWithDefault write field end error: ", err)
     }
-    return nil
-}
-
-func (x *TrivialNestedWithDefault) readField1(p thrift.Decoder) error {  // Z
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.Z = result
     return nil
 }
 
@@ -2322,13 +2345,6 @@ func (x *ComplexString) GetA() string {
     return x.A
 }
 
-func (x *ComplexString) GetB() map[string]int32 {
-    if !x.IsSetB() {
-        return make(map[string]int32)
-    }
-    return x.B
-}
-
 func (x *ComplexString) SetANonCompat(value string) *ComplexString {
     x.A = value
     return x
@@ -2339,19 +2355,6 @@ func (x *ComplexString) SetA(value string) *ComplexString {
     return x
 }
 
-func (x *ComplexString) SetBNonCompat(value map[string]int32) *ComplexString {
-    x.B = value
-    return x
-}
-
-func (x *ComplexString) SetB(value map[string]int32) *ComplexString {
-    x.B = value
-    return x
-}
-
-func (x *ComplexString) IsSetB() bool {
-    return x != nil && x.B != nil
-}
 
 func (x *ComplexString) writeField1(p thrift.Encoder) error {  // A
     if err := p.WriteFieldBegin("a", thrift.STRING, 1); err != nil {
@@ -2367,6 +2370,38 @@ func (x *ComplexString) writeField1(p thrift.Encoder) error {  // A
         return thrift.PrependError("ComplexString write field end error: ", err)
     }
     return nil
+}
+
+func (x *ComplexString) readField1(p thrift.Decoder) error {  // A
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.A = result
+    return nil
+}
+
+
+func (x *ComplexString) GetB() map[string]int32 {
+    if !x.IsSetB() {
+        return make(map[string]int32)
+    }
+    return x.B
+}
+
+func (x *ComplexString) SetBNonCompat(value map[string]int32) *ComplexString {
+    x.B = value
+    return x
+}
+
+func (x *ComplexString) SetB(value map[string]int32) *ComplexString {
+    x.B = value
+    return x
+}
+
+func (x *ComplexString) IsSetB() bool {
+    return x != nil && x.B != nil
 }
 
 func (x *ComplexString) writeField2(p thrift.Encoder) error {  // B
@@ -2400,16 +2435,6 @@ func (x *ComplexString) writeField2(p thrift.Encoder) error {  // B
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("ComplexString write field end error: ", err)
     }
-    return nil
-}
-
-func (x *ComplexString) readField1(p thrift.Decoder) error {  // A
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.A = result
     return nil
 }
 
@@ -2450,6 +2475,7 @@ func (x *ComplexString) readField2(p thrift.Decoder) error {  // B
     x.B = result
     return nil
 }
+
 
 
 
@@ -2546,13 +2572,6 @@ func (x *ComplexNestedWithDefault) GetZ() string {
     return x.Z
 }
 
-func (x *ComplexNestedWithDefault) GetN() *ComplexString {
-    if !x.IsSetN() {
-        return nil
-    }
-    return x.N
-}
-
 func (x *ComplexNestedWithDefault) SetZNonCompat(value string) *ComplexNestedWithDefault {
     x.Z = value
     return x
@@ -2563,19 +2582,6 @@ func (x *ComplexNestedWithDefault) SetZ(value string) *ComplexNestedWithDefault 
     return x
 }
 
-func (x *ComplexNestedWithDefault) SetNNonCompat(value *ComplexString) *ComplexNestedWithDefault {
-    x.N = value
-    return x
-}
-
-func (x *ComplexNestedWithDefault) SetN(value *ComplexString) *ComplexNestedWithDefault {
-    x.N = value
-    return x
-}
-
-func (x *ComplexNestedWithDefault) IsSetN() bool {
-    return x != nil && x.N != nil
-}
 
 func (x *ComplexNestedWithDefault) writeField1(p thrift.Encoder) error {  // Z
     if err := p.WriteFieldBegin("z", thrift.STRING, 1); err != nil {
@@ -2591,6 +2597,38 @@ func (x *ComplexNestedWithDefault) writeField1(p thrift.Encoder) error {  // Z
         return thrift.PrependError("ComplexNestedWithDefault write field end error: ", err)
     }
     return nil
+}
+
+func (x *ComplexNestedWithDefault) readField1(p thrift.Decoder) error {  // Z
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Z = result
+    return nil
+}
+
+
+func (x *ComplexNestedWithDefault) GetN() *ComplexString {
+    if !x.IsSetN() {
+        return nil
+    }
+    return x.N
+}
+
+func (x *ComplexNestedWithDefault) SetNNonCompat(value *ComplexString) *ComplexNestedWithDefault {
+    x.N = value
+    return x
+}
+
+func (x *ComplexNestedWithDefault) SetN(value *ComplexString) *ComplexNestedWithDefault {
+    x.N = value
+    return x
+}
+
+func (x *ComplexNestedWithDefault) IsSetN() bool {
+    return x != nil && x.N != nil
 }
 
 func (x *ComplexNestedWithDefault) writeField2(p thrift.Encoder) error {  // N
@@ -2610,16 +2648,6 @@ func (x *ComplexNestedWithDefault) writeField2(p thrift.Encoder) error {  // N
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("ComplexNestedWithDefault write field end error: ", err)
     }
-    return nil
-}
-
-func (x *ComplexNestedWithDefault) readField1(p thrift.Decoder) error {  // Z
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Z = result
     return nil
 }
 
@@ -2741,22 +2769,6 @@ func (x *MinPadding) GetSmall() int8 {
     return x.Small
 }
 
-func (x *MinPadding) GetBig() int64 {
-    return x.Big
-}
-
-func (x *MinPadding) GetMedium() int16 {
-    return x.Medium
-}
-
-func (x *MinPadding) GetBiggish() int32 {
-    return x.Biggish
-}
-
-func (x *MinPadding) GetTiny() int8 {
-    return x.Tiny
-}
-
 func (x *MinPadding) SetSmallNonCompat(value int8) *MinPadding {
     x.Small = value
     return x
@@ -2767,45 +2779,6 @@ func (x *MinPadding) SetSmall(value int8) *MinPadding {
     return x
 }
 
-func (x *MinPadding) SetBigNonCompat(value int64) *MinPadding {
-    x.Big = value
-    return x
-}
-
-func (x *MinPadding) SetBig(value int64) *MinPadding {
-    x.Big = value
-    return x
-}
-
-func (x *MinPadding) SetMediumNonCompat(value int16) *MinPadding {
-    x.Medium = value
-    return x
-}
-
-func (x *MinPadding) SetMedium(value int16) *MinPadding {
-    x.Medium = value
-    return x
-}
-
-func (x *MinPadding) SetBiggishNonCompat(value int32) *MinPadding {
-    x.Biggish = value
-    return x
-}
-
-func (x *MinPadding) SetBiggish(value int32) *MinPadding {
-    x.Biggish = value
-    return x
-}
-
-func (x *MinPadding) SetTinyNonCompat(value int8) *MinPadding {
-    x.Tiny = value
-    return x
-}
-
-func (x *MinPadding) SetTiny(value int8) *MinPadding {
-    x.Tiny = value
-    return x
-}
 
 func (x *MinPadding) writeField1(p thrift.Encoder) error {  // Small
     if err := p.WriteFieldBegin("small", thrift.BYTE, 1); err != nil {
@@ -2813,70 +2786,6 @@ func (x *MinPadding) writeField1(p thrift.Encoder) error {  // Small
     }
 
     item := x.Small
-    if err := p.WriteByte(byte(item)); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MinPadding write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MinPadding) writeField2(p thrift.Encoder) error {  // Big
-    if err := p.WriteFieldBegin("big", thrift.I64, 2); err != nil {
-        return thrift.PrependError("MinPadding write field begin error: ", err)
-    }
-
-    item := x.Big
-    if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MinPadding write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MinPadding) writeField3(p thrift.Encoder) error {  // Medium
-    if err := p.WriteFieldBegin("medium", thrift.I16, 3); err != nil {
-        return thrift.PrependError("MinPadding write field begin error: ", err)
-    }
-
-    item := x.Medium
-    if err := p.WriteI16(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MinPadding write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MinPadding) writeField4(p thrift.Encoder) error {  // Biggish
-    if err := p.WriteFieldBegin("biggish", thrift.I32, 4); err != nil {
-        return thrift.PrependError("MinPadding write field begin error: ", err)
-    }
-
-    item := x.Biggish
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MinPadding write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MinPadding) writeField5(p thrift.Encoder) error {  // Tiny
-    if err := p.WriteFieldBegin("tiny", thrift.BYTE, 5); err != nil {
-        return thrift.PrependError("MinPadding write field begin error: ", err)
-    }
-
-    item := x.Tiny
     if err := p.WriteByte(byte(item)); err != nil {
         return err
     }
@@ -2898,6 +2807,38 @@ func (x *MinPadding) readField1(p thrift.Decoder) error {  // Small
     return nil
 }
 
+
+func (x *MinPadding) GetBig() int64 {
+    return x.Big
+}
+
+func (x *MinPadding) SetBigNonCompat(value int64) *MinPadding {
+    x.Big = value
+    return x
+}
+
+func (x *MinPadding) SetBig(value int64) *MinPadding {
+    x.Big = value
+    return x
+}
+
+
+func (x *MinPadding) writeField2(p thrift.Encoder) error {  // Big
+    if err := p.WriteFieldBegin("big", thrift.I64, 2); err != nil {
+        return thrift.PrependError("MinPadding write field begin error: ", err)
+    }
+
+    item := x.Big
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MinPadding write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MinPadding) readField2(p thrift.Decoder) error {  // Big
     result, err := p.ReadI64()
     if err != nil {
@@ -2905,6 +2846,38 @@ func (x *MinPadding) readField2(p thrift.Decoder) error {  // Big
     }
 
     x.Big = result
+    return nil
+}
+
+
+func (x *MinPadding) GetMedium() int16 {
+    return x.Medium
+}
+
+func (x *MinPadding) SetMediumNonCompat(value int16) *MinPadding {
+    x.Medium = value
+    return x
+}
+
+func (x *MinPadding) SetMedium(value int16) *MinPadding {
+    x.Medium = value
+    return x
+}
+
+
+func (x *MinPadding) writeField3(p thrift.Encoder) error {  // Medium
+    if err := p.WriteFieldBegin("medium", thrift.I16, 3); err != nil {
+        return thrift.PrependError("MinPadding write field begin error: ", err)
+    }
+
+    item := x.Medium
+    if err := p.WriteI16(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MinPadding write field end error: ", err)
+    }
     return nil
 }
 
@@ -2918,6 +2891,38 @@ func (x *MinPadding) readField3(p thrift.Decoder) error {  // Medium
     return nil
 }
 
+
+func (x *MinPadding) GetBiggish() int32 {
+    return x.Biggish
+}
+
+func (x *MinPadding) SetBiggishNonCompat(value int32) *MinPadding {
+    x.Biggish = value
+    return x
+}
+
+func (x *MinPadding) SetBiggish(value int32) *MinPadding {
+    x.Biggish = value
+    return x
+}
+
+
+func (x *MinPadding) writeField4(p thrift.Encoder) error {  // Biggish
+    if err := p.WriteFieldBegin("biggish", thrift.I32, 4); err != nil {
+        return thrift.PrependError("MinPadding write field begin error: ", err)
+    }
+
+    item := x.Biggish
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MinPadding write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MinPadding) readField4(p thrift.Decoder) error {  // Biggish
     result, err := p.ReadI32()
     if err != nil {
@@ -2925,6 +2930,38 @@ func (x *MinPadding) readField4(p thrift.Decoder) error {  // Biggish
     }
 
     x.Biggish = result
+    return nil
+}
+
+
+func (x *MinPadding) GetTiny() int8 {
+    return x.Tiny
+}
+
+func (x *MinPadding) SetTinyNonCompat(value int8) *MinPadding {
+    x.Tiny = value
+    return x
+}
+
+func (x *MinPadding) SetTiny(value int8) *MinPadding {
+    x.Tiny = value
+    return x
+}
+
+
+func (x *MinPadding) writeField5(p thrift.Encoder) error {  // Tiny
+    if err := p.WriteFieldBegin("tiny", thrift.BYTE, 5); err != nil {
+        return thrift.PrependError("MinPadding write field begin error: ", err)
+    }
+
+    item := x.Tiny
+    if err := p.WriteByte(byte(item)); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MinPadding write field end error: ", err)
+    }
     return nil
 }
 
@@ -2938,6 +2975,7 @@ func (x *MinPadding) readField5(p thrift.Decoder) error {  // Tiny
     x.Tiny = result
     return nil
 }
+
 
 
 
@@ -3055,22 +3093,6 @@ func (x *MinPaddingWithCustomType) GetSmall() int8 {
     return x.Small
 }
 
-func (x *MinPaddingWithCustomType) GetBiggish() int32 {
-    return x.Biggish
-}
-
-func (x *MinPaddingWithCustomType) GetMedium() int16 {
-    return x.Medium
-}
-
-func (x *MinPaddingWithCustomType) GetBig() int64 {
-    return x.Big
-}
-
-func (x *MinPaddingWithCustomType) GetTiny() int8 {
-    return x.Tiny
-}
-
 func (x *MinPaddingWithCustomType) SetSmallNonCompat(value int8) *MinPaddingWithCustomType {
     x.Small = value
     return x
@@ -3081,45 +3103,6 @@ func (x *MinPaddingWithCustomType) SetSmall(value int8) *MinPaddingWithCustomTyp
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetBiggishNonCompat(value int32) *MinPaddingWithCustomType {
-    x.Biggish = value
-    return x
-}
-
-func (x *MinPaddingWithCustomType) SetBiggish(value int32) *MinPaddingWithCustomType {
-    x.Biggish = value
-    return x
-}
-
-func (x *MinPaddingWithCustomType) SetMediumNonCompat(value int16) *MinPaddingWithCustomType {
-    x.Medium = value
-    return x
-}
-
-func (x *MinPaddingWithCustomType) SetMedium(value int16) *MinPaddingWithCustomType {
-    x.Medium = value
-    return x
-}
-
-func (x *MinPaddingWithCustomType) SetBigNonCompat(value int64) *MinPaddingWithCustomType {
-    x.Big = value
-    return x
-}
-
-func (x *MinPaddingWithCustomType) SetBig(value int64) *MinPaddingWithCustomType {
-    x.Big = value
-    return x
-}
-
-func (x *MinPaddingWithCustomType) SetTinyNonCompat(value int8) *MinPaddingWithCustomType {
-    x.Tiny = value
-    return x
-}
-
-func (x *MinPaddingWithCustomType) SetTiny(value int8) *MinPaddingWithCustomType {
-    x.Tiny = value
-    return x
-}
 
 func (x *MinPaddingWithCustomType) writeField1(p thrift.Encoder) error {  // Small
     if err := p.WriteFieldBegin("small", thrift.BYTE, 1); err != nil {
@@ -3127,70 +3110,6 @@ func (x *MinPaddingWithCustomType) writeField1(p thrift.Encoder) error {  // Sma
     }
 
     item := x.Small
-    if err := p.WriteByte(byte(item)); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MinPaddingWithCustomType write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MinPaddingWithCustomType) writeField2(p thrift.Encoder) error {  // Biggish
-    if err := p.WriteFieldBegin("biggish", thrift.I32, 2); err != nil {
-        return thrift.PrependError("MinPaddingWithCustomType write field begin error: ", err)
-    }
-
-    item := x.Biggish
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MinPaddingWithCustomType write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MinPaddingWithCustomType) writeField3(p thrift.Encoder) error {  // Medium
-    if err := p.WriteFieldBegin("medium", thrift.I16, 3); err != nil {
-        return thrift.PrependError("MinPaddingWithCustomType write field begin error: ", err)
-    }
-
-    item := x.Medium
-    if err := p.WriteI16(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MinPaddingWithCustomType write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MinPaddingWithCustomType) writeField4(p thrift.Encoder) error {  // Big
-    if err := p.WriteFieldBegin("big", thrift.I64, 4); err != nil {
-        return thrift.PrependError("MinPaddingWithCustomType write field begin error: ", err)
-    }
-
-    item := x.Big
-    if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MinPaddingWithCustomType write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MinPaddingWithCustomType) writeField5(p thrift.Encoder) error {  // Tiny
-    if err := p.WriteFieldBegin("tiny", thrift.BYTE, 5); err != nil {
-        return thrift.PrependError("MinPaddingWithCustomType write field begin error: ", err)
-    }
-
-    item := x.Tiny
     if err := p.WriteByte(byte(item)); err != nil {
         return err
     }
@@ -3212,6 +3131,38 @@ func (x *MinPaddingWithCustomType) readField1(p thrift.Decoder) error {  // Smal
     return nil
 }
 
+
+func (x *MinPaddingWithCustomType) GetBiggish() int32 {
+    return x.Biggish
+}
+
+func (x *MinPaddingWithCustomType) SetBiggishNonCompat(value int32) *MinPaddingWithCustomType {
+    x.Biggish = value
+    return x
+}
+
+func (x *MinPaddingWithCustomType) SetBiggish(value int32) *MinPaddingWithCustomType {
+    x.Biggish = value
+    return x
+}
+
+
+func (x *MinPaddingWithCustomType) writeField2(p thrift.Encoder) error {  // Biggish
+    if err := p.WriteFieldBegin("biggish", thrift.I32, 2); err != nil {
+        return thrift.PrependError("MinPaddingWithCustomType write field begin error: ", err)
+    }
+
+    item := x.Biggish
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MinPaddingWithCustomType write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MinPaddingWithCustomType) readField2(p thrift.Decoder) error {  // Biggish
     result, err := p.ReadI32()
     if err != nil {
@@ -3219,6 +3170,38 @@ func (x *MinPaddingWithCustomType) readField2(p thrift.Decoder) error {  // Bigg
     }
 
     x.Biggish = result
+    return nil
+}
+
+
+func (x *MinPaddingWithCustomType) GetMedium() int16 {
+    return x.Medium
+}
+
+func (x *MinPaddingWithCustomType) SetMediumNonCompat(value int16) *MinPaddingWithCustomType {
+    x.Medium = value
+    return x
+}
+
+func (x *MinPaddingWithCustomType) SetMedium(value int16) *MinPaddingWithCustomType {
+    x.Medium = value
+    return x
+}
+
+
+func (x *MinPaddingWithCustomType) writeField3(p thrift.Encoder) error {  // Medium
+    if err := p.WriteFieldBegin("medium", thrift.I16, 3); err != nil {
+        return thrift.PrependError("MinPaddingWithCustomType write field begin error: ", err)
+    }
+
+    item := x.Medium
+    if err := p.WriteI16(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MinPaddingWithCustomType write field end error: ", err)
+    }
     return nil
 }
 
@@ -3232,6 +3215,38 @@ func (x *MinPaddingWithCustomType) readField3(p thrift.Decoder) error {  // Medi
     return nil
 }
 
+
+func (x *MinPaddingWithCustomType) GetBig() int64 {
+    return x.Big
+}
+
+func (x *MinPaddingWithCustomType) SetBigNonCompat(value int64) *MinPaddingWithCustomType {
+    x.Big = value
+    return x
+}
+
+func (x *MinPaddingWithCustomType) SetBig(value int64) *MinPaddingWithCustomType {
+    x.Big = value
+    return x
+}
+
+
+func (x *MinPaddingWithCustomType) writeField4(p thrift.Encoder) error {  // Big
+    if err := p.WriteFieldBegin("big", thrift.I64, 4); err != nil {
+        return thrift.PrependError("MinPaddingWithCustomType write field begin error: ", err)
+    }
+
+    item := x.Big
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MinPaddingWithCustomType write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MinPaddingWithCustomType) readField4(p thrift.Decoder) error {  // Big
     result, err := p.ReadI64()
     if err != nil {
@@ -3239,6 +3254,38 @@ func (x *MinPaddingWithCustomType) readField4(p thrift.Decoder) error {  // Big
     }
 
     x.Big = result
+    return nil
+}
+
+
+func (x *MinPaddingWithCustomType) GetTiny() int8 {
+    return x.Tiny
+}
+
+func (x *MinPaddingWithCustomType) SetTinyNonCompat(value int8) *MinPaddingWithCustomType {
+    x.Tiny = value
+    return x
+}
+
+func (x *MinPaddingWithCustomType) SetTiny(value int8) *MinPaddingWithCustomType {
+    x.Tiny = value
+    return x
+}
+
+
+func (x *MinPaddingWithCustomType) writeField5(p thrift.Encoder) error {  // Tiny
+    if err := p.WriteFieldBegin("tiny", thrift.BYTE, 5); err != nil {
+        return thrift.PrependError("MinPaddingWithCustomType write field begin error: ", err)
+    }
+
+    item := x.Tiny
+    if err := p.WriteByte(byte(item)); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MinPaddingWithCustomType write field end error: ", err)
+    }
     return nil
 }
 
@@ -3252,6 +3299,7 @@ func (x *MinPaddingWithCustomType) readField5(p thrift.Decoder) error {  // Tiny
     x.Tiny = result
     return nil
 }
+
 
 
 
@@ -3368,21 +3416,6 @@ func (x *MyStruct) GetMyIntField() int64 {
     return x.MyIntField
 }
 
-func (x *MyStruct) GetMyStringField() string {
-    return x.MyStringField
-}
-
-func (x *MyStruct) GetMajorVer() int64 {
-    return x.MajorVer
-}
-
-func (x *MyStruct) GetData() *MyDataItem {
-    if !x.IsSetData() {
-        return nil
-    }
-    return x.Data
-}
-
 func (x *MyStruct) SetMyIntFieldNonCompat(value int64) *MyStruct {
     x.MyIntField = value
     return x
@@ -3393,39 +3426,6 @@ func (x *MyStruct) SetMyIntField(value int64) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetMyStringFieldNonCompat(value string) *MyStruct {
-    x.MyStringField = value
-    return x
-}
-
-func (x *MyStruct) SetMyStringField(value string) *MyStruct {
-    x.MyStringField = value
-    return x
-}
-
-func (x *MyStruct) SetMajorVerNonCompat(value int64) *MyStruct {
-    x.MajorVer = value
-    return x
-}
-
-func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
-    x.MajorVer = value
-    return x
-}
-
-func (x *MyStruct) SetDataNonCompat(value *MyDataItem) *MyStruct {
-    x.Data = value
-    return x
-}
-
-func (x *MyStruct) SetData(value *MyDataItem) *MyStruct {
-    x.Data = value
-    return x
-}
-
-func (x *MyStruct) IsSetData() bool {
-    return x != nil && x.Data != nil
-}
 
 func (x *MyStruct) writeField1(p thrift.Encoder) error {  // MyIntField
     if err := p.WriteFieldBegin("MyIntField", thrift.I64, 1); err != nil {
@@ -3434,58 +3434,6 @@ func (x *MyStruct) writeField1(p thrift.Encoder) error {  // MyIntField
 
     item := x.MyIntField
     if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField2(p thrift.Encoder) error {  // MyStringField
-    if err := p.WriteFieldBegin("MyStringField", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.MyStringField
-    if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField3(p thrift.Encoder) error {  // MajorVer
-    if err := p.WriteFieldBegin("majorVer", thrift.I64, 3); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.MajorVer
-    if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField4(p thrift.Encoder) error {  // Data
-    if !x.IsSetData() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("data", thrift.STRUCT, 4); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.Data
-    if err := item.Write(p); err != nil {
         return err
     }
 
@@ -3505,6 +3453,38 @@ func (x *MyStruct) readField1(p thrift.Decoder) error {  // MyIntField
     return nil
 }
 
+
+func (x *MyStruct) GetMyStringField() string {
+    return x.MyStringField
+}
+
+func (x *MyStruct) SetMyStringFieldNonCompat(value string) *MyStruct {
+    x.MyStringField = value
+    return x
+}
+
+func (x *MyStruct) SetMyStringField(value string) *MyStruct {
+    x.MyStringField = value
+    return x
+}
+
+
+func (x *MyStruct) writeField2(p thrift.Encoder) error {  // MyStringField
+    if err := p.WriteFieldBegin("MyStringField", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.MyStringField
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MyStruct) readField2(p thrift.Decoder) error {  // MyStringField
     result, err := p.ReadString()
     if err != nil {
@@ -3515,6 +3495,38 @@ func (x *MyStruct) readField2(p thrift.Decoder) error {  // MyStringField
     return nil
 }
 
+
+func (x *MyStruct) GetMajorVer() int64 {
+    return x.MajorVer
+}
+
+func (x *MyStruct) SetMajorVerNonCompat(value int64) *MyStruct {
+    x.MajorVer = value
+    return x
+}
+
+func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
+    x.MajorVer = value
+    return x
+}
+
+
+func (x *MyStruct) writeField3(p thrift.Encoder) error {  // MajorVer
+    if err := p.WriteFieldBegin("majorVer", thrift.I64, 3); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.MajorVer
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MyStruct) readField3(p thrift.Decoder) error {  // MajorVer
     result, err := p.ReadI64()
     if err != nil {
@@ -3522,6 +3534,48 @@ func (x *MyStruct) readField3(p thrift.Decoder) error {  // MajorVer
     }
 
     x.MajorVer = result
+    return nil
+}
+
+
+func (x *MyStruct) GetData() *MyDataItem {
+    if !x.IsSetData() {
+        return nil
+    }
+    return x.Data
+}
+
+func (x *MyStruct) SetDataNonCompat(value *MyDataItem) *MyStruct {
+    x.Data = value
+    return x
+}
+
+func (x *MyStruct) SetData(value *MyDataItem) *MyStruct {
+    x.Data = value
+    return x
+}
+
+func (x *MyStruct) IsSetData() bool {
+    return x != nil && x.Data != nil
+}
+
+func (x *MyStruct) writeField4(p thrift.Encoder) error {  // Data
+    if !x.IsSetData() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("data", thrift.STRUCT, 4); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.Data
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -3730,6 +3784,7 @@ func (x *Renaming) SetFoo(value int64) *Renaming {
     return x
 }
 
+
 func (x *Renaming) writeField1(p thrift.Encoder) error {  // Foo
     if err := p.WriteFieldBegin("foo", thrift.I64, 1); err != nil {
         return thrift.PrependError("Renaming write field begin error: ", err)
@@ -3755,6 +3810,7 @@ func (x *Renaming) readField1(p thrift.Decoder) error {  // Foo
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -3848,13 +3904,6 @@ func (x *AnnotatedTypes) GetBinaryField() TBinary_8623 {
     return x.BinaryField
 }
 
-func (x *AnnotatedTypes) GetListField() SomeListOfTypeMap_2468 {
-    if !x.IsSetListField() {
-        return NewSomeListOfTypeMap_2468()
-    }
-    return x.ListField
-}
-
 func (x *AnnotatedTypes) SetBinaryFieldNonCompat(value TBinary_8623) *AnnotatedTypes {
     x.BinaryField = value
     return x
@@ -3865,22 +3914,8 @@ func (x *AnnotatedTypes) SetBinaryField(value TBinary_8623) *AnnotatedTypes {
     return x
 }
 
-func (x *AnnotatedTypes) SetListFieldNonCompat(value SomeListOfTypeMap_2468) *AnnotatedTypes {
-    x.ListField = value
-    return x
-}
-
-func (x *AnnotatedTypes) SetListField(value SomeListOfTypeMap_2468) *AnnotatedTypes {
-    x.ListField = value
-    return x
-}
-
 func (x *AnnotatedTypes) IsSetBinaryField() bool {
     return x != nil && x.BinaryField != nil
-}
-
-func (x *AnnotatedTypes) IsSetListField() bool {
-    return x != nil && x.ListField != nil
 }
 
 func (x *AnnotatedTypes) writeField1(p thrift.Encoder) error {  // BinaryField
@@ -3890,23 +3925,6 @@ func (x *AnnotatedTypes) writeField1(p thrift.Encoder) error {  // BinaryField
 
     item := x.BinaryField
     err := WriteTBinary_8623(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("AnnotatedTypes write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *AnnotatedTypes) writeField2(p thrift.Encoder) error {  // ListField
-    if err := p.WriteFieldBegin("list_field", thrift.LIST, 2); err != nil {
-        return thrift.PrependError("AnnotatedTypes write field begin error: ", err)
-    }
-
-    item := x.ListField
-    err := WriteSomeListOfTypeMap_2468(item, p)
     if err != nil {
         return err
     }
@@ -3927,6 +3945,45 @@ func (x *AnnotatedTypes) readField1(p thrift.Decoder) error {  // BinaryField
     return nil
 }
 
+
+func (x *AnnotatedTypes) GetListField() SomeListOfTypeMap_2468 {
+    if !x.IsSetListField() {
+        return NewSomeListOfTypeMap_2468()
+    }
+    return x.ListField
+}
+
+func (x *AnnotatedTypes) SetListFieldNonCompat(value SomeListOfTypeMap_2468) *AnnotatedTypes {
+    x.ListField = value
+    return x
+}
+
+func (x *AnnotatedTypes) SetListField(value SomeListOfTypeMap_2468) *AnnotatedTypes {
+    x.ListField = value
+    return x
+}
+
+func (x *AnnotatedTypes) IsSetListField() bool {
+    return x != nil && x.ListField != nil
+}
+
+func (x *AnnotatedTypes) writeField2(p thrift.Encoder) error {  // ListField
+    if err := p.WriteFieldBegin("list_field", thrift.LIST, 2); err != nil {
+        return thrift.PrependError("AnnotatedTypes write field begin error: ", err)
+    }
+
+    item := x.ListField
+    err := WriteSomeListOfTypeMap_2468(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("AnnotatedTypes write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *AnnotatedTypes) readField2(p thrift.Decoder) error {  // ListField
     result, err := ReadSomeListOfTypeMap_2468(p)
     if err != nil {
@@ -3936,6 +3993,7 @@ func (x *AnnotatedTypes) readField2(p thrift.Decoder) error {  // ListField
     x.ListField = result
     return nil
 }
+
 
 
 
@@ -4035,13 +4093,6 @@ func (x *ForwardUsageRoot) GetForwardUsageStruct() *ForwardUsageStruct {
     return x.ForwardUsageStruct
 }
 
-func (x *ForwardUsageRoot) GetForwardUsageByRef() *ForwardUsageByRef {
-    if !x.IsSetForwardUsageByRef() {
-        return nil
-    }
-    return x.ForwardUsageByRef
-}
-
 func (x *ForwardUsageRoot) SetForwardUsageStructNonCompat(value *ForwardUsageStruct) *ForwardUsageRoot {
     x.ForwardUsageStruct = value
     return x
@@ -4052,22 +4103,8 @@ func (x *ForwardUsageRoot) SetForwardUsageStruct(value *ForwardUsageStruct) *For
     return x
 }
 
-func (x *ForwardUsageRoot) SetForwardUsageByRefNonCompat(value *ForwardUsageByRef) *ForwardUsageRoot {
-    x.ForwardUsageByRef = value
-    return x
-}
-
-func (x *ForwardUsageRoot) SetForwardUsageByRef(value *ForwardUsageByRef) *ForwardUsageRoot {
-    x.ForwardUsageByRef = value
-    return x
-}
-
 func (x *ForwardUsageRoot) IsSetForwardUsageStruct() bool {
     return x != nil && x.ForwardUsageStruct != nil
-}
-
-func (x *ForwardUsageRoot) IsSetForwardUsageByRef() bool {
-    return x != nil && x.ForwardUsageByRef != nil
 }
 
 func (x *ForwardUsageRoot) writeField1(p thrift.Encoder) error {  // ForwardUsageStruct
@@ -4090,6 +4127,39 @@ func (x *ForwardUsageRoot) writeField1(p thrift.Encoder) error {  // ForwardUsag
     return nil
 }
 
+func (x *ForwardUsageRoot) readField1(p thrift.Decoder) error {  // ForwardUsageStruct
+    result := NewForwardUsageStruct()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.ForwardUsageStruct = result
+    return nil
+}
+
+
+func (x *ForwardUsageRoot) GetForwardUsageByRef() *ForwardUsageByRef {
+    if !x.IsSetForwardUsageByRef() {
+        return nil
+    }
+    return x.ForwardUsageByRef
+}
+
+func (x *ForwardUsageRoot) SetForwardUsageByRefNonCompat(value *ForwardUsageByRef) *ForwardUsageRoot {
+    x.ForwardUsageByRef = value
+    return x
+}
+
+func (x *ForwardUsageRoot) SetForwardUsageByRef(value *ForwardUsageByRef) *ForwardUsageRoot {
+    x.ForwardUsageByRef = value
+    return x
+}
+
+func (x *ForwardUsageRoot) IsSetForwardUsageByRef() bool {
+    return x != nil && x.ForwardUsageByRef != nil
+}
+
 func (x *ForwardUsageRoot) writeField2(p thrift.Encoder) error {  // ForwardUsageByRef
     if !x.IsSetForwardUsageByRef() {
         return nil
@@ -4110,17 +4180,6 @@ func (x *ForwardUsageRoot) writeField2(p thrift.Encoder) error {  // ForwardUsag
     return nil
 }
 
-func (x *ForwardUsageRoot) readField1(p thrift.Decoder) error {  // ForwardUsageStruct
-    result := NewForwardUsageStruct()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.ForwardUsageStruct = result
-    return nil
-}
-
 func (x *ForwardUsageRoot) readField2(p thrift.Decoder) error {  // ForwardUsageByRef
     result := NewForwardUsageByRef()
     err := result.Read(p)
@@ -4131,7 +4190,6 @@ func (x *ForwardUsageRoot) readField2(p thrift.Decoder) error {  // ForwardUsage
     x.ForwardUsageByRef = result
     return nil
 }
-
 
 
 
@@ -4595,6 +4653,7 @@ func (x *IncompleteMap) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *IncompleteMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("IncompleteMap"); err != nil {
         return thrift.PrependError("IncompleteMap write struct begin error: ", err)
@@ -4853,6 +4912,7 @@ func (x *CompleteMap) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *CompleteMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CompleteMap"); err != nil {
         return thrift.PrependError("CompleteMap write struct begin error: ", err)
@@ -5090,6 +5150,7 @@ func (x *IncompleteList) readField1(p thrift.Decoder) error {  // Field
     x.Field = result
     return nil
 }
+
 
 
 
@@ -5335,6 +5396,7 @@ func (x *CompleteList) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *CompleteList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CompleteList"); err != nil {
         return thrift.PrependError("CompleteList write struct begin error: ", err)
@@ -5572,6 +5634,7 @@ func (x *AdaptedList) readField1(p thrift.Decoder) error {  // Field
     x.Field = result
     return nil
 }
+
 
 
 
@@ -5877,6 +5940,7 @@ func (x *DependentAdaptedList) readField1(p thrift.Decoder) error {  // Field
 
 
 
+
 func (x *DependentAdaptedList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("DependentAdaptedList"); err != nil {
         return thrift.PrependError("DependentAdaptedList write struct begin error: ", err)
@@ -6105,36 +6169,6 @@ func (x *AllocatorAware) GetAaList() ListI32_9187 {
     return x.AaList
 }
 
-func (x *AllocatorAware) GetAaSet() SetI32_7070 {
-    if !x.IsSetAaSet() {
-        return NewSetI32_7070()
-    }
-    return x.AaSet
-}
-
-func (x *AllocatorAware) GetAaMap() MapI32I32_9565 {
-    if !x.IsSetAaMap() {
-        return NewMapI32I32_9565()
-    }
-    return x.AaMap
-}
-
-func (x *AllocatorAware) GetAaString() String_5252 {
-    return x.AaString
-}
-
-func (x *AllocatorAware) GetNotAContainer() int32 {
-    return x.NotAContainer
-}
-
-func (x *AllocatorAware) GetAaUnique() I32_9314 {
-    return x.AaUnique
-}
-
-func (x *AllocatorAware) GetAaShared() I32_9314 {
-    return x.AaShared
-}
-
 func (x *AllocatorAware) SetAaListNonCompat(value ListI32_9187) *AllocatorAware {
     x.AaList = value
     return x
@@ -6145,76 +6179,8 @@ func (x *AllocatorAware) SetAaList(value ListI32_9187) *AllocatorAware {
     return x
 }
 
-func (x *AllocatorAware) SetAaSetNonCompat(value SetI32_7070) *AllocatorAware {
-    x.AaSet = value
-    return x
-}
-
-func (x *AllocatorAware) SetAaSet(value SetI32_7070) *AllocatorAware {
-    x.AaSet = value
-    return x
-}
-
-func (x *AllocatorAware) SetAaMapNonCompat(value MapI32I32_9565) *AllocatorAware {
-    x.AaMap = value
-    return x
-}
-
-func (x *AllocatorAware) SetAaMap(value MapI32I32_9565) *AllocatorAware {
-    x.AaMap = value
-    return x
-}
-
-func (x *AllocatorAware) SetAaStringNonCompat(value String_5252) *AllocatorAware {
-    x.AaString = value
-    return x
-}
-
-func (x *AllocatorAware) SetAaString(value String_5252) *AllocatorAware {
-    x.AaString = value
-    return x
-}
-
-func (x *AllocatorAware) SetNotAContainerNonCompat(value int32) *AllocatorAware {
-    x.NotAContainer = value
-    return x
-}
-
-func (x *AllocatorAware) SetNotAContainer(value int32) *AllocatorAware {
-    x.NotAContainer = value
-    return x
-}
-
-func (x *AllocatorAware) SetAaUniqueNonCompat(value I32_9314) *AllocatorAware {
-    x.AaUnique = value
-    return x
-}
-
-func (x *AllocatorAware) SetAaUnique(value I32_9314) *AllocatorAware {
-    x.AaUnique = value
-    return x
-}
-
-func (x *AllocatorAware) SetAaSharedNonCompat(value I32_9314) *AllocatorAware {
-    x.AaShared = value
-    return x
-}
-
-func (x *AllocatorAware) SetAaShared(value I32_9314) *AllocatorAware {
-    x.AaShared = value
-    return x
-}
-
 func (x *AllocatorAware) IsSetAaList() bool {
     return x != nil && x.AaList != nil
-}
-
-func (x *AllocatorAware) IsSetAaSet() bool {
-    return x != nil && x.AaSet != nil
-}
-
-func (x *AllocatorAware) IsSetAaMap() bool {
-    return x != nil && x.AaMap != nil
 }
 
 func (x *AllocatorAware) writeField1(p thrift.Encoder) error {  // AaList
@@ -6224,107 +6190,6 @@ func (x *AllocatorAware) writeField1(p thrift.Encoder) error {  // AaList
 
     item := x.AaList
     err := WriteListI32_9187(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("AllocatorAware write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *AllocatorAware) writeField2(p thrift.Encoder) error {  // AaSet
-    if err := p.WriteFieldBegin("aa_set", thrift.SET, 2); err != nil {
-        return thrift.PrependError("AllocatorAware write field begin error: ", err)
-    }
-
-    item := x.AaSet
-    err := WriteSetI32_7070(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("AllocatorAware write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *AllocatorAware) writeField3(p thrift.Encoder) error {  // AaMap
-    if err := p.WriteFieldBegin("aa_map", thrift.MAP, 3); err != nil {
-        return thrift.PrependError("AllocatorAware write field begin error: ", err)
-    }
-
-    item := x.AaMap
-    err := WriteMapI32I32_9565(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("AllocatorAware write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *AllocatorAware) writeField4(p thrift.Encoder) error {  // AaString
-    if err := p.WriteFieldBegin("aa_string", thrift.STRING, 4); err != nil {
-        return thrift.PrependError("AllocatorAware write field begin error: ", err)
-    }
-
-    item := x.AaString
-    err := WriteString_5252(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("AllocatorAware write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *AllocatorAware) writeField5(p thrift.Encoder) error {  // NotAContainer
-    if err := p.WriteFieldBegin("not_a_container", thrift.I32, 5); err != nil {
-        return thrift.PrependError("AllocatorAware write field begin error: ", err)
-    }
-
-    item := x.NotAContainer
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("AllocatorAware write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *AllocatorAware) writeField6(p thrift.Encoder) error {  // AaUnique
-    if err := p.WriteFieldBegin("aa_unique", thrift.I32, 6); err != nil {
-        return thrift.PrependError("AllocatorAware write field begin error: ", err)
-    }
-
-    item := x.AaUnique
-    err := WriteI32_9314(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("AllocatorAware write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *AllocatorAware) writeField7(p thrift.Encoder) error {  // AaShared
-    if err := p.WriteFieldBegin("aa_shared", thrift.I32, 7); err != nil {
-        return thrift.PrependError("AllocatorAware write field begin error: ", err)
-    }
-
-    item := x.AaShared
-    err := WriteI32_9314(item, p)
     if err != nil {
         return err
     }
@@ -6345,6 +6210,45 @@ func (x *AllocatorAware) readField1(p thrift.Decoder) error {  // AaList
     return nil
 }
 
+
+func (x *AllocatorAware) GetAaSet() SetI32_7070 {
+    if !x.IsSetAaSet() {
+        return NewSetI32_7070()
+    }
+    return x.AaSet
+}
+
+func (x *AllocatorAware) SetAaSetNonCompat(value SetI32_7070) *AllocatorAware {
+    x.AaSet = value
+    return x
+}
+
+func (x *AllocatorAware) SetAaSet(value SetI32_7070) *AllocatorAware {
+    x.AaSet = value
+    return x
+}
+
+func (x *AllocatorAware) IsSetAaSet() bool {
+    return x != nil && x.AaSet != nil
+}
+
+func (x *AllocatorAware) writeField2(p thrift.Encoder) error {  // AaSet
+    if err := p.WriteFieldBegin("aa_set", thrift.SET, 2); err != nil {
+        return thrift.PrependError("AllocatorAware write field begin error: ", err)
+    }
+
+    item := x.AaSet
+    err := WriteSetI32_7070(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("AllocatorAware write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *AllocatorAware) readField2(p thrift.Decoder) error {  // AaSet
     result, err := ReadSetI32_7070(p)
     if err != nil {
@@ -6352,6 +6256,45 @@ func (x *AllocatorAware) readField2(p thrift.Decoder) error {  // AaSet
     }
 
     x.AaSet = result
+    return nil
+}
+
+
+func (x *AllocatorAware) GetAaMap() MapI32I32_9565 {
+    if !x.IsSetAaMap() {
+        return NewMapI32I32_9565()
+    }
+    return x.AaMap
+}
+
+func (x *AllocatorAware) SetAaMapNonCompat(value MapI32I32_9565) *AllocatorAware {
+    x.AaMap = value
+    return x
+}
+
+func (x *AllocatorAware) SetAaMap(value MapI32I32_9565) *AllocatorAware {
+    x.AaMap = value
+    return x
+}
+
+func (x *AllocatorAware) IsSetAaMap() bool {
+    return x != nil && x.AaMap != nil
+}
+
+func (x *AllocatorAware) writeField3(p thrift.Encoder) error {  // AaMap
+    if err := p.WriteFieldBegin("aa_map", thrift.MAP, 3); err != nil {
+        return thrift.PrependError("AllocatorAware write field begin error: ", err)
+    }
+
+    item := x.AaMap
+    err := WriteMapI32I32_9565(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("AllocatorAware write field end error: ", err)
+    }
     return nil
 }
 
@@ -6365,6 +6308,39 @@ func (x *AllocatorAware) readField3(p thrift.Decoder) error {  // AaMap
     return nil
 }
 
+
+func (x *AllocatorAware) GetAaString() String_5252 {
+    return x.AaString
+}
+
+func (x *AllocatorAware) SetAaStringNonCompat(value String_5252) *AllocatorAware {
+    x.AaString = value
+    return x
+}
+
+func (x *AllocatorAware) SetAaString(value String_5252) *AllocatorAware {
+    x.AaString = value
+    return x
+}
+
+
+func (x *AllocatorAware) writeField4(p thrift.Encoder) error {  // AaString
+    if err := p.WriteFieldBegin("aa_string", thrift.STRING, 4); err != nil {
+        return thrift.PrependError("AllocatorAware write field begin error: ", err)
+    }
+
+    item := x.AaString
+    err := WriteString_5252(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("AllocatorAware write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *AllocatorAware) readField4(p thrift.Decoder) error {  // AaString
     result, err := ReadString_5252(p)
     if err != nil {
@@ -6372,6 +6348,38 @@ func (x *AllocatorAware) readField4(p thrift.Decoder) error {  // AaString
     }
 
     x.AaString = result
+    return nil
+}
+
+
+func (x *AllocatorAware) GetNotAContainer() int32 {
+    return x.NotAContainer
+}
+
+func (x *AllocatorAware) SetNotAContainerNonCompat(value int32) *AllocatorAware {
+    x.NotAContainer = value
+    return x
+}
+
+func (x *AllocatorAware) SetNotAContainer(value int32) *AllocatorAware {
+    x.NotAContainer = value
+    return x
+}
+
+
+func (x *AllocatorAware) writeField5(p thrift.Encoder) error {  // NotAContainer
+    if err := p.WriteFieldBegin("not_a_container", thrift.I32, 5); err != nil {
+        return thrift.PrependError("AllocatorAware write field begin error: ", err)
+    }
+
+    item := x.NotAContainer
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("AllocatorAware write field end error: ", err)
+    }
     return nil
 }
 
@@ -6385,6 +6393,39 @@ func (x *AllocatorAware) readField5(p thrift.Decoder) error {  // NotAContainer
     return nil
 }
 
+
+func (x *AllocatorAware) GetAaUnique() I32_9314 {
+    return x.AaUnique
+}
+
+func (x *AllocatorAware) SetAaUniqueNonCompat(value I32_9314) *AllocatorAware {
+    x.AaUnique = value
+    return x
+}
+
+func (x *AllocatorAware) SetAaUnique(value I32_9314) *AllocatorAware {
+    x.AaUnique = value
+    return x
+}
+
+
+func (x *AllocatorAware) writeField6(p thrift.Encoder) error {  // AaUnique
+    if err := p.WriteFieldBegin("aa_unique", thrift.I32, 6); err != nil {
+        return thrift.PrependError("AllocatorAware write field begin error: ", err)
+    }
+
+    item := x.AaUnique
+    err := WriteI32_9314(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("AllocatorAware write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *AllocatorAware) readField6(p thrift.Decoder) error {  // AaUnique
     result, err := ReadI32_9314(p)
     if err != nil {
@@ -6392,6 +6433,39 @@ func (x *AllocatorAware) readField6(p thrift.Decoder) error {  // AaUnique
     }
 
     x.AaUnique = result
+    return nil
+}
+
+
+func (x *AllocatorAware) GetAaShared() I32_9314 {
+    return x.AaShared
+}
+
+func (x *AllocatorAware) SetAaSharedNonCompat(value I32_9314) *AllocatorAware {
+    x.AaShared = value
+    return x
+}
+
+func (x *AllocatorAware) SetAaShared(value I32_9314) *AllocatorAware {
+    x.AaShared = value
+    return x
+}
+
+
+func (x *AllocatorAware) writeField7(p thrift.Encoder) error {  // AaShared
+    if err := p.WriteFieldBegin("aa_shared", thrift.I32, 7); err != nil {
+        return thrift.PrependError("AllocatorAware write field begin error: ", err)
+    }
+
+    item := x.AaShared
+    err := WriteI32_9314(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("AllocatorAware write field end error: ", err)
+    }
     return nil
 }
 
@@ -6404,6 +6478,7 @@ func (x *AllocatorAware) readField7(p thrift.Decoder) error {  // AaShared
     x.AaShared = result
     return nil
 }
+
 
 
 
@@ -6530,13 +6605,6 @@ func (x *AllocatorAware2) GetNotAContainer() int32 {
     return x.NotAContainer
 }
 
-func (x *AllocatorAware2) GetBoxField() int32 {
-    if !x.IsSetBoxField() {
-        return 0
-    }
-    return *x.BoxField
-}
-
 func (x *AllocatorAware2) SetNotAContainerNonCompat(value int32) *AllocatorAware2 {
     x.NotAContainer = value
     return x
@@ -6547,19 +6615,6 @@ func (x *AllocatorAware2) SetNotAContainer(value int32) *AllocatorAware2 {
     return x
 }
 
-func (x *AllocatorAware2) SetBoxFieldNonCompat(value int32) *AllocatorAware2 {
-    x.BoxField = &value
-    return x
-}
-
-func (x *AllocatorAware2) SetBoxField(value *int32) *AllocatorAware2 {
-    x.BoxField = value
-    return x
-}
-
-func (x *AllocatorAware2) IsSetBoxField() bool {
-    return x != nil && x.BoxField != nil
-}
 
 func (x *AllocatorAware2) writeField1(p thrift.Encoder) error {  // NotAContainer
     if err := p.WriteFieldBegin("not_a_container", thrift.I32, 1); err != nil {
@@ -6575,6 +6630,38 @@ func (x *AllocatorAware2) writeField1(p thrift.Encoder) error {  // NotAContaine
         return thrift.PrependError("AllocatorAware2 write field end error: ", err)
     }
     return nil
+}
+
+func (x *AllocatorAware2) readField1(p thrift.Decoder) error {  // NotAContainer
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.NotAContainer = result
+    return nil
+}
+
+
+func (x *AllocatorAware2) GetBoxField() int32 {
+    if !x.IsSetBoxField() {
+        return 0
+    }
+    return *x.BoxField
+}
+
+func (x *AllocatorAware2) SetBoxFieldNonCompat(value int32) *AllocatorAware2 {
+    x.BoxField = &value
+    return x
+}
+
+func (x *AllocatorAware2) SetBoxField(value *int32) *AllocatorAware2 {
+    x.BoxField = value
+    return x
+}
+
+func (x *AllocatorAware2) IsSetBoxField() bool {
+    return x != nil && x.BoxField != nil
 }
 
 func (x *AllocatorAware2) writeField2(p thrift.Encoder) error {  // BoxField
@@ -6594,16 +6681,6 @@ func (x *AllocatorAware2) writeField2(p thrift.Encoder) error {  // BoxField
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("AllocatorAware2 write field end error: ", err)
     }
-    return nil
-}
-
-func (x *AllocatorAware2) readField1(p thrift.Decoder) error {  // NotAContainer
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.NotAContainer = result
     return nil
 }
 
@@ -6713,14 +6790,6 @@ func (x *TypedefStruct) GetI32Field() int32 {
     return x.I32Field
 }
 
-func (x *TypedefStruct) GetIntTypedefField() IntTypedef {
-    return x.IntTypedefField
-}
-
-func (x *TypedefStruct) GetUintTypedefField() UintTypedef {
-    return x.UintTypedefField
-}
-
 func (x *TypedefStruct) SetI32FieldNonCompat(value int32) *TypedefStruct {
     x.I32Field = value
     return x
@@ -6731,25 +6800,6 @@ func (x *TypedefStruct) SetI32Field(value int32) *TypedefStruct {
     return x
 }
 
-func (x *TypedefStruct) SetIntTypedefFieldNonCompat(value IntTypedef) *TypedefStruct {
-    x.IntTypedefField = value
-    return x
-}
-
-func (x *TypedefStruct) SetIntTypedefField(value IntTypedef) *TypedefStruct {
-    x.IntTypedefField = value
-    return x
-}
-
-func (x *TypedefStruct) SetUintTypedefFieldNonCompat(value UintTypedef) *TypedefStruct {
-    x.UintTypedefField = value
-    return x
-}
-
-func (x *TypedefStruct) SetUintTypedefField(value UintTypedef) *TypedefStruct {
-    x.UintTypedefField = value
-    return x
-}
 
 func (x *TypedefStruct) writeField1(p thrift.Encoder) error {  // I32Field
     if err := p.WriteFieldBegin("i32_field", thrift.I32, 1); err != nil {
@@ -6758,40 +6808,6 @@ func (x *TypedefStruct) writeField1(p thrift.Encoder) error {  // I32Field
 
     item := x.I32Field
     if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("TypedefStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *TypedefStruct) writeField2(p thrift.Encoder) error {  // IntTypedefField
-    if err := p.WriteFieldBegin("IntTypedef_field", thrift.I32, 2); err != nil {
-        return thrift.PrependError("TypedefStruct write field begin error: ", err)
-    }
-
-    item := x.IntTypedefField
-    err := WriteIntTypedef(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("TypedefStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *TypedefStruct) writeField3(p thrift.Encoder) error {  // UintTypedefField
-    if err := p.WriteFieldBegin("UintTypedef_field", thrift.I32, 3); err != nil {
-        return thrift.PrependError("TypedefStruct write field begin error: ", err)
-    }
-
-    item := x.UintTypedefField
-    err := WriteUintTypedef(item, p)
-    if err != nil {
         return err
     }
 
@@ -6811,6 +6827,39 @@ func (x *TypedefStruct) readField1(p thrift.Decoder) error {  // I32Field
     return nil
 }
 
+
+func (x *TypedefStruct) GetIntTypedefField() IntTypedef {
+    return x.IntTypedefField
+}
+
+func (x *TypedefStruct) SetIntTypedefFieldNonCompat(value IntTypedef) *TypedefStruct {
+    x.IntTypedefField = value
+    return x
+}
+
+func (x *TypedefStruct) SetIntTypedefField(value IntTypedef) *TypedefStruct {
+    x.IntTypedefField = value
+    return x
+}
+
+
+func (x *TypedefStruct) writeField2(p thrift.Encoder) error {  // IntTypedefField
+    if err := p.WriteFieldBegin("IntTypedef_field", thrift.I32, 2); err != nil {
+        return thrift.PrependError("TypedefStruct write field begin error: ", err)
+    }
+
+    item := x.IntTypedefField
+    err := WriteIntTypedef(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("TypedefStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *TypedefStruct) readField2(p thrift.Decoder) error {  // IntTypedefField
     result, err := ReadIntTypedef(p)
     if err != nil {
@@ -6818,6 +6867,39 @@ func (x *TypedefStruct) readField2(p thrift.Decoder) error {  // IntTypedefField
     }
 
     x.IntTypedefField = result
+    return nil
+}
+
+
+func (x *TypedefStruct) GetUintTypedefField() UintTypedef {
+    return x.UintTypedefField
+}
+
+func (x *TypedefStruct) SetUintTypedefFieldNonCompat(value UintTypedef) *TypedefStruct {
+    x.UintTypedefField = value
+    return x
+}
+
+func (x *TypedefStruct) SetUintTypedefField(value UintTypedef) *TypedefStruct {
+    x.UintTypedefField = value
+    return x
+}
+
+
+func (x *TypedefStruct) writeField3(p thrift.Encoder) error {  // UintTypedefField
+    if err := p.WriteFieldBegin("UintTypedef_field", thrift.I32, 3); err != nil {
+        return thrift.PrependError("TypedefStruct write field begin error: ", err)
+    }
+
+    item := x.UintTypedefField
+    err := WriteUintTypedef(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("TypedefStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -6830,6 +6912,7 @@ func (x *TypedefStruct) readField3(p thrift.Decoder) error {  // UintTypedefFiel
     x.UintTypedefField = result
     return nil
 }
+
 
 
 
@@ -6941,6 +7024,7 @@ func (x *StructWithDoubleUnderscores) Set_Field(value int32) *StructWithDoubleUn
     return x
 }
 
+
 func (x *StructWithDoubleUnderscores) writeField1(p thrift.Encoder) error {  // _Field
     if err := p.WriteFieldBegin("__field", thrift.I32, 1); err != nil {
         return thrift.PrependError("StructWithDoubleUnderscores write field begin error: ", err)
@@ -6966,6 +7050,7 @@ func (x *StructWithDoubleUnderscores) readField1(p thrift.Decoder) error {  // _
     x._Field = result
     return nil
 }
+
 
 
 
@@ -7105,6 +7190,7 @@ func (x *reqSomeServiceBounceMap) readField1(p thrift.Decoder) error {  // M
 
 
 
+
 func (x *reqSomeServiceBounceMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqSomeServiceBounceMap"); err != nil {
         return thrift.PrependError("reqSomeServiceBounceMap write struct begin error: ", err)
@@ -7237,6 +7323,7 @@ func (x *respSomeServiceBounceMap) readField0(p thrift.Decoder) error {  // Succ
     x.Success = result
     return nil
 }
+
 
 
 
@@ -7399,6 +7486,7 @@ func (x *reqSomeServiceBinaryKeyedMap) readField1(p thrift.Decoder) error {  // 
     x.R = result
     return nil
 }
+
 
 
 
@@ -7585,6 +7673,7 @@ func (x *respSomeServiceBinaryKeyedMap) readField0(p thrift.Decoder) error {  //
     x.Success = result
     return nil
 }
+
 
 
 

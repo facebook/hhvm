@@ -35,14 +35,6 @@ func (x *Foo) GetField2() int32 {
     return x.Field2
 }
 
-func (x *Foo) GetField3() int32 {
-    return x.Field3
-}
-
-func (x *Foo) GetField1() int32 {
-    return x.Field1
-}
-
 func (x *Foo) SetField2NonCompat(value int32) *Foo {
     x.Field2 = value
     return x
@@ -53,25 +45,6 @@ func (x *Foo) SetField2(value int32) *Foo {
     return x
 }
 
-func (x *Foo) SetField3NonCompat(value int32) *Foo {
-    x.Field3 = value
-    return x
-}
-
-func (x *Foo) SetField3(value int32) *Foo {
-    x.Field3 = value
-    return x
-}
-
-func (x *Foo) SetField1NonCompat(value int32) *Foo {
-    x.Field1 = value
-    return x
-}
-
-func (x *Foo) SetField1(value int32) *Foo {
-    x.Field1 = value
-    return x
-}
 
 func (x *Foo) writeField1(p thrift.Encoder) error {  // Field2
     if err := p.WriteFieldBegin("field2", thrift.I32, 1); err != nil {
@@ -79,38 +52,6 @@ func (x *Foo) writeField1(p thrift.Encoder) error {  // Field2
     }
 
     item := x.Field2
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Foo write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Foo) writeField2(p thrift.Encoder) error {  // Field3
-    if err := p.WriteFieldBegin("field3", thrift.I32, 2); err != nil {
-        return thrift.PrependError("Foo write field begin error: ", err)
-    }
-
-    item := x.Field3
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Foo write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Foo) writeField3(p thrift.Encoder) error {  // Field1
-    if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {
-        return thrift.PrependError("Foo write field begin error: ", err)
-    }
-
-    item := x.Field1
     if err := p.WriteI32(item); err != nil {
         return err
     }
@@ -131,6 +72,38 @@ func (x *Foo) readField1(p thrift.Decoder) error {  // Field2
     return nil
 }
 
+
+func (x *Foo) GetField3() int32 {
+    return x.Field3
+}
+
+func (x *Foo) SetField3NonCompat(value int32) *Foo {
+    x.Field3 = value
+    return x
+}
+
+func (x *Foo) SetField3(value int32) *Foo {
+    x.Field3 = value
+    return x
+}
+
+
+func (x *Foo) writeField2(p thrift.Encoder) error {  // Field3
+    if err := p.WriteFieldBegin("field3", thrift.I32, 2); err != nil {
+        return thrift.PrependError("Foo write field begin error: ", err)
+    }
+
+    item := x.Field3
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Foo write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *Foo) readField2(p thrift.Decoder) error {  // Field3
     result, err := p.ReadI32()
     if err != nil {
@@ -138,6 +111,38 @@ func (x *Foo) readField2(p thrift.Decoder) error {  // Field3
     }
 
     x.Field3 = result
+    return nil
+}
+
+
+func (x *Foo) GetField1() int32 {
+    return x.Field1
+}
+
+func (x *Foo) SetField1NonCompat(value int32) *Foo {
+    x.Field1 = value
+    return x
+}
+
+func (x *Foo) SetField1(value int32) *Foo {
+    x.Field1 = value
+    return x
+}
+
+
+func (x *Foo) writeField3(p thrift.Encoder) error {  // Field1
+    if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {
+        return thrift.PrependError("Foo write field begin error: ", err)
+    }
+
+    item := x.Field1
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Foo write field end error: ", err)
+    }
     return nil
 }
 
@@ -150,6 +155,7 @@ func (x *Foo) readField3(p thrift.Decoder) error {  // Field1
     x.Field1 = result
     return nil
 }
+
 
 
 
@@ -253,14 +259,6 @@ func (x *Foo2) GetField2() int32 {
     return x.Field2
 }
 
-func (x *Foo2) GetField3() int32 {
-    return x.Field3
-}
-
-func (x *Foo2) GetField1() int32 {
-    return x.Field1
-}
-
 func (x *Foo2) SetField2NonCompat(value int32) *Foo2 {
     x.Field2 = value
     return x
@@ -271,25 +269,6 @@ func (x *Foo2) SetField2(value int32) *Foo2 {
     return x
 }
 
-func (x *Foo2) SetField3NonCompat(value int32) *Foo2 {
-    x.Field3 = value
-    return x
-}
-
-func (x *Foo2) SetField3(value int32) *Foo2 {
-    x.Field3 = value
-    return x
-}
-
-func (x *Foo2) SetField1NonCompat(value int32) *Foo2 {
-    x.Field1 = value
-    return x
-}
-
-func (x *Foo2) SetField1(value int32) *Foo2 {
-    x.Field1 = value
-    return x
-}
 
 func (x *Foo2) writeField1(p thrift.Encoder) error {  // Field2
     if err := p.WriteFieldBegin("field2", thrift.I32, 1); err != nil {
@@ -297,38 +276,6 @@ func (x *Foo2) writeField1(p thrift.Encoder) error {  // Field2
     }
 
     item := x.Field2
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Foo2 write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Foo2) writeField2(p thrift.Encoder) error {  // Field3
-    if err := p.WriteFieldBegin("field3", thrift.I32, 2); err != nil {
-        return thrift.PrependError("Foo2 write field begin error: ", err)
-    }
-
-    item := x.Field3
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Foo2 write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Foo2) writeField3(p thrift.Encoder) error {  // Field1
-    if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {
-        return thrift.PrependError("Foo2 write field begin error: ", err)
-    }
-
-    item := x.Field1
     if err := p.WriteI32(item); err != nil {
         return err
     }
@@ -349,6 +296,38 @@ func (x *Foo2) readField1(p thrift.Decoder) error {  // Field2
     return nil
 }
 
+
+func (x *Foo2) GetField3() int32 {
+    return x.Field3
+}
+
+func (x *Foo2) SetField3NonCompat(value int32) *Foo2 {
+    x.Field3 = value
+    return x
+}
+
+func (x *Foo2) SetField3(value int32) *Foo2 {
+    x.Field3 = value
+    return x
+}
+
+
+func (x *Foo2) writeField2(p thrift.Encoder) error {  // Field3
+    if err := p.WriteFieldBegin("field3", thrift.I32, 2); err != nil {
+        return thrift.PrependError("Foo2 write field begin error: ", err)
+    }
+
+    item := x.Field3
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Foo2 write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *Foo2) readField2(p thrift.Decoder) error {  // Field3
     result, err := p.ReadI32()
     if err != nil {
@@ -356,6 +335,38 @@ func (x *Foo2) readField2(p thrift.Decoder) error {  // Field3
     }
 
     x.Field3 = result
+    return nil
+}
+
+
+func (x *Foo2) GetField1() int32 {
+    return x.Field1
+}
+
+func (x *Foo2) SetField1NonCompat(value int32) *Foo2 {
+    x.Field1 = value
+    return x
+}
+
+func (x *Foo2) SetField1(value int32) *Foo2 {
+    x.Field1 = value
+    return x
+}
+
+
+func (x *Foo2) writeField3(p thrift.Encoder) error {  // Field1
+    if err := p.WriteFieldBegin("field1", thrift.I32, 3); err != nil {
+        return thrift.PrependError("Foo2 write field begin error: ", err)
+    }
+
+    item := x.Field1
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Foo2 write field end error: ", err)
+    }
     return nil
 }
 
@@ -368,6 +379,7 @@ func (x *Foo2) readField3(p thrift.Decoder) error {  // Field1
     x.Field1 = result
     return nil
 }
+
 
 
 

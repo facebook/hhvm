@@ -190,6 +190,7 @@ func (x *MyStructNestedAnnotation) SetName(value string) *MyStructNestedAnnotati
     return x
 }
 
+
 func (x *MyStructNestedAnnotation) writeField1(p thrift.Encoder) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
         return thrift.PrependError("MyStructNestedAnnotation write field begin error: ", err)
@@ -215,6 +216,7 @@ func (x *MyStructNestedAnnotation) readField1(p thrift.Decoder) error {  // Name
     x.Name = result
     return nil
 }
+
 
 
 
@@ -482,44 +484,6 @@ func (x *MyStruct) GetAbstractName() string {
     return x.AbstractName
 }
 
-func (x *MyStruct) GetMajorVer() int64 {
-    return x.MajorVer
-}
-
-func (x *MyStruct) GetAnnotationWithQuote() string {
-    return x.AnnotationWithQuote
-}
-
-func (x *MyStruct) GetClass_() string {
-    return x.Class_
-}
-
-func (x *MyStruct) GetAnnotationWithTrailingComma() string {
-    return x.AnnotationWithTrailingComma
-}
-
-func (x *MyStruct) GetEmptyAnnotations() string {
-    return x.EmptyAnnotations
-}
-
-func (x *MyStruct) GetMyEnum() MyEnum {
-    return x.MyEnum
-}
-
-func (x *MyStruct) GetCppTypeAnnotation() ListString_6884 {
-    if !x.IsSetCppTypeAnnotation() {
-        return NewListString_6884()
-    }
-    return x.CppTypeAnnotation
-}
-
-func (x *MyStruct) GetMyUnion() *MyUnion {
-    if !x.IsSetMyUnion() {
-        return nil
-    }
-    return x.MyUnion
-}
-
 func (x *MyStruct) SetAbstractNameNonCompat(value string) *MyStruct {
     x.AbstractName = value
     return x
@@ -530,93 +494,6 @@ func (x *MyStruct) SetAbstractName(value string) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetMajorVerNonCompat(value int64) *MyStruct {
-    x.MajorVer = value
-    return x
-}
-
-func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
-    x.MajorVer = value
-    return x
-}
-
-func (x *MyStruct) SetAnnotationWithQuoteNonCompat(value string) *MyStruct {
-    x.AnnotationWithQuote = value
-    return x
-}
-
-func (x *MyStruct) SetAnnotationWithQuote(value string) *MyStruct {
-    x.AnnotationWithQuote = value
-    return x
-}
-
-func (x *MyStruct) SetClass_NonCompat(value string) *MyStruct {
-    x.Class_ = value
-    return x
-}
-
-func (x *MyStruct) SetClass_(value string) *MyStruct {
-    x.Class_ = value
-    return x
-}
-
-func (x *MyStruct) SetAnnotationWithTrailingCommaNonCompat(value string) *MyStruct {
-    x.AnnotationWithTrailingComma = value
-    return x
-}
-
-func (x *MyStruct) SetAnnotationWithTrailingComma(value string) *MyStruct {
-    x.AnnotationWithTrailingComma = value
-    return x
-}
-
-func (x *MyStruct) SetEmptyAnnotationsNonCompat(value string) *MyStruct {
-    x.EmptyAnnotations = value
-    return x
-}
-
-func (x *MyStruct) SetEmptyAnnotations(value string) *MyStruct {
-    x.EmptyAnnotations = value
-    return x
-}
-
-func (x *MyStruct) SetMyEnumNonCompat(value MyEnum) *MyStruct {
-    x.MyEnum = value
-    return x
-}
-
-func (x *MyStruct) SetMyEnum(value MyEnum) *MyStruct {
-    x.MyEnum = value
-    return x
-}
-
-func (x *MyStruct) SetCppTypeAnnotationNonCompat(value ListString_6884) *MyStruct {
-    x.CppTypeAnnotation = value
-    return x
-}
-
-func (x *MyStruct) SetCppTypeAnnotation(value ListString_6884) *MyStruct {
-    x.CppTypeAnnotation = value
-    return x
-}
-
-func (x *MyStruct) SetMyUnionNonCompat(value *MyUnion) *MyStruct {
-    x.MyUnion = value
-    return x
-}
-
-func (x *MyStruct) SetMyUnion(value *MyUnion) *MyStruct {
-    x.MyUnion = value
-    return x
-}
-
-func (x *MyStruct) IsSetCppTypeAnnotation() bool {
-    return x != nil && x.CppTypeAnnotation != nil
-}
-
-func (x *MyStruct) IsSetMyUnion() bool {
-    return x != nil && x.MyUnion != nil
-}
 
 func (x *MyStruct) writeField1(p thrift.Encoder) error {  // AbstractName
     if err := p.WriteFieldBegin("abstract", thrift.STRING, 1); err != nil {
@@ -625,139 +502,6 @@ func (x *MyStruct) writeField1(p thrift.Encoder) error {  // AbstractName
 
     item := x.AbstractName
     if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField2(p thrift.Encoder) error {  // MajorVer
-    if err := p.WriteFieldBegin("major", thrift.I64, 2); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.MajorVer
-    if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField3(p thrift.Encoder) error {  // AnnotationWithQuote
-    if err := p.WriteFieldBegin("annotation_with_quote", thrift.STRING, 3); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.AnnotationWithQuote
-    if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField4(p thrift.Encoder) error {  // Class_
-    if err := p.WriteFieldBegin("class_", thrift.STRING, 4); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.Class_
-    if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField5(p thrift.Encoder) error {  // AnnotationWithTrailingComma
-    if err := p.WriteFieldBegin("annotation_with_trailing_comma", thrift.STRING, 5); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.AnnotationWithTrailingComma
-    if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField6(p thrift.Encoder) error {  // EmptyAnnotations
-    if err := p.WriteFieldBegin("empty_annotations", thrift.STRING, 6); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.EmptyAnnotations
-    if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField7(p thrift.Encoder) error {  // MyEnum
-    if err := p.WriteFieldBegin("my_enum", thrift.I32, 7); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.MyEnum
-    if err := p.WriteI32(int32(item)); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField8(p thrift.Encoder) error {  // CppTypeAnnotation
-    if err := p.WriteFieldBegin("cpp_type_annotation", thrift.LIST, 8); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.CppTypeAnnotation
-    err := WriteListString_6884(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyStruct) writeField9(p thrift.Encoder) error {  // MyUnion
-    if !x.IsSetMyUnion() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("my_union", thrift.STRUCT, 9); err != nil {
-        return thrift.PrependError("MyStruct write field begin error: ", err)
-    }
-
-    item := x.MyUnion
-    if err := item.Write(p); err != nil {
         return err
     }
 
@@ -777,6 +521,38 @@ func (x *MyStruct) readField1(p thrift.Decoder) error {  // AbstractName
     return nil
 }
 
+
+func (x *MyStruct) GetMajorVer() int64 {
+    return x.MajorVer
+}
+
+func (x *MyStruct) SetMajorVerNonCompat(value int64) *MyStruct {
+    x.MajorVer = value
+    return x
+}
+
+func (x *MyStruct) SetMajorVer(value int64) *MyStruct {
+    x.MajorVer = value
+    return x
+}
+
+
+func (x *MyStruct) writeField2(p thrift.Encoder) error {  // MajorVer
+    if err := p.WriteFieldBegin("major", thrift.I64, 2); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.MajorVer
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MyStruct) readField2(p thrift.Decoder) error {  // MajorVer
     result, err := p.ReadI64()
     if err != nil {
@@ -784,6 +560,38 @@ func (x *MyStruct) readField2(p thrift.Decoder) error {  // MajorVer
     }
 
     x.MajorVer = result
+    return nil
+}
+
+
+func (x *MyStruct) GetAnnotationWithQuote() string {
+    return x.AnnotationWithQuote
+}
+
+func (x *MyStruct) SetAnnotationWithQuoteNonCompat(value string) *MyStruct {
+    x.AnnotationWithQuote = value
+    return x
+}
+
+func (x *MyStruct) SetAnnotationWithQuote(value string) *MyStruct {
+    x.AnnotationWithQuote = value
+    return x
+}
+
+
+func (x *MyStruct) writeField3(p thrift.Encoder) error {  // AnnotationWithQuote
+    if err := p.WriteFieldBegin("annotation_with_quote", thrift.STRING, 3); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.AnnotationWithQuote
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -797,6 +605,38 @@ func (x *MyStruct) readField3(p thrift.Decoder) error {  // AnnotationWithQuote
     return nil
 }
 
+
+func (x *MyStruct) GetClass_() string {
+    return x.Class_
+}
+
+func (x *MyStruct) SetClass_NonCompat(value string) *MyStruct {
+    x.Class_ = value
+    return x
+}
+
+func (x *MyStruct) SetClass_(value string) *MyStruct {
+    x.Class_ = value
+    return x
+}
+
+
+func (x *MyStruct) writeField4(p thrift.Encoder) error {  // Class_
+    if err := p.WriteFieldBegin("class_", thrift.STRING, 4); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.Class_
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MyStruct) readField4(p thrift.Decoder) error {  // Class_
     result, err := p.ReadString()
     if err != nil {
@@ -804,6 +644,38 @@ func (x *MyStruct) readField4(p thrift.Decoder) error {  // Class_
     }
 
     x.Class_ = result
+    return nil
+}
+
+
+func (x *MyStruct) GetAnnotationWithTrailingComma() string {
+    return x.AnnotationWithTrailingComma
+}
+
+func (x *MyStruct) SetAnnotationWithTrailingCommaNonCompat(value string) *MyStruct {
+    x.AnnotationWithTrailingComma = value
+    return x
+}
+
+func (x *MyStruct) SetAnnotationWithTrailingComma(value string) *MyStruct {
+    x.AnnotationWithTrailingComma = value
+    return x
+}
+
+
+func (x *MyStruct) writeField5(p thrift.Encoder) error {  // AnnotationWithTrailingComma
+    if err := p.WriteFieldBegin("annotation_with_trailing_comma", thrift.STRING, 5); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.AnnotationWithTrailingComma
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -817,6 +689,38 @@ func (x *MyStruct) readField5(p thrift.Decoder) error {  // AnnotationWithTraili
     return nil
 }
 
+
+func (x *MyStruct) GetEmptyAnnotations() string {
+    return x.EmptyAnnotations
+}
+
+func (x *MyStruct) SetEmptyAnnotationsNonCompat(value string) *MyStruct {
+    x.EmptyAnnotations = value
+    return x
+}
+
+func (x *MyStruct) SetEmptyAnnotations(value string) *MyStruct {
+    x.EmptyAnnotations = value
+    return x
+}
+
+
+func (x *MyStruct) writeField6(p thrift.Encoder) error {  // EmptyAnnotations
+    if err := p.WriteFieldBegin("empty_annotations", thrift.STRING, 6); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.EmptyAnnotations
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MyStruct) readField6(p thrift.Decoder) error {  // EmptyAnnotations
     result, err := p.ReadString()
     if err != nil {
@@ -824,6 +728,38 @@ func (x *MyStruct) readField6(p thrift.Decoder) error {  // EmptyAnnotations
     }
 
     x.EmptyAnnotations = result
+    return nil
+}
+
+
+func (x *MyStruct) GetMyEnum() MyEnum {
+    return x.MyEnum
+}
+
+func (x *MyStruct) SetMyEnumNonCompat(value MyEnum) *MyStruct {
+    x.MyEnum = value
+    return x
+}
+
+func (x *MyStruct) SetMyEnum(value MyEnum) *MyStruct {
+    x.MyEnum = value
+    return x
+}
+
+
+func (x *MyStruct) writeField7(p thrift.Encoder) error {  // MyEnum
+    if err := p.WriteFieldBegin("my_enum", thrift.I32, 7); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.MyEnum
+    if err := p.WriteI32(int32(item)); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -838,6 +774,45 @@ func (x *MyStruct) readField7(p thrift.Decoder) error {  // MyEnum
     return nil
 }
 
+
+func (x *MyStruct) GetCppTypeAnnotation() ListString_6884 {
+    if !x.IsSetCppTypeAnnotation() {
+        return NewListString_6884()
+    }
+    return x.CppTypeAnnotation
+}
+
+func (x *MyStruct) SetCppTypeAnnotationNonCompat(value ListString_6884) *MyStruct {
+    x.CppTypeAnnotation = value
+    return x
+}
+
+func (x *MyStruct) SetCppTypeAnnotation(value ListString_6884) *MyStruct {
+    x.CppTypeAnnotation = value
+    return x
+}
+
+func (x *MyStruct) IsSetCppTypeAnnotation() bool {
+    return x != nil && x.CppTypeAnnotation != nil
+}
+
+func (x *MyStruct) writeField8(p thrift.Encoder) error {  // CppTypeAnnotation
+    if err := p.WriteFieldBegin("cpp_type_annotation", thrift.LIST, 8); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.CppTypeAnnotation
+    err := WriteListString_6884(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MyStruct) readField8(p thrift.Decoder) error {  // CppTypeAnnotation
     result, err := ReadListString_6884(p)
     if err != nil {
@@ -845,6 +820,48 @@ func (x *MyStruct) readField8(p thrift.Decoder) error {  // CppTypeAnnotation
     }
 
     x.CppTypeAnnotation = result
+    return nil
+}
+
+
+func (x *MyStruct) GetMyUnion() *MyUnion {
+    if !x.IsSetMyUnion() {
+        return nil
+    }
+    return x.MyUnion
+}
+
+func (x *MyStruct) SetMyUnionNonCompat(value *MyUnion) *MyStruct {
+    x.MyUnion = value
+    return x
+}
+
+func (x *MyStruct) SetMyUnion(value *MyUnion) *MyStruct {
+    x.MyUnion = value
+    return x
+}
+
+func (x *MyStruct) IsSetMyUnion() bool {
+    return x != nil && x.MyUnion != nil
+}
+
+func (x *MyStruct) writeField9(p thrift.Encoder) error {  // MyUnion
+    if !x.IsSetMyUnion() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("my_union", thrift.STRUCT, 9); err != nil {
+        return thrift.PrependError("MyStruct write field begin error: ", err)
+    }
+
+    item := x.MyUnion
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -997,10 +1014,6 @@ func (x *SecretStruct) GetId() int64 {
     return x.Id
 }
 
-func (x *SecretStruct) GetPassword() string {
-    return x.Password
-}
-
 func (x *SecretStruct) SetIdNonCompat(value int64) *SecretStruct {
     x.Id = value
     return x
@@ -1011,15 +1024,6 @@ func (x *SecretStruct) SetId(value int64) *SecretStruct {
     return x
 }
 
-func (x *SecretStruct) SetPasswordNonCompat(value string) *SecretStruct {
-    x.Password = value
-    return x
-}
-
-func (x *SecretStruct) SetPassword(value string) *SecretStruct {
-    x.Password = value
-    return x
-}
 
 func (x *SecretStruct) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
@@ -1028,22 +1032,6 @@ func (x *SecretStruct) writeField1(p thrift.Encoder) error {  // Id
 
     item := x.Id
     if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("SecretStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *SecretStruct) writeField2(p thrift.Encoder) error {  // Password
-    if err := p.WriteFieldBegin("password", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("SecretStruct write field begin error: ", err)
-    }
-
-    item := x.Password
-    if err := p.WriteString(item); err != nil {
         return err
     }
 
@@ -1063,6 +1051,38 @@ func (x *SecretStruct) readField1(p thrift.Decoder) error {  // Id
     return nil
 }
 
+
+func (x *SecretStruct) GetPassword() string {
+    return x.Password
+}
+
+func (x *SecretStruct) SetPasswordNonCompat(value string) *SecretStruct {
+    x.Password = value
+    return x
+}
+
+func (x *SecretStruct) SetPassword(value string) *SecretStruct {
+    x.Password = value
+    return x
+}
+
+
+func (x *SecretStruct) writeField2(p thrift.Encoder) error {  // Password
+    if err := p.WriteFieldBegin("password", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("SecretStruct write field begin error: ", err)
+    }
+
+    item := x.Password
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("SecretStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *SecretStruct) readField2(p thrift.Decoder) error {  // Password
     result, err := p.ReadString()
     if err != nil {
@@ -1072,6 +1092,7 @@ func (x *SecretStruct) readField2(p thrift.Decoder) error {  // Password
     x.Password = result
     return nil
 }
+
 
 
 
@@ -1614,6 +1635,7 @@ func (x *reqMyServiceHasDataById) SetId(value int64) *reqMyServiceHasDataById {
     return x
 }
 
+
 func (x *reqMyServiceHasDataById) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
         return thrift.PrependError("reqMyServiceHasDataById write field begin error: ", err)
@@ -1639,6 +1661,7 @@ func (x *reqMyServiceHasDataById) readField1(p thrift.Decoder) error {  // Id
     x.Id = result
     return nil
 }
+
 
 
 
@@ -1876,6 +1899,7 @@ func (x *reqMyServiceGoGetDataById) SetId(value int64) *reqMyServiceGoGetDataByI
     return x
 }
 
+
 func (x *reqMyServiceGoGetDataById) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
         return thrift.PrependError("reqMyServiceGoGetDataById write field begin error: ", err)
@@ -1901,6 +1925,7 @@ func (x *reqMyServiceGoGetDataById) readField1(p thrift.Decoder) error {  // Id
     x.Id = result
     return nil
 }
+
 
 
 
@@ -2129,10 +2154,6 @@ func (x *reqMyServicePutDataById) GetId() int64 {
     return x.Id
 }
 
-func (x *reqMyServicePutDataById) GetData() string {
-    return x.Data
-}
-
 func (x *reqMyServicePutDataById) SetIdNonCompat(value int64) *reqMyServicePutDataById {
     x.Id = value
     return x
@@ -2143,15 +2164,6 @@ func (x *reqMyServicePutDataById) SetId(value int64) *reqMyServicePutDataById {
     return x
 }
 
-func (x *reqMyServicePutDataById) SetDataNonCompat(value string) *reqMyServicePutDataById {
-    x.Data = value
-    return x
-}
-
-func (x *reqMyServicePutDataById) SetData(value string) *reqMyServicePutDataById {
-    x.Data = value
-    return x
-}
 
 func (x *reqMyServicePutDataById) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
@@ -2160,22 +2172,6 @@ func (x *reqMyServicePutDataById) writeField1(p thrift.Encoder) error {  // Id
 
     item := x.Id
     if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqMyServicePutDataById write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqMyServicePutDataById) writeField2(p thrift.Encoder) error {  // Data
-    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("reqMyServicePutDataById write field begin error: ", err)
-    }
-
-    item := x.Data
-    if err := p.WriteString(item); err != nil {
         return err
     }
 
@@ -2195,6 +2191,38 @@ func (x *reqMyServicePutDataById) readField1(p thrift.Decoder) error {  // Id
     return nil
 }
 
+
+func (x *reqMyServicePutDataById) GetData() string {
+    return x.Data
+}
+
+func (x *reqMyServicePutDataById) SetDataNonCompat(value string) *reqMyServicePutDataById {
+    x.Data = value
+    return x
+}
+
+func (x *reqMyServicePutDataById) SetData(value string) *reqMyServicePutDataById {
+    x.Data = value
+    return x
+}
+
+
+func (x *reqMyServicePutDataById) writeField2(p thrift.Encoder) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("reqMyServicePutDataById write field begin error: ", err)
+    }
+
+    item := x.Data
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqMyServicePutDataById write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *reqMyServicePutDataById) readField2(p thrift.Decoder) error {  // Data
     result, err := p.ReadString()
     if err != nil {
@@ -2204,6 +2232,7 @@ func (x *reqMyServicePutDataById) readField2(p thrift.Decoder) error {  // Data
     x.Data = result
     return nil
 }
+
 
 
 
@@ -2380,10 +2409,6 @@ func (x *reqMyServiceLobDataById) GetId() int64 {
     return x.Id
 }
 
-func (x *reqMyServiceLobDataById) GetData() string {
-    return x.Data
-}
-
 func (x *reqMyServiceLobDataById) SetIdNonCompat(value int64) *reqMyServiceLobDataById {
     x.Id = value
     return x
@@ -2394,15 +2419,6 @@ func (x *reqMyServiceLobDataById) SetId(value int64) *reqMyServiceLobDataById {
     return x
 }
 
-func (x *reqMyServiceLobDataById) SetDataNonCompat(value string) *reqMyServiceLobDataById {
-    x.Data = value
-    return x
-}
-
-func (x *reqMyServiceLobDataById) SetData(value string) *reqMyServiceLobDataById {
-    x.Data = value
-    return x
-}
 
 func (x *reqMyServiceLobDataById) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
@@ -2411,22 +2427,6 @@ func (x *reqMyServiceLobDataById) writeField1(p thrift.Encoder) error {  // Id
 
     item := x.Id
     if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("reqMyServiceLobDataById write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *reqMyServiceLobDataById) writeField2(p thrift.Encoder) error {  // Data
-    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("reqMyServiceLobDataById write field begin error: ", err)
-    }
-
-    item := x.Data
-    if err := p.WriteString(item); err != nil {
         return err
     }
 
@@ -2446,6 +2446,38 @@ func (x *reqMyServiceLobDataById) readField1(p thrift.Decoder) error {  // Id
     return nil
 }
 
+
+func (x *reqMyServiceLobDataById) GetData() string {
+    return x.Data
+}
+
+func (x *reqMyServiceLobDataById) SetDataNonCompat(value string) *reqMyServiceLobDataById {
+    x.Data = value
+    return x
+}
+
+func (x *reqMyServiceLobDataById) SetData(value string) *reqMyServiceLobDataById {
+    x.Data = value
+    return x
+}
+
+
+func (x *reqMyServiceLobDataById) writeField2(p thrift.Encoder) error {  // Data
+    if err := p.WriteFieldBegin("data", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("reqMyServiceLobDataById write field begin error: ", err)
+    }
+
+    item := x.Data
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("reqMyServiceLobDataById write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *reqMyServiceLobDataById) readField2(p thrift.Decoder) error {  // Data
     result, err := p.ReadString()
     if err != nil {
@@ -2455,6 +2487,7 @@ func (x *reqMyServiceLobDataById) readField2(p thrift.Decoder) error {  // Data
     x.Data = result
     return nil
 }
+
 
 
 

@@ -424,31 +424,6 @@ func (x *Internship) GetWeeks() int32 {
     return x.Weeks
 }
 
-func (x *Internship) GetTitle() string {
-    return x.Title
-}
-
-func (x *Internship) GetEmployer() Company {
-    if !x.IsSetEmployer() {
-        return 0
-    }
-    return *x.Employer
-}
-
-func (x *Internship) GetCompensation() float64 {
-    if !x.IsSetCompensation() {
-        return 0.0
-    }
-    return *x.Compensation
-}
-
-func (x *Internship) GetSchool() string {
-    if !x.IsSetSchool() {
-        return ""
-    }
-    return *x.School
-}
-
 func (x *Internship) SetWeeksNonCompat(value int32) *Internship {
     x.Weeks = value
     return x
@@ -459,57 +434,6 @@ func (x *Internship) SetWeeks(value int32) *Internship {
     return x
 }
 
-func (x *Internship) SetTitleNonCompat(value string) *Internship {
-    x.Title = value
-    return x
-}
-
-func (x *Internship) SetTitle(value string) *Internship {
-    x.Title = value
-    return x
-}
-
-func (x *Internship) SetEmployerNonCompat(value Company) *Internship {
-    x.Employer = &value
-    return x
-}
-
-func (x *Internship) SetEmployer(value *Company) *Internship {
-    x.Employer = value
-    return x
-}
-
-func (x *Internship) SetCompensationNonCompat(value float64) *Internship {
-    x.Compensation = &value
-    return x
-}
-
-func (x *Internship) SetCompensation(value *float64) *Internship {
-    x.Compensation = value
-    return x
-}
-
-func (x *Internship) SetSchoolNonCompat(value string) *Internship {
-    x.School = &value
-    return x
-}
-
-func (x *Internship) SetSchool(value *string) *Internship {
-    x.School = value
-    return x
-}
-
-func (x *Internship) IsSetEmployer() bool {
-    return x != nil && x.Employer != nil
-}
-
-func (x *Internship) IsSetCompensation() bool {
-    return x != nil && x.Compensation != nil
-}
-
-func (x *Internship) IsSetSchool() bool {
-    return x != nil && x.School != nil
-}
 
 func (x *Internship) writeField1(p thrift.Encoder) error {  // Weeks
     if err := p.WriteFieldBegin("weeks", thrift.I32, 1); err != nil {
@@ -527,6 +451,32 @@ func (x *Internship) writeField1(p thrift.Encoder) error {  // Weeks
     return nil
 }
 
+func (x *Internship) readField1(p thrift.Decoder) error {  // Weeks
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Weeks = result
+    return nil
+}
+
+
+func (x *Internship) GetTitle() string {
+    return x.Title
+}
+
+func (x *Internship) SetTitleNonCompat(value string) *Internship {
+    x.Title = value
+    return x
+}
+
+func (x *Internship) SetTitle(value string) *Internship {
+    x.Title = value
+    return x
+}
+
+
 func (x *Internship) writeField2(p thrift.Encoder) error {  // Title
     if err := p.WriteFieldBegin("title", thrift.STRING, 2); err != nil {
         return thrift.PrependError("Internship write field begin error: ", err)
@@ -541,6 +491,38 @@ func (x *Internship) writeField2(p thrift.Encoder) error {  // Title
         return thrift.PrependError("Internship write field end error: ", err)
     }
     return nil
+}
+
+func (x *Internship) readField2(p thrift.Decoder) error {  // Title
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Title = result
+    return nil
+}
+
+
+func (x *Internship) GetEmployer() Company {
+    if !x.IsSetEmployer() {
+        return 0
+    }
+    return *x.Employer
+}
+
+func (x *Internship) SetEmployerNonCompat(value Company) *Internship {
+    x.Employer = &value
+    return x
+}
+
+func (x *Internship) SetEmployer(value *Company) *Internship {
+    x.Employer = value
+    return x
+}
+
+func (x *Internship) IsSetEmployer() bool {
+    return x != nil && x.Employer != nil
 }
 
 func (x *Internship) writeField3(p thrift.Encoder) error {  // Employer
@@ -563,6 +545,39 @@ func (x *Internship) writeField3(p thrift.Encoder) error {  // Employer
     return nil
 }
 
+func (x *Internship) readField3(p thrift.Decoder) error {  // Employer
+    enumResult, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+    result := Company(enumResult)
+
+    x.Employer = &result
+    return nil
+}
+
+
+func (x *Internship) GetCompensation() float64 {
+    if !x.IsSetCompensation() {
+        return 0.0
+    }
+    return *x.Compensation
+}
+
+func (x *Internship) SetCompensationNonCompat(value float64) *Internship {
+    x.Compensation = &value
+    return x
+}
+
+func (x *Internship) SetCompensation(value *float64) *Internship {
+    x.Compensation = value
+    return x
+}
+
+func (x *Internship) IsSetCompensation() bool {
+    return x != nil && x.Compensation != nil
+}
+
 func (x *Internship) writeField4(p thrift.Encoder) error {  // Compensation
     if !x.IsSetCompensation() {
         return nil
@@ -581,6 +596,38 @@ func (x *Internship) writeField4(p thrift.Encoder) error {  // Compensation
         return thrift.PrependError("Internship write field end error: ", err)
     }
     return nil
+}
+
+func (x *Internship) readField4(p thrift.Decoder) error {  // Compensation
+    result, err := p.ReadDouble()
+    if err != nil {
+        return err
+    }
+
+    x.Compensation = &result
+    return nil
+}
+
+
+func (x *Internship) GetSchool() string {
+    if !x.IsSetSchool() {
+        return ""
+    }
+    return *x.School
+}
+
+func (x *Internship) SetSchoolNonCompat(value string) *Internship {
+    x.School = &value
+    return x
+}
+
+func (x *Internship) SetSchool(value *string) *Internship {
+    x.School = value
+    return x
+}
+
+func (x *Internship) IsSetSchool() bool {
+    return x != nil && x.School != nil
 }
 
 func (x *Internship) writeField5(p thrift.Encoder) error {  // School
@@ -603,47 +650,6 @@ func (x *Internship) writeField5(p thrift.Encoder) error {  // School
     return nil
 }
 
-func (x *Internship) readField1(p thrift.Decoder) error {  // Weeks
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.Weeks = result
-    return nil
-}
-
-func (x *Internship) readField2(p thrift.Decoder) error {  // Title
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Title = result
-    return nil
-}
-
-func (x *Internship) readField3(p thrift.Decoder) error {  // Employer
-    enumResult, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-    result := Company(enumResult)
-
-    x.Employer = &result
-    return nil
-}
-
-func (x *Internship) readField4(p thrift.Decoder) error {  // Compensation
-    result, err := p.ReadDouble()
-    if err != nil {
-        return err
-    }
-
-    x.Compensation = &result
-    return nil
-}
-
 func (x *Internship) readField5(p thrift.Decoder) error {  // School
     result, err := p.ReadString()
     if err != nil {
@@ -653,8 +659,6 @@ func (x *Internship) readField5(p thrift.Decoder) error {  // School
     x.School = &result
     return nil
 }
-
-
 
 
 
@@ -767,10 +771,6 @@ func (x *Range) GetMin() int32 {
     return x.Min
 }
 
-func (x *Range) GetMax() int32 {
-    return x.Max
-}
-
 func (x *Range) SetMinNonCompat(value int32) *Range {
     x.Min = value
     return x
@@ -781,15 +781,6 @@ func (x *Range) SetMin(value int32) *Range {
     return x
 }
 
-func (x *Range) SetMaxNonCompat(value int32) *Range {
-    x.Max = value
-    return x
-}
-
-func (x *Range) SetMax(value int32) *Range {
-    x.Max = value
-    return x
-}
 
 func (x *Range) writeField1(p thrift.Encoder) error {  // Min
     if err := p.WriteFieldBegin("min", thrift.I32, 1); err != nil {
@@ -797,22 +788,6 @@ func (x *Range) writeField1(p thrift.Encoder) error {  // Min
     }
 
     item := x.Min
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Range write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Range) writeField2(p thrift.Encoder) error {  // Max
-    if err := p.WriteFieldBegin("max", thrift.I32, 2); err != nil {
-        return thrift.PrependError("Range write field begin error: ", err)
-    }
-
-    item := x.Max
     if err := p.WriteI32(item); err != nil {
         return err
     }
@@ -833,6 +808,38 @@ func (x *Range) readField1(p thrift.Decoder) error {  // Min
     return nil
 }
 
+
+func (x *Range) GetMax() int32 {
+    return x.Max
+}
+
+func (x *Range) SetMaxNonCompat(value int32) *Range {
+    x.Max = value
+    return x
+}
+
+func (x *Range) SetMax(value int32) *Range {
+    x.Max = value
+    return x
+}
+
+
+func (x *Range) writeField2(p thrift.Encoder) error {  // Max
+    if err := p.WriteFieldBegin("max", thrift.I32, 2); err != nil {
+        return thrift.PrependError("Range write field begin error: ", err)
+    }
+
+    item := x.Max
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Range write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *Range) readField2(p thrift.Decoder) error {  // Max
     result, err := p.ReadI32()
     if err != nil {
@@ -842,6 +849,7 @@ func (x *Range) readField2(p thrift.Decoder) error {  // Max
     x.Max = result
     return nil
 }
+
 
 
 
@@ -938,10 +946,6 @@ func (x *Struct1) GetA() int32 {
     return x.A
 }
 
-func (x *Struct1) GetB() string {
-    return x.B
-}
-
 func (x *Struct1) SetANonCompat(value int32) *Struct1 {
     x.A = value
     return x
@@ -952,15 +956,6 @@ func (x *Struct1) SetA(value int32) *Struct1 {
     return x
 }
 
-func (x *Struct1) SetBNonCompat(value string) *Struct1 {
-    x.B = value
-    return x
-}
-
-func (x *Struct1) SetB(value string) *Struct1 {
-    x.B = value
-    return x
-}
 
 func (x *Struct1) writeField1(p thrift.Encoder) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I32, 1); err != nil {
@@ -969,22 +964,6 @@ func (x *Struct1) writeField1(p thrift.Encoder) error {  // A
 
     item := x.A
     if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Struct1 write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Struct1) writeField2(p thrift.Encoder) error {  // B
-    if err := p.WriteFieldBegin("b", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("Struct1 write field begin error: ", err)
-    }
-
-    item := x.B
-    if err := p.WriteString(item); err != nil {
         return err
     }
 
@@ -1004,6 +983,38 @@ func (x *Struct1) readField1(p thrift.Decoder) error {  // A
     return nil
 }
 
+
+func (x *Struct1) GetB() string {
+    return x.B
+}
+
+func (x *Struct1) SetBNonCompat(value string) *Struct1 {
+    x.B = value
+    return x
+}
+
+func (x *Struct1) SetB(value string) *Struct1 {
+    x.B = value
+    return x
+}
+
+
+func (x *Struct1) writeField2(p thrift.Encoder) error {  // B
+    if err := p.WriteFieldBegin("b", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("Struct1 write field begin error: ", err)
+    }
+
+    item := x.B
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Struct1 write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *Struct1) readField2(p thrift.Decoder) error {  // B
     result, err := p.ReadString()
     if err != nil {
@@ -1013,6 +1024,7 @@ func (x *Struct1) readField2(p thrift.Decoder) error {  // B
     x.B = result
     return nil
 }
+
 
 
 
@@ -1111,24 +1123,6 @@ func (x *Struct2) GetA() int32 {
     return x.A
 }
 
-func (x *Struct2) GetB() string {
-    return x.B
-}
-
-func (x *Struct2) GetC() *Struct1 {
-    if !x.IsSetC() {
-        return nil
-    }
-    return x.C
-}
-
-func (x *Struct2) GetD() []int32 {
-    if !x.IsSetD() {
-        return make([]int32, 0)
-    }
-    return x.D
-}
-
 func (x *Struct2) SetANonCompat(value int32) *Struct2 {
     x.A = value
     return x
@@ -1139,43 +1133,6 @@ func (x *Struct2) SetA(value int32) *Struct2 {
     return x
 }
 
-func (x *Struct2) SetBNonCompat(value string) *Struct2 {
-    x.B = value
-    return x
-}
-
-func (x *Struct2) SetB(value string) *Struct2 {
-    x.B = value
-    return x
-}
-
-func (x *Struct2) SetCNonCompat(value *Struct1) *Struct2 {
-    x.C = value
-    return x
-}
-
-func (x *Struct2) SetC(value *Struct1) *Struct2 {
-    x.C = value
-    return x
-}
-
-func (x *Struct2) SetDNonCompat(value []int32) *Struct2 {
-    x.D = value
-    return x
-}
-
-func (x *Struct2) SetD(value []int32) *Struct2 {
-    x.D = value
-    return x
-}
-
-func (x *Struct2) IsSetC() bool {
-    return x != nil && x.C != nil
-}
-
-func (x *Struct2) IsSetD() bool {
-    return x != nil && x.D != nil
-}
 
 func (x *Struct2) writeField1(p thrift.Encoder) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I32, 1); err != nil {
@@ -1193,6 +1150,32 @@ func (x *Struct2) writeField1(p thrift.Encoder) error {  // A
     return nil
 }
 
+func (x *Struct2) readField1(p thrift.Decoder) error {  // A
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.A = result
+    return nil
+}
+
+
+func (x *Struct2) GetB() string {
+    return x.B
+}
+
+func (x *Struct2) SetBNonCompat(value string) *Struct2 {
+    x.B = value
+    return x
+}
+
+func (x *Struct2) SetB(value string) *Struct2 {
+    x.B = value
+    return x
+}
+
+
 func (x *Struct2) writeField2(p thrift.Encoder) error {  // B
     if err := p.WriteFieldBegin("b", thrift.STRING, 2); err != nil {
         return thrift.PrependError("Struct2 write field begin error: ", err)
@@ -1207,6 +1190,38 @@ func (x *Struct2) writeField2(p thrift.Encoder) error {  // B
         return thrift.PrependError("Struct2 write field end error: ", err)
     }
     return nil
+}
+
+func (x *Struct2) readField2(p thrift.Decoder) error {  // B
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.B = result
+    return nil
+}
+
+
+func (x *Struct2) GetC() *Struct1 {
+    if !x.IsSetC() {
+        return nil
+    }
+    return x.C
+}
+
+func (x *Struct2) SetCNonCompat(value *Struct1) *Struct2 {
+    x.C = value
+    return x
+}
+
+func (x *Struct2) SetC(value *Struct1) *Struct2 {
+    x.C = value
+    return x
+}
+
+func (x *Struct2) IsSetC() bool {
+    return x != nil && x.C != nil
 }
 
 func (x *Struct2) writeField3(p thrift.Encoder) error {  // C
@@ -1227,6 +1242,39 @@ func (x *Struct2) writeField3(p thrift.Encoder) error {  // C
         return thrift.PrependError("Struct2 write field end error: ", err)
     }
     return nil
+}
+
+func (x *Struct2) readField3(p thrift.Decoder) error {  // C
+    result := NewStruct1()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.C = result
+    return nil
+}
+
+
+func (x *Struct2) GetD() []int32 {
+    if !x.IsSetD() {
+        return make([]int32, 0)
+    }
+    return x.D
+}
+
+func (x *Struct2) SetDNonCompat(value []int32) *Struct2 {
+    x.D = value
+    return x
+}
+
+func (x *Struct2) SetD(value []int32) *Struct2 {
+    x.D = value
+    return x
+}
+
+func (x *Struct2) IsSetD() bool {
+    return x != nil && x.D != nil
 }
 
 func (x *Struct2) writeField4(p thrift.Encoder) error {  // D
@@ -1253,37 +1301,6 @@ func (x *Struct2) writeField4(p thrift.Encoder) error {  // D
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("Struct2 write field end error: ", err)
     }
-    return nil
-}
-
-func (x *Struct2) readField1(p thrift.Decoder) error {  // A
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.A = result
-    return nil
-}
-
-func (x *Struct2) readField2(p thrift.Decoder) error {  // B
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.B = result
-    return nil
-}
-
-func (x *Struct2) readField3(p thrift.Decoder) error {  // C
-    result := NewStruct1()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.C = result
     return nil
 }
 
@@ -1424,17 +1441,6 @@ func (x *Struct3) GetA() string {
     return x.A
 }
 
-func (x *Struct3) GetB() int32 {
-    return x.B
-}
-
-func (x *Struct3) GetC() *Struct2 {
-    if !x.IsSetC() {
-        return nil
-    }
-    return x.C
-}
-
 func (x *Struct3) SetANonCompat(value string) *Struct3 {
     x.A = value
     return x
@@ -1445,29 +1451,6 @@ func (x *Struct3) SetA(value string) *Struct3 {
     return x
 }
 
-func (x *Struct3) SetBNonCompat(value int32) *Struct3 {
-    x.B = value
-    return x
-}
-
-func (x *Struct3) SetB(value int32) *Struct3 {
-    x.B = value
-    return x
-}
-
-func (x *Struct3) SetCNonCompat(value *Struct2) *Struct3 {
-    x.C = value
-    return x
-}
-
-func (x *Struct3) SetC(value *Struct2) *Struct3 {
-    x.C = value
-    return x
-}
-
-func (x *Struct3) IsSetC() bool {
-    return x != nil && x.C != nil
-}
 
 func (x *Struct3) writeField1(p thrift.Encoder) error {  // A
     if err := p.WriteFieldBegin("a", thrift.STRING, 1); err != nil {
@@ -1476,42 +1459,6 @@ func (x *Struct3) writeField1(p thrift.Encoder) error {  // A
 
     item := x.A
     if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Struct3 write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Struct3) writeField2(p thrift.Encoder) error {  // B
-    if err := p.WriteFieldBegin("b", thrift.I32, 2); err != nil {
-        return thrift.PrependError("Struct3 write field begin error: ", err)
-    }
-
-    item := x.B
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Struct3 write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Struct3) writeField3(p thrift.Encoder) error {  // C
-    if !x.IsSetC() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("c", thrift.STRUCT, 3); err != nil {
-        return thrift.PrependError("Struct3 write field begin error: ", err)
-    }
-
-    item := x.C
-    if err := item.Write(p); err != nil {
         return err
     }
 
@@ -1531,6 +1478,38 @@ func (x *Struct3) readField1(p thrift.Decoder) error {  // A
     return nil
 }
 
+
+func (x *Struct3) GetB() int32 {
+    return x.B
+}
+
+func (x *Struct3) SetBNonCompat(value int32) *Struct3 {
+    x.B = value
+    return x
+}
+
+func (x *Struct3) SetB(value int32) *Struct3 {
+    x.B = value
+    return x
+}
+
+
+func (x *Struct3) writeField2(p thrift.Encoder) error {  // B
+    if err := p.WriteFieldBegin("b", thrift.I32, 2); err != nil {
+        return thrift.PrependError("Struct3 write field begin error: ", err)
+    }
+
+    item := x.B
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Struct3 write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *Struct3) readField2(p thrift.Decoder) error {  // B
     result, err := p.ReadI32()
     if err != nil {
@@ -1538,6 +1517,48 @@ func (x *Struct3) readField2(p thrift.Decoder) error {  // B
     }
 
     x.B = result
+    return nil
+}
+
+
+func (x *Struct3) GetC() *Struct2 {
+    if !x.IsSetC() {
+        return nil
+    }
+    return x.C
+}
+
+func (x *Struct3) SetCNonCompat(value *Struct2) *Struct3 {
+    x.C = value
+    return x
+}
+
+func (x *Struct3) SetC(value *Struct2) *Struct3 {
+    x.C = value
+    return x
+}
+
+func (x *Struct3) IsSetC() bool {
+    return x != nil && x.C != nil
+}
+
+func (x *Struct3) writeField3(p thrift.Encoder) error {  // C
+    if !x.IsSetC() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("c", thrift.STRUCT, 3); err != nil {
+        return thrift.PrependError("Struct3 write field begin error: ", err)
+    }
+
+    item := x.C
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Struct3 write field end error: ", err)
+    }
     return nil
 }
 
@@ -1655,20 +1676,6 @@ func (x *Struct4) GetA() int32 {
     return x.A
 }
 
-func (x *Struct4) GetB() float64 {
-    if !x.IsSetB() {
-        return 0.0
-    }
-    return *x.B
-}
-
-func (x *Struct4) GetC() int8 {
-    if !x.IsSetC() {
-        return 0
-    }
-    return *x.C
-}
-
 func (x *Struct4) SetANonCompat(value int32) *Struct4 {
     x.A = value
     return x
@@ -1679,33 +1686,6 @@ func (x *Struct4) SetA(value int32) *Struct4 {
     return x
 }
 
-func (x *Struct4) SetBNonCompat(value float64) *Struct4 {
-    x.B = &value
-    return x
-}
-
-func (x *Struct4) SetB(value *float64) *Struct4 {
-    x.B = value
-    return x
-}
-
-func (x *Struct4) SetCNonCompat(value int8) *Struct4 {
-    x.C = &value
-    return x
-}
-
-func (x *Struct4) SetC(value *int8) *Struct4 {
-    x.C = value
-    return x
-}
-
-func (x *Struct4) IsSetB() bool {
-    return x != nil && x.B != nil
-}
-
-func (x *Struct4) IsSetC() bool {
-    return x != nil && x.C != nil
-}
 
 func (x *Struct4) writeField1(p thrift.Encoder) error {  // A
     if err := p.WriteFieldBegin("a", thrift.I32, 1); err != nil {
@@ -1721,6 +1701,38 @@ func (x *Struct4) writeField1(p thrift.Encoder) error {  // A
         return thrift.PrependError("Struct4 write field end error: ", err)
     }
     return nil
+}
+
+func (x *Struct4) readField1(p thrift.Decoder) error {  // A
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.A = result
+    return nil
+}
+
+
+func (x *Struct4) GetB() float64 {
+    if !x.IsSetB() {
+        return 0.0
+    }
+    return *x.B
+}
+
+func (x *Struct4) SetBNonCompat(value float64) *Struct4 {
+    x.B = &value
+    return x
+}
+
+func (x *Struct4) SetB(value *float64) *Struct4 {
+    x.B = value
+    return x
+}
+
+func (x *Struct4) IsSetB() bool {
+    return x != nil && x.B != nil
 }
 
 func (x *Struct4) writeField2(p thrift.Encoder) error {  // B
@@ -1743,6 +1755,38 @@ func (x *Struct4) writeField2(p thrift.Encoder) error {  // B
     return nil
 }
 
+func (x *Struct4) readField2(p thrift.Decoder) error {  // B
+    result, err := p.ReadDouble()
+    if err != nil {
+        return err
+    }
+
+    x.B = &result
+    return nil
+}
+
+
+func (x *Struct4) GetC() int8 {
+    if !x.IsSetC() {
+        return 0
+    }
+    return *x.C
+}
+
+func (x *Struct4) SetCNonCompat(value int8) *Struct4 {
+    x.C = &value
+    return x
+}
+
+func (x *Struct4) SetC(value *int8) *Struct4 {
+    x.C = value
+    return x
+}
+
+func (x *Struct4) IsSetC() bool {
+    return x != nil && x.C != nil
+}
+
 func (x *Struct4) writeField3(p thrift.Encoder) error {  // C
     if !x.IsSetC() {
         return nil
@@ -1763,26 +1807,6 @@ func (x *Struct4) writeField3(p thrift.Encoder) error {  // C
     return nil
 }
 
-func (x *Struct4) readField1(p thrift.Decoder) error {  // A
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.A = result
-    return nil
-}
-
-func (x *Struct4) readField2(p thrift.Decoder) error {  // B
-    result, err := p.ReadDouble()
-    if err != nil {
-        return err
-    }
-
-    x.B = &result
-    return nil
-}
-
 func (x *Struct4) readField3(p thrift.Decoder) error {  // C
     resultByte, err := p.ReadByte()
     result := int8(resultByte)
@@ -1793,7 +1817,6 @@ func (x *Struct4) readField3(p thrift.Decoder) error {  // C
     x.C = &result
     return nil
 }
-
 
 
 
@@ -1898,13 +1921,6 @@ func (x *Union1) GetI() int32 {
     return *x.I
 }
 
-func (x *Union1) GetD() float64 {
-    if !x.IsSetD() {
-        return 0.0
-    }
-    return *x.D
-}
-
 func (x *Union1) SetINonCompat(value int32) *Union1 {
     x.I = &value
     return x
@@ -1915,22 +1931,8 @@ func (x *Union1) SetI(value *int32) *Union1 {
     return x
 }
 
-func (x *Union1) SetDNonCompat(value float64) *Union1 {
-    x.D = &value
-    return x
-}
-
-func (x *Union1) SetD(value *float64) *Union1 {
-    x.D = value
-    return x
-}
-
 func (x *Union1) IsSetI() bool {
     return x != nil && x.I != nil
-}
-
-func (x *Union1) IsSetD() bool {
-    return x != nil && x.D != nil
 }
 
 func (x *Union1) writeField1(p thrift.Encoder) error {  // I
@@ -1953,6 +1955,38 @@ func (x *Union1) writeField1(p thrift.Encoder) error {  // I
     return nil
 }
 
+func (x *Union1) readField1(p thrift.Decoder) error {  // I
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.I = &result
+    return nil
+}
+
+
+func (x *Union1) GetD() float64 {
+    if !x.IsSetD() {
+        return 0.0
+    }
+    return *x.D
+}
+
+func (x *Union1) SetDNonCompat(value float64) *Union1 {
+    x.D = &value
+    return x
+}
+
+func (x *Union1) SetD(value *float64) *Union1 {
+    x.D = value
+    return x
+}
+
+func (x *Union1) IsSetD() bool {
+    return x != nil && x.D != nil
+}
+
 func (x *Union1) writeField2(p thrift.Encoder) error {  // D
     if !x.IsSetD() {
         return nil
@@ -1973,16 +2007,6 @@ func (x *Union1) writeField2(p thrift.Encoder) error {  // D
     return nil
 }
 
-func (x *Union1) readField1(p thrift.Decoder) error {  // I
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.I = &result
-    return nil
-}
-
 func (x *Union1) readField2(p thrift.Decoder) error {  // D
     result, err := p.ReadDouble()
     if err != nil {
@@ -1992,7 +2016,6 @@ func (x *Union1) readField2(p thrift.Decoder) error {  // D
     x.D = &result
     return nil
 }
-
 
 
 
@@ -2106,27 +2129,6 @@ func (x *Union2) GetI() int32 {
     return *x.I
 }
 
-func (x *Union2) GetD() float64 {
-    if !x.IsSetD() {
-        return 0.0
-    }
-    return *x.D
-}
-
-func (x *Union2) GetS() *Struct1 {
-    if !x.IsSetS() {
-        return nil
-    }
-    return x.S
-}
-
-func (x *Union2) GetU() *Union1 {
-    if !x.IsSetU() {
-        return nil
-    }
-    return x.U
-}
-
 func (x *Union2) SetINonCompat(value int32) *Union2 {
     x.I = &value
     return x
@@ -2137,50 +2139,8 @@ func (x *Union2) SetI(value *int32) *Union2 {
     return x
 }
 
-func (x *Union2) SetDNonCompat(value float64) *Union2 {
-    x.D = &value
-    return x
-}
-
-func (x *Union2) SetD(value *float64) *Union2 {
-    x.D = value
-    return x
-}
-
-func (x *Union2) SetSNonCompat(value *Struct1) *Union2 {
-    x.S = value
-    return x
-}
-
-func (x *Union2) SetS(value *Struct1) *Union2 {
-    x.S = value
-    return x
-}
-
-func (x *Union2) SetUNonCompat(value *Union1) *Union2 {
-    x.U = value
-    return x
-}
-
-func (x *Union2) SetU(value *Union1) *Union2 {
-    x.U = value
-    return x
-}
-
 func (x *Union2) IsSetI() bool {
     return x != nil && x.I != nil
-}
-
-func (x *Union2) IsSetD() bool {
-    return x != nil && x.D != nil
-}
-
-func (x *Union2) IsSetS() bool {
-    return x != nil && x.S != nil
-}
-
-func (x *Union2) IsSetU() bool {
-    return x != nil && x.U != nil
 }
 
 func (x *Union2) writeField1(p thrift.Encoder) error {  // I
@@ -2203,6 +2163,38 @@ func (x *Union2) writeField1(p thrift.Encoder) error {  // I
     return nil
 }
 
+func (x *Union2) readField1(p thrift.Decoder) error {  // I
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.I = &result
+    return nil
+}
+
+
+func (x *Union2) GetD() float64 {
+    if !x.IsSetD() {
+        return 0.0
+    }
+    return *x.D
+}
+
+func (x *Union2) SetDNonCompat(value float64) *Union2 {
+    x.D = &value
+    return x
+}
+
+func (x *Union2) SetD(value *float64) *Union2 {
+    x.D = value
+    return x
+}
+
+func (x *Union2) IsSetD() bool {
+    return x != nil && x.D != nil
+}
+
 func (x *Union2) writeField2(p thrift.Encoder) error {  // D
     if !x.IsSetD() {
         return nil
@@ -2221,6 +2213,38 @@ func (x *Union2) writeField2(p thrift.Encoder) error {  // D
         return thrift.PrependError("Union2 write field end error: ", err)
     }
     return nil
+}
+
+func (x *Union2) readField2(p thrift.Decoder) error {  // D
+    result, err := p.ReadDouble()
+    if err != nil {
+        return err
+    }
+
+    x.D = &result
+    return nil
+}
+
+
+func (x *Union2) GetS() *Struct1 {
+    if !x.IsSetS() {
+        return nil
+    }
+    return x.S
+}
+
+func (x *Union2) SetSNonCompat(value *Struct1) *Union2 {
+    x.S = value
+    return x
+}
+
+func (x *Union2) SetS(value *Struct1) *Union2 {
+    x.S = value
+    return x
+}
+
+func (x *Union2) IsSetS() bool {
+    return x != nil && x.S != nil
 }
 
 func (x *Union2) writeField3(p thrift.Encoder) error {  // S
@@ -2243,6 +2267,39 @@ func (x *Union2) writeField3(p thrift.Encoder) error {  // S
     return nil
 }
 
+func (x *Union2) readField3(p thrift.Decoder) error {  // S
+    result := NewStruct1()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.S = result
+    return nil
+}
+
+
+func (x *Union2) GetU() *Union1 {
+    if !x.IsSetU() {
+        return nil
+    }
+    return x.U
+}
+
+func (x *Union2) SetUNonCompat(value *Union1) *Union2 {
+    x.U = value
+    return x
+}
+
+func (x *Union2) SetU(value *Union1) *Union2 {
+    x.U = value
+    return x
+}
+
+func (x *Union2) IsSetU() bool {
+    return x != nil && x.U != nil
+}
+
 func (x *Union2) writeField4(p thrift.Encoder) error {  // U
     if !x.IsSetU() {
         return nil
@@ -2263,37 +2320,6 @@ func (x *Union2) writeField4(p thrift.Encoder) error {  // U
     return nil
 }
 
-func (x *Union2) readField1(p thrift.Decoder) error {  // I
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.I = &result
-    return nil
-}
-
-func (x *Union2) readField2(p thrift.Decoder) error {  // D
-    result, err := p.ReadDouble()
-    if err != nil {
-        return err
-    }
-
-    x.D = &result
-    return nil
-}
-
-func (x *Union2) readField3(p thrift.Decoder) error {  // S
-    result := NewStruct1()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.S = result
-    return nil
-}
-
 func (x *Union2) readField4(p thrift.Decoder) error {  // U
     result := NewUnion1()
     err := result.Read(p)
@@ -2304,9 +2330,6 @@ func (x *Union2) readField4(p thrift.Decoder) error {  // U
     x.U = result
     return nil
 }
-
-
-
 
 
 

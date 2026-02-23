@@ -187,97 +187,6 @@ func (x *MyUnion) GetBoolField() bool {
     return *x.BoolField
 }
 
-func (x *MyUnion) GetByteField() int8 {
-    if !x.IsSetByteField() {
-        return 0
-    }
-    return *x.ByteField
-}
-
-func (x *MyUnion) GetShortField() int16 {
-    if !x.IsSetShortField() {
-        return 0
-    }
-    return *x.ShortField
-}
-
-func (x *MyUnion) GetIntField() int32 {
-    if !x.IsSetIntField() {
-        return 0
-    }
-    return *x.IntField
-}
-
-func (x *MyUnion) GetLongField() int64 {
-    if !x.IsSetLongField() {
-        return 0
-    }
-    return *x.LongField
-}
-
-func (x *MyUnion) GetFloatField() float32 {
-    if !x.IsSetFloatField() {
-        return 0.0
-    }
-    return *x.FloatField
-}
-
-func (x *MyUnion) GetDoubleField() float64 {
-    if !x.IsSetDoubleField() {
-        return 0.0
-    }
-    return *x.DoubleField
-}
-
-func (x *MyUnion) GetStringField() string {
-    if !x.IsSetStringField() {
-        return ""
-    }
-    return *x.StringField
-}
-
-func (x *MyUnion) GetBinaryField() []byte {
-    if !x.IsSetBinaryField() {
-        return []byte("")
-    }
-    return x.BinaryField
-}
-
-func (x *MyUnion) GetEnumField() MyEnum {
-    if !x.IsSetEnumField() {
-        return 0
-    }
-    return *x.EnumField
-}
-
-func (x *MyUnion) GetListField() []int16 {
-    if !x.IsSetListField() {
-        return make([]int16, 0)
-    }
-    return x.ListField
-}
-
-func (x *MyUnion) GetSetField() []int16 {
-    if !x.IsSetSetField() {
-        return make([]int16, 0)
-    }
-    return x.SetField
-}
-
-func (x *MyUnion) GetMapField() map[int16]int16 {
-    if !x.IsSetMapField() {
-        return make(map[int16]int16)
-    }
-    return x.MapField
-}
-
-func (x *MyUnion) GetStructField() *MyStruct {
-    if !x.IsSetStructField() {
-        return nil
-    }
-    return x.StructField
-}
-
 func (x *MyUnion) SetBoolFieldNonCompat(value bool) *MyUnion {
     x.BoolField = &value
     return x
@@ -288,190 +197,8 @@ func (x *MyUnion) SetBoolField(value *bool) *MyUnion {
     return x
 }
 
-func (x *MyUnion) SetByteFieldNonCompat(value int8) *MyUnion {
-    x.ByteField = &value
-    return x
-}
-
-func (x *MyUnion) SetByteField(value *int8) *MyUnion {
-    x.ByteField = value
-    return x
-}
-
-func (x *MyUnion) SetShortFieldNonCompat(value int16) *MyUnion {
-    x.ShortField = &value
-    return x
-}
-
-func (x *MyUnion) SetShortField(value *int16) *MyUnion {
-    x.ShortField = value
-    return x
-}
-
-func (x *MyUnion) SetIntFieldNonCompat(value int32) *MyUnion {
-    x.IntField = &value
-    return x
-}
-
-func (x *MyUnion) SetIntField(value *int32) *MyUnion {
-    x.IntField = value
-    return x
-}
-
-func (x *MyUnion) SetLongFieldNonCompat(value int64) *MyUnion {
-    x.LongField = &value
-    return x
-}
-
-func (x *MyUnion) SetLongField(value *int64) *MyUnion {
-    x.LongField = value
-    return x
-}
-
-func (x *MyUnion) SetFloatFieldNonCompat(value float32) *MyUnion {
-    x.FloatField = &value
-    return x
-}
-
-func (x *MyUnion) SetFloatField(value *float32) *MyUnion {
-    x.FloatField = value
-    return x
-}
-
-func (x *MyUnion) SetDoubleFieldNonCompat(value float64) *MyUnion {
-    x.DoubleField = &value
-    return x
-}
-
-func (x *MyUnion) SetDoubleField(value *float64) *MyUnion {
-    x.DoubleField = value
-    return x
-}
-
-func (x *MyUnion) SetStringFieldNonCompat(value string) *MyUnion {
-    x.StringField = &value
-    return x
-}
-
-func (x *MyUnion) SetStringField(value *string) *MyUnion {
-    x.StringField = value
-    return x
-}
-
-func (x *MyUnion) SetBinaryFieldNonCompat(value []byte) *MyUnion {
-    x.BinaryField = value
-    return x
-}
-
-func (x *MyUnion) SetBinaryField(value []byte) *MyUnion {
-    x.BinaryField = value
-    return x
-}
-
-func (x *MyUnion) SetEnumFieldNonCompat(value MyEnum) *MyUnion {
-    x.EnumField = &value
-    return x
-}
-
-func (x *MyUnion) SetEnumField(value *MyEnum) *MyUnion {
-    x.EnumField = value
-    return x
-}
-
-func (x *MyUnion) SetListFieldNonCompat(value []int16) *MyUnion {
-    x.ListField = value
-    return x
-}
-
-func (x *MyUnion) SetListField(value []int16) *MyUnion {
-    x.ListField = value
-    return x
-}
-
-func (x *MyUnion) SetSetFieldNonCompat(value []int16) *MyUnion {
-    x.SetField = value
-    return x
-}
-
-func (x *MyUnion) SetSetField(value []int16) *MyUnion {
-    x.SetField = value
-    return x
-}
-
-func (x *MyUnion) SetMapFieldNonCompat(value map[int16]int16) *MyUnion {
-    x.MapField = value
-    return x
-}
-
-func (x *MyUnion) SetMapField(value map[int16]int16) *MyUnion {
-    x.MapField = value
-    return x
-}
-
-func (x *MyUnion) SetStructFieldNonCompat(value *MyStruct) *MyUnion {
-    x.StructField = value
-    return x
-}
-
-func (x *MyUnion) SetStructField(value *MyStruct) *MyUnion {
-    x.StructField = value
-    return x
-}
-
 func (x *MyUnion) IsSetBoolField() bool {
     return x != nil && x.BoolField != nil
-}
-
-func (x *MyUnion) IsSetByteField() bool {
-    return x != nil && x.ByteField != nil
-}
-
-func (x *MyUnion) IsSetShortField() bool {
-    return x != nil && x.ShortField != nil
-}
-
-func (x *MyUnion) IsSetIntField() bool {
-    return x != nil && x.IntField != nil
-}
-
-func (x *MyUnion) IsSetLongField() bool {
-    return x != nil && x.LongField != nil
-}
-
-func (x *MyUnion) IsSetFloatField() bool {
-    return x != nil && x.FloatField != nil
-}
-
-func (x *MyUnion) IsSetDoubleField() bool {
-    return x != nil && x.DoubleField != nil
-}
-
-func (x *MyUnion) IsSetStringField() bool {
-    return x != nil && x.StringField != nil
-}
-
-func (x *MyUnion) IsSetBinaryField() bool {
-    return x != nil && x.BinaryField != nil
-}
-
-func (x *MyUnion) IsSetEnumField() bool {
-    return x != nil && x.EnumField != nil
-}
-
-func (x *MyUnion) IsSetListField() bool {
-    return x != nil && x.ListField != nil
-}
-
-func (x *MyUnion) IsSetSetField() bool {
-    return x != nil && x.SetField != nil
-}
-
-func (x *MyUnion) IsSetMapField() bool {
-    return x != nil && x.MapField != nil
-}
-
-func (x *MyUnion) IsSetStructField() bool {
-    return x != nil && x.StructField != nil
 }
 
 func (x *MyUnion) writeField1(p thrift.Encoder) error {  // BoolField
@@ -494,6 +221,38 @@ func (x *MyUnion) writeField1(p thrift.Encoder) error {  // BoolField
     return nil
 }
 
+func (x *MyUnion) readField1(p thrift.Decoder) error {  // BoolField
+    result, err := p.ReadBool()
+    if err != nil {
+        return err
+    }
+
+    x.BoolField = &result
+    return nil
+}
+
+
+func (x *MyUnion) GetByteField() int8 {
+    if !x.IsSetByteField() {
+        return 0
+    }
+    return *x.ByteField
+}
+
+func (x *MyUnion) SetByteFieldNonCompat(value int8) *MyUnion {
+    x.ByteField = &value
+    return x
+}
+
+func (x *MyUnion) SetByteField(value *int8) *MyUnion {
+    x.ByteField = value
+    return x
+}
+
+func (x *MyUnion) IsSetByteField() bool {
+    return x != nil && x.ByteField != nil
+}
+
 func (x *MyUnion) writeField2(p thrift.Encoder) error {  // ByteField
     if !x.IsSetByteField() {
         return nil
@@ -512,6 +271,39 @@ func (x *MyUnion) writeField2(p thrift.Encoder) error {  // ByteField
         return thrift.PrependError("MyUnion write field end error: ", err)
     }
     return nil
+}
+
+func (x *MyUnion) readField2(p thrift.Decoder) error {  // ByteField
+    resultByte, err := p.ReadByte()
+    result := int8(resultByte)
+    if err != nil {
+        return err
+    }
+
+    x.ByteField = &result
+    return nil
+}
+
+
+func (x *MyUnion) GetShortField() int16 {
+    if !x.IsSetShortField() {
+        return 0
+    }
+    return *x.ShortField
+}
+
+func (x *MyUnion) SetShortFieldNonCompat(value int16) *MyUnion {
+    x.ShortField = &value
+    return x
+}
+
+func (x *MyUnion) SetShortField(value *int16) *MyUnion {
+    x.ShortField = value
+    return x
+}
+
+func (x *MyUnion) IsSetShortField() bool {
+    return x != nil && x.ShortField != nil
 }
 
 func (x *MyUnion) writeField3(p thrift.Encoder) error {  // ShortField
@@ -534,6 +326,38 @@ func (x *MyUnion) writeField3(p thrift.Encoder) error {  // ShortField
     return nil
 }
 
+func (x *MyUnion) readField3(p thrift.Decoder) error {  // ShortField
+    result, err := p.ReadI16()
+    if err != nil {
+        return err
+    }
+
+    x.ShortField = &result
+    return nil
+}
+
+
+func (x *MyUnion) GetIntField() int32 {
+    if !x.IsSetIntField() {
+        return 0
+    }
+    return *x.IntField
+}
+
+func (x *MyUnion) SetIntFieldNonCompat(value int32) *MyUnion {
+    x.IntField = &value
+    return x
+}
+
+func (x *MyUnion) SetIntField(value *int32) *MyUnion {
+    x.IntField = value
+    return x
+}
+
+func (x *MyUnion) IsSetIntField() bool {
+    return x != nil && x.IntField != nil
+}
+
 func (x *MyUnion) writeField4(p thrift.Encoder) error {  // IntField
     if !x.IsSetIntField() {
         return nil
@@ -552,6 +376,38 @@ func (x *MyUnion) writeField4(p thrift.Encoder) error {  // IntField
         return thrift.PrependError("MyUnion write field end error: ", err)
     }
     return nil
+}
+
+func (x *MyUnion) readField4(p thrift.Decoder) error {  // IntField
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.IntField = &result
+    return nil
+}
+
+
+func (x *MyUnion) GetLongField() int64 {
+    if !x.IsSetLongField() {
+        return 0
+    }
+    return *x.LongField
+}
+
+func (x *MyUnion) SetLongFieldNonCompat(value int64) *MyUnion {
+    x.LongField = &value
+    return x
+}
+
+func (x *MyUnion) SetLongField(value *int64) *MyUnion {
+    x.LongField = value
+    return x
+}
+
+func (x *MyUnion) IsSetLongField() bool {
+    return x != nil && x.LongField != nil
 }
 
 func (x *MyUnion) writeField5(p thrift.Encoder) error {  // LongField
@@ -574,6 +430,38 @@ func (x *MyUnion) writeField5(p thrift.Encoder) error {  // LongField
     return nil
 }
 
+func (x *MyUnion) readField5(p thrift.Decoder) error {  // LongField
+    result, err := p.ReadI64()
+    if err != nil {
+        return err
+    }
+
+    x.LongField = &result
+    return nil
+}
+
+
+func (x *MyUnion) GetFloatField() float32 {
+    if !x.IsSetFloatField() {
+        return 0.0
+    }
+    return *x.FloatField
+}
+
+func (x *MyUnion) SetFloatFieldNonCompat(value float32) *MyUnion {
+    x.FloatField = &value
+    return x
+}
+
+func (x *MyUnion) SetFloatField(value *float32) *MyUnion {
+    x.FloatField = value
+    return x
+}
+
+func (x *MyUnion) IsSetFloatField() bool {
+    return x != nil && x.FloatField != nil
+}
+
 func (x *MyUnion) writeField6(p thrift.Encoder) error {  // FloatField
     if !x.IsSetFloatField() {
         return nil
@@ -592,6 +480,38 @@ func (x *MyUnion) writeField6(p thrift.Encoder) error {  // FloatField
         return thrift.PrependError("MyUnion write field end error: ", err)
     }
     return nil
+}
+
+func (x *MyUnion) readField6(p thrift.Decoder) error {  // FloatField
+    result, err := p.ReadFloat()
+    if err != nil {
+        return err
+    }
+
+    x.FloatField = &result
+    return nil
+}
+
+
+func (x *MyUnion) GetDoubleField() float64 {
+    if !x.IsSetDoubleField() {
+        return 0.0
+    }
+    return *x.DoubleField
+}
+
+func (x *MyUnion) SetDoubleFieldNonCompat(value float64) *MyUnion {
+    x.DoubleField = &value
+    return x
+}
+
+func (x *MyUnion) SetDoubleField(value *float64) *MyUnion {
+    x.DoubleField = value
+    return x
+}
+
+func (x *MyUnion) IsSetDoubleField() bool {
+    return x != nil && x.DoubleField != nil
 }
 
 func (x *MyUnion) writeField7(p thrift.Encoder) error {  // DoubleField
@@ -614,6 +534,38 @@ func (x *MyUnion) writeField7(p thrift.Encoder) error {  // DoubleField
     return nil
 }
 
+func (x *MyUnion) readField7(p thrift.Decoder) error {  // DoubleField
+    result, err := p.ReadDouble()
+    if err != nil {
+        return err
+    }
+
+    x.DoubleField = &result
+    return nil
+}
+
+
+func (x *MyUnion) GetStringField() string {
+    if !x.IsSetStringField() {
+        return ""
+    }
+    return *x.StringField
+}
+
+func (x *MyUnion) SetStringFieldNonCompat(value string) *MyUnion {
+    x.StringField = &value
+    return x
+}
+
+func (x *MyUnion) SetStringField(value *string) *MyUnion {
+    x.StringField = value
+    return x
+}
+
+func (x *MyUnion) IsSetStringField() bool {
+    return x != nil && x.StringField != nil
+}
+
 func (x *MyUnion) writeField8(p thrift.Encoder) error {  // StringField
     if !x.IsSetStringField() {
         return nil
@@ -632,6 +584,38 @@ func (x *MyUnion) writeField8(p thrift.Encoder) error {  // StringField
         return thrift.PrependError("MyUnion write field end error: ", err)
     }
     return nil
+}
+
+func (x *MyUnion) readField8(p thrift.Decoder) error {  // StringField
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.StringField = &result
+    return nil
+}
+
+
+func (x *MyUnion) GetBinaryField() []byte {
+    if !x.IsSetBinaryField() {
+        return []byte("")
+    }
+    return x.BinaryField
+}
+
+func (x *MyUnion) SetBinaryFieldNonCompat(value []byte) *MyUnion {
+    x.BinaryField = value
+    return x
+}
+
+func (x *MyUnion) SetBinaryField(value []byte) *MyUnion {
+    x.BinaryField = value
+    return x
+}
+
+func (x *MyUnion) IsSetBinaryField() bool {
+    return x != nil && x.BinaryField != nil
 }
 
 func (x *MyUnion) writeField9(p thrift.Encoder) error {  // BinaryField
@@ -654,6 +638,38 @@ func (x *MyUnion) writeField9(p thrift.Encoder) error {  // BinaryField
     return nil
 }
 
+func (x *MyUnion) readField9(p thrift.Decoder) error {  // BinaryField
+    result, err := p.ReadBinary()
+    if err != nil {
+        return err
+    }
+
+    x.BinaryField = result
+    return nil
+}
+
+
+func (x *MyUnion) GetEnumField() MyEnum {
+    if !x.IsSetEnumField() {
+        return 0
+    }
+    return *x.EnumField
+}
+
+func (x *MyUnion) SetEnumFieldNonCompat(value MyEnum) *MyUnion {
+    x.EnumField = &value
+    return x
+}
+
+func (x *MyUnion) SetEnumField(value *MyEnum) *MyUnion {
+    x.EnumField = value
+    return x
+}
+
+func (x *MyUnion) IsSetEnumField() bool {
+    return x != nil && x.EnumField != nil
+}
+
 func (x *MyUnion) writeField10(p thrift.Encoder) error {  // EnumField
     if !x.IsSetEnumField() {
         return nil
@@ -672,6 +688,39 @@ func (x *MyUnion) writeField10(p thrift.Encoder) error {  // EnumField
         return thrift.PrependError("MyUnion write field end error: ", err)
     }
     return nil
+}
+
+func (x *MyUnion) readField10(p thrift.Decoder) error {  // EnumField
+    enumResult, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+    result := MyEnum(enumResult)
+
+    x.EnumField = &result
+    return nil
+}
+
+
+func (x *MyUnion) GetListField() []int16 {
+    if !x.IsSetListField() {
+        return make([]int16, 0)
+    }
+    return x.ListField
+}
+
+func (x *MyUnion) SetListFieldNonCompat(value []int16) *MyUnion {
+    x.ListField = value
+    return x
+}
+
+func (x *MyUnion) SetListField(value []int16) *MyUnion {
+    x.ListField = value
+    return x
+}
+
+func (x *MyUnion) IsSetListField() bool {
+    return x != nil && x.ListField != nil
 }
 
 func (x *MyUnion) writeField11(p thrift.Encoder) error {  // ListField
@@ -705,6 +754,56 @@ func (x *MyUnion) writeField11(p thrift.Encoder) error {  // ListField
     return nil
 }
 
+func (x *MyUnion) readField11(p thrift.Decoder) error {  // ListField
+    _ /* elemType */, size, err := p.ReadListBegin()
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
+    }
+    
+    listResult := make([]int16, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int16
+        {
+            result, err := p.ReadI16()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
+
+    x.ListField = result
+    return nil
+}
+
+
+func (x *MyUnion) GetSetField() []int16 {
+    if !x.IsSetSetField() {
+        return make([]int16, 0)
+    }
+    return x.SetField
+}
+
+func (x *MyUnion) SetSetFieldNonCompat(value []int16) *MyUnion {
+    x.SetField = value
+    return x
+}
+
+func (x *MyUnion) SetSetField(value []int16) *MyUnion {
+    x.SetField = value
+    return x
+}
+
+func (x *MyUnion) IsSetSetField() bool {
+    return x != nil && x.SetField != nil
+}
+
 func (x *MyUnion) writeField12(p thrift.Encoder) error {  // SetField
     if !x.IsSetSetField() {
         return nil
@@ -734,6 +833,56 @@ func (x *MyUnion) writeField12(p thrift.Encoder) error {  // SetField
         return thrift.PrependError("MyUnion write field end error: ", err)
     }
     return nil
+}
+
+func (x *MyUnion) readField12(p thrift.Decoder) error {  // SetField
+    _ /* elemType */, size, err := p.ReadSetBegin()
+    if err != nil {
+        return thrift.PrependError("error reading set begin: ", err)
+    }
+    
+    setResult := make([]int16, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int16
+        {
+            result, err := p.ReadI16()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        setResult = append(setResult, elem)
+    }
+    
+    if err := p.ReadSetEnd(); err != nil {
+        return thrift.PrependError("error reading set end: ", err)
+    }
+    result := setResult
+
+    x.SetField = result
+    return nil
+}
+
+
+func (x *MyUnion) GetMapField() map[int16]int16 {
+    if !x.IsSetMapField() {
+        return make(map[int16]int16)
+    }
+    return x.MapField
+}
+
+func (x *MyUnion) SetMapFieldNonCompat(value map[int16]int16) *MyUnion {
+    x.MapField = value
+    return x
+}
+
+func (x *MyUnion) SetMapField(value map[int16]int16) *MyUnion {
+    x.MapField = value
+    return x
+}
+
+func (x *MyUnion) IsSetMapField() bool {
+    return x != nil && x.MapField != nil
 }
 
 func (x *MyUnion) writeField13(p thrift.Encoder) error {  // MapField
@@ -771,184 +920,6 @@ func (x *MyUnion) writeField13(p thrift.Encoder) error {  // MapField
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("MyUnion write field end error: ", err)
     }
-    return nil
-}
-
-func (x *MyUnion) writeField14(p thrift.Encoder) error {  // StructField
-    if !x.IsSetStructField() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("struct_field", thrift.STRUCT, 14); err != nil {
-        return thrift.PrependError("MyUnion write field begin error: ", err)
-    }
-
-    item := x.StructField
-    if err := item.Write(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("MyUnion write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *MyUnion) readField1(p thrift.Decoder) error {  // BoolField
-    result, err := p.ReadBool()
-    if err != nil {
-        return err
-    }
-
-    x.BoolField = &result
-    return nil
-}
-
-func (x *MyUnion) readField2(p thrift.Decoder) error {  // ByteField
-    resultByte, err := p.ReadByte()
-    result := int8(resultByte)
-    if err != nil {
-        return err
-    }
-
-    x.ByteField = &result
-    return nil
-}
-
-func (x *MyUnion) readField3(p thrift.Decoder) error {  // ShortField
-    result, err := p.ReadI16()
-    if err != nil {
-        return err
-    }
-
-    x.ShortField = &result
-    return nil
-}
-
-func (x *MyUnion) readField4(p thrift.Decoder) error {  // IntField
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.IntField = &result
-    return nil
-}
-
-func (x *MyUnion) readField5(p thrift.Decoder) error {  // LongField
-    result, err := p.ReadI64()
-    if err != nil {
-        return err
-    }
-
-    x.LongField = &result
-    return nil
-}
-
-func (x *MyUnion) readField6(p thrift.Decoder) error {  // FloatField
-    result, err := p.ReadFloat()
-    if err != nil {
-        return err
-    }
-
-    x.FloatField = &result
-    return nil
-}
-
-func (x *MyUnion) readField7(p thrift.Decoder) error {  // DoubleField
-    result, err := p.ReadDouble()
-    if err != nil {
-        return err
-    }
-
-    x.DoubleField = &result
-    return nil
-}
-
-func (x *MyUnion) readField8(p thrift.Decoder) error {  // StringField
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.StringField = &result
-    return nil
-}
-
-func (x *MyUnion) readField9(p thrift.Decoder) error {  // BinaryField
-    result, err := p.ReadBinary()
-    if err != nil {
-        return err
-    }
-
-    x.BinaryField = result
-    return nil
-}
-
-func (x *MyUnion) readField10(p thrift.Decoder) error {  // EnumField
-    enumResult, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-    result := MyEnum(enumResult)
-
-    x.EnumField = &result
-    return nil
-}
-
-func (x *MyUnion) readField11(p thrift.Decoder) error {  // ListField
-    _ /* elemType */, size, err := p.ReadListBegin()
-    if err != nil {
-        return thrift.PrependError("error reading list begin: ", err)
-    }
-    
-    listResult := make([]int16, 0, size)
-    for i := 0; i < size; i++ {
-        var elem int16
-        {
-            result, err := p.ReadI16()
-            if err != nil {
-                return err
-            }
-            elem = result
-        }
-        listResult = append(listResult, elem)
-    }
-    
-    if err := p.ReadListEnd(); err != nil {
-        return thrift.PrependError("error reading list end: ", err)
-    }
-    result := listResult
-
-    x.ListField = result
-    return nil
-}
-
-func (x *MyUnion) readField12(p thrift.Decoder) error {  // SetField
-    _ /* elemType */, size, err := p.ReadSetBegin()
-    if err != nil {
-        return thrift.PrependError("error reading set begin: ", err)
-    }
-    
-    setResult := make([]int16, 0, size)
-    for i := 0; i < size; i++ {
-        var elem int16
-        {
-            result, err := p.ReadI16()
-            if err != nil {
-                return err
-            }
-            elem = result
-        }
-        setResult = append(setResult, elem)
-    }
-    
-    if err := p.ReadSetEnd(); err != nil {
-        return thrift.PrependError("error reading set end: ", err)
-    }
-    result := setResult
-
-    x.SetField = result
     return nil
 }
 
@@ -990,6 +961,48 @@ func (x *MyUnion) readField13(p thrift.Decoder) error {  // MapField
     return nil
 }
 
+
+func (x *MyUnion) GetStructField() *MyStruct {
+    if !x.IsSetStructField() {
+        return nil
+    }
+    return x.StructField
+}
+
+func (x *MyUnion) SetStructFieldNonCompat(value *MyStruct) *MyUnion {
+    x.StructField = value
+    return x
+}
+
+func (x *MyUnion) SetStructField(value *MyStruct) *MyUnion {
+    x.StructField = value
+    return x
+}
+
+func (x *MyUnion) IsSetStructField() bool {
+    return x != nil && x.StructField != nil
+}
+
+func (x *MyUnion) writeField14(p thrift.Encoder) error {  // StructField
+    if !x.IsSetStructField() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("struct_field", thrift.STRUCT, 14); err != nil {
+        return thrift.PrependError("MyUnion write field begin error: ", err)
+    }
+
+    item := x.StructField
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("MyUnion write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *MyUnion) readField14(p thrift.Decoder) error {  // StructField
     result := NewMyStruct()
     err := result.Read(p)
@@ -1000,15 +1013,6 @@ func (x *MyUnion) readField14(p thrift.Decoder) error {  // StructField
     x.StructField = result
     return nil
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1222,6 +1226,7 @@ func (x *MyStructWithCustomDefault) SetField1(value int64) *MyStructWithCustomDe
     return x
 }
 
+
 func (x *MyStructWithCustomDefault) writeField1(p thrift.Encoder) error {  // Field1
     if err := p.WriteFieldBegin("field1", thrift.I64, 1); err != nil {
         return thrift.PrependError("MyStructWithCustomDefault write field begin error: ", err)
@@ -1247,6 +1252,7 @@ func (x *MyStructWithCustomDefault) readField1(p thrift.Decoder) error {  // Fie
     x.Field1 = result
     return nil
 }
+
 
 
 
@@ -1350,80 +1356,6 @@ func (x *StructLevelTerseStruct) GetBoolField() bool {
     return x.BoolField
 }
 
-func (x *StructLevelTerseStruct) GetByteField() int8 {
-    return x.ByteField
-}
-
-func (x *StructLevelTerseStruct) GetShortField() int16 {
-    return x.ShortField
-}
-
-func (x *StructLevelTerseStruct) GetIntField() int32 {
-    return x.IntField
-}
-
-func (x *StructLevelTerseStruct) GetLongField() int64 {
-    return x.LongField
-}
-
-func (x *StructLevelTerseStruct) GetFloatField() float32 {
-    return x.FloatField
-}
-
-func (x *StructLevelTerseStruct) GetDoubleField() float64 {
-    return x.DoubleField
-}
-
-func (x *StructLevelTerseStruct) GetStringField() string {
-    return x.StringField
-}
-
-func (x *StructLevelTerseStruct) GetBinaryField() []byte {
-    if !x.IsSetBinaryField() {
-        return []byte("")
-    }
-    return x.BinaryField
-}
-
-func (x *StructLevelTerseStruct) GetEnumField() MyEnum {
-    return x.EnumField
-}
-
-func (x *StructLevelTerseStruct) GetListField() []int16 {
-    if !x.IsSetListField() {
-        return make([]int16, 0)
-    }
-    return x.ListField
-}
-
-func (x *StructLevelTerseStruct) GetSetField() []int16 {
-    if !x.IsSetSetField() {
-        return make([]int16, 0)
-    }
-    return x.SetField
-}
-
-func (x *StructLevelTerseStruct) GetMapField() map[int16]int16 {
-    if !x.IsSetMapField() {
-        return make(map[int16]int16)
-    }
-    return x.MapField
-}
-
-func (x *StructLevelTerseStruct) GetStructField() *MyStruct {
-    if !x.IsSetStructField() {
-        return nil
-    }
-    return x.StructField
-}
-
-func (x *StructLevelTerseStruct) GetUnionField() *MyUnion {
-    if !x.IsSetUnionField() {
-        return nil
-    }
-    return x.UnionField
-}
-
 func (x *StructLevelTerseStruct) SetBoolFieldNonCompat(value bool) *StructLevelTerseStruct {
     x.BoolField = value
     return x
@@ -1434,169 +1366,6 @@ func (x *StructLevelTerseStruct) SetBoolField(value bool) *StructLevelTerseStruc
     return x
 }
 
-func (x *StructLevelTerseStruct) SetByteFieldNonCompat(value int8) *StructLevelTerseStruct {
-    x.ByteField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetByteField(value int8) *StructLevelTerseStruct {
-    x.ByteField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetShortFieldNonCompat(value int16) *StructLevelTerseStruct {
-    x.ShortField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetShortField(value int16) *StructLevelTerseStruct {
-    x.ShortField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetIntFieldNonCompat(value int32) *StructLevelTerseStruct {
-    x.IntField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetIntField(value int32) *StructLevelTerseStruct {
-    x.IntField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetLongFieldNonCompat(value int64) *StructLevelTerseStruct {
-    x.LongField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetLongField(value int64) *StructLevelTerseStruct {
-    x.LongField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetFloatFieldNonCompat(value float32) *StructLevelTerseStruct {
-    x.FloatField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetFloatField(value float32) *StructLevelTerseStruct {
-    x.FloatField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetDoubleFieldNonCompat(value float64) *StructLevelTerseStruct {
-    x.DoubleField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetDoubleField(value float64) *StructLevelTerseStruct {
-    x.DoubleField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetStringFieldNonCompat(value string) *StructLevelTerseStruct {
-    x.StringField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetStringField(value string) *StructLevelTerseStruct {
-    x.StringField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetBinaryFieldNonCompat(value []byte) *StructLevelTerseStruct {
-    x.BinaryField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetBinaryField(value []byte) *StructLevelTerseStruct {
-    x.BinaryField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetEnumFieldNonCompat(value MyEnum) *StructLevelTerseStruct {
-    x.EnumField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetEnumField(value MyEnum) *StructLevelTerseStruct {
-    x.EnumField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetListFieldNonCompat(value []int16) *StructLevelTerseStruct {
-    x.ListField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetListField(value []int16) *StructLevelTerseStruct {
-    x.ListField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetSetFieldNonCompat(value []int16) *StructLevelTerseStruct {
-    x.SetField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetSetField(value []int16) *StructLevelTerseStruct {
-    x.SetField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetMapFieldNonCompat(value map[int16]int16) *StructLevelTerseStruct {
-    x.MapField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetMapField(value map[int16]int16) *StructLevelTerseStruct {
-    x.MapField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetStructFieldNonCompat(value *MyStruct) *StructLevelTerseStruct {
-    x.StructField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetStructField(value *MyStruct) *StructLevelTerseStruct {
-    x.StructField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetUnionFieldNonCompat(value *MyUnion) *StructLevelTerseStruct {
-    x.UnionField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) SetUnionField(value *MyUnion) *StructLevelTerseStruct {
-    x.UnionField = value
-    return x
-}
-
-func (x *StructLevelTerseStruct) IsSetBinaryField() bool {
-    return x != nil && x.BinaryField != nil
-}
-
-func (x *StructLevelTerseStruct) IsSetListField() bool {
-    return x != nil && x.ListField != nil
-}
-
-func (x *StructLevelTerseStruct) IsSetSetField() bool {
-    return x != nil && x.SetField != nil
-}
-
-func (x *StructLevelTerseStruct) IsSetMapField() bool {
-    return x != nil && x.MapField != nil
-}
-
-func (x *StructLevelTerseStruct) IsSetStructField() bool {
-    return x != nil && x.StructField != nil
-}
-
-func (x *StructLevelTerseStruct) IsSetUnionField() bool {
-    return x != nil && x.UnionField != nil
-}
 
 func (x *StructLevelTerseStruct) writeField1(p thrift.Encoder) error {  // BoolField
     if err := p.WriteFieldBegin("bool_field", thrift.BOOL, 1); err != nil {
@@ -1614,6 +1383,32 @@ func (x *StructLevelTerseStruct) writeField1(p thrift.Encoder) error {  // BoolF
     return nil
 }
 
+func (x *StructLevelTerseStruct) readField1(p thrift.Decoder) error {  // BoolField
+    result, err := p.ReadBool()
+    if err != nil {
+        return err
+    }
+
+    x.BoolField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetByteField() int8 {
+    return x.ByteField
+}
+
+func (x *StructLevelTerseStruct) SetByteFieldNonCompat(value int8) *StructLevelTerseStruct {
+    x.ByteField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetByteField(value int8) *StructLevelTerseStruct {
+    x.ByteField = value
+    return x
+}
+
+
 func (x *StructLevelTerseStruct) writeField2(p thrift.Encoder) error {  // ByteField
     if err := p.WriteFieldBegin("byte_field", thrift.BYTE, 2); err != nil {
         return thrift.PrependError("StructLevelTerseStruct write field begin error: ", err)
@@ -1629,6 +1424,33 @@ func (x *StructLevelTerseStruct) writeField2(p thrift.Encoder) error {  // ByteF
     }
     return nil
 }
+
+func (x *StructLevelTerseStruct) readField2(p thrift.Decoder) error {  // ByteField
+    resultByte, err := p.ReadByte()
+    result := int8(resultByte)
+    if err != nil {
+        return err
+    }
+
+    x.ByteField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetShortField() int16 {
+    return x.ShortField
+}
+
+func (x *StructLevelTerseStruct) SetShortFieldNonCompat(value int16) *StructLevelTerseStruct {
+    x.ShortField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetShortField(value int16) *StructLevelTerseStruct {
+    x.ShortField = value
+    return x
+}
+
 
 func (x *StructLevelTerseStruct) writeField3(p thrift.Encoder) error {  // ShortField
     if err := p.WriteFieldBegin("short_field", thrift.I16, 3); err != nil {
@@ -1646,6 +1468,32 @@ func (x *StructLevelTerseStruct) writeField3(p thrift.Encoder) error {  // Short
     return nil
 }
 
+func (x *StructLevelTerseStruct) readField3(p thrift.Decoder) error {  // ShortField
+    result, err := p.ReadI16()
+    if err != nil {
+        return err
+    }
+
+    x.ShortField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetIntField() int32 {
+    return x.IntField
+}
+
+func (x *StructLevelTerseStruct) SetIntFieldNonCompat(value int32) *StructLevelTerseStruct {
+    x.IntField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetIntField(value int32) *StructLevelTerseStruct {
+    x.IntField = value
+    return x
+}
+
+
 func (x *StructLevelTerseStruct) writeField4(p thrift.Encoder) error {  // IntField
     if err := p.WriteFieldBegin("int_field", thrift.I32, 4); err != nil {
         return thrift.PrependError("StructLevelTerseStruct write field begin error: ", err)
@@ -1661,6 +1509,32 @@ func (x *StructLevelTerseStruct) writeField4(p thrift.Encoder) error {  // IntFi
     }
     return nil
 }
+
+func (x *StructLevelTerseStruct) readField4(p thrift.Decoder) error {  // IntField
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.IntField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetLongField() int64 {
+    return x.LongField
+}
+
+func (x *StructLevelTerseStruct) SetLongFieldNonCompat(value int64) *StructLevelTerseStruct {
+    x.LongField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetLongField(value int64) *StructLevelTerseStruct {
+    x.LongField = value
+    return x
+}
+
 
 func (x *StructLevelTerseStruct) writeField5(p thrift.Encoder) error {  // LongField
     if err := p.WriteFieldBegin("long_field", thrift.I64, 5); err != nil {
@@ -1678,6 +1552,32 @@ func (x *StructLevelTerseStruct) writeField5(p thrift.Encoder) error {  // LongF
     return nil
 }
 
+func (x *StructLevelTerseStruct) readField5(p thrift.Decoder) error {  // LongField
+    result, err := p.ReadI64()
+    if err != nil {
+        return err
+    }
+
+    x.LongField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetFloatField() float32 {
+    return x.FloatField
+}
+
+func (x *StructLevelTerseStruct) SetFloatFieldNonCompat(value float32) *StructLevelTerseStruct {
+    x.FloatField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetFloatField(value float32) *StructLevelTerseStruct {
+    x.FloatField = value
+    return x
+}
+
+
 func (x *StructLevelTerseStruct) writeField6(p thrift.Encoder) error {  // FloatField
     if err := p.WriteFieldBegin("float_field", thrift.FLOAT, 6); err != nil {
         return thrift.PrependError("StructLevelTerseStruct write field begin error: ", err)
@@ -1693,6 +1593,32 @@ func (x *StructLevelTerseStruct) writeField6(p thrift.Encoder) error {  // Float
     }
     return nil
 }
+
+func (x *StructLevelTerseStruct) readField6(p thrift.Decoder) error {  // FloatField
+    result, err := p.ReadFloat()
+    if err != nil {
+        return err
+    }
+
+    x.FloatField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetDoubleField() float64 {
+    return x.DoubleField
+}
+
+func (x *StructLevelTerseStruct) SetDoubleFieldNonCompat(value float64) *StructLevelTerseStruct {
+    x.DoubleField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetDoubleField(value float64) *StructLevelTerseStruct {
+    x.DoubleField = value
+    return x
+}
+
 
 func (x *StructLevelTerseStruct) writeField7(p thrift.Encoder) error {  // DoubleField
     if err := p.WriteFieldBegin("double_field", thrift.DOUBLE, 7); err != nil {
@@ -1710,6 +1636,32 @@ func (x *StructLevelTerseStruct) writeField7(p thrift.Encoder) error {  // Doubl
     return nil
 }
 
+func (x *StructLevelTerseStruct) readField7(p thrift.Decoder) error {  // DoubleField
+    result, err := p.ReadDouble()
+    if err != nil {
+        return err
+    }
+
+    x.DoubleField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetStringField() string {
+    return x.StringField
+}
+
+func (x *StructLevelTerseStruct) SetStringFieldNonCompat(value string) *StructLevelTerseStruct {
+    x.StringField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetStringField(value string) *StructLevelTerseStruct {
+    x.StringField = value
+    return x
+}
+
+
 func (x *StructLevelTerseStruct) writeField8(p thrift.Encoder) error {  // StringField
     if err := p.WriteFieldBegin("string_field", thrift.STRING, 8); err != nil {
         return thrift.PrependError("StructLevelTerseStruct write field begin error: ", err)
@@ -1724,6 +1676,38 @@ func (x *StructLevelTerseStruct) writeField8(p thrift.Encoder) error {  // Strin
         return thrift.PrependError("StructLevelTerseStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *StructLevelTerseStruct) readField8(p thrift.Decoder) error {  // StringField
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.StringField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetBinaryField() []byte {
+    if !x.IsSetBinaryField() {
+        return []byte("")
+    }
+    return x.BinaryField
+}
+
+func (x *StructLevelTerseStruct) SetBinaryFieldNonCompat(value []byte) *StructLevelTerseStruct {
+    x.BinaryField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetBinaryField(value []byte) *StructLevelTerseStruct {
+    x.BinaryField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) IsSetBinaryField() bool {
+    return x != nil && x.BinaryField != nil
 }
 
 func (x *StructLevelTerseStruct) writeField9(p thrift.Encoder) error {  // BinaryField
@@ -1742,6 +1726,32 @@ func (x *StructLevelTerseStruct) writeField9(p thrift.Encoder) error {  // Binar
     return nil
 }
 
+func (x *StructLevelTerseStruct) readField9(p thrift.Decoder) error {  // BinaryField
+    result, err := p.ReadBinary()
+    if err != nil {
+        return err
+    }
+
+    x.BinaryField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetEnumField() MyEnum {
+    return x.EnumField
+}
+
+func (x *StructLevelTerseStruct) SetEnumFieldNonCompat(value MyEnum) *StructLevelTerseStruct {
+    x.EnumField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetEnumField(value MyEnum) *StructLevelTerseStruct {
+    x.EnumField = value
+    return x
+}
+
+
 func (x *StructLevelTerseStruct) writeField10(p thrift.Encoder) error {  // EnumField
     if err := p.WriteFieldBegin("enum_field", thrift.I32, 10); err != nil {
         return thrift.PrependError("StructLevelTerseStruct write field begin error: ", err)
@@ -1756,6 +1766,39 @@ func (x *StructLevelTerseStruct) writeField10(p thrift.Encoder) error {  // Enum
         return thrift.PrependError("StructLevelTerseStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *StructLevelTerseStruct) readField10(p thrift.Decoder) error {  // EnumField
+    enumResult, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+    result := MyEnum(enumResult)
+
+    x.EnumField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetListField() []int16 {
+    if !x.IsSetListField() {
+        return make([]int16, 0)
+    }
+    return x.ListField
+}
+
+func (x *StructLevelTerseStruct) SetListFieldNonCompat(value []int16) *StructLevelTerseStruct {
+    x.ListField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetListField(value []int16) *StructLevelTerseStruct {
+    x.ListField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) IsSetListField() bool {
+    return x != nil && x.ListField != nil
 }
 
 func (x *StructLevelTerseStruct) writeField11(p thrift.Encoder) error {  // ListField
@@ -1785,6 +1828,56 @@ func (x *StructLevelTerseStruct) writeField11(p thrift.Encoder) error {  // List
     return nil
 }
 
+func (x *StructLevelTerseStruct) readField11(p thrift.Decoder) error {  // ListField
+    _ /* elemType */, size, err := p.ReadListBegin()
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
+    }
+    
+    listResult := make([]int16, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int16
+        {
+            result, err := p.ReadI16()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
+
+    x.ListField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetSetField() []int16 {
+    if !x.IsSetSetField() {
+        return make([]int16, 0)
+    }
+    return x.SetField
+}
+
+func (x *StructLevelTerseStruct) SetSetFieldNonCompat(value []int16) *StructLevelTerseStruct {
+    x.SetField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetSetField(value []int16) *StructLevelTerseStruct {
+    x.SetField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) IsSetSetField() bool {
+    return x != nil && x.SetField != nil
+}
+
 func (x *StructLevelTerseStruct) writeField12(p thrift.Encoder) error {  // SetField
     if err := p.WriteFieldBegin("set_field", thrift.SET, 12); err != nil {
         return thrift.PrependError("StructLevelTerseStruct write field begin error: ", err)
@@ -1810,6 +1903,56 @@ func (x *StructLevelTerseStruct) writeField12(p thrift.Encoder) error {  // SetF
         return thrift.PrependError("StructLevelTerseStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *StructLevelTerseStruct) readField12(p thrift.Decoder) error {  // SetField
+    _ /* elemType */, size, err := p.ReadSetBegin()
+    if err != nil {
+        return thrift.PrependError("error reading set begin: ", err)
+    }
+    
+    setResult := make([]int16, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int16
+        {
+            result, err := p.ReadI16()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        setResult = append(setResult, elem)
+    }
+    
+    if err := p.ReadSetEnd(); err != nil {
+        return thrift.PrependError("error reading set end: ", err)
+    }
+    result := setResult
+
+    x.SetField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetMapField() map[int16]int16 {
+    if !x.IsSetMapField() {
+        return make(map[int16]int16)
+    }
+    return x.MapField
+}
+
+func (x *StructLevelTerseStruct) SetMapFieldNonCompat(value map[int16]int16) *StructLevelTerseStruct {
+    x.MapField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetMapField(value map[int16]int16) *StructLevelTerseStruct {
+    x.MapField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) IsSetMapField() bool {
+    return x != nil && x.MapField != nil
 }
 
 func (x *StructLevelTerseStruct) writeField13(p thrift.Encoder) error {  // MapField
@@ -1843,204 +1986,6 @@ func (x *StructLevelTerseStruct) writeField13(p thrift.Encoder) error {  // MapF
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("StructLevelTerseStruct write field end error: ", err)
     }
-    return nil
-}
-
-func (x *StructLevelTerseStruct) writeField14(p thrift.Encoder) error {  // StructField
-    if !x.IsSetStructField() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("struct_field", thrift.STRUCT, 14); err != nil {
-        return thrift.PrependError("StructLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.StructField
-    if err := item.Write(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("StructLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *StructLevelTerseStruct) writeField15(p thrift.Encoder) error {  // UnionField
-    if !x.IsSetUnionField() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("union_field", thrift.STRUCT, 15); err != nil {
-        return thrift.PrependError("StructLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.UnionField
-    if err := item.Write(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("StructLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField1(p thrift.Decoder) error {  // BoolField
-    result, err := p.ReadBool()
-    if err != nil {
-        return err
-    }
-
-    x.BoolField = result
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField2(p thrift.Decoder) error {  // ByteField
-    resultByte, err := p.ReadByte()
-    result := int8(resultByte)
-    if err != nil {
-        return err
-    }
-
-    x.ByteField = result
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField3(p thrift.Decoder) error {  // ShortField
-    result, err := p.ReadI16()
-    if err != nil {
-        return err
-    }
-
-    x.ShortField = result
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField4(p thrift.Decoder) error {  // IntField
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.IntField = result
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField5(p thrift.Decoder) error {  // LongField
-    result, err := p.ReadI64()
-    if err != nil {
-        return err
-    }
-
-    x.LongField = result
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField6(p thrift.Decoder) error {  // FloatField
-    result, err := p.ReadFloat()
-    if err != nil {
-        return err
-    }
-
-    x.FloatField = result
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField7(p thrift.Decoder) error {  // DoubleField
-    result, err := p.ReadDouble()
-    if err != nil {
-        return err
-    }
-
-    x.DoubleField = result
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField8(p thrift.Decoder) error {  // StringField
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.StringField = result
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField9(p thrift.Decoder) error {  // BinaryField
-    result, err := p.ReadBinary()
-    if err != nil {
-        return err
-    }
-
-    x.BinaryField = result
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField10(p thrift.Decoder) error {  // EnumField
-    enumResult, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-    result := MyEnum(enumResult)
-
-    x.EnumField = result
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField11(p thrift.Decoder) error {  // ListField
-    _ /* elemType */, size, err := p.ReadListBegin()
-    if err != nil {
-        return thrift.PrependError("error reading list begin: ", err)
-    }
-    
-    listResult := make([]int16, 0, size)
-    for i := 0; i < size; i++ {
-        var elem int16
-        {
-            result, err := p.ReadI16()
-            if err != nil {
-                return err
-            }
-            elem = result
-        }
-        listResult = append(listResult, elem)
-    }
-    
-    if err := p.ReadListEnd(); err != nil {
-        return thrift.PrependError("error reading list end: ", err)
-    }
-    result := listResult
-
-    x.ListField = result
-    return nil
-}
-
-func (x *StructLevelTerseStruct) readField12(p thrift.Decoder) error {  // SetField
-    _ /* elemType */, size, err := p.ReadSetBegin()
-    if err != nil {
-        return thrift.PrependError("error reading set begin: ", err)
-    }
-    
-    setResult := make([]int16, 0, size)
-    for i := 0; i < size; i++ {
-        var elem int16
-        {
-            result, err := p.ReadI16()
-            if err != nil {
-                return err
-            }
-            elem = result
-        }
-        setResult = append(setResult, elem)
-    }
-    
-    if err := p.ReadSetEnd(); err != nil {
-        return thrift.PrependError("error reading set end: ", err)
-    }
-    result := setResult
-
-    x.SetField = result
     return nil
 }
 
@@ -2082,6 +2027,48 @@ func (x *StructLevelTerseStruct) readField13(p thrift.Decoder) error {  // MapFi
     return nil
 }
 
+
+func (x *StructLevelTerseStruct) GetStructField() *MyStruct {
+    if !x.IsSetStructField() {
+        return nil
+    }
+    return x.StructField
+}
+
+func (x *StructLevelTerseStruct) SetStructFieldNonCompat(value *MyStruct) *StructLevelTerseStruct {
+    x.StructField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetStructField(value *MyStruct) *StructLevelTerseStruct {
+    x.StructField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) IsSetStructField() bool {
+    return x != nil && x.StructField != nil
+}
+
+func (x *StructLevelTerseStruct) writeField14(p thrift.Encoder) error {  // StructField
+    if !x.IsSetStructField() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("struct_field", thrift.STRUCT, 14); err != nil {
+        return thrift.PrependError("StructLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.StructField
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructLevelTerseStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *StructLevelTerseStruct) readField14(p thrift.Decoder) error {  // StructField
     result := NewMyStruct()
     err := result.Read(p)
@@ -2090,6 +2077,48 @@ func (x *StructLevelTerseStruct) readField14(p thrift.Decoder) error {  // Struc
     }
 
     x.StructField = result
+    return nil
+}
+
+
+func (x *StructLevelTerseStruct) GetUnionField() *MyUnion {
+    if !x.IsSetUnionField() {
+        return nil
+    }
+    return x.UnionField
+}
+
+func (x *StructLevelTerseStruct) SetUnionFieldNonCompat(value *MyUnion) *StructLevelTerseStruct {
+    x.UnionField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) SetUnionField(value *MyUnion) *StructLevelTerseStruct {
+    x.UnionField = value
+    return x
+}
+
+func (x *StructLevelTerseStruct) IsSetUnionField() bool {
+    return x != nil && x.UnionField != nil
+}
+
+func (x *StructLevelTerseStruct) writeField15(p thrift.Encoder) error {  // UnionField
+    if !x.IsSetUnionField() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("union_field", thrift.STRUCT, 15); err != nil {
+        return thrift.PrependError("StructLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.UnionField
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructLevelTerseStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -2103,7 +2132,6 @@ func (x *StructLevelTerseStruct) readField15(p thrift.Decoder) error {  // Union
     x.UnionField = result
     return nil
 }
-
 
 
 
@@ -2307,158 +2335,6 @@ func (x *FieldLevelTerseStruct) GetTerseBoolField() bool {
     return x.TerseBoolField
 }
 
-func (x *FieldLevelTerseStruct) GetTerseByteField() int8 {
-    return x.TerseByteField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseShortField() int16 {
-    return x.TerseShortField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseIntField() int32 {
-    return x.TerseIntField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseLongField() int64 {
-    return x.TerseLongField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseFloatField() float32 {
-    return x.TerseFloatField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseDoubleField() float64 {
-    return x.TerseDoubleField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseStringField() string {
-    return x.TerseStringField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseBinaryField() []byte {
-    if !x.IsSetTerseBinaryField() {
-        return []byte("")
-    }
-    return x.TerseBinaryField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseEnumField() MyEnum {
-    return x.TerseEnumField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseListField() []int16 {
-    if !x.IsSetTerseListField() {
-        return make([]int16, 0)
-    }
-    return x.TerseListField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseSetField() []int16 {
-    if !x.IsSetTerseSetField() {
-        return make([]int16, 0)
-    }
-    return x.TerseSetField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseMapField() map[int16]int16 {
-    if !x.IsSetTerseMapField() {
-        return make(map[int16]int16)
-    }
-    return x.TerseMapField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseStructField() *MyStruct {
-    if !x.IsSetTerseStructField() {
-        return nil
-    }
-    return x.TerseStructField
-}
-
-func (x *FieldLevelTerseStruct) GetBoolField() bool {
-    return x.BoolField
-}
-
-func (x *FieldLevelTerseStruct) GetByteField() int8 {
-    return x.ByteField
-}
-
-func (x *FieldLevelTerseStruct) GetShortField() int16 {
-    return x.ShortField
-}
-
-func (x *FieldLevelTerseStruct) GetIntField() int32 {
-    return x.IntField
-}
-
-func (x *FieldLevelTerseStruct) GetLongField() int64 {
-    return x.LongField
-}
-
-func (x *FieldLevelTerseStruct) GetFloatField() float32 {
-    return x.FloatField
-}
-
-func (x *FieldLevelTerseStruct) GetDoubleField() float64 {
-    return x.DoubleField
-}
-
-func (x *FieldLevelTerseStruct) GetStringField() string {
-    return x.StringField
-}
-
-func (x *FieldLevelTerseStruct) GetBinaryField() []byte {
-    if !x.IsSetBinaryField() {
-        return []byte("")
-    }
-    return x.BinaryField
-}
-
-func (x *FieldLevelTerseStruct) GetEnumField() MyEnum {
-    return x.EnumField
-}
-
-func (x *FieldLevelTerseStruct) GetListField() []int16 {
-    if !x.IsSetListField() {
-        return make([]int16, 0)
-    }
-    return x.ListField
-}
-
-func (x *FieldLevelTerseStruct) GetSetField() []int16 {
-    if !x.IsSetSetField() {
-        return make([]int16, 0)
-    }
-    return x.SetField
-}
-
-func (x *FieldLevelTerseStruct) GetMapField() map[int16]int16 {
-    if !x.IsSetMapField() {
-        return make(map[int16]int16)
-    }
-    return x.MapField
-}
-
-func (x *FieldLevelTerseStruct) GetStructField() *MyStruct {
-    if !x.IsSetStructField() {
-        return nil
-    }
-    return x.StructField
-}
-
-func (x *FieldLevelTerseStruct) GetTerseUnionField() *MyUnion {
-    if !x.IsSetTerseUnionField() {
-        return nil
-    }
-    return x.TerseUnionField
-}
-
-func (x *FieldLevelTerseStruct) GetUnionField() *MyUnion {
-    if !x.IsSetUnionField() {
-        return nil
-    }
-    return x.UnionField
-}
-
 func (x *FieldLevelTerseStruct) SetTerseBoolFieldNonCompat(value bool) *FieldLevelTerseStruct {
     x.TerseBoolField = value
     return x
@@ -2469,343 +2345,6 @@ func (x *FieldLevelTerseStruct) SetTerseBoolField(value bool) *FieldLevelTerseSt
     return x
 }
 
-func (x *FieldLevelTerseStruct) SetTerseByteFieldNonCompat(value int8) *FieldLevelTerseStruct {
-    x.TerseByteField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseByteField(value int8) *FieldLevelTerseStruct {
-    x.TerseByteField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseShortFieldNonCompat(value int16) *FieldLevelTerseStruct {
-    x.TerseShortField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseShortField(value int16) *FieldLevelTerseStruct {
-    x.TerseShortField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseIntFieldNonCompat(value int32) *FieldLevelTerseStruct {
-    x.TerseIntField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseIntField(value int32) *FieldLevelTerseStruct {
-    x.TerseIntField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseLongFieldNonCompat(value int64) *FieldLevelTerseStruct {
-    x.TerseLongField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseLongField(value int64) *FieldLevelTerseStruct {
-    x.TerseLongField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseFloatFieldNonCompat(value float32) *FieldLevelTerseStruct {
-    x.TerseFloatField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseFloatField(value float32) *FieldLevelTerseStruct {
-    x.TerseFloatField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseDoubleFieldNonCompat(value float64) *FieldLevelTerseStruct {
-    x.TerseDoubleField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseDoubleField(value float64) *FieldLevelTerseStruct {
-    x.TerseDoubleField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseStringFieldNonCompat(value string) *FieldLevelTerseStruct {
-    x.TerseStringField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseStringField(value string) *FieldLevelTerseStruct {
-    x.TerseStringField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseBinaryFieldNonCompat(value []byte) *FieldLevelTerseStruct {
-    x.TerseBinaryField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseBinaryField(value []byte) *FieldLevelTerseStruct {
-    x.TerseBinaryField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseEnumFieldNonCompat(value MyEnum) *FieldLevelTerseStruct {
-    x.TerseEnumField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseEnumField(value MyEnum) *FieldLevelTerseStruct {
-    x.TerseEnumField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseListFieldNonCompat(value []int16) *FieldLevelTerseStruct {
-    x.TerseListField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseListField(value []int16) *FieldLevelTerseStruct {
-    x.TerseListField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseSetFieldNonCompat(value []int16) *FieldLevelTerseStruct {
-    x.TerseSetField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseSetField(value []int16) *FieldLevelTerseStruct {
-    x.TerseSetField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseMapFieldNonCompat(value map[int16]int16) *FieldLevelTerseStruct {
-    x.TerseMapField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseMapField(value map[int16]int16) *FieldLevelTerseStruct {
-    x.TerseMapField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseStructFieldNonCompat(value *MyStruct) *FieldLevelTerseStruct {
-    x.TerseStructField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseStructField(value *MyStruct) *FieldLevelTerseStruct {
-    x.TerseStructField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetBoolFieldNonCompat(value bool) *FieldLevelTerseStruct {
-    x.BoolField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetBoolField(value bool) *FieldLevelTerseStruct {
-    x.BoolField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetByteFieldNonCompat(value int8) *FieldLevelTerseStruct {
-    x.ByteField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetByteField(value int8) *FieldLevelTerseStruct {
-    x.ByteField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetShortFieldNonCompat(value int16) *FieldLevelTerseStruct {
-    x.ShortField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetShortField(value int16) *FieldLevelTerseStruct {
-    x.ShortField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetIntFieldNonCompat(value int32) *FieldLevelTerseStruct {
-    x.IntField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetIntField(value int32) *FieldLevelTerseStruct {
-    x.IntField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetLongFieldNonCompat(value int64) *FieldLevelTerseStruct {
-    x.LongField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetLongField(value int64) *FieldLevelTerseStruct {
-    x.LongField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetFloatFieldNonCompat(value float32) *FieldLevelTerseStruct {
-    x.FloatField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetFloatField(value float32) *FieldLevelTerseStruct {
-    x.FloatField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetDoubleFieldNonCompat(value float64) *FieldLevelTerseStruct {
-    x.DoubleField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetDoubleField(value float64) *FieldLevelTerseStruct {
-    x.DoubleField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetStringFieldNonCompat(value string) *FieldLevelTerseStruct {
-    x.StringField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetStringField(value string) *FieldLevelTerseStruct {
-    x.StringField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetBinaryFieldNonCompat(value []byte) *FieldLevelTerseStruct {
-    x.BinaryField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetBinaryField(value []byte) *FieldLevelTerseStruct {
-    x.BinaryField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetEnumFieldNonCompat(value MyEnum) *FieldLevelTerseStruct {
-    x.EnumField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetEnumField(value MyEnum) *FieldLevelTerseStruct {
-    x.EnumField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetListFieldNonCompat(value []int16) *FieldLevelTerseStruct {
-    x.ListField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetListField(value []int16) *FieldLevelTerseStruct {
-    x.ListField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetSetFieldNonCompat(value []int16) *FieldLevelTerseStruct {
-    x.SetField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetSetField(value []int16) *FieldLevelTerseStruct {
-    x.SetField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetMapFieldNonCompat(value map[int16]int16) *FieldLevelTerseStruct {
-    x.MapField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetMapField(value map[int16]int16) *FieldLevelTerseStruct {
-    x.MapField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetStructFieldNonCompat(value *MyStruct) *FieldLevelTerseStruct {
-    x.StructField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetStructField(value *MyStruct) *FieldLevelTerseStruct {
-    x.StructField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseUnionFieldNonCompat(value *MyUnion) *FieldLevelTerseStruct {
-    x.TerseUnionField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetTerseUnionField(value *MyUnion) *FieldLevelTerseStruct {
-    x.TerseUnionField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetUnionFieldNonCompat(value *MyUnion) *FieldLevelTerseStruct {
-    x.UnionField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) SetUnionField(value *MyUnion) *FieldLevelTerseStruct {
-    x.UnionField = value
-    return x
-}
-
-func (x *FieldLevelTerseStruct) IsSetTerseBinaryField() bool {
-    return x != nil && x.TerseBinaryField != nil
-}
-
-func (x *FieldLevelTerseStruct) IsSetTerseListField() bool {
-    return x != nil && x.TerseListField != nil
-}
-
-func (x *FieldLevelTerseStruct) IsSetTerseSetField() bool {
-    return x != nil && x.TerseSetField != nil
-}
-
-func (x *FieldLevelTerseStruct) IsSetTerseMapField() bool {
-    return x != nil && x.TerseMapField != nil
-}
-
-func (x *FieldLevelTerseStruct) IsSetTerseStructField() bool {
-    return x != nil && x.TerseStructField != nil
-}
-
-func (x *FieldLevelTerseStruct) IsSetBinaryField() bool {
-    return x != nil && x.BinaryField != nil
-}
-
-func (x *FieldLevelTerseStruct) IsSetListField() bool {
-    return x != nil && x.ListField != nil
-}
-
-func (x *FieldLevelTerseStruct) IsSetSetField() bool {
-    return x != nil && x.SetField != nil
-}
-
-func (x *FieldLevelTerseStruct) IsSetMapField() bool {
-    return x != nil && x.MapField != nil
-}
-
-func (x *FieldLevelTerseStruct) IsSetStructField() bool {
-    return x != nil && x.StructField != nil
-}
-
-func (x *FieldLevelTerseStruct) IsSetTerseUnionField() bool {
-    return x != nil && x.TerseUnionField != nil
-}
-
-func (x *FieldLevelTerseStruct) IsSetUnionField() bool {
-    return x != nil && x.UnionField != nil
-}
 
 func (x *FieldLevelTerseStruct) writeField1(p thrift.Encoder) error {  // TerseBoolField
     if err := p.WriteFieldBegin("terse_bool_field", thrift.BOOL, 1); err != nil {
@@ -2823,6 +2362,32 @@ func (x *FieldLevelTerseStruct) writeField1(p thrift.Encoder) error {  // TerseB
     return nil
 }
 
+func (x *FieldLevelTerseStruct) readField1(p thrift.Decoder) error {  // TerseBoolField
+    result, err := p.ReadBool()
+    if err != nil {
+        return err
+    }
+
+    x.TerseBoolField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseByteField() int8 {
+    return x.TerseByteField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseByteFieldNonCompat(value int8) *FieldLevelTerseStruct {
+    x.TerseByteField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseByteField(value int8) *FieldLevelTerseStruct {
+    x.TerseByteField = value
+    return x
+}
+
+
 func (x *FieldLevelTerseStruct) writeField2(p thrift.Encoder) error {  // TerseByteField
     if err := p.WriteFieldBegin("terse_byte_field", thrift.BYTE, 2); err != nil {
         return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
@@ -2838,6 +2403,33 @@ func (x *FieldLevelTerseStruct) writeField2(p thrift.Encoder) error {  // TerseB
     }
     return nil
 }
+
+func (x *FieldLevelTerseStruct) readField2(p thrift.Decoder) error {  // TerseByteField
+    resultByte, err := p.ReadByte()
+    result := int8(resultByte)
+    if err != nil {
+        return err
+    }
+
+    x.TerseByteField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseShortField() int16 {
+    return x.TerseShortField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseShortFieldNonCompat(value int16) *FieldLevelTerseStruct {
+    x.TerseShortField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseShortField(value int16) *FieldLevelTerseStruct {
+    x.TerseShortField = value
+    return x
+}
+
 
 func (x *FieldLevelTerseStruct) writeField3(p thrift.Encoder) error {  // TerseShortField
     if err := p.WriteFieldBegin("terse_short_field", thrift.I16, 3); err != nil {
@@ -2855,6 +2447,32 @@ func (x *FieldLevelTerseStruct) writeField3(p thrift.Encoder) error {  // TerseS
     return nil
 }
 
+func (x *FieldLevelTerseStruct) readField3(p thrift.Decoder) error {  // TerseShortField
+    result, err := p.ReadI16()
+    if err != nil {
+        return err
+    }
+
+    x.TerseShortField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseIntField() int32 {
+    return x.TerseIntField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseIntFieldNonCompat(value int32) *FieldLevelTerseStruct {
+    x.TerseIntField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseIntField(value int32) *FieldLevelTerseStruct {
+    x.TerseIntField = value
+    return x
+}
+
+
 func (x *FieldLevelTerseStruct) writeField4(p thrift.Encoder) error {  // TerseIntField
     if err := p.WriteFieldBegin("terse_int_field", thrift.I32, 4); err != nil {
         return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
@@ -2870,6 +2488,32 @@ func (x *FieldLevelTerseStruct) writeField4(p thrift.Encoder) error {  // TerseI
     }
     return nil
 }
+
+func (x *FieldLevelTerseStruct) readField4(p thrift.Decoder) error {  // TerseIntField
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.TerseIntField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseLongField() int64 {
+    return x.TerseLongField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseLongFieldNonCompat(value int64) *FieldLevelTerseStruct {
+    x.TerseLongField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseLongField(value int64) *FieldLevelTerseStruct {
+    x.TerseLongField = value
+    return x
+}
+
 
 func (x *FieldLevelTerseStruct) writeField5(p thrift.Encoder) error {  // TerseLongField
     if err := p.WriteFieldBegin("terse_long_field", thrift.I64, 5); err != nil {
@@ -2887,6 +2531,32 @@ func (x *FieldLevelTerseStruct) writeField5(p thrift.Encoder) error {  // TerseL
     return nil
 }
 
+func (x *FieldLevelTerseStruct) readField5(p thrift.Decoder) error {  // TerseLongField
+    result, err := p.ReadI64()
+    if err != nil {
+        return err
+    }
+
+    x.TerseLongField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseFloatField() float32 {
+    return x.TerseFloatField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseFloatFieldNonCompat(value float32) *FieldLevelTerseStruct {
+    x.TerseFloatField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseFloatField(value float32) *FieldLevelTerseStruct {
+    x.TerseFloatField = value
+    return x
+}
+
+
 func (x *FieldLevelTerseStruct) writeField6(p thrift.Encoder) error {  // TerseFloatField
     if err := p.WriteFieldBegin("terse_float_field", thrift.FLOAT, 6); err != nil {
         return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
@@ -2902,6 +2572,32 @@ func (x *FieldLevelTerseStruct) writeField6(p thrift.Encoder) error {  // TerseF
     }
     return nil
 }
+
+func (x *FieldLevelTerseStruct) readField6(p thrift.Decoder) error {  // TerseFloatField
+    result, err := p.ReadFloat()
+    if err != nil {
+        return err
+    }
+
+    x.TerseFloatField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseDoubleField() float64 {
+    return x.TerseDoubleField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseDoubleFieldNonCompat(value float64) *FieldLevelTerseStruct {
+    x.TerseDoubleField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseDoubleField(value float64) *FieldLevelTerseStruct {
+    x.TerseDoubleField = value
+    return x
+}
+
 
 func (x *FieldLevelTerseStruct) writeField7(p thrift.Encoder) error {  // TerseDoubleField
     if err := p.WriteFieldBegin("terse_double_field", thrift.DOUBLE, 7); err != nil {
@@ -2919,6 +2615,32 @@ func (x *FieldLevelTerseStruct) writeField7(p thrift.Encoder) error {  // TerseD
     return nil
 }
 
+func (x *FieldLevelTerseStruct) readField7(p thrift.Decoder) error {  // TerseDoubleField
+    result, err := p.ReadDouble()
+    if err != nil {
+        return err
+    }
+
+    x.TerseDoubleField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseStringField() string {
+    return x.TerseStringField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseStringFieldNonCompat(value string) *FieldLevelTerseStruct {
+    x.TerseStringField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseStringField(value string) *FieldLevelTerseStruct {
+    x.TerseStringField = value
+    return x
+}
+
+
 func (x *FieldLevelTerseStruct) writeField8(p thrift.Encoder) error {  // TerseStringField
     if err := p.WriteFieldBegin("terse_string_field", thrift.STRING, 8); err != nil {
         return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
@@ -2933,6 +2655,38 @@ func (x *FieldLevelTerseStruct) writeField8(p thrift.Encoder) error {  // TerseS
         return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *FieldLevelTerseStruct) readField8(p thrift.Decoder) error {  // TerseStringField
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.TerseStringField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseBinaryField() []byte {
+    if !x.IsSetTerseBinaryField() {
+        return []byte("")
+    }
+    return x.TerseBinaryField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseBinaryFieldNonCompat(value []byte) *FieldLevelTerseStruct {
+    x.TerseBinaryField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseBinaryField(value []byte) *FieldLevelTerseStruct {
+    x.TerseBinaryField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetTerseBinaryField() bool {
+    return x != nil && x.TerseBinaryField != nil
 }
 
 func (x *FieldLevelTerseStruct) writeField9(p thrift.Encoder) error {  // TerseBinaryField
@@ -2951,6 +2705,32 @@ func (x *FieldLevelTerseStruct) writeField9(p thrift.Encoder) error {  // TerseB
     return nil
 }
 
+func (x *FieldLevelTerseStruct) readField9(p thrift.Decoder) error {  // TerseBinaryField
+    result, err := p.ReadBinary()
+    if err != nil {
+        return err
+    }
+
+    x.TerseBinaryField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseEnumField() MyEnum {
+    return x.TerseEnumField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseEnumFieldNonCompat(value MyEnum) *FieldLevelTerseStruct {
+    x.TerseEnumField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseEnumField(value MyEnum) *FieldLevelTerseStruct {
+    x.TerseEnumField = value
+    return x
+}
+
+
 func (x *FieldLevelTerseStruct) writeField10(p thrift.Encoder) error {  // TerseEnumField
     if err := p.WriteFieldBegin("terse_enum_field", thrift.I32, 10); err != nil {
         return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
@@ -2965,6 +2745,39 @@ func (x *FieldLevelTerseStruct) writeField10(p thrift.Encoder) error {  // Terse
         return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *FieldLevelTerseStruct) readField10(p thrift.Decoder) error {  // TerseEnumField
+    enumResult, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+    result := MyEnum(enumResult)
+
+    x.TerseEnumField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseListField() []int16 {
+    if !x.IsSetTerseListField() {
+        return make([]int16, 0)
+    }
+    return x.TerseListField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseListFieldNonCompat(value []int16) *FieldLevelTerseStruct {
+    x.TerseListField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseListField(value []int16) *FieldLevelTerseStruct {
+    x.TerseListField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetTerseListField() bool {
+    return x != nil && x.TerseListField != nil
 }
 
 func (x *FieldLevelTerseStruct) writeField11(p thrift.Encoder) error {  // TerseListField
@@ -2994,6 +2807,56 @@ func (x *FieldLevelTerseStruct) writeField11(p thrift.Encoder) error {  // Terse
     return nil
 }
 
+func (x *FieldLevelTerseStruct) readField11(p thrift.Decoder) error {  // TerseListField
+    _ /* elemType */, size, err := p.ReadListBegin()
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
+    }
+    
+    listResult := make([]int16, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int16
+        {
+            result, err := p.ReadI16()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
+
+    x.TerseListField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseSetField() []int16 {
+    if !x.IsSetTerseSetField() {
+        return make([]int16, 0)
+    }
+    return x.TerseSetField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseSetFieldNonCompat(value []int16) *FieldLevelTerseStruct {
+    x.TerseSetField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseSetField(value []int16) *FieldLevelTerseStruct {
+    x.TerseSetField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetTerseSetField() bool {
+    return x != nil && x.TerseSetField != nil
+}
+
 func (x *FieldLevelTerseStruct) writeField12(p thrift.Encoder) error {  // TerseSetField
     if err := p.WriteFieldBegin("terse_set_field", thrift.SET, 12); err != nil {
         return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
@@ -3019,6 +2882,56 @@ func (x *FieldLevelTerseStruct) writeField12(p thrift.Encoder) error {  // Terse
         return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
     }
     return nil
+}
+
+func (x *FieldLevelTerseStruct) readField12(p thrift.Decoder) error {  // TerseSetField
+    _ /* elemType */, size, err := p.ReadSetBegin()
+    if err != nil {
+        return thrift.PrependError("error reading set begin: ", err)
+    }
+    
+    setResult := make([]int16, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int16
+        {
+            result, err := p.ReadI16()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        setResult = append(setResult, elem)
+    }
+    
+    if err := p.ReadSetEnd(); err != nil {
+        return thrift.PrependError("error reading set end: ", err)
+    }
+    result := setResult
+
+    x.TerseSetField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseMapField() map[int16]int16 {
+    if !x.IsSetTerseMapField() {
+        return make(map[int16]int16)
+    }
+    return x.TerseMapField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseMapFieldNonCompat(value map[int16]int16) *FieldLevelTerseStruct {
+    x.TerseMapField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseMapField(value map[int16]int16) *FieldLevelTerseStruct {
+    x.TerseMapField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetTerseMapField() bool {
+    return x != nil && x.TerseMapField != nil
 }
 
 func (x *FieldLevelTerseStruct) writeField13(p thrift.Encoder) error {  // TerseMapField
@@ -3052,492 +2965,6 @@ func (x *FieldLevelTerseStruct) writeField13(p thrift.Encoder) error {  // Terse
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
     }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField14(p thrift.Encoder) error {  // TerseStructField
-    if !x.IsSetTerseStructField() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("terse_struct_field", thrift.STRUCT, 14); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.TerseStructField
-    if err := item.Write(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField15(p thrift.Encoder) error {  // BoolField
-    if err := p.WriteFieldBegin("bool_field", thrift.BOOL, 15); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.BoolField
-    if err := p.WriteBool(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField16(p thrift.Encoder) error {  // ByteField
-    if err := p.WriteFieldBegin("byte_field", thrift.BYTE, 16); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.ByteField
-    if err := p.WriteByte(byte(item)); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField17(p thrift.Encoder) error {  // ShortField
-    if err := p.WriteFieldBegin("short_field", thrift.I16, 17); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.ShortField
-    if err := p.WriteI16(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField18(p thrift.Encoder) error {  // IntField
-    if err := p.WriteFieldBegin("int_field", thrift.I32, 18); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.IntField
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField19(p thrift.Encoder) error {  // LongField
-    if err := p.WriteFieldBegin("long_field", thrift.I64, 19); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.LongField
-    if err := p.WriteI64(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField20(p thrift.Encoder) error {  // FloatField
-    if err := p.WriteFieldBegin("float_field", thrift.FLOAT, 20); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.FloatField
-    if err := p.WriteFloat(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField21(p thrift.Encoder) error {  // DoubleField
-    if err := p.WriteFieldBegin("double_field", thrift.DOUBLE, 21); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.DoubleField
-    if err := p.WriteDouble(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField22(p thrift.Encoder) error {  // StringField
-    if err := p.WriteFieldBegin("string_field", thrift.STRING, 22); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.StringField
-    if err := p.WriteString(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField23(p thrift.Encoder) error {  // BinaryField
-    if err := p.WriteFieldBegin("binary_field", thrift.STRING, 23); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.BinaryField
-    if err := p.WriteBinary(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField24(p thrift.Encoder) error {  // EnumField
-    if err := p.WriteFieldBegin("enum_field", thrift.I32, 24); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.EnumField
-    if err := p.WriteI32(int32(item)); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField25(p thrift.Encoder) error {  // ListField
-    if err := p.WriteFieldBegin("list_field", thrift.LIST, 25); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.ListField
-    if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
-        return thrift.PrependError("error writing list begin: ", err)
-    }
-    for _, v := range item {
-        {
-            item := v
-            if err := p.WriteI16(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteListEnd(); err != nil {
-        return thrift.PrependError("error writing list end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField26(p thrift.Encoder) error {  // SetField
-    if err := p.WriteFieldBegin("set_field", thrift.SET, 26); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.SetField
-    if err := p.WriteSetBegin(thrift.I16, len(item)); err != nil {
-        return thrift.PrependError("error writing set begin: ", err)
-    }
-    for _, v := range item {
-        {
-            item := v
-            if err := p.WriteI16(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteSetEnd(); err != nil {
-        return thrift.PrependError("error writing set end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField27(p thrift.Encoder) error {  // MapField
-    if err := p.WriteFieldBegin("map_field", thrift.MAP, 27); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.MapField
-    if err := p.WriteMapBegin(thrift.I16, thrift.I16, len(item)); err != nil {
-        return thrift.PrependError("error writing map begin: ", err)
-    }
-    for k, v := range item {
-        {
-            item := k
-            if err := p.WriteI16(item); err != nil {
-                return err
-            }
-        }
-    
-        {
-            item := v
-            if err := p.WriteI16(item); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteMapEnd(); err != nil {
-        return thrift.PrependError("error writing map end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField28(p thrift.Encoder) error {  // StructField
-    if !x.IsSetStructField() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("struct_field", thrift.STRUCT, 28); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.StructField
-    if err := item.Write(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField29(p thrift.Encoder) error {  // TerseUnionField
-    if !x.IsSetTerseUnionField() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("terse_union_field", thrift.STRUCT, 29); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.TerseUnionField
-    if err := item.Write(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) writeField30(p thrift.Encoder) error {  // UnionField
-    if !x.IsSetUnionField() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("union_field", thrift.STRUCT, 30); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
-    }
-
-    item := x.UnionField
-    if err := item.Write(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField1(p thrift.Decoder) error {  // TerseBoolField
-    result, err := p.ReadBool()
-    if err != nil {
-        return err
-    }
-
-    x.TerseBoolField = result
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField2(p thrift.Decoder) error {  // TerseByteField
-    resultByte, err := p.ReadByte()
-    result := int8(resultByte)
-    if err != nil {
-        return err
-    }
-
-    x.TerseByteField = result
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField3(p thrift.Decoder) error {  // TerseShortField
-    result, err := p.ReadI16()
-    if err != nil {
-        return err
-    }
-
-    x.TerseShortField = result
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField4(p thrift.Decoder) error {  // TerseIntField
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.TerseIntField = result
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField5(p thrift.Decoder) error {  // TerseLongField
-    result, err := p.ReadI64()
-    if err != nil {
-        return err
-    }
-
-    x.TerseLongField = result
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField6(p thrift.Decoder) error {  // TerseFloatField
-    result, err := p.ReadFloat()
-    if err != nil {
-        return err
-    }
-
-    x.TerseFloatField = result
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField7(p thrift.Decoder) error {  // TerseDoubleField
-    result, err := p.ReadDouble()
-    if err != nil {
-        return err
-    }
-
-    x.TerseDoubleField = result
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField8(p thrift.Decoder) error {  // TerseStringField
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.TerseStringField = result
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField9(p thrift.Decoder) error {  // TerseBinaryField
-    result, err := p.ReadBinary()
-    if err != nil {
-        return err
-    }
-
-    x.TerseBinaryField = result
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField10(p thrift.Decoder) error {  // TerseEnumField
-    enumResult, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-    result := MyEnum(enumResult)
-
-    x.TerseEnumField = result
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField11(p thrift.Decoder) error {  // TerseListField
-    _ /* elemType */, size, err := p.ReadListBegin()
-    if err != nil {
-        return thrift.PrependError("error reading list begin: ", err)
-    }
-    
-    listResult := make([]int16, 0, size)
-    for i := 0; i < size; i++ {
-        var elem int16
-        {
-            result, err := p.ReadI16()
-            if err != nil {
-                return err
-            }
-            elem = result
-        }
-        listResult = append(listResult, elem)
-    }
-    
-    if err := p.ReadListEnd(); err != nil {
-        return thrift.PrependError("error reading list end: ", err)
-    }
-    result := listResult
-
-    x.TerseListField = result
-    return nil
-}
-
-func (x *FieldLevelTerseStruct) readField12(p thrift.Decoder) error {  // TerseSetField
-    _ /* elemType */, size, err := p.ReadSetBegin()
-    if err != nil {
-        return thrift.PrependError("error reading set begin: ", err)
-    }
-    
-    setResult := make([]int16, 0, size)
-    for i := 0; i < size; i++ {
-        var elem int16
-        {
-            result, err := p.ReadI16()
-            if err != nil {
-                return err
-            }
-            elem = result
-        }
-        setResult = append(setResult, elem)
-    }
-    
-    if err := p.ReadSetEnd(); err != nil {
-        return thrift.PrependError("error reading set end: ", err)
-    }
-    result := setResult
-
-    x.TerseSetField = result
     return nil
 }
 
@@ -3579,6 +3006,48 @@ func (x *FieldLevelTerseStruct) readField13(p thrift.Decoder) error {  // TerseM
     return nil
 }
 
+
+func (x *FieldLevelTerseStruct) GetTerseStructField() *MyStruct {
+    if !x.IsSetTerseStructField() {
+        return nil
+    }
+    return x.TerseStructField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseStructFieldNonCompat(value *MyStruct) *FieldLevelTerseStruct {
+    x.TerseStructField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseStructField(value *MyStruct) *FieldLevelTerseStruct {
+    x.TerseStructField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetTerseStructField() bool {
+    return x != nil && x.TerseStructField != nil
+}
+
+func (x *FieldLevelTerseStruct) writeField14(p thrift.Encoder) error {  // TerseStructField
+    if !x.IsSetTerseStructField() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("terse_struct_field", thrift.STRUCT, 14); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.TerseStructField
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *FieldLevelTerseStruct) readField14(p thrift.Decoder) error {  // TerseStructField
     result := NewMyStruct()
     err := result.Read(p)
@@ -3590,6 +3059,38 @@ func (x *FieldLevelTerseStruct) readField14(p thrift.Decoder) error {  // TerseS
     return nil
 }
 
+
+func (x *FieldLevelTerseStruct) GetBoolField() bool {
+    return x.BoolField
+}
+
+func (x *FieldLevelTerseStruct) SetBoolFieldNonCompat(value bool) *FieldLevelTerseStruct {
+    x.BoolField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetBoolField(value bool) *FieldLevelTerseStruct {
+    x.BoolField = value
+    return x
+}
+
+
+func (x *FieldLevelTerseStruct) writeField15(p thrift.Encoder) error {  // BoolField
+    if err := p.WriteFieldBegin("bool_field", thrift.BOOL, 15); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.BoolField
+    if err := p.WriteBool(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *FieldLevelTerseStruct) readField15(p thrift.Decoder) error {  // BoolField
     result, err := p.ReadBool()
     if err != nil {
@@ -3597,6 +3098,38 @@ func (x *FieldLevelTerseStruct) readField15(p thrift.Decoder) error {  // BoolFi
     }
 
     x.BoolField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetByteField() int8 {
+    return x.ByteField
+}
+
+func (x *FieldLevelTerseStruct) SetByteFieldNonCompat(value int8) *FieldLevelTerseStruct {
+    x.ByteField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetByteField(value int8) *FieldLevelTerseStruct {
+    x.ByteField = value
+    return x
+}
+
+
+func (x *FieldLevelTerseStruct) writeField16(p thrift.Encoder) error {  // ByteField
+    if err := p.WriteFieldBegin("byte_field", thrift.BYTE, 16); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.ByteField
+    if err := p.WriteByte(byte(item)); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -3611,6 +3144,38 @@ func (x *FieldLevelTerseStruct) readField16(p thrift.Decoder) error {  // ByteFi
     return nil
 }
 
+
+func (x *FieldLevelTerseStruct) GetShortField() int16 {
+    return x.ShortField
+}
+
+func (x *FieldLevelTerseStruct) SetShortFieldNonCompat(value int16) *FieldLevelTerseStruct {
+    x.ShortField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetShortField(value int16) *FieldLevelTerseStruct {
+    x.ShortField = value
+    return x
+}
+
+
+func (x *FieldLevelTerseStruct) writeField17(p thrift.Encoder) error {  // ShortField
+    if err := p.WriteFieldBegin("short_field", thrift.I16, 17); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.ShortField
+    if err := p.WriteI16(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *FieldLevelTerseStruct) readField17(p thrift.Decoder) error {  // ShortField
     result, err := p.ReadI16()
     if err != nil {
@@ -3618,6 +3183,38 @@ func (x *FieldLevelTerseStruct) readField17(p thrift.Decoder) error {  // ShortF
     }
 
     x.ShortField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetIntField() int32 {
+    return x.IntField
+}
+
+func (x *FieldLevelTerseStruct) SetIntFieldNonCompat(value int32) *FieldLevelTerseStruct {
+    x.IntField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetIntField(value int32) *FieldLevelTerseStruct {
+    x.IntField = value
+    return x
+}
+
+
+func (x *FieldLevelTerseStruct) writeField18(p thrift.Encoder) error {  // IntField
+    if err := p.WriteFieldBegin("int_field", thrift.I32, 18); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.IntField
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -3631,6 +3228,38 @@ func (x *FieldLevelTerseStruct) readField18(p thrift.Decoder) error {  // IntFie
     return nil
 }
 
+
+func (x *FieldLevelTerseStruct) GetLongField() int64 {
+    return x.LongField
+}
+
+func (x *FieldLevelTerseStruct) SetLongFieldNonCompat(value int64) *FieldLevelTerseStruct {
+    x.LongField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetLongField(value int64) *FieldLevelTerseStruct {
+    x.LongField = value
+    return x
+}
+
+
+func (x *FieldLevelTerseStruct) writeField19(p thrift.Encoder) error {  // LongField
+    if err := p.WriteFieldBegin("long_field", thrift.I64, 19); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.LongField
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *FieldLevelTerseStruct) readField19(p thrift.Decoder) error {  // LongField
     result, err := p.ReadI64()
     if err != nil {
@@ -3638,6 +3267,38 @@ func (x *FieldLevelTerseStruct) readField19(p thrift.Decoder) error {  // LongFi
     }
 
     x.LongField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetFloatField() float32 {
+    return x.FloatField
+}
+
+func (x *FieldLevelTerseStruct) SetFloatFieldNonCompat(value float32) *FieldLevelTerseStruct {
+    x.FloatField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetFloatField(value float32) *FieldLevelTerseStruct {
+    x.FloatField = value
+    return x
+}
+
+
+func (x *FieldLevelTerseStruct) writeField20(p thrift.Encoder) error {  // FloatField
+    if err := p.WriteFieldBegin("float_field", thrift.FLOAT, 20); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.FloatField
+    if err := p.WriteFloat(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -3651,6 +3312,38 @@ func (x *FieldLevelTerseStruct) readField20(p thrift.Decoder) error {  // FloatF
     return nil
 }
 
+
+func (x *FieldLevelTerseStruct) GetDoubleField() float64 {
+    return x.DoubleField
+}
+
+func (x *FieldLevelTerseStruct) SetDoubleFieldNonCompat(value float64) *FieldLevelTerseStruct {
+    x.DoubleField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetDoubleField(value float64) *FieldLevelTerseStruct {
+    x.DoubleField = value
+    return x
+}
+
+
+func (x *FieldLevelTerseStruct) writeField21(p thrift.Encoder) error {  // DoubleField
+    if err := p.WriteFieldBegin("double_field", thrift.DOUBLE, 21); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.DoubleField
+    if err := p.WriteDouble(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *FieldLevelTerseStruct) readField21(p thrift.Decoder) error {  // DoubleField
     result, err := p.ReadDouble()
     if err != nil {
@@ -3658,6 +3351,38 @@ func (x *FieldLevelTerseStruct) readField21(p thrift.Decoder) error {  // Double
     }
 
     x.DoubleField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetStringField() string {
+    return x.StringField
+}
+
+func (x *FieldLevelTerseStruct) SetStringFieldNonCompat(value string) *FieldLevelTerseStruct {
+    x.StringField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetStringField(value string) *FieldLevelTerseStruct {
+    x.StringField = value
+    return x
+}
+
+
+func (x *FieldLevelTerseStruct) writeField22(p thrift.Encoder) error {  // StringField
+    if err := p.WriteFieldBegin("string_field", thrift.STRING, 22); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.StringField
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -3671,6 +3396,44 @@ func (x *FieldLevelTerseStruct) readField22(p thrift.Decoder) error {  // String
     return nil
 }
 
+
+func (x *FieldLevelTerseStruct) GetBinaryField() []byte {
+    if !x.IsSetBinaryField() {
+        return []byte("")
+    }
+    return x.BinaryField
+}
+
+func (x *FieldLevelTerseStruct) SetBinaryFieldNonCompat(value []byte) *FieldLevelTerseStruct {
+    x.BinaryField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetBinaryField(value []byte) *FieldLevelTerseStruct {
+    x.BinaryField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetBinaryField() bool {
+    return x != nil && x.BinaryField != nil
+}
+
+func (x *FieldLevelTerseStruct) writeField23(p thrift.Encoder) error {  // BinaryField
+    if err := p.WriteFieldBegin("binary_field", thrift.STRING, 23); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.BinaryField
+    if err := p.WriteBinary(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *FieldLevelTerseStruct) readField23(p thrift.Decoder) error {  // BinaryField
     result, err := p.ReadBinary()
     if err != nil {
@@ -3678,6 +3441,38 @@ func (x *FieldLevelTerseStruct) readField23(p thrift.Decoder) error {  // Binary
     }
 
     x.BinaryField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetEnumField() MyEnum {
+    return x.EnumField
+}
+
+func (x *FieldLevelTerseStruct) SetEnumFieldNonCompat(value MyEnum) *FieldLevelTerseStruct {
+    x.EnumField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetEnumField(value MyEnum) *FieldLevelTerseStruct {
+    x.EnumField = value
+    return x
+}
+
+
+func (x *FieldLevelTerseStruct) writeField24(p thrift.Encoder) error {  // EnumField
+    if err := p.WriteFieldBegin("enum_field", thrift.I32, 24); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.EnumField
+    if err := p.WriteI32(int32(item)); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -3689,6 +3484,55 @@ func (x *FieldLevelTerseStruct) readField24(p thrift.Decoder) error {  // EnumFi
     result := MyEnum(enumResult)
 
     x.EnumField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetListField() []int16 {
+    if !x.IsSetListField() {
+        return make([]int16, 0)
+    }
+    return x.ListField
+}
+
+func (x *FieldLevelTerseStruct) SetListFieldNonCompat(value []int16) *FieldLevelTerseStruct {
+    x.ListField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetListField(value []int16) *FieldLevelTerseStruct {
+    x.ListField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetListField() bool {
+    return x != nil && x.ListField != nil
+}
+
+func (x *FieldLevelTerseStruct) writeField25(p thrift.Encoder) error {  // ListField
+    if err := p.WriteFieldBegin("list_field", thrift.LIST, 25); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.ListField
+    if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI16(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -3720,6 +3564,55 @@ func (x *FieldLevelTerseStruct) readField25(p thrift.Decoder) error {  // ListFi
     return nil
 }
 
+
+func (x *FieldLevelTerseStruct) GetSetField() []int16 {
+    if !x.IsSetSetField() {
+        return make([]int16, 0)
+    }
+    return x.SetField
+}
+
+func (x *FieldLevelTerseStruct) SetSetFieldNonCompat(value []int16) *FieldLevelTerseStruct {
+    x.SetField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetSetField(value []int16) *FieldLevelTerseStruct {
+    x.SetField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetSetField() bool {
+    return x != nil && x.SetField != nil
+}
+
+func (x *FieldLevelTerseStruct) writeField26(p thrift.Encoder) error {  // SetField
+    if err := p.WriteFieldBegin("set_field", thrift.SET, 26); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.SetField
+    if err := p.WriteSetBegin(thrift.I16, len(item)); err != nil {
+        return thrift.PrependError("error writing set begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI16(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteSetEnd(); err != nil {
+        return thrift.PrependError("error writing set end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *FieldLevelTerseStruct) readField26(p thrift.Decoder) error {  // SetField
     _ /* elemType */, size, err := p.ReadSetBegin()
     if err != nil {
@@ -3745,6 +3638,62 @@ func (x *FieldLevelTerseStruct) readField26(p thrift.Decoder) error {  // SetFie
     result := setResult
 
     x.SetField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetMapField() map[int16]int16 {
+    if !x.IsSetMapField() {
+        return make(map[int16]int16)
+    }
+    return x.MapField
+}
+
+func (x *FieldLevelTerseStruct) SetMapFieldNonCompat(value map[int16]int16) *FieldLevelTerseStruct {
+    x.MapField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetMapField(value map[int16]int16) *FieldLevelTerseStruct {
+    x.MapField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetMapField() bool {
+    return x != nil && x.MapField != nil
+}
+
+func (x *FieldLevelTerseStruct) writeField27(p thrift.Encoder) error {  // MapField
+    if err := p.WriteFieldBegin("map_field", thrift.MAP, 27); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.MapField
+    if err := p.WriteMapBegin(thrift.I16, thrift.I16, len(item)); err != nil {
+        return thrift.PrependError("error writing map begin: ", err)
+    }
+    for k, v := range item {
+        {
+            item := k
+            if err := p.WriteI16(item); err != nil {
+                return err
+            }
+        }
+    
+        {
+            item := v
+            if err := p.WriteI16(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteMapEnd(); err != nil {
+        return thrift.PrependError("error writing map end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -3786,6 +3735,48 @@ func (x *FieldLevelTerseStruct) readField27(p thrift.Decoder) error {  // MapFie
     return nil
 }
 
+
+func (x *FieldLevelTerseStruct) GetStructField() *MyStruct {
+    if !x.IsSetStructField() {
+        return nil
+    }
+    return x.StructField
+}
+
+func (x *FieldLevelTerseStruct) SetStructFieldNonCompat(value *MyStruct) *FieldLevelTerseStruct {
+    x.StructField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetStructField(value *MyStruct) *FieldLevelTerseStruct {
+    x.StructField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetStructField() bool {
+    return x != nil && x.StructField != nil
+}
+
+func (x *FieldLevelTerseStruct) writeField28(p thrift.Encoder) error {  // StructField
+    if !x.IsSetStructField() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("struct_field", thrift.STRUCT, 28); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.StructField
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *FieldLevelTerseStruct) readField28(p thrift.Decoder) error {  // StructField
     result := NewMyStruct()
     err := result.Read(p)
@@ -3794,6 +3785,48 @@ func (x *FieldLevelTerseStruct) readField28(p thrift.Decoder) error {  // Struct
     }
 
     x.StructField = result
+    return nil
+}
+
+
+func (x *FieldLevelTerseStruct) GetTerseUnionField() *MyUnion {
+    if !x.IsSetTerseUnionField() {
+        return nil
+    }
+    return x.TerseUnionField
+}
+
+func (x *FieldLevelTerseStruct) SetTerseUnionFieldNonCompat(value *MyUnion) *FieldLevelTerseStruct {
+    x.TerseUnionField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetTerseUnionField(value *MyUnion) *FieldLevelTerseStruct {
+    x.TerseUnionField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetTerseUnionField() bool {
+    return x != nil && x.TerseUnionField != nil
+}
+
+func (x *FieldLevelTerseStruct) writeField29(p thrift.Encoder) error {  // TerseUnionField
+    if !x.IsSetTerseUnionField() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("terse_union_field", thrift.STRUCT, 29); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.TerseUnionField
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
     return nil
 }
 
@@ -3808,6 +3841,48 @@ func (x *FieldLevelTerseStruct) readField29(p thrift.Decoder) error {  // TerseU
     return nil
 }
 
+
+func (x *FieldLevelTerseStruct) GetUnionField() *MyUnion {
+    if !x.IsSetUnionField() {
+        return nil
+    }
+    return x.UnionField
+}
+
+func (x *FieldLevelTerseStruct) SetUnionFieldNonCompat(value *MyUnion) *FieldLevelTerseStruct {
+    x.UnionField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) SetUnionField(value *MyUnion) *FieldLevelTerseStruct {
+    x.UnionField = value
+    return x
+}
+
+func (x *FieldLevelTerseStruct) IsSetUnionField() bool {
+    return x != nil && x.UnionField != nil
+}
+
+func (x *FieldLevelTerseStruct) writeField30(p thrift.Encoder) error {  // UnionField
+    if !x.IsSetUnionField() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("union_field", thrift.STRUCT, 30); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field begin error: ", err)
+    }
+
+    item := x.UnionField
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldLevelTerseStruct write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *FieldLevelTerseStruct) readField30(p thrift.Decoder) error {  // UnionField
     result := NewMyUnion()
     err := result.Read(p)
@@ -3818,9 +3893,6 @@ func (x *FieldLevelTerseStruct) readField30(p thrift.Decoder) error {  // UnionF
     x.UnionField = result
     return nil
 }
-
-
-
 
 
 
@@ -4087,14 +4159,6 @@ func (x *AdaptedFields) GetField1() MyInteger {
     return x.Field1
 }
 
-func (x *AdaptedFields) GetField2() int32 {
-    return x.Field2
-}
-
-func (x *AdaptedFields) GetField3() MyInteger {
-    return x.Field3
-}
-
 func (x *AdaptedFields) SetField1NonCompat(value MyInteger) *AdaptedFields {
     x.Field1 = value
     return x
@@ -4105,25 +4169,6 @@ func (x *AdaptedFields) SetField1(value MyInteger) *AdaptedFields {
     return x
 }
 
-func (x *AdaptedFields) SetField2NonCompat(value int32) *AdaptedFields {
-    x.Field2 = value
-    return x
-}
-
-func (x *AdaptedFields) SetField2(value int32) *AdaptedFields {
-    x.Field2 = value
-    return x
-}
-
-func (x *AdaptedFields) SetField3NonCompat(value MyInteger) *AdaptedFields {
-    x.Field3 = value
-    return x
-}
-
-func (x *AdaptedFields) SetField3(value MyInteger) *AdaptedFields {
-    x.Field3 = value
-    return x
-}
 
 func (x *AdaptedFields) writeField1(p thrift.Encoder) error {  // Field1
     if err := p.WriteFieldBegin("field1", thrift.I32, 1); err != nil {
@@ -4131,39 +4176,6 @@ func (x *AdaptedFields) writeField1(p thrift.Encoder) error {  // Field1
     }
 
     item := x.Field1
-    err := WriteMyInteger(item, p)
-    if err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("AdaptedFields write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *AdaptedFields) writeField2(p thrift.Encoder) error {  // Field2
-    if err := p.WriteFieldBegin("field2", thrift.I32, 2); err != nil {
-        return thrift.PrependError("AdaptedFields write field begin error: ", err)
-    }
-
-    item := x.Field2
-    if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("AdaptedFields write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *AdaptedFields) writeField3(p thrift.Encoder) error {  // Field3
-    if err := p.WriteFieldBegin("field3", thrift.I32, 3); err != nil {
-        return thrift.PrependError("AdaptedFields write field begin error: ", err)
-    }
-
-    item := x.Field3
     err := WriteMyInteger(item, p)
     if err != nil {
         return err
@@ -4185,6 +4197,38 @@ func (x *AdaptedFields) readField1(p thrift.Decoder) error {  // Field1
     return nil
 }
 
+
+func (x *AdaptedFields) GetField2() int32 {
+    return x.Field2
+}
+
+func (x *AdaptedFields) SetField2NonCompat(value int32) *AdaptedFields {
+    x.Field2 = value
+    return x
+}
+
+func (x *AdaptedFields) SetField2(value int32) *AdaptedFields {
+    x.Field2 = value
+    return x
+}
+
+
+func (x *AdaptedFields) writeField2(p thrift.Encoder) error {  // Field2
+    if err := p.WriteFieldBegin("field2", thrift.I32, 2); err != nil {
+        return thrift.PrependError("AdaptedFields write field begin error: ", err)
+    }
+
+    item := x.Field2
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("AdaptedFields write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *AdaptedFields) readField2(p thrift.Decoder) error {  // Field2
     result, err := p.ReadI32()
     if err != nil {
@@ -4192,6 +4236,39 @@ func (x *AdaptedFields) readField2(p thrift.Decoder) error {  // Field2
     }
 
     x.Field2 = result
+    return nil
+}
+
+
+func (x *AdaptedFields) GetField3() MyInteger {
+    return x.Field3
+}
+
+func (x *AdaptedFields) SetField3NonCompat(value MyInteger) *AdaptedFields {
+    x.Field3 = value
+    return x
+}
+
+func (x *AdaptedFields) SetField3(value MyInteger) *AdaptedFields {
+    x.Field3 = value
+    return x
+}
+
+
+func (x *AdaptedFields) writeField3(p thrift.Encoder) error {  // Field3
+    if err := p.WriteFieldBegin("field3", thrift.I32, 3); err != nil {
+        return thrift.PrependError("AdaptedFields write field begin error: ", err)
+    }
+
+    item := x.Field3
+    err := WriteMyInteger(item, p)
+    if err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("AdaptedFields write field end error: ", err)
+    }
     return nil
 }
 
@@ -4204,6 +4281,7 @@ func (x *AdaptedFields) readField3(p thrift.Decoder) error {  // Field3
     x.Field3 = result
     return nil
 }
+
 
 
 
@@ -4316,6 +4394,7 @@ func (x *TerseException) SetMsg(value string) *TerseException {
     return x
 }
 
+
 func (x *TerseException) writeField1(p thrift.Encoder) error {  // Msg
     if err := p.WriteFieldBegin("msg", thrift.STRING, 1); err != nil {
         return thrift.PrependError("TerseException write field begin error: ", err)
@@ -4341,6 +4420,7 @@ func (x *TerseException) readField1(p thrift.Decoder) error {  // Msg
     x.Msg = result
     return nil
 }
+
 
 
 

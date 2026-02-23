@@ -46,6 +46,7 @@ func (x *CustomException) SetMessage(value string) *CustomException {
     return x
 }
 
+
 func (x *CustomException) writeField1(p thrift.Encoder) error {  // Message
     if err := p.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
         return thrift.PrependError("CustomException write field begin error: ", err)
@@ -71,6 +72,7 @@ func (x *CustomException) readField1(p thrift.Decoder) error {  // Message
     x.Message = result
     return nil
 }
+
 
 
 
@@ -178,6 +180,7 @@ func (x *ShouldBeBoxed) SetSessionId(value string) *ShouldBeBoxed {
     return x
 }
 
+
 func (x *ShouldBeBoxed) writeField1(p thrift.Encoder) error {  // SessionId
     if err := p.WriteFieldBegin("sessionId", thrift.STRING, 1); err != nil {
         return thrift.PrependError("ShouldBeBoxed write field begin error: ", err)
@@ -203,6 +206,7 @@ func (x *ShouldBeBoxed) readField1(p thrift.Decoder) error {  // SessionId
     x.SessionId = result
     return nil
 }
+
 
 
 
@@ -462,6 +466,7 @@ func (x *reqMyServiceInteract) SetArg(value int32) *reqMyServiceInteract {
     return x
 }
 
+
 func (x *reqMyServiceInteract) writeField1(p thrift.Encoder) error {  // Arg
     if err := p.WriteFieldBegin("arg", thrift.I32, 1); err != nil {
         return thrift.PrependError("reqMyServiceInteract write field begin error: ", err)
@@ -487,6 +492,7 @@ func (x *reqMyServiceInteract) readField1(p thrift.Decoder) error {  // Arg
     x.Arg = result
     return nil
 }
+
 
 
 
@@ -1392,6 +1398,7 @@ func (x *reqFactoriesInteract) SetArg(value int32) *reqFactoriesInteract {
     return x
 }
 
+
 func (x *reqFactoriesInteract) writeField1(p thrift.Encoder) error {  // Arg
     if err := p.WriteFieldBegin("arg", thrift.I32, 1); err != nil {
         return thrift.PrependError("reqFactoriesInteract write field begin error: ", err)
@@ -1417,6 +1424,7 @@ func (x *reqFactoriesInteract) readField1(p thrift.Decoder) error {  // Arg
     x.Arg = result
     return nil
 }
+
 
 
 
@@ -2885,13 +2893,6 @@ func (x *respMyInteractionFrobnicate) GetSuccess() int32 {
     return *x.Success
 }
 
-func (x *respMyInteractionFrobnicate) GetEx() *CustomException {
-    if !x.IsSetEx() {
-        return nil
-    }
-    return x.Ex
-}
-
 func (x *respMyInteractionFrobnicate) SetSuccessNonCompat(value int32) *respMyInteractionFrobnicate {
     x.Success = &value
     return x
@@ -2902,22 +2903,8 @@ func (x *respMyInteractionFrobnicate) SetSuccess(value *int32) *respMyInteractio
     return x
 }
 
-func (x *respMyInteractionFrobnicate) SetExNonCompat(value *CustomException) *respMyInteractionFrobnicate {
-    x.Ex = value
-    return x
-}
-
-func (x *respMyInteractionFrobnicate) SetEx(value *CustomException) *respMyInteractionFrobnicate {
-    x.Ex = value
-    return x
-}
-
 func (x *respMyInteractionFrobnicate) IsSetSuccess() bool {
     return x != nil && x.Success != nil
-}
-
-func (x *respMyInteractionFrobnicate) IsSetEx() bool {
-    return x != nil && x.Ex != nil
 }
 
 func (x *respMyInteractionFrobnicate) writeField0(p thrift.Encoder) error {  // Success
@@ -2940,6 +2927,38 @@ func (x *respMyInteractionFrobnicate) writeField0(p thrift.Encoder) error {  // 
     return nil
 }
 
+func (x *respMyInteractionFrobnicate) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+func (x *respMyInteractionFrobnicate) GetEx() *CustomException {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *respMyInteractionFrobnicate) SetExNonCompat(value *CustomException) *respMyInteractionFrobnicate {
+    x.Ex = value
+    return x
+}
+
+func (x *respMyInteractionFrobnicate) SetEx(value *CustomException) *respMyInteractionFrobnicate {
+    x.Ex = value
+    return x
+}
+
+func (x *respMyInteractionFrobnicate) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
 func (x *respMyInteractionFrobnicate) writeField1(p thrift.Encoder) error {  // Ex
     if !x.IsSetEx() {
         return nil
@@ -2960,16 +2979,6 @@ func (x *respMyInteractionFrobnicate) writeField1(p thrift.Encoder) error {  // 
     return nil
 }
 
-func (x *respMyInteractionFrobnicate) readField0(p thrift.Decoder) error {  // Success
-    result, err := p.ReadI32()
-    if err != nil {
-        return err
-    }
-
-    x.Success = &result
-    return nil
-}
-
 func (x *respMyInteractionFrobnicate) readField1(p thrift.Decoder) error {  // Ex
     result := NewCustomException()
     err := result.Read(p)
@@ -2980,7 +2989,6 @@ func (x *respMyInteractionFrobnicate) readField1(p thrift.Decoder) error {  // E
     x.Ex = result
     return nil
 }
-
 
 
 
@@ -3690,6 +3698,7 @@ func (x *respMyInteractionEncode) readField0(p thrift.Decoder) error {  // Succe
 
 
 
+
 func (x *respMyInteractionEncode) Exception() thrift.WritableException {
     return nil
 }
@@ -3963,6 +3972,7 @@ func (x *respFinalMyInteractionEncode) readField0(p thrift.Decoder) error {  // 
     x.Success = result
     return nil
 }
+
 
 
 
@@ -4878,6 +4888,7 @@ func (x *respMyInteractionFastEncode) readField0(p thrift.Decoder) error {  // S
 
 
 
+
 func (x *respMyInteractionFastEncode) Exception() thrift.WritableException {
     return nil
 }
@@ -5151,6 +5162,7 @@ func (x *respFinalMyInteractionFastEncode) readField0(p thrift.Decoder) error { 
     x.Success = result
     return nil
 }
+
 
 
 

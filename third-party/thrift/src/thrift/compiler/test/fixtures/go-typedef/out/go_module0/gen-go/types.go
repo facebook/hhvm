@@ -34,10 +34,6 @@ func (x *Accessory) GetInventoryId() int32 {
     return x.InventoryId
 }
 
-func (x *Accessory) GetName() string {
-    return x.Name
-}
-
 func (x *Accessory) SetInventoryIdNonCompat(value int32) *Accessory {
     x.InventoryId = value
     return x
@@ -48,15 +44,6 @@ func (x *Accessory) SetInventoryId(value int32) *Accessory {
     return x
 }
 
-func (x *Accessory) SetNameNonCompat(value string) *Accessory {
-    x.Name = value
-    return x
-}
-
-func (x *Accessory) SetName(value string) *Accessory {
-    x.Name = value
-    return x
-}
 
 func (x *Accessory) writeField1(p thrift.Encoder) error {  // InventoryId
     if err := p.WriteFieldBegin("InventoryId", thrift.I32, 1); err != nil {
@@ -65,22 +52,6 @@ func (x *Accessory) writeField1(p thrift.Encoder) error {  // InventoryId
 
     item := x.InventoryId
     if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Accessory write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Accessory) writeField2(p thrift.Encoder) error {  // Name
-    if err := p.WriteFieldBegin("Name", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("Accessory write field begin error: ", err)
-    }
-
-    item := x.Name
-    if err := p.WriteString(item); err != nil {
         return err
     }
 
@@ -100,6 +71,38 @@ func (x *Accessory) readField1(p thrift.Decoder) error {  // InventoryId
     return nil
 }
 
+
+func (x *Accessory) GetName() string {
+    return x.Name
+}
+
+func (x *Accessory) SetNameNonCompat(value string) *Accessory {
+    x.Name = value
+    return x
+}
+
+func (x *Accessory) SetName(value string) *Accessory {
+    x.Name = value
+    return x
+}
+
+
+func (x *Accessory) writeField2(p thrift.Encoder) error {  // Name
+    if err := p.WriteFieldBegin("Name", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("Accessory write field begin error: ", err)
+    }
+
+    item := x.Name
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Accessory write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *Accessory) readField2(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
     if err != nil {
@@ -109,6 +112,7 @@ func (x *Accessory) readField2(p thrift.Decoder) error {  // Name
     x.Name = result
     return nil
 }
+
 
 
 
@@ -205,10 +209,6 @@ func (x *PartName) GetInventoryId() int32 {
     return x.InventoryId
 }
 
-func (x *PartName) GetName() string {
-    return x.Name
-}
-
 func (x *PartName) SetInventoryIdNonCompat(value int32) *PartName {
     x.InventoryId = value
     return x
@@ -219,15 +219,6 @@ func (x *PartName) SetInventoryId(value int32) *PartName {
     return x
 }
 
-func (x *PartName) SetNameNonCompat(value string) *PartName {
-    x.Name = value
-    return x
-}
-
-func (x *PartName) SetName(value string) *PartName {
-    x.Name = value
-    return x
-}
 
 func (x *PartName) writeField1(p thrift.Encoder) error {  // InventoryId
     if err := p.WriteFieldBegin("InventoryId", thrift.I32, 1); err != nil {
@@ -236,22 +227,6 @@ func (x *PartName) writeField1(p thrift.Encoder) error {  // InventoryId
 
     item := x.InventoryId
     if err := p.WriteI32(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("PartName write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *PartName) writeField2(p thrift.Encoder) error {  // Name
-    if err := p.WriteFieldBegin("Name", thrift.STRING, 2); err != nil {
-        return thrift.PrependError("PartName write field begin error: ", err)
-    }
-
-    item := x.Name
-    if err := p.WriteString(item); err != nil {
         return err
     }
 
@@ -271,6 +246,38 @@ func (x *PartName) readField1(p thrift.Decoder) error {  // InventoryId
     return nil
 }
 
+
+func (x *PartName) GetName() string {
+    return x.Name
+}
+
+func (x *PartName) SetNameNonCompat(value string) *PartName {
+    x.Name = value
+    return x
+}
+
+func (x *PartName) SetName(value string) *PartName {
+    x.Name = value
+    return x
+}
+
+
+func (x *PartName) writeField2(p thrift.Encoder) error {  // Name
+    if err := p.WriteFieldBegin("Name", thrift.STRING, 2); err != nil {
+        return thrift.PrependError("PartName write field begin error: ", err)
+    }
+
+    item := x.Name
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("PartName write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *PartName) readField2(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
     if err != nil {
@@ -280,6 +287,7 @@ func (x *PartName) readField2(p thrift.Decoder) error {  // Name
     x.Name = result
     return nil
 }
+
 
 
 

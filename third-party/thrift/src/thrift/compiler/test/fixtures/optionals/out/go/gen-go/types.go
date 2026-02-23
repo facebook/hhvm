@@ -100,18 +100,6 @@ func (x *Color) GetRed() float64 {
     return x.Red
 }
 
-func (x *Color) GetGreen() float64 {
-    return x.Green
-}
-
-func (x *Color) GetBlue() float64 {
-    return x.Blue
-}
-
-func (x *Color) GetAlpha() float64 {
-    return x.Alpha
-}
-
 func (x *Color) SetRedNonCompat(value float64) *Color {
     x.Red = value
     return x
@@ -122,35 +110,6 @@ func (x *Color) SetRed(value float64) *Color {
     return x
 }
 
-func (x *Color) SetGreenNonCompat(value float64) *Color {
-    x.Green = value
-    return x
-}
-
-func (x *Color) SetGreen(value float64) *Color {
-    x.Green = value
-    return x
-}
-
-func (x *Color) SetBlueNonCompat(value float64) *Color {
-    x.Blue = value
-    return x
-}
-
-func (x *Color) SetBlue(value float64) *Color {
-    x.Blue = value
-    return x
-}
-
-func (x *Color) SetAlphaNonCompat(value float64) *Color {
-    x.Alpha = value
-    return x
-}
-
-func (x *Color) SetAlpha(value float64) *Color {
-    x.Alpha = value
-    return x
-}
 
 func (x *Color) writeField1(p thrift.Encoder) error {  // Red
     if err := p.WriteFieldBegin("red", thrift.DOUBLE, 1); err != nil {
@@ -158,54 +117,6 @@ func (x *Color) writeField1(p thrift.Encoder) error {  // Red
     }
 
     item := x.Red
-    if err := p.WriteDouble(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Color write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Color) writeField2(p thrift.Encoder) error {  // Green
-    if err := p.WriteFieldBegin("green", thrift.DOUBLE, 2); err != nil {
-        return thrift.PrependError("Color write field begin error: ", err)
-    }
-
-    item := x.Green
-    if err := p.WriteDouble(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Color write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Color) writeField3(p thrift.Encoder) error {  // Blue
-    if err := p.WriteFieldBegin("blue", thrift.DOUBLE, 3); err != nil {
-        return thrift.PrependError("Color write field begin error: ", err)
-    }
-
-    item := x.Blue
-    if err := p.WriteDouble(item); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Color write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Color) writeField4(p thrift.Encoder) error {  // Alpha
-    if err := p.WriteFieldBegin("alpha", thrift.DOUBLE, 4); err != nil {
-        return thrift.PrependError("Color write field begin error: ", err)
-    }
-
-    item := x.Alpha
     if err := p.WriteDouble(item); err != nil {
         return err
     }
@@ -226,6 +137,38 @@ func (x *Color) readField1(p thrift.Decoder) error {  // Red
     return nil
 }
 
+
+func (x *Color) GetGreen() float64 {
+    return x.Green
+}
+
+func (x *Color) SetGreenNonCompat(value float64) *Color {
+    x.Green = value
+    return x
+}
+
+func (x *Color) SetGreen(value float64) *Color {
+    x.Green = value
+    return x
+}
+
+
+func (x *Color) writeField2(p thrift.Encoder) error {  // Green
+    if err := p.WriteFieldBegin("green", thrift.DOUBLE, 2); err != nil {
+        return thrift.PrependError("Color write field begin error: ", err)
+    }
+
+    item := x.Green
+    if err := p.WriteDouble(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Color write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *Color) readField2(p thrift.Decoder) error {  // Green
     result, err := p.ReadDouble()
     if err != nil {
@@ -233,6 +176,38 @@ func (x *Color) readField2(p thrift.Decoder) error {  // Green
     }
 
     x.Green = result
+    return nil
+}
+
+
+func (x *Color) GetBlue() float64 {
+    return x.Blue
+}
+
+func (x *Color) SetBlueNonCompat(value float64) *Color {
+    x.Blue = value
+    return x
+}
+
+func (x *Color) SetBlue(value float64) *Color {
+    x.Blue = value
+    return x
+}
+
+
+func (x *Color) writeField3(p thrift.Encoder) error {  // Blue
+    if err := p.WriteFieldBegin("blue", thrift.DOUBLE, 3); err != nil {
+        return thrift.PrependError("Color write field begin error: ", err)
+    }
+
+    item := x.Blue
+    if err := p.WriteDouble(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Color write field end error: ", err)
+    }
     return nil
 }
 
@@ -246,6 +221,38 @@ func (x *Color) readField3(p thrift.Decoder) error {  // Blue
     return nil
 }
 
+
+func (x *Color) GetAlpha() float64 {
+    return x.Alpha
+}
+
+func (x *Color) SetAlphaNonCompat(value float64) *Color {
+    x.Alpha = value
+    return x
+}
+
+func (x *Color) SetAlpha(value float64) *Color {
+    x.Alpha = value
+    return x
+}
+
+
+func (x *Color) writeField4(p thrift.Encoder) error {  // Alpha
+    if err := p.WriteFieldBegin("alpha", thrift.DOUBLE, 4); err != nil {
+        return thrift.PrependError("Color write field begin error: ", err)
+    }
+
+    item := x.Alpha
+    if err := p.WriteDouble(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Color write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *Color) readField4(p thrift.Decoder) error {  // Alpha
     result, err := p.ReadDouble()
     if err != nil {
@@ -255,6 +262,7 @@ func (x *Color) readField4(p thrift.Decoder) error {  // Alpha
     x.Alpha = result
     return nil
 }
+
 
 
 
@@ -369,34 +377,6 @@ func (x *Vehicle) GetColor() *Color {
     return x.Color
 }
 
-func (x *Vehicle) GetLicensePlate() string {
-    if !x.IsSetLicensePlate() {
-        return ""
-    }
-    return *x.LicensePlate
-}
-
-func (x *Vehicle) GetDescription() string {
-    if !x.IsSetDescription() {
-        return ""
-    }
-    return *x.Description
-}
-
-func (x *Vehicle) GetName() string {
-    if !x.IsSetName() {
-        return ""
-    }
-    return *x.Name
-}
-
-func (x *Vehicle) GetHasAC() bool {
-    if !x.IsSetHasAC() {
-        return false
-    }
-    return *x.HasAC
-}
-
 func (x *Vehicle) SetColorNonCompat(value *Color) *Vehicle {
     x.Color = value
     return x
@@ -407,64 +387,8 @@ func (x *Vehicle) SetColor(value *Color) *Vehicle {
     return x
 }
 
-func (x *Vehicle) SetLicensePlateNonCompat(value string) *Vehicle {
-    x.LicensePlate = &value
-    return x
-}
-
-func (x *Vehicle) SetLicensePlate(value *string) *Vehicle {
-    x.LicensePlate = value
-    return x
-}
-
-func (x *Vehicle) SetDescriptionNonCompat(value string) *Vehicle {
-    x.Description = &value
-    return x
-}
-
-func (x *Vehicle) SetDescription(value *string) *Vehicle {
-    x.Description = value
-    return x
-}
-
-func (x *Vehicle) SetNameNonCompat(value string) *Vehicle {
-    x.Name = &value
-    return x
-}
-
-func (x *Vehicle) SetName(value *string) *Vehicle {
-    x.Name = value
-    return x
-}
-
-func (x *Vehicle) SetHasACNonCompat(value bool) *Vehicle {
-    x.HasAC = &value
-    return x
-}
-
-func (x *Vehicle) SetHasAC(value *bool) *Vehicle {
-    x.HasAC = value
-    return x
-}
-
 func (x *Vehicle) IsSetColor() bool {
     return x != nil && x.Color != nil
-}
-
-func (x *Vehicle) IsSetLicensePlate() bool {
-    return x != nil && x.LicensePlate != nil
-}
-
-func (x *Vehicle) IsSetDescription() bool {
-    return x != nil && x.Description != nil
-}
-
-func (x *Vehicle) IsSetName() bool {
-    return x != nil && x.Name != nil
-}
-
-func (x *Vehicle) IsSetHasAC() bool {
-    return x != nil && x.HasAC != nil
 }
 
 func (x *Vehicle) writeField1(p thrift.Encoder) error {  // Color
@@ -487,6 +411,39 @@ func (x *Vehicle) writeField1(p thrift.Encoder) error {  // Color
     return nil
 }
 
+func (x *Vehicle) readField1(p thrift.Decoder) error {  // Color
+    result := NewColor()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Color = result
+    return nil
+}
+
+
+func (x *Vehicle) GetLicensePlate() string {
+    if !x.IsSetLicensePlate() {
+        return ""
+    }
+    return *x.LicensePlate
+}
+
+func (x *Vehicle) SetLicensePlateNonCompat(value string) *Vehicle {
+    x.LicensePlate = &value
+    return x
+}
+
+func (x *Vehicle) SetLicensePlate(value *string) *Vehicle {
+    x.LicensePlate = value
+    return x
+}
+
+func (x *Vehicle) IsSetLicensePlate() bool {
+    return x != nil && x.LicensePlate != nil
+}
+
 func (x *Vehicle) writeField2(p thrift.Encoder) error {  // LicensePlate
     if !x.IsSetLicensePlate() {
         return nil
@@ -505,6 +462,38 @@ func (x *Vehicle) writeField2(p thrift.Encoder) error {  // LicensePlate
         return thrift.PrependError("Vehicle write field end error: ", err)
     }
     return nil
+}
+
+func (x *Vehicle) readField2(p thrift.Decoder) error {  // LicensePlate
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.LicensePlate = &result
+    return nil
+}
+
+
+func (x *Vehicle) GetDescription() string {
+    if !x.IsSetDescription() {
+        return ""
+    }
+    return *x.Description
+}
+
+func (x *Vehicle) SetDescriptionNonCompat(value string) *Vehicle {
+    x.Description = &value
+    return x
+}
+
+func (x *Vehicle) SetDescription(value *string) *Vehicle {
+    x.Description = value
+    return x
+}
+
+func (x *Vehicle) IsSetDescription() bool {
+    return x != nil && x.Description != nil
 }
 
 func (x *Vehicle) writeField3(p thrift.Encoder) error {  // Description
@@ -527,6 +516,38 @@ func (x *Vehicle) writeField3(p thrift.Encoder) error {  // Description
     return nil
 }
 
+func (x *Vehicle) readField3(p thrift.Decoder) error {  // Description
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Description = &result
+    return nil
+}
+
+
+func (x *Vehicle) GetName() string {
+    if !x.IsSetName() {
+        return ""
+    }
+    return *x.Name
+}
+
+func (x *Vehicle) SetNameNonCompat(value string) *Vehicle {
+    x.Name = &value
+    return x
+}
+
+func (x *Vehicle) SetName(value *string) *Vehicle {
+    x.Name = value
+    return x
+}
+
+func (x *Vehicle) IsSetName() bool {
+    return x != nil && x.Name != nil
+}
+
 func (x *Vehicle) writeField4(p thrift.Encoder) error {  // Name
     if !x.IsSetName() {
         return nil
@@ -545,6 +566,38 @@ func (x *Vehicle) writeField4(p thrift.Encoder) error {  // Name
         return thrift.PrependError("Vehicle write field end error: ", err)
     }
     return nil
+}
+
+func (x *Vehicle) readField4(p thrift.Decoder) error {  // Name
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Name = &result
+    return nil
+}
+
+
+func (x *Vehicle) GetHasAC() bool {
+    if !x.IsSetHasAC() {
+        return false
+    }
+    return *x.HasAC
+}
+
+func (x *Vehicle) SetHasACNonCompat(value bool) *Vehicle {
+    x.HasAC = &value
+    return x
+}
+
+func (x *Vehicle) SetHasAC(value *bool) *Vehicle {
+    x.HasAC = value
+    return x
+}
+
+func (x *Vehicle) IsSetHasAC() bool {
+    return x != nil && x.HasAC != nil
 }
 
 func (x *Vehicle) writeField5(p thrift.Encoder) error {  // HasAC
@@ -567,47 +620,6 @@ func (x *Vehicle) writeField5(p thrift.Encoder) error {  // HasAC
     return nil
 }
 
-func (x *Vehicle) readField1(p thrift.Decoder) error {  // Color
-    result := NewColor()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.Color = result
-    return nil
-}
-
-func (x *Vehicle) readField2(p thrift.Decoder) error {  // LicensePlate
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.LicensePlate = &result
-    return nil
-}
-
-func (x *Vehicle) readField3(p thrift.Decoder) error {  // Description
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Description = &result
-    return nil
-}
-
-func (x *Vehicle) readField4(p thrift.Decoder) error {  // Name
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Name = &result
-    return nil
-}
-
 func (x *Vehicle) readField5(p thrift.Decoder) error {  // HasAC
     result, err := p.ReadBool()
     if err != nil {
@@ -617,10 +629,6 @@ func (x *Vehicle) readField5(p thrift.Decoder) error {  // HasAC
     x.HasAC = &result
     return nil
 }
-
-
-
-
 
 
 
@@ -741,66 +749,6 @@ func (x *Person) GetId() PersonID {
     return x.Id
 }
 
-func (x *Person) GetName() string {
-    return x.Name
-}
-
-func (x *Person) GetAge() int16 {
-    if !x.IsSetAge() {
-        return 0
-    }
-    return *x.Age
-}
-
-func (x *Person) GetAddress() string {
-    if !x.IsSetAddress() {
-        return ""
-    }
-    return *x.Address
-}
-
-func (x *Person) GetFavoriteColor() *Color {
-    if !x.IsSetFavoriteColor() {
-        return nil
-    }
-    return x.FavoriteColor
-}
-
-func (x *Person) GetFriends() []PersonID {
-    if !x.IsSetFriends() {
-        return make([]PersonID, 0)
-    }
-    return x.Friends
-}
-
-func (x *Person) GetBestFriend() PersonID {
-    if !x.IsSetBestFriend() {
-        return NewPersonID()
-    }
-    return *x.BestFriend
-}
-
-func (x *Person) GetPetNames() map[Animal]string {
-    if !x.IsSetPetNames() {
-        return make(map[Animal]string)
-    }
-    return x.PetNames
-}
-
-func (x *Person) GetAfraidOfAnimal() Animal {
-    if !x.IsSetAfraidOfAnimal() {
-        return 0
-    }
-    return *x.AfraidOfAnimal
-}
-
-func (x *Person) GetVehicles() []*Vehicle {
-    if !x.IsSetVehicles() {
-        return make([]*Vehicle, 0)
-    }
-    return x.Vehicles
-}
-
 func (x *Person) SetIdNonCompat(value PersonID) *Person {
     x.Id = value
     return x
@@ -811,127 +759,6 @@ func (x *Person) SetId(value PersonID) *Person {
     return x
 }
 
-func (x *Person) SetNameNonCompat(value string) *Person {
-    x.Name = value
-    return x
-}
-
-func (x *Person) SetName(value string) *Person {
-    x.Name = value
-    return x
-}
-
-func (x *Person) SetAgeNonCompat(value int16) *Person {
-    x.Age = &value
-    return x
-}
-
-func (x *Person) SetAge(value *int16) *Person {
-    x.Age = value
-    return x
-}
-
-func (x *Person) SetAddressNonCompat(value string) *Person {
-    x.Address = &value
-    return x
-}
-
-func (x *Person) SetAddress(value *string) *Person {
-    x.Address = value
-    return x
-}
-
-func (x *Person) SetFavoriteColorNonCompat(value *Color) *Person {
-    x.FavoriteColor = value
-    return x
-}
-
-func (x *Person) SetFavoriteColor(value *Color) *Person {
-    x.FavoriteColor = value
-    return x
-}
-
-func (x *Person) SetFriendsNonCompat(value []PersonID) *Person {
-    x.Friends = value
-    return x
-}
-
-func (x *Person) SetFriends(value []PersonID) *Person {
-    x.Friends = value
-    return x
-}
-
-func (x *Person) SetBestFriendNonCompat(value PersonID) *Person {
-    x.BestFriend = &value
-    return x
-}
-
-func (x *Person) SetBestFriend(value *PersonID) *Person {
-    x.BestFriend = value
-    return x
-}
-
-func (x *Person) SetPetNamesNonCompat(value map[Animal]string) *Person {
-    x.PetNames = value
-    return x
-}
-
-func (x *Person) SetPetNames(value map[Animal]string) *Person {
-    x.PetNames = value
-    return x
-}
-
-func (x *Person) SetAfraidOfAnimalNonCompat(value Animal) *Person {
-    x.AfraidOfAnimal = &value
-    return x
-}
-
-func (x *Person) SetAfraidOfAnimal(value *Animal) *Person {
-    x.AfraidOfAnimal = value
-    return x
-}
-
-func (x *Person) SetVehiclesNonCompat(value []*Vehicle) *Person {
-    x.Vehicles = value
-    return x
-}
-
-func (x *Person) SetVehicles(value []*Vehicle) *Person {
-    x.Vehicles = value
-    return x
-}
-
-func (x *Person) IsSetAge() bool {
-    return x != nil && x.Age != nil
-}
-
-func (x *Person) IsSetAddress() bool {
-    return x != nil && x.Address != nil
-}
-
-func (x *Person) IsSetFavoriteColor() bool {
-    return x != nil && x.FavoriteColor != nil
-}
-
-func (x *Person) IsSetFriends() bool {
-    return x != nil && x.Friends != nil
-}
-
-func (x *Person) IsSetBestFriend() bool {
-    return x != nil && x.BestFriend != nil
-}
-
-func (x *Person) IsSetPetNames() bool {
-    return x != nil && x.PetNames != nil
-}
-
-func (x *Person) IsSetAfraidOfAnimal() bool {
-    return x != nil && x.AfraidOfAnimal != nil
-}
-
-func (x *Person) IsSetVehicles() bool {
-    return x != nil && x.Vehicles != nil
-}
 
 func (x *Person) writeField1(p thrift.Encoder) error {  // Id
     if err := p.WriteFieldBegin("id", thrift.I64, 1); err != nil {
@@ -950,6 +777,32 @@ func (x *Person) writeField1(p thrift.Encoder) error {  // Id
     return nil
 }
 
+func (x *Person) readField1(p thrift.Decoder) error {  // Id
+    result, err := ReadPersonID(p)
+    if err != nil {
+        return err
+    }
+
+    x.Id = result
+    return nil
+}
+
+
+func (x *Person) GetName() string {
+    return x.Name
+}
+
+func (x *Person) SetNameNonCompat(value string) *Person {
+    x.Name = value
+    return x
+}
+
+func (x *Person) SetName(value string) *Person {
+    x.Name = value
+    return x
+}
+
+
 func (x *Person) writeField2(p thrift.Encoder) error {  // Name
     if err := p.WriteFieldBegin("name", thrift.STRING, 2); err != nil {
         return thrift.PrependError("Person write field begin error: ", err)
@@ -964,6 +817,38 @@ func (x *Person) writeField2(p thrift.Encoder) error {  // Name
         return thrift.PrependError("Person write field end error: ", err)
     }
     return nil
+}
+
+func (x *Person) readField2(p thrift.Decoder) error {  // Name
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Name = result
+    return nil
+}
+
+
+func (x *Person) GetAge() int16 {
+    if !x.IsSetAge() {
+        return 0
+    }
+    return *x.Age
+}
+
+func (x *Person) SetAgeNonCompat(value int16) *Person {
+    x.Age = &value
+    return x
+}
+
+func (x *Person) SetAge(value *int16) *Person {
+    x.Age = value
+    return x
+}
+
+func (x *Person) IsSetAge() bool {
+    return x != nil && x.Age != nil
 }
 
 func (x *Person) writeField3(p thrift.Encoder) error {  // Age
@@ -986,6 +871,38 @@ func (x *Person) writeField3(p thrift.Encoder) error {  // Age
     return nil
 }
 
+func (x *Person) readField3(p thrift.Decoder) error {  // Age
+    result, err := p.ReadI16()
+    if err != nil {
+        return err
+    }
+
+    x.Age = &result
+    return nil
+}
+
+
+func (x *Person) GetAddress() string {
+    if !x.IsSetAddress() {
+        return ""
+    }
+    return *x.Address
+}
+
+func (x *Person) SetAddressNonCompat(value string) *Person {
+    x.Address = &value
+    return x
+}
+
+func (x *Person) SetAddress(value *string) *Person {
+    x.Address = value
+    return x
+}
+
+func (x *Person) IsSetAddress() bool {
+    return x != nil && x.Address != nil
+}
+
 func (x *Person) writeField4(p thrift.Encoder) error {  // Address
     if !x.IsSetAddress() {
         return nil
@@ -1006,6 +923,38 @@ func (x *Person) writeField4(p thrift.Encoder) error {  // Address
     return nil
 }
 
+func (x *Person) readField4(p thrift.Decoder) error {  // Address
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Address = &result
+    return nil
+}
+
+
+func (x *Person) GetFavoriteColor() *Color {
+    if !x.IsSetFavoriteColor() {
+        return nil
+    }
+    return x.FavoriteColor
+}
+
+func (x *Person) SetFavoriteColorNonCompat(value *Color) *Person {
+    x.FavoriteColor = value
+    return x
+}
+
+func (x *Person) SetFavoriteColor(value *Color) *Person {
+    x.FavoriteColor = value
+    return x
+}
+
+func (x *Person) IsSetFavoriteColor() bool {
+    return x != nil && x.FavoriteColor != nil
+}
+
 func (x *Person) writeField5(p thrift.Encoder) error {  // FavoriteColor
     if !x.IsSetFavoriteColor() {
         return nil
@@ -1024,6 +973,39 @@ func (x *Person) writeField5(p thrift.Encoder) error {  // FavoriteColor
         return thrift.PrependError("Person write field end error: ", err)
     }
     return nil
+}
+
+func (x *Person) readField5(p thrift.Decoder) error {  // FavoriteColor
+    result := NewColor()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.FavoriteColor = result
+    return nil
+}
+
+
+func (x *Person) GetFriends() []PersonID {
+    if !x.IsSetFriends() {
+        return make([]PersonID, 0)
+    }
+    return x.Friends
+}
+
+func (x *Person) SetFriendsNonCompat(value []PersonID) *Person {
+    x.Friends = value
+    return x
+}
+
+func (x *Person) SetFriends(value []PersonID) *Person {
+    x.Friends = value
+    return x
+}
+
+func (x *Person) IsSetFriends() bool {
+    return x != nil && x.Friends != nil
 }
 
 func (x *Person) writeField6(p thrift.Encoder) error {  // Friends
@@ -1058,6 +1040,56 @@ func (x *Person) writeField6(p thrift.Encoder) error {  // Friends
     return nil
 }
 
+func (x *Person) readField6(p thrift.Decoder) error {  // Friends
+    _ /* elemType */, size, err := p.ReadSetBegin()
+    if err != nil {
+        return thrift.PrependError("error reading set begin: ", err)
+    }
+    
+    setResult := make([]PersonID, 0, size)
+    for i := 0; i < size; i++ {
+        var elem PersonID
+        {
+            result, err := ReadPersonID(p)
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        setResult = append(setResult, elem)
+    }
+    
+    if err := p.ReadSetEnd(); err != nil {
+        return thrift.PrependError("error reading set end: ", err)
+    }
+    result := setResult
+
+    x.Friends = result
+    return nil
+}
+
+
+func (x *Person) GetBestFriend() PersonID {
+    if !x.IsSetBestFriend() {
+        return NewPersonID()
+    }
+    return *x.BestFriend
+}
+
+func (x *Person) SetBestFriendNonCompat(value PersonID) *Person {
+    x.BestFriend = &value
+    return x
+}
+
+func (x *Person) SetBestFriend(value *PersonID) *Person {
+    x.BestFriend = value
+    return x
+}
+
+func (x *Person) IsSetBestFriend() bool {
+    return x != nil && x.BestFriend != nil
+}
+
 func (x *Person) writeField7(p thrift.Encoder) error {  // BestFriend
     if !x.IsSetBestFriend() {
         return nil
@@ -1077,6 +1109,38 @@ func (x *Person) writeField7(p thrift.Encoder) error {  // BestFriend
         return thrift.PrependError("Person write field end error: ", err)
     }
     return nil
+}
+
+func (x *Person) readField7(p thrift.Decoder) error {  // BestFriend
+    result, err := ReadPersonID(p)
+    if err != nil {
+        return err
+    }
+
+    x.BestFriend = &result
+    return nil
+}
+
+
+func (x *Person) GetPetNames() map[Animal]string {
+    if !x.IsSetPetNames() {
+        return make(map[Animal]string)
+    }
+    return x.PetNames
+}
+
+func (x *Person) SetPetNamesNonCompat(value map[Animal]string) *Person {
+    x.PetNames = value
+    return x
+}
+
+func (x *Person) SetPetNames(value map[Animal]string) *Person {
+    x.PetNames = value
+    return x
+}
+
+func (x *Person) IsSetPetNames() bool {
+    return x != nil && x.PetNames != nil
 }
 
 func (x *Person) writeField8(p thrift.Encoder) error {  // PetNames
@@ -1114,146 +1178,6 @@ func (x *Person) writeField8(p thrift.Encoder) error {  // PetNames
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError("Person write field end error: ", err)
     }
-    return nil
-}
-
-func (x *Person) writeField9(p thrift.Encoder) error {  // AfraidOfAnimal
-    if !x.IsSetAfraidOfAnimal() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("afraidOfAnimal", thrift.I32, 9); err != nil {
-        return thrift.PrependError("Person write field begin error: ", err)
-    }
-
-    item := *x.AfraidOfAnimal
-    if err := p.WriteI32(int32(item)); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Person write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Person) writeField10(p thrift.Encoder) error {  // Vehicles
-    if !x.IsSetVehicles() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("vehicles", thrift.LIST, 10); err != nil {
-        return thrift.PrependError("Person write field begin error: ", err)
-    }
-
-    item := x.Vehicles
-    if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
-        return thrift.PrependError("error writing list begin: ", err)
-    }
-    for _, v := range item {
-        {
-            item := v
-            if err := item.Write(p); err != nil {
-                return err
-            }
-        }
-    }
-    if err := p.WriteListEnd(); err != nil {
-        return thrift.PrependError("error writing list end: ", err)
-    }
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError("Person write field end error: ", err)
-    }
-    return nil
-}
-
-func (x *Person) readField1(p thrift.Decoder) error {  // Id
-    result, err := ReadPersonID(p)
-    if err != nil {
-        return err
-    }
-
-    x.Id = result
-    return nil
-}
-
-func (x *Person) readField2(p thrift.Decoder) error {  // Name
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Name = result
-    return nil
-}
-
-func (x *Person) readField3(p thrift.Decoder) error {  // Age
-    result, err := p.ReadI16()
-    if err != nil {
-        return err
-    }
-
-    x.Age = &result
-    return nil
-}
-
-func (x *Person) readField4(p thrift.Decoder) error {  // Address
-    result, err := p.ReadString()
-    if err != nil {
-        return err
-    }
-
-    x.Address = &result
-    return nil
-}
-
-func (x *Person) readField5(p thrift.Decoder) error {  // FavoriteColor
-    result := NewColor()
-    err := result.Read(p)
-    if err != nil {
-        return err
-    }
-
-    x.FavoriteColor = result
-    return nil
-}
-
-func (x *Person) readField6(p thrift.Decoder) error {  // Friends
-    _ /* elemType */, size, err := p.ReadSetBegin()
-    if err != nil {
-        return thrift.PrependError("error reading set begin: ", err)
-    }
-    
-    setResult := make([]PersonID, 0, size)
-    for i := 0; i < size; i++ {
-        var elem PersonID
-        {
-            result, err := ReadPersonID(p)
-            if err != nil {
-                return err
-            }
-            elem = result
-        }
-        setResult = append(setResult, elem)
-    }
-    
-    if err := p.ReadSetEnd(); err != nil {
-        return thrift.PrependError("error reading set end: ", err)
-    }
-    result := setResult
-
-    x.Friends = result
-    return nil
-}
-
-func (x *Person) readField7(p thrift.Decoder) error {  // BestFriend
-    result, err := ReadPersonID(p)
-    if err != nil {
-        return err
-    }
-
-    x.BestFriend = &result
     return nil
 }
 
@@ -1296,6 +1220,48 @@ func (x *Person) readField8(p thrift.Decoder) error {  // PetNames
     return nil
 }
 
+
+func (x *Person) GetAfraidOfAnimal() Animal {
+    if !x.IsSetAfraidOfAnimal() {
+        return 0
+    }
+    return *x.AfraidOfAnimal
+}
+
+func (x *Person) SetAfraidOfAnimalNonCompat(value Animal) *Person {
+    x.AfraidOfAnimal = &value
+    return x
+}
+
+func (x *Person) SetAfraidOfAnimal(value *Animal) *Person {
+    x.AfraidOfAnimal = value
+    return x
+}
+
+func (x *Person) IsSetAfraidOfAnimal() bool {
+    return x != nil && x.AfraidOfAnimal != nil
+}
+
+func (x *Person) writeField9(p thrift.Encoder) error {  // AfraidOfAnimal
+    if !x.IsSetAfraidOfAnimal() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("afraidOfAnimal", thrift.I32, 9); err != nil {
+        return thrift.PrependError("Person write field begin error: ", err)
+    }
+
+    item := *x.AfraidOfAnimal
+    if err := p.WriteI32(int32(item)); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Person write field end error: ", err)
+    }
+    return nil
+}
+
 func (x *Person) readField9(p thrift.Decoder) error {  // AfraidOfAnimal
     enumResult, err := p.ReadI32()
     if err != nil {
@@ -1304,6 +1270,59 @@ func (x *Person) readField9(p thrift.Decoder) error {  // AfraidOfAnimal
     result := Animal(enumResult)
 
     x.AfraidOfAnimal = &result
+    return nil
+}
+
+
+func (x *Person) GetVehicles() []*Vehicle {
+    if !x.IsSetVehicles() {
+        return make([]*Vehicle, 0)
+    }
+    return x.Vehicles
+}
+
+func (x *Person) SetVehiclesNonCompat(value []*Vehicle) *Person {
+    x.Vehicles = value
+    return x
+}
+
+func (x *Person) SetVehicles(value []*Vehicle) *Person {
+    x.Vehicles = value
+    return x
+}
+
+func (x *Person) IsSetVehicles() bool {
+    return x != nil && x.Vehicles != nil
+}
+
+func (x *Person) writeField10(p thrift.Encoder) error {  // Vehicles
+    if !x.IsSetVehicles() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("vehicles", thrift.LIST, 10); err != nil {
+        return thrift.PrependError("Person write field begin error: ", err)
+    }
+
+    item := x.Vehicles
+    if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := item.Write(p); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("Person write field end error: ", err)
+    }
     return nil
 }
 
@@ -1335,10 +1354,6 @@ func (x *Person) readField10(p thrift.Decoder) error {  // Vehicles
     x.Vehicles = result
     return nil
 }
-
-
-
-
 
 
 

@@ -157,6 +157,7 @@ func (x *reqNestedContainersMapList) readField1(p thrift.Decoder) error {  // Fo
 
 
 
+
 func (x *reqNestedContainersMapList) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersMapList"); err != nil {
         return thrift.PrependError("reqNestedContainersMapList write struct begin error: ", err)
@@ -439,6 +440,7 @@ func (x *reqNestedContainersMapSet) readField1(p thrift.Decoder) error {  // Foo
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -729,6 +731,7 @@ func (x *reqNestedContainersListMap) readField1(p thrift.Decoder) error {  // Fo
 
 
 
+
 func (x *reqNestedContainersListMap) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqNestedContainersListMap"); err != nil {
         return thrift.PrependError("reqNestedContainersListMap write struct begin error: ", err)
@@ -994,6 +997,7 @@ func (x *reqNestedContainersListSet) readField1(p thrift.Decoder) error {  // Fo
     x.Foo = result
     return nil
 }
+
 
 
 
@@ -1384,6 +1388,7 @@ func (x *reqNestedContainersTurtles) readField1(p thrift.Decoder) error {  // Fo
     x.Foo = result
     return nil
 }
+
 
 
 

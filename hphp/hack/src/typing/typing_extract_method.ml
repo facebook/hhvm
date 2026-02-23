@@ -28,7 +28,25 @@ module Variance_analysis : sig
     SSet.t ->
     env:Typing_env_types.env ->
     Ast_defs.variance option SMap.t
+
+  val show_variances : Ast_defs.variance option SMap.t -> string
+    [@@warning "-32"]
 end = struct
+  let show_variances variances =
+    let str =
+      String.concat
+        ~sep:"\n"
+        (List.map (SMap.elements variances) ~f:(fun (name, variance_opt) ->
+             let var_str =
+               Option.value_map
+                 variance_opt
+                 ~default:"bivariant"
+                 ~f:Ast_defs.show_variance
+             in
+             Printf.sprintf "%s: %s" name var_str))
+    in
+    Format.sprintf "variances:\n%s\n" str
+
   let mul v1 v2 =
     let open Ast_defs in
     match (v1, v2) with
@@ -143,7 +161,7 @@ end = struct
     | Tshape shape_ty ->
       find_shape_ty shape_ty ~var ~update ~is_invariant ~acc ~env
     | Tapply ((_, class_name), tys) -> begin
-      let tparams =
+      let variances =
         match Typing_env.get_class_or_typedef_tparams env class_name with
         | [] ->
           (* In the case the class / type def doesn't exist or isn't available
@@ -152,7 +170,7 @@ end = struct
           List.map tys ~f:(fun _ -> Ast_defs.Invariant)
         | tparams -> List.map tparams ~f:(fun { tp_variance; _ } -> tp_variance)
       in
-      find_with_tparams tys tparams ~var ~update ~is_invariant ~acc ~env
+      find_with_variances tys variances ~var ~update ~is_invariant ~acc ~env
     end
 
   and find_cr_consts cr_consts ~update ~is_invariant ~acc ~env =
@@ -204,16 +222,16 @@ end = struct
       else
         find_list tys ~var ~update ~is_invariant ~acc ~env
 
-  and find_with_tparams tys tparams ~var ~update ~is_invariant ~acc ~env =
-    match (tys, tparams) with
-    | (ty :: tys, tp_variance :: tparams) ->
+  and find_with_variances tys variances ~var ~update ~is_invariant ~acc ~env =
+    match (tys, variances) with
+    | (ty :: tys, tp_variance :: variances) ->
       let acc =
         find ty ~var:(mul var tp_variance) ~is_invariant ~update ~acc ~env
       in
       if is_invariant acc then
         acc
       else
-        find_with_tparams tys tparams ~var ~update ~is_invariant ~acc ~env
+        find_with_variances tys variances ~var ~update ~is_invariant ~acc ~env
     | ([], _)
     | (_, []) ->
       (* Assumes well-formedness *)
@@ -261,7 +279,7 @@ end = struct
       find_list tys ~var ~update ~is_invariant ~acc ~env
 
   and find_fun_ty
-      Typing_defs_core.{ ft_params; ft_ret; _ }
+      Typing_defs_core.{ ft_params; ft_ret; ft_tparams; _ }
       ~var
       ~update
       ~is_invariant
@@ -275,7 +293,27 @@ end = struct
       let tys =
         List.map ft_params ~f:(fun Typing_defs_core.{ fp_type; _ } -> fp_type)
       in
-      find_list tys ~var ~update ~is_invariant ~acc ~env
+      let acc = find_list tys ~var ~update ~is_invariant ~acc ~env in
+      if is_invariant acc then
+        acc
+      else
+        (* Type parameters may appearing in upper, lower, or equality bounds
+           of other type parameters so we need to consider the polarity of these
+           occurences too *)
+        let (tys, variances) =
+          List.unzip
+            (List.concat_map ft_tparams ~f:(fun { tp_constraints; _ } ->
+                 List.map tp_constraints ~f:(fun (cstr_kind, ty) ->
+                     let variance =
+                       match cstr_kind with
+                       | Ast_defs.Constraint_as -> Ast_defs.Contravariant
+                       | Ast_defs.Constraint_super -> Ast_defs.Covariant
+                       | Ast_defs.Constraint_eq -> Ast_defs.Invariant
+                     in
+                     (ty, variance))))
+        in
+        let var = Ast_defs.Covariant in
+        find_with_variances tys variances ~var ~update ~is_invariant ~acc ~env
 
   let find_this_in_refinement ty =
     let open Typing_defs_core in
@@ -1895,7 +1933,10 @@ let apply_subst_generic fun_ty subst =
     match get_node ty with
     | Tgeneric nm ->
       (match SMap.find_opt nm subst with
-      | Some ty -> (ctx, `Stop ty)
+      | Some ty ->
+        (* Since other type parameters can appear inside bounds of type parameters
+           we restart the transform after making a substitution *)
+        (ctx, `Restart ty)
       | None -> (ctx, `Stop ty))
     | _ -> (ctx, `Continue ty)
   and on_rc_bound rc_bound ~ctx = (ctx, `Continue rc_bound) in

@@ -1,0 +1,140 @@
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 108, characters 44-55:
+Invalid argument (Typing[4323])
+  File "tparam_in_tparam_bound_variance_bad.php", line 30, characters 5-8:
+  `TKey` is a constrained type parameter
+  File "tparam_in_tparam_bound_variance_bad.php", line 30, characters 13-20:
+  This type constraint is violated
+  File "tparam_in_tparam_bound_variance_bad.php", line 30, characters 13-20:
+  Expected `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
+  But got `mixed`
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 109, characters 49-60:
+Invalid argument (Typing[4110])
+  File "tparam_in_tparam_bound_variance_bad.php", line 34, characters 10-17:
+  Expected `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
+  But got `mixed`
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 112, characters 40-51:
+Invalid argument (Typing[4323])
+  File "tparam_in_tparam_bound_variance_bad.php", line 40, characters 5-8:
+  `TKey` is a constrained type parameter
+  File "tparam_in_tparam_bound_variance_bad.php", line 40, characters 13-20:
+  This type constraint is violated
+  File "tparam_in_tparam_bound_variance_bad.php", line 40, characters 13-20:
+  Expected `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
+  But got `mixed`
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 113, characters 45-56:
+Invalid argument (Typing[4323])
+  File "tparam_in_tparam_bound_variance_bad.php", line 45, characters 52-52:
+  `T` is a constrained type parameter
+  File "tparam_in_tparam_bound_variance_bad.php", line 45, characters 57-70:
+  This type constraint is violated
+  File "tparam_in_tparam_bound_variance_bad.php", line 45, characters 62-69:
+  Expected `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
+  But got `mixed`
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 116, characters 48-61:
+Invalid argument (Typing[4323])
+  File "tparam_in_tparam_bound_variance_bad.php", line 54, characters 5-8:
+  `TKey` is a constrained type parameter
+  File "tparam_in_tparam_bound_variance_bad.php", line 54, characters 16-23:
+  This type constraint is violated
+  File "tparam_in_tparam_bound_variance_bad.php", line 12, characters 35-37:
+  Expected `int`
+  File "tparam_in_tparam_bound_variance_bad.php", line 54, characters 16-23:
+  But got `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 54, characters 16-23:
+  This type argument to `Contrav3` only allows supertypes (it is contravariant)
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 117, characters 53-66:
+Invalid argument (Typing[4110])
+  File "tparam_in_tparam_bound_variance_bad.php", line 12, characters 35-37:
+  Expected `int`
+  File "tparam_in_tparam_bound_variance_bad.php", line 58, characters 14-21:
+  But got `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 58, characters 14-21:
+  This type argument to `Contrav3` only allows supertypes (it is contravariant)
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 120, characters 44-53:
+Invalid argument (Typing[4323])
+  File "tparam_in_tparam_bound_variance_bad.php", line 64, characters 5-8:
+  `TKey` is a constrained type parameter
+  File "tparam_in_tparam_bound_variance_bad.php", line 64, characters 16-23:
+  This type constraint is violated
+  File "tparam_in_tparam_bound_variance_bad.php", line 15, characters 27-29:
+  Expected `int`
+  File "tparam_in_tparam_bound_variance_bad.php", line 64, characters 16-23:
+  But got `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 64, characters 16-23:
+  This type argument to `Inv3` must match exactly (it is invariant)
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 121, characters 49-58:
+Invalid argument (Typing[4323])
+  File "tparam_in_tparam_bound_variance_bad.php", line 67, characters 56-59:
+  `TKey` is a constrained type parameter
+  File "tparam_in_tparam_bound_variance_bad.php", line 67, characters 67-74:
+  This type constraint is violated
+  File "tparam_in_tparam_bound_variance_bad.php", line 15, characters 27-29:
+  Expected `int`
+  File "tparam_in_tparam_bound_variance_bad.php", line 67, characters 67-74:
+  But got `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 67, characters 67-74:
+  This type argument to `Inv3` must match exactly (it is invariant)
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 124, characters 44-55:
+Invalid argument (Typing[4323])
+  File "tparam_in_tparam_bound_variance_bad.php", line 74, characters 5-8:
+  `TKey` is a constrained type parameter
+  File "tparam_in_tparam_bound_variance_bad.php", line 74, characters 13-20:
+  This type constraint is violated
+  File "tparam_in_tparam_bound_variance_bad.php", line 74, characters 13-20:
+  Expected `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
+  But got `mixed`
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 125, characters 49-60:
+Invalid argument (Typing[4323])
+  File "tparam_in_tparam_bound_variance_bad.php", line 79, characters 56-59:
+  `TKey` is a constrained type parameter
+  File "tparam_in_tparam_bound_variance_bad.php", line 79, characters 64-71:
+  This type constraint is violated
+  File "tparam_in_tparam_bound_variance_bad.php", line 79, characters 64-71:
+  Expected `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
+  But got `mixed`
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 129, characters 38-55:
+Invalid argument (Typing[4323])
+  File "tparam_in_tparam_bound_variance_bad.php", line 88, characters 5-8:
+  `TKey` is a constrained type parameter
+  File "tparam_in_tparam_bound_variance_bad.php", line 88, characters 16-23:
+  This type constraint is violated
+  File "tparam_in_tparam_bound_variance_bad.php", line 18, characters 44-46:
+  Expected `int`
+  File "tparam_in_tparam_bound_variance_bad.php", line 88, characters 16-23:
+  But got `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 88, characters 16-23:
+  This type argument to `Contrav3` only allows supertypes (it is contravariant)
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 130, characters 43-60:
+Invalid argument (Typing[4110])
+  File "tparam_in_tparam_bound_variance_bad.php", line 18, characters 44-46:
+  Expected `int`
+  File "tparam_in_tparam_bound_variance_bad.php", line 92, characters 19-26:
+  But got `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 92, characters 19-26:
+  This type argument to `Contrav3` only allows supertypes (it is contravariant)
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 134, characters 42-65:
+Invalid argument (Typing[4323])
+  File "tparam_in_tparam_bound_variance_bad.php", line 98, characters 5-8:
+  `TKey` is a constrained type parameter
+  File "tparam_in_tparam_bound_variance_bad.php", line 98, characters 13-20:
+  This type constraint is violated
+  File "tparam_in_tparam_bound_variance_bad.php", line 98, characters 13-20:
+  Expected `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 21, characters 54-58:
+  But got `mixed`
+  File "tparam_in_tparam_bound_variance_bad.php", line 21, characters 54-58:
+  This type argument to `Contrav3` only allows supertypes (it is contravariant)
+ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 135, characters 47-70:
+Invalid argument (Typing[4110])
+  File "tparam_in_tparam_bound_variance_bad.php", line 102, characters 23-30:
+  Expected `arraykey`
+  File "tparam_in_tparam_bound_variance_bad.php", line 21, characters 54-58:
+  But got `mixed`
+  File "tparam_in_tparam_bound_variance_bad.php", line 21, characters 54-58:
+  This type argument to `Contrav3` only allows supertypes (it is contravariant)

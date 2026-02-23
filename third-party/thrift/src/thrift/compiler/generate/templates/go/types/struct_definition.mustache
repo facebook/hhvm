@@ -14,14 +14,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
+}}{{#import "types/field" as m_field}}{{!
 
   This template creates the type defintion for a thrift struct.
 
 }}
 type {{struct:go_name}} struct {
 {{#struct:fields_sorted}}
-    {{> types/field}}
+    {{#partial m_field.definition field=field:self}}
 
 {{/struct:fields_sorted}}
 }

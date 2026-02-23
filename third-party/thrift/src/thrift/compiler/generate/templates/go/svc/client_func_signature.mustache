@@ -22,7 +22,7 @@
 }}{{function:ctx_arg_name}} context.Context{{!
 }}{{#if function:params.fields?}}, {{/if}}{{!
 }}{{#function:args}}{{!
-}}{{field:go_arg_name}} {{#field:type}}{{> types/field_type}}{{/field:type}}{{!
+}}{{field:go_arg_name}} {{#partial m_field.field_type field=field:self}}{{!
 }}{{^last?}}, {{/last?}}{{!
 }}{{/function:args}}{{!
 }}) {{!

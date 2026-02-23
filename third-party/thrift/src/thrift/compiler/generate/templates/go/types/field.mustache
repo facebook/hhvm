@@ -14,23 +14,120 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-
-  This template creates struct field definitions for thrift structs.
-
 }}
-{{#field:deprecated?}}// Deprecated: {{field:deprecation_message}}
-{{/field:deprecated?}}{{field:go_name}} {{> types/field_type}}{{!
-}} `thrift:"{{!
-  }}{{field:name}}{{!
-  }},{{field:id}}{{!
-  }}{{#field:required?}},required{{/field:required?}}{{!
-  }}{{#field:optional?}},optional{{/field:optional?}}{{!
-}}" {{!
-}}{{#field:go_tag?}}{{!
-  }}{{field:go_tag}}{{!
-}}{{/field:go_tag?}}{{!
-}}{{^field:go_tag?}}{{!
-  }}json:"{{field:name}}{{#field:json_omitempty?}},omitempty{{/field:json_omitempty?}}" {{!
-  }}db:"{{field:name}}"{{!
-}}{{/field:go_tag?}}`
+{{#import "codec/codec" as codec}}
+{{#import "common/constants" as constants}}
+{{#import "common/type" as types}}
+
+{{! This module contains partials for struct field definitions and methods. }}
+
+{{! Defines the Go type for a struct field (with optional pointer prefix). }}
+{{#let export partial field_type |field| captures |types|}}
+{{#pragma ignore-newlines}}
+{{#if field.pointer?}}*{{/if}}{{#partial types.go_type type=field.type}}
+{{/let partial}}
+
+{{! Struct field definition. }}
+{{#let export partial definition |field| captures |field_type|}}
+{{#if field.deprecated?}}
+// Deprecated: {{field.deprecation_message}}
+{{/if field.deprecated?}}
+{{#pragma ignore-newlines}}
+{{field.go_name}} {{#partial field_type field=field}} {{!}}
+`thrift:"{{field.name}},{{field.id}}
+{{#if field.required?}},required{{#else if field.optional?}},optional{{/if}}" {{!}}
+{{#if field.go_tag?}}
+{{field.go_tag}}
+{{#else}}
+json:"{{field.name}}{{#if field.json_omitempty?}},omitempty{{/if}}" db:"{{field.name}}"
+{{/if field.go_tag?}}`
+{{/let partial}}
+
+{{! Get*() }}
+{{#let export partial get |struct field| captures |types constants|}}
+{{#let type = field.type}}
+func (x *{{struct.go_name}}) Get{{field.go_name}}() {{#if type.structured?}}*{{/if}}{{#partial types.go_type type=type}} {
+    {{#if field.nilable?}}
+    if !x.IsSet{{field.go_name}}() {
+        {{#if type.structured?}}
+        return nil
+        {{#else}}
+        return {{#if (object.notnull? field.default_value)}}{{#partial constants.const_value value=field.default_value root_const=null}}{{#else}}{{#partial types.natural_default_value type=type}}{{/if}}
+        {{/if type.structured?}}
+    }
+    {{/if field.nilable?}}
+    return {{#if field.non_struct_pointer?}}*{{/if}}x.{{field.go_name}}
+}
+{{/let partial}}
+
+{{! Set*() }}
+{{#let export partial set |struct field| captures |types|}}
+{{#let type = field.type}}
+func (x *{{struct.go_name}}) {{field.go_setter_name}}{{#if root_program.compat_setters?}}NonCompat{{/if}}(value {{#if type.structured?}}*{{/if}}{{#partial types.go_type type=type}}) *{{struct.go_name}} {
+    x.{{field.go_name}} = {{#if field.non_struct_pointer?}}&{{/if}}value
+    return x
+}
+{{#if root_program.compat_setters?}}
+
+func (x *{{struct.go_name}}) {{field.go_setter_name}}(value {{#if field.pointer?}}*{{/if}}{{#partial types.go_type type=type}}) *{{struct.go_name}} {
+    x.{{field.go_name}} = value
+    return x
+}
+{{/if root_program.compat_setters?}}
+{{/let partial}}
+
+{{! IsSet*() }}
+{{#let export partial is_set |struct field|}}
+func (x *{{struct.go_name}}) IsSet{{field.go_name}}() bool {
+    return x != nil && x.{{field.go_name}} != nil
+}
+{{/let partial}}
+
+{{! writeField*() }}
+{{#let export partial write |struct field| captures |types codec|}}
+{{#let type = field.type}}
+func (x *{{struct.go_name}}) writeField{{field.key_str}}(p thrift.Encoder) error {  // {{field.go_name}}
+    {{#if field.must_be_set_to_serialize?}}
+    if !x.IsSet{{field.go_name}}() {
+        return nil
+    }
+
+    {{/if field.must_be_set_to_serialize?}}
+    if err := p.WriteFieldBegin("{{field.name}}", {{#partial codec.ttype type=type}}, {{field.id}}); err != nil {
+        return thrift.PrependError("{{struct.go_name}} write field begin error: ", err)
+    }
+
+    item := {{#if field.non_struct_pointer?}}*{{/if}}x.{{field.go_name}}
+    {{#partial codec.encode type=type}}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("{{struct.go_name}} write field end error: ", err)
+    }
+    return nil
+}
+{{/let partial}}
+
+{{! readField*() }}
+{{#let export partial read |struct field| captures |codec|}}
+{{#let type = field.type}}
+func (x *{{struct.go_name}}) readField{{field.key_str}}(p thrift.Decoder) error {  // {{field.go_name}}
+    {{#partial codec.decode type=type}}
+
+    x.{{field.go_name}} = {{#if field.non_struct_pointer?}}&{{/if}}result
+    return nil
+}
+{{/let partial}}
+
+{{! DefaultGet*() }}
+{{#let export partial default_get |struct field| captures |types|}}
+{{#let type = field.type}}
+{{#if type.structured?}}
+// Deprecated: Use {{struct.go_qualified_new_func}}().Get{{field.go_name}}() instead.
+func (x *{{struct.go_name}}) DefaultGet{{field.go_name}}() *{{#partial types.go_type type=type}} {
+    if !x.IsSet{{field.go_name}}() {
+        return {{#partial types.natural_default_value type=type}}
+    }
+    return x.{{field.go_name}}
+}
+{{/if type.structured?}}
+{{/let partial}}

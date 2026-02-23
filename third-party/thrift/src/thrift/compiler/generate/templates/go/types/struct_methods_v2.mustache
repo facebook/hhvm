@@ -168,6 +168,19 @@ func (x *{{struct.go_name}}) Read(p thrift.Decoder) error {
 }
 {{/let partial}}
 
+{{! CountSetFields() }}
+{{#let export partial count_set_fields |struct|}}
+func (x *{{struct.go_name}}) CountSetFields() int {
+    count := int(0)
+    {{#each struct.fields_sorted as |field|}}
+    if (x.IsSet{{field.go_name}}()) {
+        count++
+    }
+    {{/each}}
+    return count
+}
+{{/let partial}}
+
 {{! setDefaults() }}
 {{#let export partial set_defaults |struct| captures |constants types|}}
 func (x *{{struct.go_name}}) setDefaults() *{{struct.go_name}} {

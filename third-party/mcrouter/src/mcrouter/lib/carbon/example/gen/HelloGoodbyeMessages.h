@@ -127,6 +127,55 @@ class GoodbyeReply : public carbon::ReplyCommon, public hellogoodbye::thrift::Go
   friend class apache::thrift::Cpp2Ops<GoodbyeReply>;
 
 };
+
 } // namespace hellogoodbye
 
+namespace hellogoodbye {
+namespace thrift {
+
+template <class Writer>
+void serialize(const HelloRequest& self, Writer&& writer);
+
+void deserialize(HelloRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(HelloRequest& self, V&& v);
+
+template <class V>
+void visitFields(const HelloRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const HelloReply& self, Writer&& writer);
+
+void deserialize(HelloReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(HelloReply& self, V&& v);
+
+template <class V>
+void visitFields(const HelloReply& self, V&& v);
+
+template <class Writer>
+void serialize(const GoodbyeRequest& self, Writer&& writer);
+
+void deserialize(GoodbyeRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(GoodbyeRequest& self, V&& v);
+
+template <class V>
+void visitFields(const GoodbyeRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const GoodbyeReply& self, Writer&& writer);
+
+void deserialize(GoodbyeReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(GoodbyeReply& self, V&& v);
+
+template <class V>
+void visitFields(const GoodbyeReply& self, V&& v);
+} // namespace thrift
+} // namespace hellogoodbye
 #include "HelloGoodbyeMessages-inl.h"

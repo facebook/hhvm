@@ -876,7 +876,454 @@ class McGatsReply : public carbon::ReplyCommon, public facebook::memcache::thrif
   friend class apache::thrift::Cpp2Ops<McGatsReply>;
 
 };
+
 } // namespace memcache
 } // namespace facebook
 
+namespace facebook {
+namespace memcache {
+namespace thrift {
+
+template <class Writer>
+void serialize(const MemcacheRequestCommon& self, Writer&& writer);
+
+void deserialize(MemcacheRequestCommon& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(MemcacheRequestCommon& self, V&& v);
+
+template <class V>
+void visitFields(const MemcacheRequestCommon& self, V&& v);
+
+template <class Writer>
+void serialize(const MemcacheReplyCommon& self, Writer&& writer);
+
+void deserialize(MemcacheReplyCommon& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(MemcacheReplyCommon& self, V&& v);
+
+template <class V>
+void visitFields(const MemcacheReplyCommon& self, V&& v);
+
+template <class Writer>
+void serialize(const McGetRequest& self, Writer&& writer);
+
+void deserialize(McGetRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McGetRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McGetRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McGetReply& self, Writer&& writer);
+
+void deserialize(McGetReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McGetReply& self, V&& v);
+
+template <class V>
+void visitFields(const McGetReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McSetRequest& self, Writer&& writer);
+
+void deserialize(McSetRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McSetRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McSetRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McSetReply& self, Writer&& writer);
+
+void deserialize(McSetReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McSetReply& self, V&& v);
+
+template <class V>
+void visitFields(const McSetReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McDeleteRequest& self, Writer&& writer);
+
+void deserialize(McDeleteRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McDeleteRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McDeleteRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McDeleteReply& self, Writer&& writer);
+
+void deserialize(McDeleteReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McDeleteReply& self, V&& v);
+
+template <class V>
+void visitFields(const McDeleteReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McLeaseGetRequest& self, Writer&& writer);
+
+void deserialize(McLeaseGetRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McLeaseGetRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McLeaseGetRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McLeaseGetReply& self, Writer&& writer);
+
+void deserialize(McLeaseGetReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McLeaseGetReply& self, V&& v);
+
+template <class V>
+void visitFields(const McLeaseGetReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McLeaseSetRequest& self, Writer&& writer);
+
+void deserialize(McLeaseSetRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McLeaseSetRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McLeaseSetRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McLeaseSetReply& self, Writer&& writer);
+
+void deserialize(McLeaseSetReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McLeaseSetReply& self, V&& v);
+
+template <class V>
+void visitFields(const McLeaseSetReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McAddRequest& self, Writer&& writer);
+
+void deserialize(McAddRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McAddRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McAddRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McAddReply& self, Writer&& writer);
+
+void deserialize(McAddReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McAddReply& self, V&& v);
+
+template <class V>
+void visitFields(const McAddReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McReplaceRequest& self, Writer&& writer);
+
+void deserialize(McReplaceRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McReplaceRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McReplaceRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McReplaceReply& self, Writer&& writer);
+
+void deserialize(McReplaceReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McReplaceReply& self, V&& v);
+
+template <class V>
+void visitFields(const McReplaceReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McGetsRequest& self, Writer&& writer);
+
+void deserialize(McGetsRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McGetsRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McGetsRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McGetsReply& self, Writer&& writer);
+
+void deserialize(McGetsReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McGetsReply& self, V&& v);
+
+template <class V>
+void visitFields(const McGetsReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McCasRequest& self, Writer&& writer);
+
+void deserialize(McCasRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McCasRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McCasRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McCasReply& self, Writer&& writer);
+
+void deserialize(McCasReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McCasReply& self, V&& v);
+
+template <class V>
+void visitFields(const McCasReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McIncrRequest& self, Writer&& writer);
+
+void deserialize(McIncrRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McIncrRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McIncrRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McIncrReply& self, Writer&& writer);
+
+void deserialize(McIncrReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McIncrReply& self, V&& v);
+
+template <class V>
+void visitFields(const McIncrReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McDecrRequest& self, Writer&& writer);
+
+void deserialize(McDecrRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McDecrRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McDecrRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McDecrReply& self, Writer&& writer);
+
+void deserialize(McDecrReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McDecrReply& self, V&& v);
+
+template <class V>
+void visitFields(const McDecrReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McMetagetRequest& self, Writer&& writer);
+
+void deserialize(McMetagetRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McMetagetRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McMetagetRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McMetagetReply& self, Writer&& writer);
+
+void deserialize(McMetagetReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McMetagetReply& self, V&& v);
+
+template <class V>
+void visitFields(const McMetagetReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McAppendRequest& self, Writer&& writer);
+
+void deserialize(McAppendRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McAppendRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McAppendRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McAppendReply& self, Writer&& writer);
+
+void deserialize(McAppendReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McAppendReply& self, V&& v);
+
+template <class V>
+void visitFields(const McAppendReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McPrependRequest& self, Writer&& writer);
+
+void deserialize(McPrependRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McPrependRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McPrependRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McPrependReply& self, Writer&& writer);
+
+void deserialize(McPrependReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McPrependReply& self, V&& v);
+
+template <class V>
+void visitFields(const McPrependReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McTouchRequest& self, Writer&& writer);
+
+void deserialize(McTouchRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McTouchRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McTouchRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McTouchReply& self, Writer&& writer);
+
+void deserialize(McTouchReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McTouchReply& self, V&& v);
+
+template <class V>
+void visitFields(const McTouchReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McFlushReRequest& self, Writer&& writer);
+
+void deserialize(McFlushReRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McFlushReRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McFlushReRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McFlushReReply& self, Writer&& writer);
+
+void deserialize(McFlushReReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McFlushReReply& self, V&& v);
+
+template <class V>
+void visitFields(const McFlushReReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McFlushAllRequest& self, Writer&& writer);
+
+void deserialize(McFlushAllRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McFlushAllRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McFlushAllRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McFlushAllReply& self, Writer&& writer);
+
+void deserialize(McFlushAllReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McFlushAllReply& self, V&& v);
+
+template <class V>
+void visitFields(const McFlushAllReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McGatRequest& self, Writer&& writer);
+
+void deserialize(McGatRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McGatRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McGatRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McGatReply& self, Writer&& writer);
+
+void deserialize(McGatReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McGatReply& self, V&& v);
+
+template <class V>
+void visitFields(const McGatReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McGatsRequest& self, Writer&& writer);
+
+void deserialize(McGatsRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McGatsRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McGatsRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McGatsReply& self, Writer&& writer);
+
+void deserialize(McGatsReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McGatsReply& self, V&& v);
+
+template <class V>
+void visitFields(const McGatsReply& self, V&& v);
+} // namespace thrift
+} // namespace memcache
+} // namespace facebook
 #include "MemcacheMessages-inl.h"

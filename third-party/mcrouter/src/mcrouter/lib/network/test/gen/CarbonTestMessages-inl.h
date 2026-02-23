@@ -19,334 +19,364 @@ namespace test {
 namespace thrift {
 
 template <class Writer>
-void ManyFields::serialize(Writer&& writer) const {
+void serialize(const ManyFields& self, Writer&& writer) {
   writer.writeStructBegin();
-  writer.writeField(1 /* field id */, buf1_ref());
-  writer.writeField(2 /* field id */, buf2_ref());
-  writer.writeField(3 /* field id */, buf3_ref());
-  writer.writeField(4 /* field id */, buf4_ref());
-  writer.writeField(5 /* field id */, buf5_ref());
-  writer.writeField(6 /* field id */, buf6_ref());
-  writer.writeField(7 /* field id */, buf7_ref());
-  writer.writeField(8 /* field id */, buf8_ref());
-  writer.writeField(9 /* field id */, buf9_ref());
-  writer.writeField(10 /* field id */, buf10_ref());
-  writer.writeField(11 /* field id */, buf11_ref());
-  writer.writeField(12 /* field id */, buf12_ref());
-  writer.writeField(13 /* field id */, buf13_ref());
-  writer.writeField(14 /* field id */, buf14_ref());
-  writer.writeField(15 /* field id */, buf15_ref());
-  writer.writeField(16 /* field id */, buf16_ref());
-  writer.writeField(17 /* field id */, buf17_ref());
-  writer.writeField(18 /* field id */, buf18_ref());
-  writer.writeField(19 /* field id */, buf19_ref());
-  writer.writeField(20 /* field id */, buf20_ref());
-  writer.writeField(21 /* field id */, buf21_ref());
-  writer.writeField(22 /* field id */, buf22_ref());
-  writer.writeField(23 /* field id */, buf23_ref());
-  writer.writeField(24 /* field id */, buf24_ref());
-  writer.writeField(25 /* field id */, buf25_ref());
-  writer.writeField(26 /* field id */, buf26_ref());
-  writer.writeField(27 /* field id */, buf27_ref());
-  writer.writeField(28 /* field id */, buf28_ref());
-  writer.writeField(29 /* field id */, buf29_ref());
-  writer.writeField(30 /* field id */, buf30_ref());
-  writer.writeField(31 /* field id */, buf31_ref());
-  writer.writeField(32 /* field id */, buf32_ref());
-  writer.writeField(33 /* field id */, buf33_ref());
-  writer.writeField(34 /* field id */, buf34_ref());
-  writer.writeField(35 /* field id */, buf35_ref());
-  writer.writeField(36 /* field id */, buf36_ref());
-  writer.writeField(37 /* field id */, buf37_ref());
-  writer.writeField(38 /* field id */, buf38_ref());
-  writer.writeField(39 /* field id */, buf39_ref());
-  writer.writeField(40 /* field id */, buf40_ref());
+  writer.writeField(1 /* field id */, self.buf1_ref());
+  writer.writeField(2 /* field id */, self.buf2_ref());
+  writer.writeField(3 /* field id */, self.buf3_ref());
+  writer.writeField(4 /* field id */, self.buf4_ref());
+  writer.writeField(5 /* field id */, self.buf5_ref());
+  writer.writeField(6 /* field id */, self.buf6_ref());
+  writer.writeField(7 /* field id */, self.buf7_ref());
+  writer.writeField(8 /* field id */, self.buf8_ref());
+  writer.writeField(9 /* field id */, self.buf9_ref());
+  writer.writeField(10 /* field id */, self.buf10_ref());
+  writer.writeField(11 /* field id */, self.buf11_ref());
+  writer.writeField(12 /* field id */, self.buf12_ref());
+  writer.writeField(13 /* field id */, self.buf13_ref());
+  writer.writeField(14 /* field id */, self.buf14_ref());
+  writer.writeField(15 /* field id */, self.buf15_ref());
+  writer.writeField(16 /* field id */, self.buf16_ref());
+  writer.writeField(17 /* field id */, self.buf17_ref());
+  writer.writeField(18 /* field id */, self.buf18_ref());
+  writer.writeField(19 /* field id */, self.buf19_ref());
+  writer.writeField(20 /* field id */, self.buf20_ref());
+  writer.writeField(21 /* field id */, self.buf21_ref());
+  writer.writeField(22 /* field id */, self.buf22_ref());
+  writer.writeField(23 /* field id */, self.buf23_ref());
+  writer.writeField(24 /* field id */, self.buf24_ref());
+  writer.writeField(25 /* field id */, self.buf25_ref());
+  writer.writeField(26 /* field id */, self.buf26_ref());
+  writer.writeField(27 /* field id */, self.buf27_ref());
+  writer.writeField(28 /* field id */, self.buf28_ref());
+  writer.writeField(29 /* field id */, self.buf29_ref());
+  writer.writeField(30 /* field id */, self.buf30_ref());
+  writer.writeField(31 /* field id */, self.buf31_ref());
+  writer.writeField(32 /* field id */, self.buf32_ref());
+  writer.writeField(33 /* field id */, self.buf33_ref());
+  writer.writeField(34 /* field id */, self.buf34_ref());
+  writer.writeField(35 /* field id */, self.buf35_ref());
+  writer.writeField(36 /* field id */, self.buf36_ref());
+  writer.writeField(37 /* field id */, self.buf37_ref());
+  writer.writeField(38 /* field id */, self.buf38_ref());
+  writer.writeField(39 /* field id */, self.buf39_ref());
+  writer.writeField(40 /* field id */, self.buf40_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
+}
+
+template <class Writer>
+void ManyFields::serialize(Writer&& writer) const {
+  facebook::memcache::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(ManyFields& self, V&& v) {
+  if (!v.visitField(1, "buf1", *self.buf1_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "buf2", *self.buf2_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "buf3", *self.buf3_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "buf4", *self.buf4_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "buf5", *self.buf5_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "buf6", *self.buf6_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "buf7", *self.buf7_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "buf8", *self.buf8_ref())) {
+    return;
+  }
+  if (!v.visitField(9, "buf9", *self.buf9_ref())) {
+    return;
+  }
+  if (!v.visitField(10, "buf10", *self.buf10_ref())) {
+    return;
+  }
+  if (!v.visitField(11, "buf11", *self.buf11_ref())) {
+    return;
+  }
+  if (!v.visitField(12, "buf12", *self.buf12_ref())) {
+    return;
+  }
+  if (!v.visitField(13, "buf13", *self.buf13_ref())) {
+    return;
+  }
+  if (!v.visitField(14, "buf14", *self.buf14_ref())) {
+    return;
+  }
+  if (!v.visitField(15, "buf15", *self.buf15_ref())) {
+    return;
+  }
+  if (!v.visitField(16, "buf16", *self.buf16_ref())) {
+    return;
+  }
+  if (!v.visitField(17, "buf17", *self.buf17_ref())) {
+    return;
+  }
+  if (!v.visitField(18, "buf18", *self.buf18_ref())) {
+    return;
+  }
+  if (!v.visitField(19, "buf19", *self.buf19_ref())) {
+    return;
+  }
+  if (!v.visitField(20, "buf20", *self.buf20_ref())) {
+    return;
+  }
+  if (!v.visitField(21, "buf21", *self.buf21_ref())) {
+    return;
+  }
+  if (!v.visitField(22, "buf22", *self.buf22_ref())) {
+    return;
+  }
+  if (!v.visitField(23, "buf23", *self.buf23_ref())) {
+    return;
+  }
+  if (!v.visitField(24, "buf24", *self.buf24_ref())) {
+    return;
+  }
+  if (!v.visitField(25, "buf25", *self.buf25_ref())) {
+    return;
+  }
+  if (!v.visitField(26, "buf26", *self.buf26_ref())) {
+    return;
+  }
+  if (!v.visitField(27, "buf27", *self.buf27_ref())) {
+    return;
+  }
+  if (!v.visitField(28, "buf28", *self.buf28_ref())) {
+    return;
+  }
+  if (!v.visitField(29, "buf29", *self.buf29_ref())) {
+    return;
+  }
+  if (!v.visitField(30, "buf30", *self.buf30_ref())) {
+    return;
+  }
+  if (!v.visitField(31, "buf31", *self.buf31_ref())) {
+    return;
+  }
+  if (!v.visitField(32, "buf32", *self.buf32_ref())) {
+    return;
+  }
+  if (!v.visitField(33, "buf33", *self.buf33_ref())) {
+    return;
+  }
+  if (!v.visitField(34, "buf34", *self.buf34_ref())) {
+    return;
+  }
+  if (!v.visitField(35, "buf35", *self.buf35_ref())) {
+    return;
+  }
+  if (!v.visitField(36, "buf36", *self.buf36_ref())) {
+    return;
+  }
+  if (!v.visitField(37, "buf37", *self.buf37_ref())) {
+    return;
+  }
+  if (!v.visitField(38, "buf38", *self.buf38_ref())) {
+    return;
+  }
+  if (!v.visitField(39, "buf39", *self.buf39_ref())) {
+    return;
+  }
+  if (!v.visitField(40, "buf40", *self.buf40_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const ManyFields& self, V&& v) {
+  if (!v.visitField(1, "buf1", *self.buf1_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "buf2", *self.buf2_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "buf3", *self.buf3_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "buf4", *self.buf4_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "buf5", *self.buf5_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "buf6", *self.buf6_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "buf7", *self.buf7_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "buf8", *self.buf8_ref())) {
+    return;
+  }
+  if (!v.visitField(9, "buf9", *self.buf9_ref())) {
+    return;
+  }
+  if (!v.visitField(10, "buf10", *self.buf10_ref())) {
+    return;
+  }
+  if (!v.visitField(11, "buf11", *self.buf11_ref())) {
+    return;
+  }
+  if (!v.visitField(12, "buf12", *self.buf12_ref())) {
+    return;
+  }
+  if (!v.visitField(13, "buf13", *self.buf13_ref())) {
+    return;
+  }
+  if (!v.visitField(14, "buf14", *self.buf14_ref())) {
+    return;
+  }
+  if (!v.visitField(15, "buf15", *self.buf15_ref())) {
+    return;
+  }
+  if (!v.visitField(16, "buf16", *self.buf16_ref())) {
+    return;
+  }
+  if (!v.visitField(17, "buf17", *self.buf17_ref())) {
+    return;
+  }
+  if (!v.visitField(18, "buf18", *self.buf18_ref())) {
+    return;
+  }
+  if (!v.visitField(19, "buf19", *self.buf19_ref())) {
+    return;
+  }
+  if (!v.visitField(20, "buf20", *self.buf20_ref())) {
+    return;
+  }
+  if (!v.visitField(21, "buf21", *self.buf21_ref())) {
+    return;
+  }
+  if (!v.visitField(22, "buf22", *self.buf22_ref())) {
+    return;
+  }
+  if (!v.visitField(23, "buf23", *self.buf23_ref())) {
+    return;
+  }
+  if (!v.visitField(24, "buf24", *self.buf24_ref())) {
+    return;
+  }
+  if (!v.visitField(25, "buf25", *self.buf25_ref())) {
+    return;
+  }
+  if (!v.visitField(26, "buf26", *self.buf26_ref())) {
+    return;
+  }
+  if (!v.visitField(27, "buf27", *self.buf27_ref())) {
+    return;
+  }
+  if (!v.visitField(28, "buf28", *self.buf28_ref())) {
+    return;
+  }
+  if (!v.visitField(29, "buf29", *self.buf29_ref())) {
+    return;
+  }
+  if (!v.visitField(30, "buf30", *self.buf30_ref())) {
+    return;
+  }
+  if (!v.visitField(31, "buf31", *self.buf31_ref())) {
+    return;
+  }
+  if (!v.visitField(32, "buf32", *self.buf32_ref())) {
+    return;
+  }
+  if (!v.visitField(33, "buf33", *self.buf33_ref())) {
+    return;
+  }
+  if (!v.visitField(34, "buf34", *self.buf34_ref())) {
+    return;
+  }
+  if (!v.visitField(35, "buf35", *self.buf35_ref())) {
+    return;
+  }
+  if (!v.visitField(36, "buf36", *self.buf36_ref())) {
+    return;
+  }
+  if (!v.visitField(37, "buf37", *self.buf37_ref())) {
+    return;
+  }
+  if (!v.visitField(38, "buf38", *self.buf38_ref())) {
+    return;
+  }
+  if (!v.visitField(39, "buf39", *self.buf39_ref())) {
+    return;
+  }
+  if (!v.visitField(40, "buf40", *self.buf40_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void ManyFields::visitFields(V&& v) {
-  if (!v.visitField(1, "buf1", *this->buf1_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "buf2", *this->buf2_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "buf3", *this->buf3_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "buf4", *this->buf4_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "buf5", *this->buf5_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "buf6", *this->buf6_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "buf7", *this->buf7_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "buf8", *this->buf8_ref())) {
-    return;
-  }
-  if (!v.visitField(9, "buf9", *this->buf9_ref())) {
-    return;
-  }
-  if (!v.visitField(10, "buf10", *this->buf10_ref())) {
-    return;
-  }
-  if (!v.visitField(11, "buf11", *this->buf11_ref())) {
-    return;
-  }
-  if (!v.visitField(12, "buf12", *this->buf12_ref())) {
-    return;
-  }
-  if (!v.visitField(13, "buf13", *this->buf13_ref())) {
-    return;
-  }
-  if (!v.visitField(14, "buf14", *this->buf14_ref())) {
-    return;
-  }
-  if (!v.visitField(15, "buf15", *this->buf15_ref())) {
-    return;
-  }
-  if (!v.visitField(16, "buf16", *this->buf16_ref())) {
-    return;
-  }
-  if (!v.visitField(17, "buf17", *this->buf17_ref())) {
-    return;
-  }
-  if (!v.visitField(18, "buf18", *this->buf18_ref())) {
-    return;
-  }
-  if (!v.visitField(19, "buf19", *this->buf19_ref())) {
-    return;
-  }
-  if (!v.visitField(20, "buf20", *this->buf20_ref())) {
-    return;
-  }
-  if (!v.visitField(21, "buf21", *this->buf21_ref())) {
-    return;
-  }
-  if (!v.visitField(22, "buf22", *this->buf22_ref())) {
-    return;
-  }
-  if (!v.visitField(23, "buf23", *this->buf23_ref())) {
-    return;
-  }
-  if (!v.visitField(24, "buf24", *this->buf24_ref())) {
-    return;
-  }
-  if (!v.visitField(25, "buf25", *this->buf25_ref())) {
-    return;
-  }
-  if (!v.visitField(26, "buf26", *this->buf26_ref())) {
-    return;
-  }
-  if (!v.visitField(27, "buf27", *this->buf27_ref())) {
-    return;
-  }
-  if (!v.visitField(28, "buf28", *this->buf28_ref())) {
-    return;
-  }
-  if (!v.visitField(29, "buf29", *this->buf29_ref())) {
-    return;
-  }
-  if (!v.visitField(30, "buf30", *this->buf30_ref())) {
-    return;
-  }
-  if (!v.visitField(31, "buf31", *this->buf31_ref())) {
-    return;
-  }
-  if (!v.visitField(32, "buf32", *this->buf32_ref())) {
-    return;
-  }
-  if (!v.visitField(33, "buf33", *this->buf33_ref())) {
-    return;
-  }
-  if (!v.visitField(34, "buf34", *this->buf34_ref())) {
-    return;
-  }
-  if (!v.visitField(35, "buf35", *this->buf35_ref())) {
-    return;
-  }
-  if (!v.visitField(36, "buf36", *this->buf36_ref())) {
-    return;
-  }
-  if (!v.visitField(37, "buf37", *this->buf37_ref())) {
-    return;
-  }
-  if (!v.visitField(38, "buf38", *this->buf38_ref())) {
-    return;
-  }
-  if (!v.visitField(39, "buf39", *this->buf39_ref())) {
-    return;
-  }
-  if (!v.visitField(40, "buf40", *this->buf40_ref())) {
-    return;
-  }
+  facebook::memcache::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void ManyFields::visitFields(V&& v) const {
-  if (!v.visitField(1, "buf1", *this->buf1_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "buf2", *this->buf2_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "buf3", *this->buf3_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "buf4", *this->buf4_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "buf5", *this->buf5_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "buf6", *this->buf6_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "buf7", *this->buf7_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "buf8", *this->buf8_ref())) {
-    return;
-  }
-  if (!v.visitField(9, "buf9", *this->buf9_ref())) {
-    return;
-  }
-  if (!v.visitField(10, "buf10", *this->buf10_ref())) {
-    return;
-  }
-  if (!v.visitField(11, "buf11", *this->buf11_ref())) {
-    return;
-  }
-  if (!v.visitField(12, "buf12", *this->buf12_ref())) {
-    return;
-  }
-  if (!v.visitField(13, "buf13", *this->buf13_ref())) {
-    return;
-  }
-  if (!v.visitField(14, "buf14", *this->buf14_ref())) {
-    return;
-  }
-  if (!v.visitField(15, "buf15", *this->buf15_ref())) {
-    return;
-  }
-  if (!v.visitField(16, "buf16", *this->buf16_ref())) {
-    return;
-  }
-  if (!v.visitField(17, "buf17", *this->buf17_ref())) {
-    return;
-  }
-  if (!v.visitField(18, "buf18", *this->buf18_ref())) {
-    return;
-  }
-  if (!v.visitField(19, "buf19", *this->buf19_ref())) {
-    return;
-  }
-  if (!v.visitField(20, "buf20", *this->buf20_ref())) {
-    return;
-  }
-  if (!v.visitField(21, "buf21", *this->buf21_ref())) {
-    return;
-  }
-  if (!v.visitField(22, "buf22", *this->buf22_ref())) {
-    return;
-  }
-  if (!v.visitField(23, "buf23", *this->buf23_ref())) {
-    return;
-  }
-  if (!v.visitField(24, "buf24", *this->buf24_ref())) {
-    return;
-  }
-  if (!v.visitField(25, "buf25", *this->buf25_ref())) {
-    return;
-  }
-  if (!v.visitField(26, "buf26", *this->buf26_ref())) {
-    return;
-  }
-  if (!v.visitField(27, "buf27", *this->buf27_ref())) {
-    return;
-  }
-  if (!v.visitField(28, "buf28", *this->buf28_ref())) {
-    return;
-  }
-  if (!v.visitField(29, "buf29", *this->buf29_ref())) {
-    return;
-  }
-  if (!v.visitField(30, "buf30", *this->buf30_ref())) {
-    return;
-  }
-  if (!v.visitField(31, "buf31", *this->buf31_ref())) {
-    return;
-  }
-  if (!v.visitField(32, "buf32", *this->buf32_ref())) {
-    return;
-  }
-  if (!v.visitField(33, "buf33", *this->buf33_ref())) {
-    return;
-  }
-  if (!v.visitField(34, "buf34", *this->buf34_ref())) {
-    return;
-  }
-  if (!v.visitField(35, "buf35", *this->buf35_ref())) {
-    return;
-  }
-  if (!v.visitField(36, "buf36", *this->buf36_ref())) {
-    return;
-  }
-  if (!v.visitField(37, "buf37", *this->buf37_ref())) {
-    return;
-  }
-  if (!v.visitField(38, "buf38", *this->buf38_ref())) {
-    return;
-  }
-  if (!v.visitField(39, "buf39", *this->buf39_ref())) {
-    return;
-  }
-  if (!v.visitField(40, "buf40", *this->buf40_ref())) {
-    return;
-  }
+  facebook::memcache::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class Writer>
-void McExpTestRequest::serialize(Writer&& writer) const {
+void serialize(const McExpTestRequest& self, Writer&& writer) {
   writer.writeStructBegin();
-  writer.writeField(1 /* field id */, key_ref());
-  writer.writeField(2 /* field id */, flags_ref());
-  writer.writeField(3 /* field id */, deadlineMs_ref());
+  writer.writeField(1 /* field id */, self.key_ref());
+  writer.writeField(2 /* field id */, self.flags_ref());
+  writer.writeField(3 /* field id */, self.deadlineMs_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
 
+template <class Writer>
+void McExpTestRequest::serialize(Writer&& writer) const {
+  facebook::memcache::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
 template <class V>
-void McExpTestRequest::visitFields(V&& v) {
-  if (!v.visitField(1, "key", *this->key_ref())) {
+void visitFields(McExpTestRequest& self, V&& v) {
+  if (!v.visitField(1, "key", *self.key_ref())) {
     return;
   }
-  if (!v.visitField(2, "flags", *this->flags_ref())) {
+  if (!v.visitField(2, "flags", *self.flags_ref())) {
     return;
   }
-  if (!v.visitField(3, "deadlineMs", *this->deadlineMs_ref())) {
+  if (!v.visitField(3, "deadlineMs", *self.deadlineMs_ref())) {
     return;
   }
 }
 
 template <class V>
+void visitFields(const McExpTestRequest& self, V&& v) {
+  if (!v.visitField(1, "key", *self.key_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "flags", *self.flags_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "deadlineMs", *self.deadlineMs_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void McExpTestRequest::visitFields(V&& v) {
+  facebook::memcache::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class V>
 void McExpTestRequest::visitFields(V&& v) const {
-  if (!v.visitField(1, "key", *this->key_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "flags", *this->flags_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "deadlineMs", *this->deadlineMs_ref())) {
-    return;
-  }
+  facebook::memcache::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 } // namespace thrift
 } // namespace test

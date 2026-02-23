@@ -20,7 +20,7 @@ namespace carbon {
 namespace test {
 namespace thrift {
 
-void TestUnionThrift::deserialize(carbon::CarbonProtocolReader& reader) {
+void deserialize(TestUnionThrift& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -33,15 +33,44 @@ void TestUnionThrift::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readRawInto(set_a());
+        reader.readRawInto(self.set_a());
         break;
       }
       case 2: {
-        reader.readRawInto(set_b());
+        reader.readRawInto(self.set_b());
         break;
       }
       case 3: {
-        reader.readRawInto(set_c());
+        reader.readRawInto(self.set_c());
+        break;
+      }
+      default: {
+        reader.skip(fieldType);
+        break;
+      }
+    }
+  }
+  reader.readStructEnd();
+}
+
+void TestUnionThrift::deserialize(carbon::CarbonProtocolReader& reader) {
+  carbon::test::thrift::deserialize(*this, reader);
+}
+
+void deserialize(TinyStruct& self, carbon::CarbonProtocolReader& reader) {
+  reader.readStructBegin();
+  while (true) {
+    const auto pr = reader.readFieldHeader();
+    const auto fieldType = pr.first;
+    const auto fieldId = pr.second;
+
+    if (fieldType == carbon::FieldType::Stop) {
+      break;
+    }
+
+    switch (fieldId) {
+      case 1: {
+        reader.readField(self.foo_ref(), fieldType);
         break;
       }
       default: {
@@ -54,6 +83,10 @@ void TestUnionThrift::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void TinyStruct::deserialize(carbon::CarbonProtocolReader& reader) {
+  carbon::test::thrift::deserialize(*this, reader);
+}
+
+void deserialize(MyBaseStruct& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -66,7 +99,7 @@ void TinyStruct::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(foo_ref(), fieldType);
+        reader.readField(self.baseInt64Member_ref(), fieldType);
         break;
       }
       default: {
@@ -79,6 +112,10 @@ void TinyStruct::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void MyBaseStruct::deserialize(carbon::CarbonProtocolReader& reader) {
+  carbon::test::thrift::deserialize(*this, reader);
+}
+
+void deserialize(MySimpleStruct& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -90,8 +127,24 @@ void MyBaseStruct::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(*self.myBaseStruct_ref(), fieldType);
+        break;
+      }
       case 1: {
-        reader.readField(baseInt64Member_ref(), fieldType);
+        reader.readField(self.int32Member_ref(), fieldType);
+        break;
+      }
+      case 2: {
+        reader.readField(self.stringMember_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.enumMember_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.vectorMember_ref(), fieldType);
         break;
       }
       default: {
@@ -104,47 +157,10 @@ void MyBaseStruct::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void MySimpleStruct::deserialize(carbon::CarbonProtocolReader& reader) {
-  reader.readStructBegin();
-  while (true) {
-    const auto pr = reader.readFieldHeader();
-    const auto fieldType = pr.first;
-    const auto fieldId = pr.second;
-
-    if (fieldType == carbon::FieldType::Stop) {
-      break;
-    }
-
-    switch (fieldId) {
-      case -1: {
-        reader.readField(myBaseStruct, fieldType);
-        break;
-      }
-      case 1: {
-        reader.readField(int32Member_ref(), fieldType);
-        break;
-      }
-      case 2: {
-        reader.readField(stringMember_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(enumMember_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(vectorMember_ref(), fieldType);
-        break;
-      }
-      default: {
-        reader.skip(fieldType);
-        break;
-      }
-    }
-  }
-  reader.readStructEnd();
+  carbon::test::thrift::deserialize(*this, reader);
 }
 
-void ThriftTestRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+void deserialize(ThriftTestRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -157,23 +173,56 @@ void ThriftTestRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -2: {
-        reader.readField(tinyStruct, fieldType);
+        reader.readField(*self.tinyStruct_ref(), fieldType);
         break;
       }
       case -1: {
-        reader.readField(base, fieldType);
+        reader.readField(*self.base_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(testBool_ref(), fieldType);
+        reader.readField(self.testBool_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(testInt8_ref(), fieldType);
+        reader.readField(self.testInt8_ref(), fieldType);
+        break;
+      }
+      default: {
+        reader.skip(fieldType);
+        break;
+      }
+    }
+  }
+  reader.readStructEnd();
+}
+
+void ThriftTestRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  carbon::test::thrift::deserialize(*this, reader);
+}
+
+void deserialize(ThriftTestReply& self, carbon::CarbonProtocolReader& reader) {
+  reader.readStructBegin();
+  while (true) {
+    const auto pr = reader.readFieldHeader();
+    const auto fieldType = pr.first;
+    const auto fieldId = pr.second;
+
+    if (fieldType == carbon::FieldType::Stop) {
+      break;
+    }
+
+    switch (fieldId) {
+      case 1: {
+        reader.readField(self.result_ref(), fieldType);
+        break;
+      }
+      case 2: {
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       default: {
@@ -186,6 +235,10 @@ void ThriftTestRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void ThriftTestReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  carbon::test::thrift::deserialize(*this, reader);
+}
+
+void deserialize(DummyThriftRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -198,11 +251,79 @@ void ThriftTestReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(message_ref(), fieldType);
+        reader.readField(self.testBool_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.testInt8_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.testInt16_ref(), fieldType);
+        break;
+      }
+      case 5: {
+        reader.readField(self.testInt32_ref(), fieldType);
+        break;
+      }
+      case 6: {
+        reader.readField(self.testInt64_ref(), fieldType);
+        break;
+      }
+      case 7: {
+        reader.readField(self.testUInt8_ref(), fieldType);
+        break;
+      }
+      case 8: {
+        reader.readField(self.testUInt16_ref(), fieldType);
+        break;
+      }
+      case 9: {
+        reader.readField(self.testUInt32_ref(), fieldType);
+        break;
+      }
+      case 10: {
+        reader.readField(self.testUInt64_ref(), fieldType);
+        break;
+      }
+      case 11: {
+        reader.readField(self.testFloat_ref(), fieldType);
+        break;
+      }
+      case 12: {
+        reader.readField(self.testDouble_ref(), fieldType);
+        break;
+      }
+      case 13: {
+        reader.readField(self.testShortString_ref(), fieldType);
+        break;
+      }
+      case 14: {
+        reader.readField(self.testLongString_ref(), fieldType);
+        break;
+      }
+      case 15: {
+        reader.readField(self.testIobuf_ref(), fieldType);
+        break;
+      }
+      case 16: {
+        reader.readField(self.testList_ref(), fieldType);
+        break;
+      }
+      case 17: {
+        reader.readField(self.testOptionalKeywordBool_ref(), fieldType);
+        break;
+      }
+      case 18: {
+        reader.readField(self.testOptionalKeywordString_ref(), fieldType);
+        break;
+      }
+      case 19: {
+        reader.readField(self.testOptionalKeywordIobuf_ref(), fieldType);
         break;
       }
       default: {
@@ -215,6 +336,10 @@ void ThriftTestReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void DummyThriftRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  carbon::test::thrift::deserialize(*this, reader);
+}
+
+void deserialize(DummyThriftReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -227,79 +352,11 @@ void DummyThriftRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(testBool_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(testInt8_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(testInt16_ref(), fieldType);
-        break;
-      }
-      case 5: {
-        reader.readField(testInt32_ref(), fieldType);
-        break;
-      }
-      case 6: {
-        reader.readField(testInt64_ref(), fieldType);
-        break;
-      }
-      case 7: {
-        reader.readField(testUInt8_ref(), fieldType);
-        break;
-      }
-      case 8: {
-        reader.readField(testUInt16_ref(), fieldType);
-        break;
-      }
-      case 9: {
-        reader.readField(testUInt32_ref(), fieldType);
-        break;
-      }
-      case 10: {
-        reader.readField(testUInt64_ref(), fieldType);
-        break;
-      }
-      case 11: {
-        reader.readField(testFloat_ref(), fieldType);
-        break;
-      }
-      case 12: {
-        reader.readField(testDouble_ref(), fieldType);
-        break;
-      }
-      case 13: {
-        reader.readField(testShortString_ref(), fieldType);
-        break;
-      }
-      case 14: {
-        reader.readField(testLongString_ref(), fieldType);
-        break;
-      }
-      case 15: {
-        reader.readField(testIobuf_ref(), fieldType);
-        break;
-      }
-      case 16: {
-        reader.readField(testList_ref(), fieldType);
-        break;
-      }
-      case 17: {
-        reader.readField(testOptionalKeywordBool_ref(), fieldType);
-        break;
-      }
-      case 18: {
-        reader.readField(testOptionalKeywordString_ref(), fieldType);
-        break;
-      }
-      case 19: {
-        reader.readField(testOptionalKeywordIobuf_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       default: {
@@ -312,6 +369,10 @@ void DummyThriftRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void DummyThriftReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  carbon::test::thrift::deserialize(*this, reader);
+}
+
+void deserialize(CustomRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -324,11 +385,23 @@ void DummyThriftReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(message_ref(), fieldType);
+        reader.readField(self.testInt8_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.timestamp_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.customAdapterTypeI64_ref(), fieldType);
+        break;
+      }
+      case 5: {
+        reader.readField(self.customAdapterTypeBinary_ref(), fieldType);
         break;
       }
       default: {
@@ -341,6 +414,10 @@ void DummyThriftReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void CustomRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  carbon::test::thrift::deserialize(*this, reader);
+}
+
+void deserialize(CustomReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -353,23 +430,11 @@ void CustomRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(testInt8_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(timestamp_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(customAdapterTypeI64_ref(), fieldType);
-        break;
-      }
-      case 5: {
-        reader.readField(customAdapterTypeBinary_ref(), fieldType);
+        reader.readField(self.valInt32_ref(), fieldType);
         break;
       }
       default: {
@@ -382,32 +447,7 @@ void CustomRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void CustomReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  reader.readStructBegin();
-  while (true) {
-    const auto pr = reader.readFieldHeader();
-    const auto fieldType = pr.first;
-    const auto fieldId = pr.second;
-
-    if (fieldType == carbon::FieldType::Stop) {
-      break;
-    }
-
-    switch (fieldId) {
-      case 1: {
-        reader.readField(result_ref(), fieldType);
-        break;
-      }
-      case 2: {
-        reader.readField(valInt32_ref(), fieldType);
-        break;
-      }
-      default: {
-        reader.skip(fieldType);
-        break;
-      }
-    }
-  }
-  reader.readStructEnd();
+  carbon::test::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace test

@@ -21,7 +21,7 @@ namespace memcache {
 namespace test {
 namespace thrift {
 
-void ManyFields::deserialize(carbon::CarbonProtocolReader& reader) {
+void deserialize(ManyFields& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -34,163 +34,200 @@ void ManyFields::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(buf1_ref(), fieldType);
+        reader.readField(self.buf1_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(buf2_ref(), fieldType);
+        reader.readField(self.buf2_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(buf3_ref(), fieldType);
+        reader.readField(self.buf3_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(buf4_ref(), fieldType);
+        reader.readField(self.buf4_ref(), fieldType);
         break;
       }
       case 5: {
-        reader.readField(buf5_ref(), fieldType);
+        reader.readField(self.buf5_ref(), fieldType);
         break;
       }
       case 6: {
-        reader.readField(buf6_ref(), fieldType);
+        reader.readField(self.buf6_ref(), fieldType);
         break;
       }
       case 7: {
-        reader.readField(buf7_ref(), fieldType);
+        reader.readField(self.buf7_ref(), fieldType);
         break;
       }
       case 8: {
-        reader.readField(buf8_ref(), fieldType);
+        reader.readField(self.buf8_ref(), fieldType);
         break;
       }
       case 9: {
-        reader.readField(buf9_ref(), fieldType);
+        reader.readField(self.buf9_ref(), fieldType);
         break;
       }
       case 10: {
-        reader.readField(buf10_ref(), fieldType);
+        reader.readField(self.buf10_ref(), fieldType);
         break;
       }
       case 11: {
-        reader.readField(buf11_ref(), fieldType);
+        reader.readField(self.buf11_ref(), fieldType);
         break;
       }
       case 12: {
-        reader.readField(buf12_ref(), fieldType);
+        reader.readField(self.buf12_ref(), fieldType);
         break;
       }
       case 13: {
-        reader.readField(buf13_ref(), fieldType);
+        reader.readField(self.buf13_ref(), fieldType);
         break;
       }
       case 14: {
-        reader.readField(buf14_ref(), fieldType);
+        reader.readField(self.buf14_ref(), fieldType);
         break;
       }
       case 15: {
-        reader.readField(buf15_ref(), fieldType);
+        reader.readField(self.buf15_ref(), fieldType);
         break;
       }
       case 16: {
-        reader.readField(buf16_ref(), fieldType);
+        reader.readField(self.buf16_ref(), fieldType);
         break;
       }
       case 17: {
-        reader.readField(buf17_ref(), fieldType);
+        reader.readField(self.buf17_ref(), fieldType);
         break;
       }
       case 18: {
-        reader.readField(buf18_ref(), fieldType);
+        reader.readField(self.buf18_ref(), fieldType);
         break;
       }
       case 19: {
-        reader.readField(buf19_ref(), fieldType);
+        reader.readField(self.buf19_ref(), fieldType);
         break;
       }
       case 20: {
-        reader.readField(buf20_ref(), fieldType);
+        reader.readField(self.buf20_ref(), fieldType);
         break;
       }
       case 21: {
-        reader.readField(buf21_ref(), fieldType);
+        reader.readField(self.buf21_ref(), fieldType);
         break;
       }
       case 22: {
-        reader.readField(buf22_ref(), fieldType);
+        reader.readField(self.buf22_ref(), fieldType);
         break;
       }
       case 23: {
-        reader.readField(buf23_ref(), fieldType);
+        reader.readField(self.buf23_ref(), fieldType);
         break;
       }
       case 24: {
-        reader.readField(buf24_ref(), fieldType);
+        reader.readField(self.buf24_ref(), fieldType);
         break;
       }
       case 25: {
-        reader.readField(buf25_ref(), fieldType);
+        reader.readField(self.buf25_ref(), fieldType);
         break;
       }
       case 26: {
-        reader.readField(buf26_ref(), fieldType);
+        reader.readField(self.buf26_ref(), fieldType);
         break;
       }
       case 27: {
-        reader.readField(buf27_ref(), fieldType);
+        reader.readField(self.buf27_ref(), fieldType);
         break;
       }
       case 28: {
-        reader.readField(buf28_ref(), fieldType);
+        reader.readField(self.buf28_ref(), fieldType);
         break;
       }
       case 29: {
-        reader.readField(buf29_ref(), fieldType);
+        reader.readField(self.buf29_ref(), fieldType);
         break;
       }
       case 30: {
-        reader.readField(buf30_ref(), fieldType);
+        reader.readField(self.buf30_ref(), fieldType);
         break;
       }
       case 31: {
-        reader.readField(buf31_ref(), fieldType);
+        reader.readField(self.buf31_ref(), fieldType);
         break;
       }
       case 32: {
-        reader.readField(buf32_ref(), fieldType);
+        reader.readField(self.buf32_ref(), fieldType);
         break;
       }
       case 33: {
-        reader.readField(buf33_ref(), fieldType);
+        reader.readField(self.buf33_ref(), fieldType);
         break;
       }
       case 34: {
-        reader.readField(buf34_ref(), fieldType);
+        reader.readField(self.buf34_ref(), fieldType);
         break;
       }
       case 35: {
-        reader.readField(buf35_ref(), fieldType);
+        reader.readField(self.buf35_ref(), fieldType);
         break;
       }
       case 36: {
-        reader.readField(buf36_ref(), fieldType);
+        reader.readField(self.buf36_ref(), fieldType);
         break;
       }
       case 37: {
-        reader.readField(buf37_ref(), fieldType);
+        reader.readField(self.buf37_ref(), fieldType);
         break;
       }
       case 38: {
-        reader.readField(buf38_ref(), fieldType);
+        reader.readField(self.buf38_ref(), fieldType);
         break;
       }
       case 39: {
-        reader.readField(buf39_ref(), fieldType);
+        reader.readField(self.buf39_ref(), fieldType);
         break;
       }
       case 40: {
-        reader.readField(buf40_ref(), fieldType);
+        reader.readField(self.buf40_ref(), fieldType);
+        break;
+      }
+      default: {
+        reader.skip(fieldType);
+        break;
+      }
+    }
+  }
+  reader.readStructEnd();
+}
+
+void ManyFields::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::test::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McExpTestRequest& self, carbon::CarbonProtocolReader& reader) {
+  reader.readStructBegin();
+  while (true) {
+    const auto pr = reader.readFieldHeader();
+    const auto fieldType = pr.first;
+    const auto fieldId = pr.second;
+
+    if (fieldType == carbon::FieldType::Stop) {
+      break;
+    }
+
+    switch (fieldId) {
+      case 1: {
+        reader.readField(self.key_ref(), fieldType);
+        break;
+      }
+      case 2: {
+        reader.readField(self.flags_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.deadlineMs_ref(), fieldType);
         break;
       }
       default: {
@@ -203,36 +240,7 @@ void ManyFields::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McExpTestRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  reader.readStructBegin();
-  while (true) {
-    const auto pr = reader.readFieldHeader();
-    const auto fieldType = pr.first;
-    const auto fieldId = pr.second;
-
-    if (fieldType == carbon::FieldType::Stop) {
-      break;
-    }
-
-    switch (fieldId) {
-      case 1: {
-        reader.readField(key_ref(), fieldType);
-        break;
-      }
-      case 2: {
-        reader.readField(flags_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(deadlineMs_ref(), fieldType);
-        break;
-      }
-      default: {
-        reader.skip(fieldType);
-        break;
-      }
-    }
-  }
-  reader.readStructEnd();
+  facebook::memcache::test::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace test

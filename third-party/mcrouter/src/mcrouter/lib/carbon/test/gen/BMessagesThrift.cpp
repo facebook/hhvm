@@ -21,7 +21,7 @@ namespace test {
 namespace B {
 namespace thrift {
 
-void TestBRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+void deserialize(TestBRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -34,11 +34,44 @@ void TestBRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(dummy2_ref(), fieldType);
+        reader.readField(self.dummy2_ref(), fieldType);
+        break;
+      }
+      default: {
+        reader.skip(fieldType);
+        break;
+      }
+    }
+  }
+  reader.readStructEnd();
+}
+
+void TestBRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  carbon::test::B::thrift::deserialize(*this, reader);
+}
+
+void deserialize(TestBReply& self, carbon::CarbonProtocolReader& reader) {
+  reader.readStructBegin();
+  while (true) {
+    const auto pr = reader.readFieldHeader();
+    const auto fieldType = pr.first;
+    const auto fieldId = pr.second;
+
+    if (fieldType == carbon::FieldType::Stop) {
+      break;
+    }
+
+    switch (fieldId) {
+      case 1: {
+        reader.readField(self.result_ref(), fieldType);
+        break;
+      }
+      case 2: {
+        reader.readField(self.valInt32_ref(), fieldType);
         break;
       }
       default: {
@@ -51,32 +84,7 @@ void TestBRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void TestBReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  reader.readStructBegin();
-  while (true) {
-    const auto pr = reader.readFieldHeader();
-    const auto fieldType = pr.first;
-    const auto fieldId = pr.second;
-
-    if (fieldType == carbon::FieldType::Stop) {
-      break;
-    }
-
-    switch (fieldId) {
-      case 1: {
-        reader.readField(result_ref(), fieldType);
-        break;
-      }
-      case 2: {
-        reader.readField(valInt32_ref(), fieldType);
-        break;
-      }
-      default: {
-        reader.skip(fieldType);
-        break;
-      }
-    }
-  }
-  reader.readStructEnd();
+  carbon::test::B::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace B

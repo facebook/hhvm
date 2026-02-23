@@ -17,685 +17,730 @@ namespace benchmark {
 namespace thrift {
 
 template <class Writer>
-void CarbonTestDataSmall::serialize(Writer&& writer) const {
+void serialize(const CarbonTestDataSmall& self, Writer&& writer) {
   writer.writeStructBegin();
-  writer.writeField(1 /* field id */, intField1_ref());
-  writer.writeField(2 /* field id */, longField1_ref());
-  writer.writeField(3 /* field id */, shortString1_ref());
-  writer.writeField(4 /* field id */, intList1_ref());
-  writer.writeField(5 /* field id */, stringMap1_ref());
-  writer.writeField(6 /* field id */, boolField1_ref());
-  writer.writeField(7 /* field id */, doubleField1_ref());
+  writer.writeField(1 /* field id */, self.intField1_ref());
+  writer.writeField(2 /* field id */, self.longField1_ref());
+  writer.writeField(3 /* field id */, self.shortString1_ref());
+  writer.writeField(4 /* field id */, self.intList1_ref());
+  writer.writeField(5 /* field id */, self.stringMap1_ref());
+  writer.writeField(6 /* field id */, self.boolField1_ref());
+  writer.writeField(7 /* field id */, self.doubleField1_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
+}
+
+template <class Writer>
+void CarbonTestDataSmall::serialize(Writer&& writer) const {
+  benchmark::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(CarbonTestDataSmall& self, V&& v) {
+  if (!v.visitField(1, "intField1", *self.intField1_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "longField1", *self.longField1_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "shortString1", *self.shortString1_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "intList1", *self.intList1_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "stringMap1", *self.stringMap1_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "boolField1", *self.boolField1_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "doubleField1", *self.doubleField1_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const CarbonTestDataSmall& self, V&& v) {
+  if (!v.visitField(1, "intField1", *self.intField1_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "longField1", *self.longField1_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "shortString1", *self.shortString1_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "intList1", *self.intList1_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "stringMap1", *self.stringMap1_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "boolField1", *self.boolField1_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "doubleField1", *self.doubleField1_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void CarbonTestDataSmall::visitFields(V&& v) {
-  if (!v.visitField(1, "intField1", *this->intField1_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "longField1", *this->longField1_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "shortString1", *this->shortString1_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "intList1", *this->intList1_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "stringMap1", *this->stringMap1_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "boolField1", *this->boolField1_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "doubleField1", *this->doubleField1_ref())) {
-    return;
-  }
+  benchmark::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void CarbonTestDataSmall::visitFields(V&& v) const {
-  if (!v.visitField(1, "intField1", *this->intField1_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "longField1", *this->longField1_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "shortString1", *this->shortString1_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "intList1", *this->intList1_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "stringMap1", *this->stringMap1_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "boolField1", *this->boolField1_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "doubleField1", *this->doubleField1_ref())) {
-    return;
-  }
+  benchmark::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const CarbonTestDataMedium& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.intField1_ref());
+  writer.writeField(2 /* field id */, self.longField1_ref());
+  writer.writeField(3 /* field id */, self.shortString1_ref());
+  writer.writeField(4 /* field id */, self.intList1_ref());
+  writer.writeField(5 /* field id */, self.stringMap1_ref());
+  writer.writeField(6 /* field id */, self.boolField1_ref());
+  writer.writeField(7 /* field id */, self.doubleField1_ref());
+  writer.writeField(8 /* field id */, self.intField2_ref());
+  writer.writeField(9 /* field id */, self.longField2_ref());
+  writer.writeField(10 /* field id */, self.shortString2_ref());
+  writer.writeField(11 /* field id */, self.intList2_ref());
+  writer.writeField(12 /* field id */, self.stringMap2_ref());
+  writer.writeField(13 /* field id */, self.boolField2_ref());
+  writer.writeField(14 /* field id */, self.doubleField2_ref());
+  writer.writeField(15 /* field id */, self.intField3_ref());
+  writer.writeField(16 /* field id */, self.longField3_ref());
+  writer.writeField(17 /* field id */, self.shortString3_ref());
+  writer.writeField(18 /* field id */, self.intList3_ref());
+  writer.writeField(19 /* field id */, self.stringMap3_ref());
+  writer.writeField(20 /* field id */, self.boolField3_ref());
+  writer.writeField(21 /* field id */, self.doubleField3_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void CarbonTestDataMedium::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, intField1_ref());
-  writer.writeField(2 /* field id */, longField1_ref());
-  writer.writeField(3 /* field id */, shortString1_ref());
-  writer.writeField(4 /* field id */, intList1_ref());
-  writer.writeField(5 /* field id */, stringMap1_ref());
-  writer.writeField(6 /* field id */, boolField1_ref());
-  writer.writeField(7 /* field id */, doubleField1_ref());
-  writer.writeField(8 /* field id */, intField2_ref());
-  writer.writeField(9 /* field id */, longField2_ref());
-  writer.writeField(10 /* field id */, shortString2_ref());
-  writer.writeField(11 /* field id */, intList2_ref());
-  writer.writeField(12 /* field id */, stringMap2_ref());
-  writer.writeField(13 /* field id */, boolField2_ref());
-  writer.writeField(14 /* field id */, doubleField2_ref());
-  writer.writeField(15 /* field id */, intField3_ref());
-  writer.writeField(16 /* field id */, longField3_ref());
-  writer.writeField(17 /* field id */, shortString3_ref());
-  writer.writeField(18 /* field id */, intList3_ref());
-  writer.writeField(19 /* field id */, stringMap3_ref());
-  writer.writeField(20 /* field id */, boolField3_ref());
-  writer.writeField(21 /* field id */, doubleField3_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  benchmark::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(CarbonTestDataMedium& self, V&& v) {
+  if (!v.visitField(1, "intField1", *self.intField1_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "longField1", *self.longField1_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "shortString1", *self.shortString1_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "intList1", *self.intList1_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "stringMap1", *self.stringMap1_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "boolField1", *self.boolField1_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "doubleField1", *self.doubleField1_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "intField2", *self.intField2_ref())) {
+    return;
+  }
+  if (!v.visitField(9, "longField2", *self.longField2_ref())) {
+    return;
+  }
+  if (!v.visitField(10, "shortString2", *self.shortString2_ref())) {
+    return;
+  }
+  if (!v.visitField(11, "intList2", *self.intList2_ref())) {
+    return;
+  }
+  if (!v.visitField(12, "stringMap2", *self.stringMap2_ref())) {
+    return;
+  }
+  if (!v.visitField(13, "boolField2", *self.boolField2_ref())) {
+    return;
+  }
+  if (!v.visitField(14, "doubleField2", *self.doubleField2_ref())) {
+    return;
+  }
+  if (!v.visitField(15, "intField3", *self.intField3_ref())) {
+    return;
+  }
+  if (!v.visitField(16, "longField3", *self.longField3_ref())) {
+    return;
+  }
+  if (!v.visitField(17, "shortString3", *self.shortString3_ref())) {
+    return;
+  }
+  if (!v.visitField(18, "intList3", *self.intList3_ref())) {
+    return;
+  }
+  if (!v.visitField(19, "stringMap3", *self.stringMap3_ref())) {
+    return;
+  }
+  if (!v.visitField(20, "boolField3", *self.boolField3_ref())) {
+    return;
+  }
+  if (!v.visitField(21, "doubleField3", *self.doubleField3_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const CarbonTestDataMedium& self, V&& v) {
+  if (!v.visitField(1, "intField1", *self.intField1_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "longField1", *self.longField1_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "shortString1", *self.shortString1_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "intList1", *self.intList1_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "stringMap1", *self.stringMap1_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "boolField1", *self.boolField1_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "doubleField1", *self.doubleField1_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "intField2", *self.intField2_ref())) {
+    return;
+  }
+  if (!v.visitField(9, "longField2", *self.longField2_ref())) {
+    return;
+  }
+  if (!v.visitField(10, "shortString2", *self.shortString2_ref())) {
+    return;
+  }
+  if (!v.visitField(11, "intList2", *self.intList2_ref())) {
+    return;
+  }
+  if (!v.visitField(12, "stringMap2", *self.stringMap2_ref())) {
+    return;
+  }
+  if (!v.visitField(13, "boolField2", *self.boolField2_ref())) {
+    return;
+  }
+  if (!v.visitField(14, "doubleField2", *self.doubleField2_ref())) {
+    return;
+  }
+  if (!v.visitField(15, "intField3", *self.intField3_ref())) {
+    return;
+  }
+  if (!v.visitField(16, "longField3", *self.longField3_ref())) {
+    return;
+  }
+  if (!v.visitField(17, "shortString3", *self.shortString3_ref())) {
+    return;
+  }
+  if (!v.visitField(18, "intList3", *self.intList3_ref())) {
+    return;
+  }
+  if (!v.visitField(19, "stringMap3", *self.stringMap3_ref())) {
+    return;
+  }
+  if (!v.visitField(20, "boolField3", *self.boolField3_ref())) {
+    return;
+  }
+  if (!v.visitField(21, "doubleField3", *self.doubleField3_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void CarbonTestDataMedium::visitFields(V&& v) {
-  if (!v.visitField(1, "intField1", *this->intField1_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "longField1", *this->longField1_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "shortString1", *this->shortString1_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "intList1", *this->intList1_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "stringMap1", *this->stringMap1_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "boolField1", *this->boolField1_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "doubleField1", *this->doubleField1_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "intField2", *this->intField2_ref())) {
-    return;
-  }
-  if (!v.visitField(9, "longField2", *this->longField2_ref())) {
-    return;
-  }
-  if (!v.visitField(10, "shortString2", *this->shortString2_ref())) {
-    return;
-  }
-  if (!v.visitField(11, "intList2", *this->intList2_ref())) {
-    return;
-  }
-  if (!v.visitField(12, "stringMap2", *this->stringMap2_ref())) {
-    return;
-  }
-  if (!v.visitField(13, "boolField2", *this->boolField2_ref())) {
-    return;
-  }
-  if (!v.visitField(14, "doubleField2", *this->doubleField2_ref())) {
-    return;
-  }
-  if (!v.visitField(15, "intField3", *this->intField3_ref())) {
-    return;
-  }
-  if (!v.visitField(16, "longField3", *this->longField3_ref())) {
-    return;
-  }
-  if (!v.visitField(17, "shortString3", *this->shortString3_ref())) {
-    return;
-  }
-  if (!v.visitField(18, "intList3", *this->intList3_ref())) {
-    return;
-  }
-  if (!v.visitField(19, "stringMap3", *this->stringMap3_ref())) {
-    return;
-  }
-  if (!v.visitField(20, "boolField3", *this->boolField3_ref())) {
-    return;
-  }
-  if (!v.visitField(21, "doubleField3", *this->doubleField3_ref())) {
-    return;
-  }
+  benchmark::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void CarbonTestDataMedium::visitFields(V&& v) const {
-  if (!v.visitField(1, "intField1", *this->intField1_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "longField1", *this->longField1_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "shortString1", *this->shortString1_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "intList1", *this->intList1_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "stringMap1", *this->stringMap1_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "boolField1", *this->boolField1_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "doubleField1", *this->doubleField1_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "intField2", *this->intField2_ref())) {
-    return;
-  }
-  if (!v.visitField(9, "longField2", *this->longField2_ref())) {
-    return;
-  }
-  if (!v.visitField(10, "shortString2", *this->shortString2_ref())) {
-    return;
-  }
-  if (!v.visitField(11, "intList2", *this->intList2_ref())) {
-    return;
-  }
-  if (!v.visitField(12, "stringMap2", *this->stringMap2_ref())) {
-    return;
-  }
-  if (!v.visitField(13, "boolField2", *this->boolField2_ref())) {
-    return;
-  }
-  if (!v.visitField(14, "doubleField2", *this->doubleField2_ref())) {
-    return;
-  }
-  if (!v.visitField(15, "intField3", *this->intField3_ref())) {
-    return;
-  }
-  if (!v.visitField(16, "longField3", *this->longField3_ref())) {
-    return;
-  }
-  if (!v.visitField(17, "shortString3", *this->shortString3_ref())) {
-    return;
-  }
-  if (!v.visitField(18, "intList3", *this->intList3_ref())) {
-    return;
-  }
-  if (!v.visitField(19, "stringMap3", *this->stringMap3_ref())) {
-    return;
-  }
-  if (!v.visitField(20, "boolField3", *this->boolField3_ref())) {
-    return;
-  }
-  if (!v.visitField(21, "doubleField3", *this->doubleField3_ref())) {
-    return;
-  }
+  benchmark::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class Writer>
-void CarbonTestDataLarge::serialize(Writer&& writer) const {
+void serialize(const CarbonTestDataLarge& self, Writer&& writer) {
   writer.writeStructBegin();
-  writer.writeField(1 /* field id */, intField1_ref());
-  writer.writeField(2 /* field id */, longField1_ref());
-  writer.writeField(3 /* field id */, shortString1_ref());
-  writer.writeField(4 /* field id */, intList1_ref());
-  writer.writeField(5 /* field id */, stringMap1_ref());
-  writer.writeField(6 /* field id */, boolField1_ref());
-  writer.writeField(7 /* field id */, doubleField1_ref());
-  writer.writeField(8 /* field id */, intField2_ref());
-  writer.writeField(9 /* field id */, longField2_ref());
-  writer.writeField(10 /* field id */, shortString2_ref());
-  writer.writeField(11 /* field id */, intList2_ref());
-  writer.writeField(12 /* field id */, stringMap2_ref());
-  writer.writeField(13 /* field id */, boolField2_ref());
-  writer.writeField(14 /* field id */, doubleField2_ref());
-  writer.writeField(15 /* field id */, intField3_ref());
-  writer.writeField(16 /* field id */, longField3_ref());
-  writer.writeField(17 /* field id */, shortString3_ref());
-  writer.writeField(18 /* field id */, intList3_ref());
-  writer.writeField(19 /* field id */, stringMap3_ref());
-  writer.writeField(20 /* field id */, boolField3_ref());
-  writer.writeField(21 /* field id */, doubleField3_ref());
-  writer.writeField(22 /* field id */, intField4_ref());
-  writer.writeField(23 /* field id */, longField4_ref());
-  writer.writeField(24 /* field id */, shortString4_ref());
-  writer.writeField(25 /* field id */, intList4_ref());
-  writer.writeField(26 /* field id */, stringMap4_ref());
-  writer.writeField(27 /* field id */, boolField4_ref());
-  writer.writeField(28 /* field id */, doubleField4_ref());
-  writer.writeField(29 /* field id */, intField5_ref());
-  writer.writeField(30 /* field id */, longField5_ref());
-  writer.writeField(31 /* field id */, shortString5_ref());
-  writer.writeField(32 /* field id */, intList5_ref());
-  writer.writeField(33 /* field id */, stringMap5_ref());
-  writer.writeField(34 /* field id */, boolField5_ref());
-  writer.writeField(35 /* field id */, doubleField5_ref());
-  writer.writeField(36 /* field id */, intField6_ref());
-  writer.writeField(37 /* field id */, longField6_ref());
-  writer.writeField(38 /* field id */, shortString6_ref());
-  writer.writeField(39 /* field id */, intList6_ref());
-  writer.writeField(40 /* field id */, stringMap6_ref());
-  writer.writeField(41 /* field id */, boolField6_ref());
-  writer.writeField(42 /* field id */, doubleField6_ref());
-  writer.writeField(43 /* field id */, intField7_ref());
-  writer.writeField(44 /* field id */, longField7_ref());
-  writer.writeField(45 /* field id */, shortString7_ref());
-  writer.writeField(46 /* field id */, intList7_ref());
-  writer.writeField(47 /* field id */, stringMap7_ref());
-  writer.writeField(48 /* field id */, boolField7_ref());
-  writer.writeField(49 /* field id */, doubleField7_ref());
-  writer.writeField(50 /* field id */, intField8_ref());
-  writer.writeField(51 /* field id */, longField8_ref());
-  writer.writeField(52 /* field id */, shortString8_ref());
-  writer.writeField(53 /* field id */, intList8_ref());
-  writer.writeField(54 /* field id */, stringMap8_ref());
-  writer.writeField(55 /* field id */, boolField8_ref());
-  writer.writeField(56 /* field id */, doubleField8_ref());
-  writer.writeField(57 /* field id */, intField9_ref());
-  writer.writeField(58 /* field id */, longField9_ref());
-  writer.writeField(59 /* field id */, shortString9_ref());
-  writer.writeField(60 /* field id */, intList9_ref());
-  writer.writeField(61 /* field id */, stringMap9_ref());
-  writer.writeField(62 /* field id */, boolField9_ref());
-  writer.writeField(63 /* field id */, doubleField9_ref());
+  writer.writeField(1 /* field id */, self.intField1_ref());
+  writer.writeField(2 /* field id */, self.longField1_ref());
+  writer.writeField(3 /* field id */, self.shortString1_ref());
+  writer.writeField(4 /* field id */, self.intList1_ref());
+  writer.writeField(5 /* field id */, self.stringMap1_ref());
+  writer.writeField(6 /* field id */, self.boolField1_ref());
+  writer.writeField(7 /* field id */, self.doubleField1_ref());
+  writer.writeField(8 /* field id */, self.intField2_ref());
+  writer.writeField(9 /* field id */, self.longField2_ref());
+  writer.writeField(10 /* field id */, self.shortString2_ref());
+  writer.writeField(11 /* field id */, self.intList2_ref());
+  writer.writeField(12 /* field id */, self.stringMap2_ref());
+  writer.writeField(13 /* field id */, self.boolField2_ref());
+  writer.writeField(14 /* field id */, self.doubleField2_ref());
+  writer.writeField(15 /* field id */, self.intField3_ref());
+  writer.writeField(16 /* field id */, self.longField3_ref());
+  writer.writeField(17 /* field id */, self.shortString3_ref());
+  writer.writeField(18 /* field id */, self.intList3_ref());
+  writer.writeField(19 /* field id */, self.stringMap3_ref());
+  writer.writeField(20 /* field id */, self.boolField3_ref());
+  writer.writeField(21 /* field id */, self.doubleField3_ref());
+  writer.writeField(22 /* field id */, self.intField4_ref());
+  writer.writeField(23 /* field id */, self.longField4_ref());
+  writer.writeField(24 /* field id */, self.shortString4_ref());
+  writer.writeField(25 /* field id */, self.intList4_ref());
+  writer.writeField(26 /* field id */, self.stringMap4_ref());
+  writer.writeField(27 /* field id */, self.boolField4_ref());
+  writer.writeField(28 /* field id */, self.doubleField4_ref());
+  writer.writeField(29 /* field id */, self.intField5_ref());
+  writer.writeField(30 /* field id */, self.longField5_ref());
+  writer.writeField(31 /* field id */, self.shortString5_ref());
+  writer.writeField(32 /* field id */, self.intList5_ref());
+  writer.writeField(33 /* field id */, self.stringMap5_ref());
+  writer.writeField(34 /* field id */, self.boolField5_ref());
+  writer.writeField(35 /* field id */, self.doubleField5_ref());
+  writer.writeField(36 /* field id */, self.intField6_ref());
+  writer.writeField(37 /* field id */, self.longField6_ref());
+  writer.writeField(38 /* field id */, self.shortString6_ref());
+  writer.writeField(39 /* field id */, self.intList6_ref());
+  writer.writeField(40 /* field id */, self.stringMap6_ref());
+  writer.writeField(41 /* field id */, self.boolField6_ref());
+  writer.writeField(42 /* field id */, self.doubleField6_ref());
+  writer.writeField(43 /* field id */, self.intField7_ref());
+  writer.writeField(44 /* field id */, self.longField7_ref());
+  writer.writeField(45 /* field id */, self.shortString7_ref());
+  writer.writeField(46 /* field id */, self.intList7_ref());
+  writer.writeField(47 /* field id */, self.stringMap7_ref());
+  writer.writeField(48 /* field id */, self.boolField7_ref());
+  writer.writeField(49 /* field id */, self.doubleField7_ref());
+  writer.writeField(50 /* field id */, self.intField8_ref());
+  writer.writeField(51 /* field id */, self.longField8_ref());
+  writer.writeField(52 /* field id */, self.shortString8_ref());
+  writer.writeField(53 /* field id */, self.intList8_ref());
+  writer.writeField(54 /* field id */, self.stringMap8_ref());
+  writer.writeField(55 /* field id */, self.boolField8_ref());
+  writer.writeField(56 /* field id */, self.doubleField8_ref());
+  writer.writeField(57 /* field id */, self.intField9_ref());
+  writer.writeField(58 /* field id */, self.longField9_ref());
+  writer.writeField(59 /* field id */, self.shortString9_ref());
+  writer.writeField(60 /* field id */, self.intList9_ref());
+  writer.writeField(61 /* field id */, self.stringMap9_ref());
+  writer.writeField(62 /* field id */, self.boolField9_ref());
+  writer.writeField(63 /* field id */, self.doubleField9_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
 
+template <class Writer>
+void CarbonTestDataLarge::serialize(Writer&& writer) const {
+  benchmark::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
 template <class V>
-void CarbonTestDataLarge::visitFields(V&& v) {
-  if (!v.visitField(1, "intField1", *this->intField1_ref())) {
+void visitFields(CarbonTestDataLarge& self, V&& v) {
+  if (!v.visitField(1, "intField1", *self.intField1_ref())) {
     return;
   }
-  if (!v.visitField(2, "longField1", *this->longField1_ref())) {
+  if (!v.visitField(2, "longField1", *self.longField1_ref())) {
     return;
   }
-  if (!v.visitField(3, "shortString1", *this->shortString1_ref())) {
+  if (!v.visitField(3, "shortString1", *self.shortString1_ref())) {
     return;
   }
-  if (!v.visitField(4, "intList1", *this->intList1_ref())) {
+  if (!v.visitField(4, "intList1", *self.intList1_ref())) {
     return;
   }
-  if (!v.visitField(5, "stringMap1", *this->stringMap1_ref())) {
+  if (!v.visitField(5, "stringMap1", *self.stringMap1_ref())) {
     return;
   }
-  if (!v.visitField(6, "boolField1", *this->boolField1_ref())) {
+  if (!v.visitField(6, "boolField1", *self.boolField1_ref())) {
     return;
   }
-  if (!v.visitField(7, "doubleField1", *this->doubleField1_ref())) {
+  if (!v.visitField(7, "doubleField1", *self.doubleField1_ref())) {
     return;
   }
-  if (!v.visitField(8, "intField2", *this->intField2_ref())) {
+  if (!v.visitField(8, "intField2", *self.intField2_ref())) {
     return;
   }
-  if (!v.visitField(9, "longField2", *this->longField2_ref())) {
+  if (!v.visitField(9, "longField2", *self.longField2_ref())) {
     return;
   }
-  if (!v.visitField(10, "shortString2", *this->shortString2_ref())) {
+  if (!v.visitField(10, "shortString2", *self.shortString2_ref())) {
     return;
   }
-  if (!v.visitField(11, "intList2", *this->intList2_ref())) {
+  if (!v.visitField(11, "intList2", *self.intList2_ref())) {
     return;
   }
-  if (!v.visitField(12, "stringMap2", *this->stringMap2_ref())) {
+  if (!v.visitField(12, "stringMap2", *self.stringMap2_ref())) {
     return;
   }
-  if (!v.visitField(13, "boolField2", *this->boolField2_ref())) {
+  if (!v.visitField(13, "boolField2", *self.boolField2_ref())) {
     return;
   }
-  if (!v.visitField(14, "doubleField2", *this->doubleField2_ref())) {
+  if (!v.visitField(14, "doubleField2", *self.doubleField2_ref())) {
     return;
   }
-  if (!v.visitField(15, "intField3", *this->intField3_ref())) {
+  if (!v.visitField(15, "intField3", *self.intField3_ref())) {
     return;
   }
-  if (!v.visitField(16, "longField3", *this->longField3_ref())) {
+  if (!v.visitField(16, "longField3", *self.longField3_ref())) {
     return;
   }
-  if (!v.visitField(17, "shortString3", *this->shortString3_ref())) {
+  if (!v.visitField(17, "shortString3", *self.shortString3_ref())) {
     return;
   }
-  if (!v.visitField(18, "intList3", *this->intList3_ref())) {
+  if (!v.visitField(18, "intList3", *self.intList3_ref())) {
     return;
   }
-  if (!v.visitField(19, "stringMap3", *this->stringMap3_ref())) {
+  if (!v.visitField(19, "stringMap3", *self.stringMap3_ref())) {
     return;
   }
-  if (!v.visitField(20, "boolField3", *this->boolField3_ref())) {
+  if (!v.visitField(20, "boolField3", *self.boolField3_ref())) {
     return;
   }
-  if (!v.visitField(21, "doubleField3", *this->doubleField3_ref())) {
+  if (!v.visitField(21, "doubleField3", *self.doubleField3_ref())) {
     return;
   }
-  if (!v.visitField(22, "intField4", *this->intField4_ref())) {
+  if (!v.visitField(22, "intField4", *self.intField4_ref())) {
     return;
   }
-  if (!v.visitField(23, "longField4", *this->longField4_ref())) {
+  if (!v.visitField(23, "longField4", *self.longField4_ref())) {
     return;
   }
-  if (!v.visitField(24, "shortString4", *this->shortString4_ref())) {
+  if (!v.visitField(24, "shortString4", *self.shortString4_ref())) {
     return;
   }
-  if (!v.visitField(25, "intList4", *this->intList4_ref())) {
+  if (!v.visitField(25, "intList4", *self.intList4_ref())) {
     return;
   }
-  if (!v.visitField(26, "stringMap4", *this->stringMap4_ref())) {
+  if (!v.visitField(26, "stringMap4", *self.stringMap4_ref())) {
     return;
   }
-  if (!v.visitField(27, "boolField4", *this->boolField4_ref())) {
+  if (!v.visitField(27, "boolField4", *self.boolField4_ref())) {
     return;
   }
-  if (!v.visitField(28, "doubleField4", *this->doubleField4_ref())) {
+  if (!v.visitField(28, "doubleField4", *self.doubleField4_ref())) {
     return;
   }
-  if (!v.visitField(29, "intField5", *this->intField5_ref())) {
+  if (!v.visitField(29, "intField5", *self.intField5_ref())) {
     return;
   }
-  if (!v.visitField(30, "longField5", *this->longField5_ref())) {
+  if (!v.visitField(30, "longField5", *self.longField5_ref())) {
     return;
   }
-  if (!v.visitField(31, "shortString5", *this->shortString5_ref())) {
+  if (!v.visitField(31, "shortString5", *self.shortString5_ref())) {
     return;
   }
-  if (!v.visitField(32, "intList5", *this->intList5_ref())) {
+  if (!v.visitField(32, "intList5", *self.intList5_ref())) {
     return;
   }
-  if (!v.visitField(33, "stringMap5", *this->stringMap5_ref())) {
+  if (!v.visitField(33, "stringMap5", *self.stringMap5_ref())) {
     return;
   }
-  if (!v.visitField(34, "boolField5", *this->boolField5_ref())) {
+  if (!v.visitField(34, "boolField5", *self.boolField5_ref())) {
     return;
   }
-  if (!v.visitField(35, "doubleField5", *this->doubleField5_ref())) {
+  if (!v.visitField(35, "doubleField5", *self.doubleField5_ref())) {
     return;
   }
-  if (!v.visitField(36, "intField6", *this->intField6_ref())) {
+  if (!v.visitField(36, "intField6", *self.intField6_ref())) {
     return;
   }
-  if (!v.visitField(37, "longField6", *this->longField6_ref())) {
+  if (!v.visitField(37, "longField6", *self.longField6_ref())) {
     return;
   }
-  if (!v.visitField(38, "shortString6", *this->shortString6_ref())) {
+  if (!v.visitField(38, "shortString6", *self.shortString6_ref())) {
     return;
   }
-  if (!v.visitField(39, "intList6", *this->intList6_ref())) {
+  if (!v.visitField(39, "intList6", *self.intList6_ref())) {
     return;
   }
-  if (!v.visitField(40, "stringMap6", *this->stringMap6_ref())) {
+  if (!v.visitField(40, "stringMap6", *self.stringMap6_ref())) {
     return;
   }
-  if (!v.visitField(41, "boolField6", *this->boolField6_ref())) {
+  if (!v.visitField(41, "boolField6", *self.boolField6_ref())) {
     return;
   }
-  if (!v.visitField(42, "doubleField6", *this->doubleField6_ref())) {
+  if (!v.visitField(42, "doubleField6", *self.doubleField6_ref())) {
     return;
   }
-  if (!v.visitField(43, "intField7", *this->intField7_ref())) {
+  if (!v.visitField(43, "intField7", *self.intField7_ref())) {
     return;
   }
-  if (!v.visitField(44, "longField7", *this->longField7_ref())) {
+  if (!v.visitField(44, "longField7", *self.longField7_ref())) {
     return;
   }
-  if (!v.visitField(45, "shortString7", *this->shortString7_ref())) {
+  if (!v.visitField(45, "shortString7", *self.shortString7_ref())) {
     return;
   }
-  if (!v.visitField(46, "intList7", *this->intList7_ref())) {
+  if (!v.visitField(46, "intList7", *self.intList7_ref())) {
     return;
   }
-  if (!v.visitField(47, "stringMap7", *this->stringMap7_ref())) {
+  if (!v.visitField(47, "stringMap7", *self.stringMap7_ref())) {
     return;
   }
-  if (!v.visitField(48, "boolField7", *this->boolField7_ref())) {
+  if (!v.visitField(48, "boolField7", *self.boolField7_ref())) {
     return;
   }
-  if (!v.visitField(49, "doubleField7", *this->doubleField7_ref())) {
+  if (!v.visitField(49, "doubleField7", *self.doubleField7_ref())) {
     return;
   }
-  if (!v.visitField(50, "intField8", *this->intField8_ref())) {
+  if (!v.visitField(50, "intField8", *self.intField8_ref())) {
     return;
   }
-  if (!v.visitField(51, "longField8", *this->longField8_ref())) {
+  if (!v.visitField(51, "longField8", *self.longField8_ref())) {
     return;
   }
-  if (!v.visitField(52, "shortString8", *this->shortString8_ref())) {
+  if (!v.visitField(52, "shortString8", *self.shortString8_ref())) {
     return;
   }
-  if (!v.visitField(53, "intList8", *this->intList8_ref())) {
+  if (!v.visitField(53, "intList8", *self.intList8_ref())) {
     return;
   }
-  if (!v.visitField(54, "stringMap8", *this->stringMap8_ref())) {
+  if (!v.visitField(54, "stringMap8", *self.stringMap8_ref())) {
     return;
   }
-  if (!v.visitField(55, "boolField8", *this->boolField8_ref())) {
+  if (!v.visitField(55, "boolField8", *self.boolField8_ref())) {
     return;
   }
-  if (!v.visitField(56, "doubleField8", *this->doubleField8_ref())) {
+  if (!v.visitField(56, "doubleField8", *self.doubleField8_ref())) {
     return;
   }
-  if (!v.visitField(57, "intField9", *this->intField9_ref())) {
+  if (!v.visitField(57, "intField9", *self.intField9_ref())) {
     return;
   }
-  if (!v.visitField(58, "longField9", *this->longField9_ref())) {
+  if (!v.visitField(58, "longField9", *self.longField9_ref())) {
     return;
   }
-  if (!v.visitField(59, "shortString9", *this->shortString9_ref())) {
+  if (!v.visitField(59, "shortString9", *self.shortString9_ref())) {
     return;
   }
-  if (!v.visitField(60, "intList9", *this->intList9_ref())) {
+  if (!v.visitField(60, "intList9", *self.intList9_ref())) {
     return;
   }
-  if (!v.visitField(61, "stringMap9", *this->stringMap9_ref())) {
+  if (!v.visitField(61, "stringMap9", *self.stringMap9_ref())) {
     return;
   }
-  if (!v.visitField(62, "boolField9", *this->boolField9_ref())) {
+  if (!v.visitField(62, "boolField9", *self.boolField9_ref())) {
     return;
   }
-  if (!v.visitField(63, "doubleField9", *this->doubleField9_ref())) {
+  if (!v.visitField(63, "doubleField9", *self.doubleField9_ref())) {
     return;
   }
 }
 
 template <class V>
+void visitFields(const CarbonTestDataLarge& self, V&& v) {
+  if (!v.visitField(1, "intField1", *self.intField1_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "longField1", *self.longField1_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "shortString1", *self.shortString1_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "intList1", *self.intList1_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "stringMap1", *self.stringMap1_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "boolField1", *self.boolField1_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "doubleField1", *self.doubleField1_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "intField2", *self.intField2_ref())) {
+    return;
+  }
+  if (!v.visitField(9, "longField2", *self.longField2_ref())) {
+    return;
+  }
+  if (!v.visitField(10, "shortString2", *self.shortString2_ref())) {
+    return;
+  }
+  if (!v.visitField(11, "intList2", *self.intList2_ref())) {
+    return;
+  }
+  if (!v.visitField(12, "stringMap2", *self.stringMap2_ref())) {
+    return;
+  }
+  if (!v.visitField(13, "boolField2", *self.boolField2_ref())) {
+    return;
+  }
+  if (!v.visitField(14, "doubleField2", *self.doubleField2_ref())) {
+    return;
+  }
+  if (!v.visitField(15, "intField3", *self.intField3_ref())) {
+    return;
+  }
+  if (!v.visitField(16, "longField3", *self.longField3_ref())) {
+    return;
+  }
+  if (!v.visitField(17, "shortString3", *self.shortString3_ref())) {
+    return;
+  }
+  if (!v.visitField(18, "intList3", *self.intList3_ref())) {
+    return;
+  }
+  if (!v.visitField(19, "stringMap3", *self.stringMap3_ref())) {
+    return;
+  }
+  if (!v.visitField(20, "boolField3", *self.boolField3_ref())) {
+    return;
+  }
+  if (!v.visitField(21, "doubleField3", *self.doubleField3_ref())) {
+    return;
+  }
+  if (!v.visitField(22, "intField4", *self.intField4_ref())) {
+    return;
+  }
+  if (!v.visitField(23, "longField4", *self.longField4_ref())) {
+    return;
+  }
+  if (!v.visitField(24, "shortString4", *self.shortString4_ref())) {
+    return;
+  }
+  if (!v.visitField(25, "intList4", *self.intList4_ref())) {
+    return;
+  }
+  if (!v.visitField(26, "stringMap4", *self.stringMap4_ref())) {
+    return;
+  }
+  if (!v.visitField(27, "boolField4", *self.boolField4_ref())) {
+    return;
+  }
+  if (!v.visitField(28, "doubleField4", *self.doubleField4_ref())) {
+    return;
+  }
+  if (!v.visitField(29, "intField5", *self.intField5_ref())) {
+    return;
+  }
+  if (!v.visitField(30, "longField5", *self.longField5_ref())) {
+    return;
+  }
+  if (!v.visitField(31, "shortString5", *self.shortString5_ref())) {
+    return;
+  }
+  if (!v.visitField(32, "intList5", *self.intList5_ref())) {
+    return;
+  }
+  if (!v.visitField(33, "stringMap5", *self.stringMap5_ref())) {
+    return;
+  }
+  if (!v.visitField(34, "boolField5", *self.boolField5_ref())) {
+    return;
+  }
+  if (!v.visitField(35, "doubleField5", *self.doubleField5_ref())) {
+    return;
+  }
+  if (!v.visitField(36, "intField6", *self.intField6_ref())) {
+    return;
+  }
+  if (!v.visitField(37, "longField6", *self.longField6_ref())) {
+    return;
+  }
+  if (!v.visitField(38, "shortString6", *self.shortString6_ref())) {
+    return;
+  }
+  if (!v.visitField(39, "intList6", *self.intList6_ref())) {
+    return;
+  }
+  if (!v.visitField(40, "stringMap6", *self.stringMap6_ref())) {
+    return;
+  }
+  if (!v.visitField(41, "boolField6", *self.boolField6_ref())) {
+    return;
+  }
+  if (!v.visitField(42, "doubleField6", *self.doubleField6_ref())) {
+    return;
+  }
+  if (!v.visitField(43, "intField7", *self.intField7_ref())) {
+    return;
+  }
+  if (!v.visitField(44, "longField7", *self.longField7_ref())) {
+    return;
+  }
+  if (!v.visitField(45, "shortString7", *self.shortString7_ref())) {
+    return;
+  }
+  if (!v.visitField(46, "intList7", *self.intList7_ref())) {
+    return;
+  }
+  if (!v.visitField(47, "stringMap7", *self.stringMap7_ref())) {
+    return;
+  }
+  if (!v.visitField(48, "boolField7", *self.boolField7_ref())) {
+    return;
+  }
+  if (!v.visitField(49, "doubleField7", *self.doubleField7_ref())) {
+    return;
+  }
+  if (!v.visitField(50, "intField8", *self.intField8_ref())) {
+    return;
+  }
+  if (!v.visitField(51, "longField8", *self.longField8_ref())) {
+    return;
+  }
+  if (!v.visitField(52, "shortString8", *self.shortString8_ref())) {
+    return;
+  }
+  if (!v.visitField(53, "intList8", *self.intList8_ref())) {
+    return;
+  }
+  if (!v.visitField(54, "stringMap8", *self.stringMap8_ref())) {
+    return;
+  }
+  if (!v.visitField(55, "boolField8", *self.boolField8_ref())) {
+    return;
+  }
+  if (!v.visitField(56, "doubleField8", *self.doubleField8_ref())) {
+    return;
+  }
+  if (!v.visitField(57, "intField9", *self.intField9_ref())) {
+    return;
+  }
+  if (!v.visitField(58, "longField9", *self.longField9_ref())) {
+    return;
+  }
+  if (!v.visitField(59, "shortString9", *self.shortString9_ref())) {
+    return;
+  }
+  if (!v.visitField(60, "intList9", *self.intList9_ref())) {
+    return;
+  }
+  if (!v.visitField(61, "stringMap9", *self.stringMap9_ref())) {
+    return;
+  }
+  if (!v.visitField(62, "boolField9", *self.boolField9_ref())) {
+    return;
+  }
+  if (!v.visitField(63, "doubleField9", *self.doubleField9_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void CarbonTestDataLarge::visitFields(V&& v) {
+  benchmark::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class V>
 void CarbonTestDataLarge::visitFields(V&& v) const {
-  if (!v.visitField(1, "intField1", *this->intField1_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "longField1", *this->longField1_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "shortString1", *this->shortString1_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "intList1", *this->intList1_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "stringMap1", *this->stringMap1_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "boolField1", *this->boolField1_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "doubleField1", *this->doubleField1_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "intField2", *this->intField2_ref())) {
-    return;
-  }
-  if (!v.visitField(9, "longField2", *this->longField2_ref())) {
-    return;
-  }
-  if (!v.visitField(10, "shortString2", *this->shortString2_ref())) {
-    return;
-  }
-  if (!v.visitField(11, "intList2", *this->intList2_ref())) {
-    return;
-  }
-  if (!v.visitField(12, "stringMap2", *this->stringMap2_ref())) {
-    return;
-  }
-  if (!v.visitField(13, "boolField2", *this->boolField2_ref())) {
-    return;
-  }
-  if (!v.visitField(14, "doubleField2", *this->doubleField2_ref())) {
-    return;
-  }
-  if (!v.visitField(15, "intField3", *this->intField3_ref())) {
-    return;
-  }
-  if (!v.visitField(16, "longField3", *this->longField3_ref())) {
-    return;
-  }
-  if (!v.visitField(17, "shortString3", *this->shortString3_ref())) {
-    return;
-  }
-  if (!v.visitField(18, "intList3", *this->intList3_ref())) {
-    return;
-  }
-  if (!v.visitField(19, "stringMap3", *this->stringMap3_ref())) {
-    return;
-  }
-  if (!v.visitField(20, "boolField3", *this->boolField3_ref())) {
-    return;
-  }
-  if (!v.visitField(21, "doubleField3", *this->doubleField3_ref())) {
-    return;
-  }
-  if (!v.visitField(22, "intField4", *this->intField4_ref())) {
-    return;
-  }
-  if (!v.visitField(23, "longField4", *this->longField4_ref())) {
-    return;
-  }
-  if (!v.visitField(24, "shortString4", *this->shortString4_ref())) {
-    return;
-  }
-  if (!v.visitField(25, "intList4", *this->intList4_ref())) {
-    return;
-  }
-  if (!v.visitField(26, "stringMap4", *this->stringMap4_ref())) {
-    return;
-  }
-  if (!v.visitField(27, "boolField4", *this->boolField4_ref())) {
-    return;
-  }
-  if (!v.visitField(28, "doubleField4", *this->doubleField4_ref())) {
-    return;
-  }
-  if (!v.visitField(29, "intField5", *this->intField5_ref())) {
-    return;
-  }
-  if (!v.visitField(30, "longField5", *this->longField5_ref())) {
-    return;
-  }
-  if (!v.visitField(31, "shortString5", *this->shortString5_ref())) {
-    return;
-  }
-  if (!v.visitField(32, "intList5", *this->intList5_ref())) {
-    return;
-  }
-  if (!v.visitField(33, "stringMap5", *this->stringMap5_ref())) {
-    return;
-  }
-  if (!v.visitField(34, "boolField5", *this->boolField5_ref())) {
-    return;
-  }
-  if (!v.visitField(35, "doubleField5", *this->doubleField5_ref())) {
-    return;
-  }
-  if (!v.visitField(36, "intField6", *this->intField6_ref())) {
-    return;
-  }
-  if (!v.visitField(37, "longField6", *this->longField6_ref())) {
-    return;
-  }
-  if (!v.visitField(38, "shortString6", *this->shortString6_ref())) {
-    return;
-  }
-  if (!v.visitField(39, "intList6", *this->intList6_ref())) {
-    return;
-  }
-  if (!v.visitField(40, "stringMap6", *this->stringMap6_ref())) {
-    return;
-  }
-  if (!v.visitField(41, "boolField6", *this->boolField6_ref())) {
-    return;
-  }
-  if (!v.visitField(42, "doubleField6", *this->doubleField6_ref())) {
-    return;
-  }
-  if (!v.visitField(43, "intField7", *this->intField7_ref())) {
-    return;
-  }
-  if (!v.visitField(44, "longField7", *this->longField7_ref())) {
-    return;
-  }
-  if (!v.visitField(45, "shortString7", *this->shortString7_ref())) {
-    return;
-  }
-  if (!v.visitField(46, "intList7", *this->intList7_ref())) {
-    return;
-  }
-  if (!v.visitField(47, "stringMap7", *this->stringMap7_ref())) {
-    return;
-  }
-  if (!v.visitField(48, "boolField7", *this->boolField7_ref())) {
-    return;
-  }
-  if (!v.visitField(49, "doubleField7", *this->doubleField7_ref())) {
-    return;
-  }
-  if (!v.visitField(50, "intField8", *this->intField8_ref())) {
-    return;
-  }
-  if (!v.visitField(51, "longField8", *this->longField8_ref())) {
-    return;
-  }
-  if (!v.visitField(52, "shortString8", *this->shortString8_ref())) {
-    return;
-  }
-  if (!v.visitField(53, "intList8", *this->intList8_ref())) {
-    return;
-  }
-  if (!v.visitField(54, "stringMap8", *this->stringMap8_ref())) {
-    return;
-  }
-  if (!v.visitField(55, "boolField8", *this->boolField8_ref())) {
-    return;
-  }
-  if (!v.visitField(56, "doubleField8", *this->doubleField8_ref())) {
-    return;
-  }
-  if (!v.visitField(57, "intField9", *this->intField9_ref())) {
-    return;
-  }
-  if (!v.visitField(58, "longField9", *this->longField9_ref())) {
-    return;
-  }
-  if (!v.visitField(59, "shortString9", *this->shortString9_ref())) {
-    return;
-  }
-  if (!v.visitField(60, "intList9", *this->intList9_ref())) {
-    return;
-  }
-  if (!v.visitField(61, "stringMap9", *this->stringMap9_ref())) {
-    return;
-  }
-  if (!v.visitField(62, "boolField9", *this->boolField9_ref())) {
-    return;
-  }
-  if (!v.visitField(63, "doubleField9", *this->doubleField9_ref())) {
-    return;
-  }
+  benchmark::thrift::visitFields(*this, std::forward<V>(v));
 }
 } // namespace thrift
 } // namespace benchmark

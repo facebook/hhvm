@@ -17,161 +17,221 @@ namespace hellogoodbye {
 namespace thrift {
 
 template <class Writer>
-void HelloRequest::serialize(Writer&& writer) const {
+void serialize(const HelloRequest& self, Writer&& writer) {
   writer.writeStructBegin();
-  writer.writeField(1 /* field id */, key_ref());
-  writer.writeField(2 /* field id */, shardId_ref());
-  writer.writeField(3 /* field id */, deadlineMs_ref());
-  writer.writeField(4 /* field id */, message_ref());
-  writer.writeField(5 /* field id */, priority_ref());
-  writer.writeField(6 /* field id */, beforeLatencyUs_ref());
-  writer.writeField(7 /* field id */, afterLatencyUs_ref());
-  writer.writeField(8 /* field id */, clientVersion_ref());
+  writer.writeField(1 /* field id */, self.key_ref());
+  writer.writeField(2 /* field id */, self.shardId_ref());
+  writer.writeField(3 /* field id */, self.deadlineMs_ref());
+  writer.writeField(4 /* field id */, self.message_ref());
+  writer.writeField(5 /* field id */, self.priority_ref());
+  writer.writeField(6 /* field id */, self.beforeLatencyUs_ref());
+  writer.writeField(7 /* field id */, self.afterLatencyUs_ref());
+  writer.writeField(8 /* field id */, self.clientVersion_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
+}
+
+template <class Writer>
+void HelloRequest::serialize(Writer&& writer) const {
+  hellogoodbye::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(HelloRequest& self, V&& v) {
+  if (!v.visitField(1, "key", *self.key_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "shardId", *self.shardId_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "deadlineMs", *self.deadlineMs_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "message", *self.message_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "priority", *self.priority_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "beforeLatencyUs", *self.beforeLatencyUs_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "afterLatencyUs", *self.afterLatencyUs_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "clientVersion", *self.clientVersion_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const HelloRequest& self, V&& v) {
+  if (!v.visitField(1, "key", *self.key_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "shardId", *self.shardId_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "deadlineMs", *self.deadlineMs_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "message", *self.message_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "priority", *self.priority_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "beforeLatencyUs", *self.beforeLatencyUs_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "afterLatencyUs", *self.afterLatencyUs_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "clientVersion", *self.clientVersion_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void HelloRequest::visitFields(V&& v) {
-  if (!v.visitField(1, "key", *this->key_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "shardId", *this->shardId_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "deadlineMs", *this->deadlineMs_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "message", *this->message_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "priority", *this->priority_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "beforeLatencyUs", *this->beforeLatencyUs_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "afterLatencyUs", *this->afterLatencyUs_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "clientVersion", *this->clientVersion_ref())) {
-    return;
-  }
+  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void HelloRequest::visitFields(V&& v) const {
-  if (!v.visitField(1, "key", *this->key_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "shardId", *this->shardId_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "deadlineMs", *this->deadlineMs_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "message", *this->message_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "priority", *this->priority_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "beforeLatencyUs", *this->beforeLatencyUs_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "afterLatencyUs", *this->afterLatencyUs_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "clientVersion", *this->clientVersion_ref())) {
-    return;
-  }
+  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const HelloReply& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.result_ref());
+  writer.writeField(2 /* field id */, self.message_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void HelloReply::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, result_ref());
-  writer.writeField(2 /* field id */, message_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  hellogoodbye::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(HelloReply& self, V&& v) {
+  if (!v.visitField(1, "result", *self.result_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "message", *self.message_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const HelloReply& self, V&& v) {
+  if (!v.visitField(1, "result", *self.result_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "message", *self.message_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void HelloReply::visitFields(V&& v) {
-  if (!v.visitField(1, "result", *this->result_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "message", *this->message_ref())) {
-    return;
-  }
+  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void HelloReply::visitFields(V&& v) const {
-  if (!v.visitField(1, "result", *this->result_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "message", *this->message_ref())) {
-    return;
-  }
+  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const GoodbyeRequest& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.key_ref());
+  writer.writeField(2 /* field id */, self.shardId_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void GoodbyeRequest::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, key_ref());
-  writer.writeField(2 /* field id */, shardId_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  hellogoodbye::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(GoodbyeRequest& self, V&& v) {
+  if (!v.visitField(1, "key", *self.key_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "shardId", *self.shardId_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const GoodbyeRequest& self, V&& v) {
+  if (!v.visitField(1, "key", *self.key_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "shardId", *self.shardId_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void GoodbyeRequest::visitFields(V&& v) {
-  if (!v.visitField(1, "key", *this->key_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "shardId", *this->shardId_ref())) {
-    return;
-  }
+  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void GoodbyeRequest::visitFields(V&& v) const {
-  if (!v.visitField(1, "key", *this->key_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "shardId", *this->shardId_ref())) {
-    return;
-  }
+  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class Writer>
-void GoodbyeReply::serialize(Writer&& writer) const {
+void serialize(const GoodbyeReply& self, Writer&& writer) {
   writer.writeStructBegin();
-  writer.writeField(1 /* field id */, result_ref());
-  writer.writeField(2 /* field id */, message_ref());
+  writer.writeField(1 /* field id */, self.result_ref());
+  writer.writeField(2 /* field id */, self.message_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
 
+template <class Writer>
+void GoodbyeReply::serialize(Writer&& writer) const {
+  hellogoodbye::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
 template <class V>
-void GoodbyeReply::visitFields(V&& v) {
-  if (!v.visitField(1, "result", *this->result_ref())) {
+void visitFields(GoodbyeReply& self, V&& v) {
+  if (!v.visitField(1, "result", *self.result_ref())) {
     return;
   }
-  if (!v.visitField(2, "message", *this->message_ref())) {
+  if (!v.visitField(2, "message", *self.message_ref())) {
     return;
   }
 }
 
 template <class V>
+void visitFields(const GoodbyeReply& self, V&& v) {
+  if (!v.visitField(1, "result", *self.result_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "message", *self.message_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void GoodbyeReply::visitFields(V&& v) {
+  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class V>
 void GoodbyeReply::visitFields(V&& v) const {
-  if (!v.visitField(1, "result", *this->result_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "message", *this->message_ref())) {
-    return;
-  }
+  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
 }
 } // namespace thrift
 } // namespace hellogoodbye

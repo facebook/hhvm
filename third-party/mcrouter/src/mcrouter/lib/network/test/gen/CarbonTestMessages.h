@@ -43,4 +43,34 @@ using McExpTestRequest = facebook::memcache::test::thrift::McExpTestRequest;
 } // namespace memcache
 } // namespace facebook
 
+namespace facebook {
+namespace memcache {
+namespace test {
+namespace thrift {
+
+template <class Writer>
+void serialize(const ManyFields& self, Writer&& writer);
+
+void deserialize(ManyFields& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(ManyFields& self, V&& v);
+
+template <class V>
+void visitFields(const ManyFields& self, V&& v);
+
+template <class Writer>
+void serialize(const McExpTestRequest& self, Writer&& writer);
+
+void deserialize(McExpTestRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McExpTestRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McExpTestRequest& self, V&& v);
+} // namespace thrift
+} // namespace test
+} // namespace memcache
+} // namespace facebook
 #include "CarbonTestMessages-inl.h"

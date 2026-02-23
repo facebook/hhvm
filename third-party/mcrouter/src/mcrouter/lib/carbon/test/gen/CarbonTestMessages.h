@@ -189,4 +189,233 @@ using StructWithOptionalEnumInt8 = carbon::test::thrift::StructWithOptionalEnumI
 } // namespace test
 } // namespace carbon
 
+namespace carbon {
+namespace test {
+namespace thrift {
+
+template <class Writer>
+void serialize(const TestRequest& self, Writer&& writer);
+
+void deserialize(TestRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TestRequest& self, V&& v);
+
+template <class V>
+void visitFields(const TestRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const TestReply& self, Writer&& writer);
+
+void deserialize(TestReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TestReply& self, V&& v);
+
+template <class V>
+void visitFields(const TestReply& self, V&& v);
+
+template <class Writer>
+void serialize(const TestRequestStringKey& self, Writer&& writer);
+
+void deserialize(TestRequestStringKey& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TestRequestStringKey& self, V&& v);
+
+template <class V>
+void visitFields(const TestRequestStringKey& self, V&& v);
+
+template <class Writer>
+void serialize(const TestReplyStringKey& self, Writer&& writer);
+
+void deserialize(TestReplyStringKey& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TestReplyStringKey& self, V&& v);
+
+template <class V>
+void visitFields(const TestReplyStringKey& self, V&& v);
+
+template <class Writer>
+void serialize(const TestOptionalBool& self, Writer&& writer);
+
+void deserialize(TestOptionalBool& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TestOptionalBool& self, V&& v);
+
+template <class V>
+void visitFields(const TestOptionalBool& self, V&& v);
+
+template <class Writer>
+void serialize(const TestUnion& self, Writer&& writer);
+
+void deserialize(TestUnion& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TestUnion& self, V&& v);
+
+template <class V>
+void visitFields(const TestUnion& self, V&& v);
+
+template <class V>
+void foreachMember(TestUnion& self, V&& v);
+
+template <class Writer>
+void serialize(const TestF14Containers& self, Writer&& writer);
+
+void deserialize(TestF14Containers& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TestF14Containers& self, V&& v);
+
+template <class V>
+void visitFields(const TestF14Containers& self, V&& v);
+
+template <class Writer>
+void serialize(const TestStdContainers& self, Writer&& writer);
+
+void deserialize(TestStdContainers& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TestStdContainers& self, V&& v);
+
+template <class V>
+void visitFields(const TestStdContainers& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithEnumUInt32& self, Writer&& writer);
+
+void deserialize(StructWithEnumUInt32& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithEnumUInt32& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithEnumUInt32& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithEnumUInt16& self, Writer&& writer);
+
+void deserialize(StructWithEnumUInt16& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithEnumUInt16& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithEnumUInt16& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithEnumUInt8& self, Writer&& writer);
+
+void deserialize(StructWithEnumUInt8& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithEnumUInt8& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithEnumUInt8& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithEnumInt32& self, Writer&& writer);
+
+void deserialize(StructWithEnumInt32& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithEnumInt32& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithEnumInt32& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithEnumInt16& self, Writer&& writer);
+
+void deserialize(StructWithEnumInt16& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithEnumInt16& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithEnumInt16& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithEnumInt8& self, Writer&& writer);
+
+void deserialize(StructWithEnumInt8& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithEnumInt8& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithEnumInt8& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithOptionalEnumUInt32& self, Writer&& writer);
+
+void deserialize(StructWithOptionalEnumUInt32& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithOptionalEnumUInt32& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithOptionalEnumUInt32& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithOptionalEnumUInt16& self, Writer&& writer);
+
+void deserialize(StructWithOptionalEnumUInt16& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithOptionalEnumUInt16& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithOptionalEnumUInt16& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithOptionalEnumUInt8& self, Writer&& writer);
+
+void deserialize(StructWithOptionalEnumUInt8& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithOptionalEnumUInt8& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithOptionalEnumUInt8& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithOptionalEnumInt32& self, Writer&& writer);
+
+void deserialize(StructWithOptionalEnumInt32& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithOptionalEnumInt32& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithOptionalEnumInt32& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithOptionalEnumInt16& self, Writer&& writer);
+
+void deserialize(StructWithOptionalEnumInt16& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithOptionalEnumInt16& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithOptionalEnumInt16& self, V&& v);
+
+template <class Writer>
+void serialize(const StructWithOptionalEnumInt8& self, Writer&& writer);
+
+void deserialize(StructWithOptionalEnumInt8& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(StructWithOptionalEnumInt8& self, V&& v);
+
+template <class V>
+void visitFields(const StructWithOptionalEnumInt8& self, V&& v);
+} // namespace thrift
+} // namespace test
+} // namespace carbon
 #include "CarbonTestMessages-inl.h"

@@ -292,7 +292,146 @@ class GoAwayRequest : public carbon::ReplyCommon, public facebook::memcache::thr
   friend class apache::thrift::Cpp2Ops<GoAwayRequest>;
 
 };
+
 } // namespace memcache
 } // namespace facebook
 
+namespace facebook {
+namespace memcache {
+namespace thrift {
+
+template <class Writer>
+void serialize(const McVersionRequest& self, Writer&& writer);
+
+void deserialize(McVersionRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McVersionRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McVersionRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McVersionReply& self, Writer&& writer);
+
+void deserialize(McVersionReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McVersionReply& self, V&& v);
+
+template <class V>
+void visitFields(const McVersionReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McStatsRequest& self, Writer&& writer);
+
+void deserialize(McStatsRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McStatsRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McStatsRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McStatsReply& self, Writer&& writer);
+
+void deserialize(McStatsReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McStatsReply& self, V&& v);
+
+template <class V>
+void visitFields(const McStatsReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McShutdownRequest& self, Writer&& writer);
+
+void deserialize(McShutdownRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McShutdownRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McShutdownRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McShutdownReply& self, Writer&& writer);
+
+void deserialize(McShutdownReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McShutdownReply& self, V&& v);
+
+template <class V>
+void visitFields(const McShutdownReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McQuitRequest& self, Writer&& writer);
+
+void deserialize(McQuitRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McQuitRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McQuitRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McQuitReply& self, Writer&& writer);
+
+void deserialize(McQuitReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McQuitReply& self, V&& v);
+
+template <class V>
+void visitFields(const McQuitReply& self, V&& v);
+
+template <class Writer>
+void serialize(const McExecRequest& self, Writer&& writer);
+
+void deserialize(McExecRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McExecRequest& self, V&& v);
+
+template <class V>
+void visitFields(const McExecRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const McExecReply& self, Writer&& writer);
+
+void deserialize(McExecReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(McExecReply& self, V&& v);
+
+template <class V>
+void visitFields(const McExecReply& self, V&& v);
+
+template <class Writer>
+void serialize(const GoAwayAcknowledgement& self, Writer&& writer);
+
+void deserialize(GoAwayAcknowledgement& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(GoAwayAcknowledgement& self, V&& v);
+
+template <class V>
+void visitFields(const GoAwayAcknowledgement& self, V&& v);
+
+template <class Writer>
+void serialize(const GoAwayRequest& self, Writer&& writer);
+
+void deserialize(GoAwayRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(GoAwayRequest& self, V&& v);
+
+template <class V>
+void visitFields(const GoAwayRequest& self, V&& v);
+} // namespace thrift
+} // namespace memcache
+} // namespace facebook
 #include "CommonMessages-inl.h"

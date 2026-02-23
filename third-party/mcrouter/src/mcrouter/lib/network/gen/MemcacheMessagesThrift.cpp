@@ -20,7 +20,7 @@ namespace facebook {
 namespace memcache {
 namespace thrift {
 
-void MemcacheRequestCommon::deserialize(carbon::CarbonProtocolReader& reader) {
+void deserialize(MemcacheRequestCommon& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -33,31 +33,60 @@ void MemcacheRequestCommon::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(beforeLatencyUs_ref(), fieldType);
+        reader.readField(self.beforeLatencyUs_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(afterLatencyUs_ref(), fieldType);
+        reader.readField(self.afterLatencyUs_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(bucketId_ref(), fieldType);
+        reader.readField(self.bucketId_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(productId_ref(), fieldType);
+        reader.readField(self.productId_ref(), fieldType);
         break;
       }
       case 5: {
-        reader.readField(regionalizationEntity_ref(), fieldType);
+        reader.readField(self.regionalizationEntity_ref(), fieldType);
         break;
       }
       case 6: {
-        reader.readField(mcTenantId_ref(), fieldType);
+        reader.readField(self.mcTenantId_ref(), fieldType);
         break;
       }
       case 7: {
-        reader.readField(ticket_ref(), fieldType);
+        reader.readField(self.ticket_ref(), fieldType);
+        break;
+      }
+      default: {
+        reader.skip(fieldType);
+        break;
+      }
+    }
+  }
+  reader.readStructEnd();
+}
+
+void MemcacheRequestCommon::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(MemcacheReplyCommon& self, carbon::CarbonProtocolReader& reader) {
+  reader.readStructBegin();
+  while (true) {
+    const auto pr = reader.readFieldHeader();
+    const auto fieldType = pr.first;
+    const auto fieldId = pr.second;
+
+    if (fieldType == carbon::FieldType::Stop) {
+      break;
+    }
+
+    switch (fieldId) {
+      case 1: {
+        reader.readField(self.replySourceBitMask_ref(), fieldType);
         break;
       }
       default: {
@@ -70,6 +99,10 @@ void MemcacheRequestCommon::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void MemcacheReplyCommon::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McGetRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -81,8 +114,16 @@ void MemcacheReplyCommon::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
+        break;
+      }
       case 1: {
-        reader.readField(replySourceBitMask_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
+        break;
+      }
+      case 2: {
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       default: {
@@ -95,6 +136,10 @@ void MemcacheReplyCommon::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McGetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McGetReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -107,15 +152,31 @@ void McGetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.value_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.flags_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 5: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
+        break;
+      }
+      case 6: {
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       default: {
@@ -128,6 +189,10 @@ void McGetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McGetReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McSetRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -140,31 +205,23 @@ void McGetReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(value_ref(), fieldType);
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 5: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
-        break;
-      }
-      case 6: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.value_ref(), fieldType);
         break;
       }
       default: {
@@ -177,6 +234,10 @@ void McGetReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McSetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McSetReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -189,23 +250,27 @@ void McSetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.value_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(value_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 5: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -218,6 +283,10 @@ void McSetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McSetReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McDeleteRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -230,27 +299,27 @@ void McSetReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(value_ref(), fieldType);
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(message_ref(), fieldType);
+        reader.readField(self.value_ref(), fieldType);
         break;
       }
       case 5: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.attributes_ref(), fieldType);
         break;
       }
       default: {
@@ -263,6 +332,10 @@ void McSetReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McDeleteRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McDeleteReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -275,27 +348,27 @@ void McDeleteRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.value_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(value_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       case 5: {
-        reader.readField(attributes_ref(), fieldType);
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -308,6 +381,10 @@ void McDeleteRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McDeleteReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McLeaseGetRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -320,27 +397,15 @@ void McDeleteReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(flags_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(value_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 5: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       default: {
@@ -353,6 +418,10 @@ void McDeleteReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McLeaseGetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McLeaseGetReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -365,15 +434,35 @@ void McLeaseGetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.leaseToken_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.value_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.flags_ref(), fieldType);
+        break;
+      }
+      case 5: {
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 6: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
+        break;
+      }
+      case 7: {
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       default: {
@@ -386,6 +475,10 @@ void McLeaseGetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McLeaseGetReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McLeaseSetRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -398,35 +491,27 @@ void McLeaseGetReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(leaseToken_ref(), fieldType);
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(value_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.value_ref(), fieldType);
         break;
       }
       case 5: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 6: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
-        break;
-      }
-      case 7: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.leaseToken_ref(), fieldType);
         break;
       }
       default: {
@@ -439,6 +524,10 @@ void McLeaseGetReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McLeaseSetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McLeaseSetReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -451,27 +540,19 @@ void McLeaseSetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(flags_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(value_ref(), fieldType);
-        break;
-      }
-      case 5: {
-        reader.readField(leaseToken_ref(), fieldType);
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -484,6 +565,10 @@ void McLeaseSetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McLeaseSetReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McAddRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -496,19 +581,23 @@ void McLeaseSetReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(message_ref(), fieldType);
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.value_ref(), fieldType);
         break;
       }
       default: {
@@ -521,6 +610,10 @@ void McLeaseSetReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McAddRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McAddReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -533,23 +626,19 @@ void McAddRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(flags_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(value_ref(), fieldType);
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -562,6 +651,10 @@ void McAddRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McAddReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McReplaceRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -574,19 +667,23 @@ void McAddReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(message_ref(), fieldType);
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.value_ref(), fieldType);
         break;
       }
       default: {
@@ -599,6 +696,10 @@ void McAddReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McReplaceRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McReplaceReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -611,23 +712,19 @@ void McReplaceRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(flags_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(value_ref(), fieldType);
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -640,6 +737,10 @@ void McReplaceRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McReplaceReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McGetsRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -652,19 +753,15 @@ void McReplaceReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       default: {
@@ -677,6 +774,10 @@ void McReplaceReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McGetsRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McGetsReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -689,15 +790,31 @@ void McGetsRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.casToken_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.value_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.flags_ref(), fieldType);
+        break;
+      }
+      case 5: {
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 6: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -710,6 +827,10 @@ void McGetsRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McGetsReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McCasRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -722,31 +843,27 @@ void McGetsReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(casToken_ref(), fieldType);
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(value_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.value_ref(), fieldType);
         break;
       }
       case 5: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 6: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.casToken_ref(), fieldType);
         break;
       }
       default: {
@@ -759,6 +876,10 @@ void McGetsReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McCasRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McCasReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -771,27 +892,19 @@ void McCasRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(flags_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(value_ref(), fieldType);
-        break;
-      }
-      case 5: {
-        reader.readField(casToken_ref(), fieldType);
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -804,6 +917,10 @@ void McCasRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McCasReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McIncrRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -816,19 +933,19 @@ void McCasReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(message_ref(), fieldType);
+        reader.readField(self.delta_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       default: {
@@ -841,6 +958,10 @@ void McCasReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McIncrRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McIncrReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -853,19 +974,23 @@ void McIncrRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(delta_ref(), fieldType);
+        reader.readField(self.delta_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -878,6 +1003,10 @@ void McIncrRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McIncrReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McDecrRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -890,23 +1019,19 @@ void McIncrReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(delta_ref(), fieldType);
+        reader.readField(self.delta_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       default: {
@@ -919,6 +1044,10 @@ void McIncrReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McDecrRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McDecrReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -931,19 +1060,23 @@ void McDecrRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(delta_ref(), fieldType);
+        reader.readField(self.delta_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -956,6 +1089,10 @@ void McDecrRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McDecrReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McMetagetRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -968,23 +1105,15 @@ void McDecrReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(delta_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       default: {
@@ -997,6 +1126,10 @@ void McDecrReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McMetagetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McMetagetReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1009,15 +1142,35 @@ void McMetagetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(flags_ref(), fieldType);
+        reader.readField(self.age_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.exptime_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.ipv_ref(), fieldType);
+        break;
+      }
+      case 5: {
+        reader.readField(self.ipAddress_ref(), fieldType);
+        break;
+      }
+      case 6: {
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 7: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -1030,6 +1183,10 @@ void McMetagetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McMetagetReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McAppendRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1042,35 +1199,23 @@ void McMetagetReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(age_ref(), fieldType);
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(ipv_ref(), fieldType);
-        break;
-      }
-      case 5: {
-        reader.readField(ipAddress_ref(), fieldType);
-        break;
-      }
-      case 6: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 7: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.value_ref(), fieldType);
         break;
       }
       default: {
@@ -1083,6 +1228,10 @@ void McMetagetReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McAppendRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McAppendReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1095,23 +1244,19 @@ void McAppendRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(flags_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(value_ref(), fieldType);
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -1124,6 +1269,10 @@ void McAppendRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McAppendReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McPrependRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1136,19 +1285,23 @@ void McAppendReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(message_ref(), fieldType);
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.flags_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.value_ref(), fieldType);
         break;
       }
       default: {
@@ -1161,6 +1314,10 @@ void McAppendReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McPrependRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McPrependReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1173,23 +1330,19 @@ void McPrependRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(flags_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(value_ref(), fieldType);
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -1202,6 +1355,10 @@ void McPrependRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McPrependReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McTouchRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1214,19 +1371,15 @@ void McPrependReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       default: {
@@ -1239,6 +1392,10 @@ void McPrependReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McTouchRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McTouchReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1251,15 +1408,19 @@ void McTouchRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -1272,6 +1433,10 @@ void McTouchRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McTouchReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McFlushReRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1284,19 +1449,11 @@ void McTouchReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
-        break;
-      }
-      case 2: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       default: {
@@ -1309,6 +1466,10 @@ void McTouchReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McFlushReRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McFlushReReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1321,11 +1482,19 @@ void McFlushReRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
+        break;
+      }
+      case 2: {
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -1338,6 +1507,10 @@ void McFlushReRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McFlushReReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McFlushAllRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1350,19 +1523,15 @@ void McFlushReReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.delay_ref(), fieldType);
         break;
       }
       default: {
@@ -1375,6 +1544,10 @@ void McFlushReReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McFlushAllRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McFlushAllReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1387,15 +1560,19 @@ void McFlushAllRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(delay_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -1408,6 +1585,10 @@ void McFlushAllRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McFlushAllReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McGatRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1420,19 +1601,15 @@ void McFlushAllReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       default: {
@@ -1445,6 +1622,10 @@ void McFlushAllReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McGatRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McGatReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1457,15 +1638,27 @@ void McGatRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.value_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.flags_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 5: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -1478,6 +1671,10 @@ void McGatRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McGatReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McGatsRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1490,27 +1687,15 @@ void McGatReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
+        reader.readField(*self.memcacheRequestCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.exptime_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(value_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(flags_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 5: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       default: {
@@ -1523,6 +1708,10 @@ void McGatReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McGatsRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  facebook::memcache::thrift::deserialize(*this, reader);
+}
+
+void deserialize(McGatsReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -1535,15 +1724,31 @@ void McGatsRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case -1: {
-        reader.readField(memcacheRequestCommon, fieldType);
+        reader.readField(*self.memcacheReplyCommon_ref(), fieldType);
         break;
       }
       case 1: {
-        reader.readField(exptime_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.casToken_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.value_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.flags_ref(), fieldType);
+        break;
+      }
+      case 5: {
+        reader.readField(self.message_ref(), fieldType);
+        break;
+      }
+      case 6: {
+        reader.readField(self.appSpecificErrorCode_ref(), fieldType);
         break;
       }
       default: {
@@ -1556,52 +1761,7 @@ void McGatsRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void McGatsReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  reader.readStructBegin();
-  while (true) {
-    const auto pr = reader.readFieldHeader();
-    const auto fieldType = pr.first;
-    const auto fieldId = pr.second;
-
-    if (fieldType == carbon::FieldType::Stop) {
-      break;
-    }
-
-    switch (fieldId) {
-      case -1: {
-        reader.readField(memcacheReplyCommon, fieldType);
-        break;
-      }
-      case 1: {
-        reader.readField(result_ref(), fieldType);
-        break;
-      }
-      case 2: {
-        reader.readField(casToken_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(value_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(flags_ref(), fieldType);
-        break;
-      }
-      case 5: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      case 6: {
-        reader.readField(appSpecificErrorCode_ref(), fieldType);
-        break;
-      }
-      default: {
-        reader.skip(fieldType);
-        break;
-      }
-    }
-  }
-  reader.readStructEnd();
+  facebook::memcache::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace memcache

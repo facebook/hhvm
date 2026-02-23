@@ -180,7 +180,127 @@ class CustomReply : public carbon::ReplyCommon, public carbon::test::thrift::Cus
   friend class apache::thrift::Cpp2Ops<CustomReply>;
 
 };
+
 } // namespace test
 } // namespace carbon
 
+namespace carbon {
+namespace test {
+namespace thrift {
+
+template <class Writer>
+void serialize(const TestUnionThrift& self, Writer&& writer);
+
+void deserialize(TestUnionThrift& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TestUnionThrift& self, V&& v);
+
+template <class V>
+void visitFields(const TestUnionThrift& self, V&& v);
+
+template <class V>
+void foreachMember(TestUnionThrift& self, V&& v);
+
+template <class Writer>
+void serialize(const TinyStruct& self, Writer&& writer);
+
+void deserialize(TinyStruct& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TinyStruct& self, V&& v);
+
+template <class V>
+void visitFields(const TinyStruct& self, V&& v);
+
+template <class Writer>
+void serialize(const MyBaseStruct& self, Writer&& writer);
+
+void deserialize(MyBaseStruct& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(MyBaseStruct& self, V&& v);
+
+template <class V>
+void visitFields(const MyBaseStruct& self, V&& v);
+
+template <class Writer>
+void serialize(const MySimpleStruct& self, Writer&& writer);
+
+void deserialize(MySimpleStruct& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(MySimpleStruct& self, V&& v);
+
+template <class V>
+void visitFields(const MySimpleStruct& self, V&& v);
+
+template <class Writer>
+void serialize(const ThriftTestRequest& self, Writer&& writer);
+
+void deserialize(ThriftTestRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(ThriftTestRequest& self, V&& v);
+
+template <class V>
+void visitFields(const ThriftTestRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const ThriftTestReply& self, Writer&& writer);
+
+void deserialize(ThriftTestReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(ThriftTestReply& self, V&& v);
+
+template <class V>
+void visitFields(const ThriftTestReply& self, V&& v);
+
+template <class Writer>
+void serialize(const DummyThriftRequest& self, Writer&& writer);
+
+void deserialize(DummyThriftRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(DummyThriftRequest& self, V&& v);
+
+template <class V>
+void visitFields(const DummyThriftRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const DummyThriftReply& self, Writer&& writer);
+
+void deserialize(DummyThriftReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(DummyThriftReply& self, V&& v);
+
+template <class V>
+void visitFields(const DummyThriftReply& self, V&& v);
+
+template <class Writer>
+void serialize(const CustomRequest& self, Writer&& writer);
+
+void deserialize(CustomRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(CustomRequest& self, V&& v);
+
+template <class V>
+void visitFields(const CustomRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const CustomReply& self, Writer&& writer);
+
+void deserialize(CustomReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(CustomReply& self, V&& v);
+
+template <class V>
+void visitFields(const CustomReply& self, V&& v);
+} // namespace thrift
+} // namespace test
+} // namespace carbon
 #include "CarbonThriftTestMessages-inl.h"

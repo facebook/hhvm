@@ -81,8 +81,39 @@ class TestBReply : public carbon::ReplyCommon, public carbon::test::B::thrift::T
   friend class apache::thrift::Cpp2Ops<TestBReply>;
 
 };
+
 } // namespace B
 } // namespace test
 } // namespace carbon
 
+namespace carbon {
+namespace test {
+namespace B {
+namespace thrift {
+
+template <class Writer>
+void serialize(const TestBRequest& self, Writer&& writer);
+
+void deserialize(TestBRequest& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TestBRequest& self, V&& v);
+
+template <class V>
+void visitFields(const TestBRequest& self, V&& v);
+
+template <class Writer>
+void serialize(const TestBReply& self, Writer&& writer);
+
+void deserialize(TestBReply& self, carbon::CarbonProtocolReader& reader);
+
+template <class V>
+void visitFields(TestBReply& self, V&& v);
+
+template <class V>
+void visitFields(const TestBReply& self, V&& v);
+} // namespace thrift
+} // namespace B
+} // namespace test
+} // namespace carbon
 #include "BMessages-inl.h"

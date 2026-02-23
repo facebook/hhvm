@@ -19,7 +19,7 @@
 namespace hellogoodbye {
 namespace thrift {
 
-void HelloRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+void deserialize(HelloRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -32,35 +32,68 @@ void HelloRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(shardId_ref(), fieldType);
+        reader.readField(self.shardId_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(deadlineMs_ref(), fieldType);
+        reader.readField(self.deadlineMs_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(message_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       case 5: {
-        reader.readField(priority_ref(), fieldType);
+        reader.readField(self.priority_ref(), fieldType);
         break;
       }
       case 6: {
-        reader.readField(beforeLatencyUs_ref(), fieldType);
+        reader.readField(self.beforeLatencyUs_ref(), fieldType);
         break;
       }
       case 7: {
-        reader.readField(afterLatencyUs_ref(), fieldType);
+        reader.readField(self.afterLatencyUs_ref(), fieldType);
         break;
       }
       case 8: {
-        reader.readField(clientVersion_ref(), fieldType);
+        reader.readField(self.clientVersion_ref(), fieldType);
+        break;
+      }
+      default: {
+        reader.skip(fieldType);
+        break;
+      }
+    }
+  }
+  reader.readStructEnd();
+}
+
+void HelloRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  hellogoodbye::thrift::deserialize(*this, reader);
+}
+
+void deserialize(HelloReply& self, carbon::CarbonProtocolReader& reader) {
+  reader.readStructBegin();
+  while (true) {
+    const auto pr = reader.readFieldHeader();
+    const auto fieldType = pr.first;
+    const auto fieldId = pr.second;
+
+    if (fieldType == carbon::FieldType::Stop) {
+      break;
+    }
+
+    switch (fieldId) {
+      case 1: {
+        reader.readField(self.result_ref(), fieldType);
+        break;
+      }
+      case 2: {
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       default: {
@@ -73,6 +106,10 @@ void HelloRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void HelloReply::deserialize(carbon::CarbonProtocolReader& reader) {
+  hellogoodbye::thrift::deserialize(*this, reader);
+}
+
+void deserialize(GoodbyeRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -85,11 +122,11 @@ void HelloReply::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(result_ref(), fieldType);
+        reader.readField(self.key_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(message_ref(), fieldType);
+        reader.readField(self.shardId_ref(), fieldType);
         break;
       }
       default: {
@@ -102,6 +139,10 @@ void HelloReply::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void GoodbyeRequest::deserialize(carbon::CarbonProtocolReader& reader) {
+  hellogoodbye::thrift::deserialize(*this, reader);
+}
+
+void deserialize(GoodbyeReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -114,11 +155,11 @@ void GoodbyeRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(key_ref(), fieldType);
+        reader.readField(self.result_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(shardId_ref(), fieldType);
+        reader.readField(self.message_ref(), fieldType);
         break;
       }
       default: {
@@ -131,32 +172,7 @@ void GoodbyeRequest::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void GoodbyeReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  reader.readStructBegin();
-  while (true) {
-    const auto pr = reader.readFieldHeader();
-    const auto fieldType = pr.first;
-    const auto fieldId = pr.second;
-
-    if (fieldType == carbon::FieldType::Stop) {
-      break;
-    }
-
-    switch (fieldId) {
-      case 1: {
-        reader.readField(result_ref(), fieldType);
-        break;
-      }
-      case 2: {
-        reader.readField(message_ref(), fieldType);
-        break;
-      }
-      default: {
-        reader.skip(fieldType);
-        break;
-      }
-    }
-  }
-  reader.readStructEnd();
+  hellogoodbye::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace hellogoodbye

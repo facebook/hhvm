@@ -18,932 +18,1237 @@ namespace test {
 namespace thrift {
 
 template <class Writer>
-void TestRequest::serialize(Writer&& writer) const {
+void serialize(const TestRequest& self, Writer&& writer) {
   writer.writeStructBegin();
-  writer.writeField(1 /* field id */, key_ref());
-  writer.writeField(2 /* field id */, dummy2_ref());
-  writer.writeField(3 /* field id */, testBool_ref());
-  writer.writeField(4 /* field id */, testChar_ref());
-  writer.writeField(5 /* field id */, testInt8_ref());
-  writer.writeField(6 /* field id */, testInt16_ref());
-  writer.writeField(7 /* field id */, testInt32_ref());
-  writer.writeField(8 /* field id */, testInt64_ref());
-  writer.writeField(9 /* field id */, testUInt8_ref());
-  writer.writeField(10 /* field id */, testUInt16_ref());
-  writer.writeField(11 /* field id */, testUInt32_ref());
-  writer.writeField(12 /* field id */, testUInt64_ref());
-  writer.writeField(13 /* field id */, testFloat_ref());
-  writer.writeField(14 /* field id */, testDouble_ref());
-  writer.writeField(15 /* field id */, testShortString_ref());
-  writer.writeField(16 /* field id */, testLongString_ref());
-  writer.writeField(17 /* field id */, testIobuf_ref());
-  writer.writeField(19 /* field id */, testList_ref());
-  writer.writeField(20 /* field id */, testOptionalString_ref());
-  writer.writeField(21 /* field id */, testOptionalIobuf_ref());
-  writer.writeField(22 /* field id */, dummy22_ref());
-  writer.writeField(23 /* field id */, dummy23_ref());
-  writer.writeField(24 /* field id */, testNestedVec_ref());
-  writer.writeField(25 /* field id */, testUMap_ref());
-  writer.writeField(26 /* field id */, testMap_ref());
-  writer.writeField(27 /* field id */, testComplexMap_ref());
-  writer.writeField(28 /* field id */, testUSet_ref());
-  writer.writeField(29 /* field id */, testSet_ref());
-  writer.writeField(30 /* field id */, testOptionalBool_ref());
-  writer.writeField(31 /* field id */, dummy31_ref());
-  writer.writeField(32 /* field id */, testIOBufList_ref());
-  writer.writeField(33 /* field id */, testF14FastMap_ref());
-  writer.writeField(34 /* field id */, testF14NodeMap_ref());
-  writer.writeField(35 /* field id */, testF14ValueMap_ref());
-  writer.writeField(36 /* field id */, testF14VectorMap_ref());
-  writer.writeField(37 /* field id */, testF14FastSet_ref());
-  writer.writeField(38 /* field id */, testF14NodeSet_ref());
-  writer.writeField(39 /* field id */, testF14ValueSet_ref());
-  writer.writeField(40 /* field id */, testF14VectorSet_ref());
-  writer.writeField(41 /* field id */, testOptionalKeywordString_ref());
-  writer.writeField(42 /* field id */, testOptionalKeywordIobuf_ref());
-  writer.writeField(43 /* field id */, testOptionalKeywordBool_ref());
+  writer.writeField(1 /* field id */, self.key_ref());
+  writer.writeField(2 /* field id */, self.dummy2_ref());
+  writer.writeField(3 /* field id */, self.testBool_ref());
+  writer.writeField(4 /* field id */, self.testChar_ref());
+  writer.writeField(5 /* field id */, self.testInt8_ref());
+  writer.writeField(6 /* field id */, self.testInt16_ref());
+  writer.writeField(7 /* field id */, self.testInt32_ref());
+  writer.writeField(8 /* field id */, self.testInt64_ref());
+  writer.writeField(9 /* field id */, self.testUInt8_ref());
+  writer.writeField(10 /* field id */, self.testUInt16_ref());
+  writer.writeField(11 /* field id */, self.testUInt32_ref());
+  writer.writeField(12 /* field id */, self.testUInt64_ref());
+  writer.writeField(13 /* field id */, self.testFloat_ref());
+  writer.writeField(14 /* field id */, self.testDouble_ref());
+  writer.writeField(15 /* field id */, self.testShortString_ref());
+  writer.writeField(16 /* field id */, self.testLongString_ref());
+  writer.writeField(17 /* field id */, self.testIobuf_ref());
+  writer.writeField(19 /* field id */, self.testList_ref());
+  writer.writeField(20 /* field id */, self.testOptionalString_ref());
+  writer.writeField(21 /* field id */, self.testOptionalIobuf_ref());
+  writer.writeField(22 /* field id */, self.dummy22_ref());
+  writer.writeField(23 /* field id */, self.dummy23_ref());
+  writer.writeField(24 /* field id */, self.testNestedVec_ref());
+  writer.writeField(25 /* field id */, self.testUMap_ref());
+  writer.writeField(26 /* field id */, self.testMap_ref());
+  writer.writeField(27 /* field id */, self.testComplexMap_ref());
+  writer.writeField(28 /* field id */, self.testUSet_ref());
+  writer.writeField(29 /* field id */, self.testSet_ref());
+  writer.writeField(30 /* field id */, self.testOptionalBool_ref());
+  writer.writeField(31 /* field id */, self.dummy31_ref());
+  writer.writeField(32 /* field id */, self.testIOBufList_ref());
+  writer.writeField(33 /* field id */, self.testF14FastMap_ref());
+  writer.writeField(34 /* field id */, self.testF14NodeMap_ref());
+  writer.writeField(35 /* field id */, self.testF14ValueMap_ref());
+  writer.writeField(36 /* field id */, self.testF14VectorMap_ref());
+  writer.writeField(37 /* field id */, self.testF14FastSet_ref());
+  writer.writeField(38 /* field id */, self.testF14NodeSet_ref());
+  writer.writeField(39 /* field id */, self.testF14ValueSet_ref());
+  writer.writeField(40 /* field id */, self.testF14VectorSet_ref());
+  writer.writeField(41 /* field id */, self.testOptionalKeywordString_ref());
+  writer.writeField(42 /* field id */, self.testOptionalKeywordIobuf_ref());
+  writer.writeField(43 /* field id */, self.testOptionalKeywordBool_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
+}
+
+template <class Writer>
+void TestRequest::serialize(Writer&& writer) const {
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(TestRequest& self, V&& v) {
+  if (!v.visitField(1, "key", *self.key_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "dummy2", *self.dummy2_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "testBool", *self.testBool_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "testChar", *self.testChar_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "testInt8", *self.testInt8_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "testInt16", *self.testInt16_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "testInt32", *self.testInt32_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "testInt64", *self.testInt64_ref())) {
+    return;
+  }
+  if (!v.visitField(9, "testUInt8", *self.testUInt8_ref())) {
+    return;
+  }
+  if (!v.visitField(10, "testUInt16", *self.testUInt16_ref())) {
+    return;
+  }
+  if (!v.visitField(11, "testUInt32", *self.testUInt32_ref())) {
+    return;
+  }
+  if (!v.visitField(12, "testUInt64", *self.testUInt64_ref())) {
+    return;
+  }
+  if (!v.visitField(13, "testFloat", *self.testFloat_ref())) {
+    return;
+  }
+  if (!v.visitField(14, "testDouble", *self.testDouble_ref())) {
+    return;
+  }
+  if (!v.visitField(15, "testShortString", *self.testShortString_ref())) {
+    return;
+  }
+  if (!v.visitField(16, "testLongString", *self.testLongString_ref())) {
+    return;
+  }
+  if (!v.visitField(17, "testIobuf", *self.testIobuf_ref())) {
+    return;
+  }
+  if (!v.visitField(19, "testList", *self.testList_ref())) {
+    return;
+  }
+  if (!v.visitField(20, "testOptionalString", self.testOptionalString_ref())) {
+    return;
+  }
+  if (!v.visitField(21, "testOptionalIobuf", self.testOptionalIobuf_ref())) {
+    return;
+  }
+  if (!v.visitField(22, "dummy22", *self.dummy22_ref())) {
+    return;
+  }
+  if (!v.visitField(23, "dummy23", *self.dummy23_ref())) {
+    return;
+  }
+  if (!v.visitField(24, "testNestedVec", *self.testNestedVec_ref())) {
+    return;
+  }
+  if (!v.visitField(25, "testUMap", *self.testUMap_ref())) {
+    return;
+  }
+  if (!v.visitField(26, "testMap", *self.testMap_ref())) {
+    return;
+  }
+  if (!v.visitField(27, "testComplexMap", *self.testComplexMap_ref())) {
+    return;
+  }
+  if (!v.visitField(28, "testUSet", *self.testUSet_ref())) {
+    return;
+  }
+  if (!v.visitField(29, "testSet", *self.testSet_ref())) {
+    return;
+  }
+  if (!v.visitField(30, "testOptionalBool", self.testOptionalBool_ref())) {
+    return;
+  }
+  if (!v.visitField(31, "dummy31", *self.dummy31_ref())) {
+    return;
+  }
+  if (!v.visitField(32, "testIOBufList", *self.testIOBufList_ref())) {
+    return;
+  }
+  if (!v.visitField(33, "testF14FastMap", *self.testF14FastMap_ref())) {
+    return;
+  }
+  if (!v.visitField(34, "testF14NodeMap", *self.testF14NodeMap_ref())) {
+    return;
+  }
+  if (!v.visitField(35, "testF14ValueMap", *self.testF14ValueMap_ref())) {
+    return;
+  }
+  if (!v.visitField(36, "testF14VectorMap", *self.testF14VectorMap_ref())) {
+    return;
+  }
+  if (!v.visitField(37, "testF14FastSet", *self.testF14FastSet_ref())) {
+    return;
+  }
+  if (!v.visitField(38, "testF14NodeSet", *self.testF14NodeSet_ref())) {
+    return;
+  }
+  if (!v.visitField(39, "testF14ValueSet", *self.testF14ValueSet_ref())) {
+    return;
+  }
+  if (!v.visitField(40, "testF14VectorSet", *self.testF14VectorSet_ref())) {
+    return;
+  }
+  if (!v.visitField(41, "testOptionalKeywordString", self.testOptionalKeywordString_ref())) {
+    return;
+  }
+  if (!v.visitField(42, "testOptionalKeywordIobuf", self.testOptionalKeywordIobuf_ref())) {
+    return;
+  }
+  if (!v.visitField(43, "testOptionalKeywordBool", self.testOptionalKeywordBool_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const TestRequest& self, V&& v) {
+  if (!v.visitField(1, "key", *self.key_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "dummy2", *self.dummy2_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "testBool", *self.testBool_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "testChar", *self.testChar_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "testInt8", *self.testInt8_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "testInt16", *self.testInt16_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "testInt32", *self.testInt32_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "testInt64", *self.testInt64_ref())) {
+    return;
+  }
+  if (!v.visitField(9, "testUInt8", *self.testUInt8_ref())) {
+    return;
+  }
+  if (!v.visitField(10, "testUInt16", *self.testUInt16_ref())) {
+    return;
+  }
+  if (!v.visitField(11, "testUInt32", *self.testUInt32_ref())) {
+    return;
+  }
+  if (!v.visitField(12, "testUInt64", *self.testUInt64_ref())) {
+    return;
+  }
+  if (!v.visitField(13, "testFloat", *self.testFloat_ref())) {
+    return;
+  }
+  if (!v.visitField(14, "testDouble", *self.testDouble_ref())) {
+    return;
+  }
+  if (!v.visitField(15, "testShortString", *self.testShortString_ref())) {
+    return;
+  }
+  if (!v.visitField(16, "testLongString", *self.testLongString_ref())) {
+    return;
+  }
+  if (!v.visitField(17, "testIobuf", *self.testIobuf_ref())) {
+    return;
+  }
+  if (!v.visitField(19, "testList", *self.testList_ref())) {
+    return;
+  }
+  if (!v.visitField(20, "testOptionalString", self.testOptionalString_ref())) {
+    return;
+  }
+  if (!v.visitField(21, "testOptionalIobuf", self.testOptionalIobuf_ref())) {
+    return;
+  }
+  if (!v.visitField(22, "dummy22", *self.dummy22_ref())) {
+    return;
+  }
+  if (!v.visitField(23, "dummy23", *self.dummy23_ref())) {
+    return;
+  }
+  if (!v.visitField(24, "testNestedVec", *self.testNestedVec_ref())) {
+    return;
+  }
+  if (!v.visitField(25, "testUMap", *self.testUMap_ref())) {
+    return;
+  }
+  if (!v.visitField(26, "testMap", *self.testMap_ref())) {
+    return;
+  }
+  if (!v.visitField(27, "testComplexMap", *self.testComplexMap_ref())) {
+    return;
+  }
+  if (!v.visitField(28, "testUSet", *self.testUSet_ref())) {
+    return;
+  }
+  if (!v.visitField(29, "testSet", *self.testSet_ref())) {
+    return;
+  }
+  if (!v.visitField(30, "testOptionalBool", self.testOptionalBool_ref())) {
+    return;
+  }
+  if (!v.visitField(31, "dummy31", *self.dummy31_ref())) {
+    return;
+  }
+  if (!v.visitField(32, "testIOBufList", *self.testIOBufList_ref())) {
+    return;
+  }
+  if (!v.visitField(33, "testF14FastMap", *self.testF14FastMap_ref())) {
+    return;
+  }
+  if (!v.visitField(34, "testF14NodeMap", *self.testF14NodeMap_ref())) {
+    return;
+  }
+  if (!v.visitField(35, "testF14ValueMap", *self.testF14ValueMap_ref())) {
+    return;
+  }
+  if (!v.visitField(36, "testF14VectorMap", *self.testF14VectorMap_ref())) {
+    return;
+  }
+  if (!v.visitField(37, "testF14FastSet", *self.testF14FastSet_ref())) {
+    return;
+  }
+  if (!v.visitField(38, "testF14NodeSet", *self.testF14NodeSet_ref())) {
+    return;
+  }
+  if (!v.visitField(39, "testF14ValueSet", *self.testF14ValueSet_ref())) {
+    return;
+  }
+  if (!v.visitField(40, "testF14VectorSet", *self.testF14VectorSet_ref())) {
+    return;
+  }
+  if (!v.visitField(41, "testOptionalKeywordString", self.testOptionalKeywordString_ref())) {
+    return;
+  }
+  if (!v.visitField(42, "testOptionalKeywordIobuf", self.testOptionalKeywordIobuf_ref())) {
+    return;
+  }
+  if (!v.visitField(43, "testOptionalKeywordBool", self.testOptionalKeywordBool_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void TestRequest::visitFields(V&& v) {
-  if (!v.visitField(1, "key", *this->key_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "dummy2", *this->dummy2_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "testBool", *this->testBool_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "testChar", *this->testChar_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "testInt8", *this->testInt8_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "testInt16", *this->testInt16_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "testInt32", *this->testInt32_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "testInt64", *this->testInt64_ref())) {
-    return;
-  }
-  if (!v.visitField(9, "testUInt8", *this->testUInt8_ref())) {
-    return;
-  }
-  if (!v.visitField(10, "testUInt16", *this->testUInt16_ref())) {
-    return;
-  }
-  if (!v.visitField(11, "testUInt32", *this->testUInt32_ref())) {
-    return;
-  }
-  if (!v.visitField(12, "testUInt64", *this->testUInt64_ref())) {
-    return;
-  }
-  if (!v.visitField(13, "testFloat", *this->testFloat_ref())) {
-    return;
-  }
-  if (!v.visitField(14, "testDouble", *this->testDouble_ref())) {
-    return;
-  }
-  if (!v.visitField(15, "testShortString", *this->testShortString_ref())) {
-    return;
-  }
-  if (!v.visitField(16, "testLongString", *this->testLongString_ref())) {
-    return;
-  }
-  if (!v.visitField(17, "testIobuf", *this->testIobuf_ref())) {
-    return;
-  }
-  if (!v.visitField(19, "testList", *this->testList_ref())) {
-    return;
-  }
-  if (!v.visitField(20, "testOptionalString", this->testOptionalString_ref())) {
-    return;
-  }
-  if (!v.visitField(21, "testOptionalIobuf", this->testOptionalIobuf_ref())) {
-    return;
-  }
-  if (!v.visitField(22, "dummy22", *this->dummy22_ref())) {
-    return;
-  }
-  if (!v.visitField(23, "dummy23", *this->dummy23_ref())) {
-    return;
-  }
-  if (!v.visitField(24, "testNestedVec", *this->testNestedVec_ref())) {
-    return;
-  }
-  if (!v.visitField(25, "testUMap", *this->testUMap_ref())) {
-    return;
-  }
-  if (!v.visitField(26, "testMap", *this->testMap_ref())) {
-    return;
-  }
-  if (!v.visitField(27, "testComplexMap", *this->testComplexMap_ref())) {
-    return;
-  }
-  if (!v.visitField(28, "testUSet", *this->testUSet_ref())) {
-    return;
-  }
-  if (!v.visitField(29, "testSet", *this->testSet_ref())) {
-    return;
-  }
-  if (!v.visitField(30, "testOptionalBool", this->testOptionalBool_ref())) {
-    return;
-  }
-  if (!v.visitField(31, "dummy31", *this->dummy31_ref())) {
-    return;
-  }
-  if (!v.visitField(32, "testIOBufList", *this->testIOBufList_ref())) {
-    return;
-  }
-  if (!v.visitField(33, "testF14FastMap", *this->testF14FastMap_ref())) {
-    return;
-  }
-  if (!v.visitField(34, "testF14NodeMap", *this->testF14NodeMap_ref())) {
-    return;
-  }
-  if (!v.visitField(35, "testF14ValueMap", *this->testF14ValueMap_ref())) {
-    return;
-  }
-  if (!v.visitField(36, "testF14VectorMap", *this->testF14VectorMap_ref())) {
-    return;
-  }
-  if (!v.visitField(37, "testF14FastSet", *this->testF14FastSet_ref())) {
-    return;
-  }
-  if (!v.visitField(38, "testF14NodeSet", *this->testF14NodeSet_ref())) {
-    return;
-  }
-  if (!v.visitField(39, "testF14ValueSet", *this->testF14ValueSet_ref())) {
-    return;
-  }
-  if (!v.visitField(40, "testF14VectorSet", *this->testF14VectorSet_ref())) {
-    return;
-  }
-  if (!v.visitField(41, "testOptionalKeywordString", this->testOptionalKeywordString_ref())) {
-    return;
-  }
-  if (!v.visitField(42, "testOptionalKeywordIobuf", this->testOptionalKeywordIobuf_ref())) {
-    return;
-  }
-  if (!v.visitField(43, "testOptionalKeywordBool", this->testOptionalKeywordBool_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void TestRequest::visitFields(V&& v) const {
-  if (!v.visitField(1, "key", *this->key_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "dummy2", *this->dummy2_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "testBool", *this->testBool_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "testChar", *this->testChar_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "testInt8", *this->testInt8_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "testInt16", *this->testInt16_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "testInt32", *this->testInt32_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "testInt64", *this->testInt64_ref())) {
-    return;
-  }
-  if (!v.visitField(9, "testUInt8", *this->testUInt8_ref())) {
-    return;
-  }
-  if (!v.visitField(10, "testUInt16", *this->testUInt16_ref())) {
-    return;
-  }
-  if (!v.visitField(11, "testUInt32", *this->testUInt32_ref())) {
-    return;
-  }
-  if (!v.visitField(12, "testUInt64", *this->testUInt64_ref())) {
-    return;
-  }
-  if (!v.visitField(13, "testFloat", *this->testFloat_ref())) {
-    return;
-  }
-  if (!v.visitField(14, "testDouble", *this->testDouble_ref())) {
-    return;
-  }
-  if (!v.visitField(15, "testShortString", *this->testShortString_ref())) {
-    return;
-  }
-  if (!v.visitField(16, "testLongString", *this->testLongString_ref())) {
-    return;
-  }
-  if (!v.visitField(17, "testIobuf", *this->testIobuf_ref())) {
-    return;
-  }
-  if (!v.visitField(19, "testList", *this->testList_ref())) {
-    return;
-  }
-  if (!v.visitField(20, "testOptionalString", this->testOptionalString_ref())) {
-    return;
-  }
-  if (!v.visitField(21, "testOptionalIobuf", this->testOptionalIobuf_ref())) {
-    return;
-  }
-  if (!v.visitField(22, "dummy22", *this->dummy22_ref())) {
-    return;
-  }
-  if (!v.visitField(23, "dummy23", *this->dummy23_ref())) {
-    return;
-  }
-  if (!v.visitField(24, "testNestedVec", *this->testNestedVec_ref())) {
-    return;
-  }
-  if (!v.visitField(25, "testUMap", *this->testUMap_ref())) {
-    return;
-  }
-  if (!v.visitField(26, "testMap", *this->testMap_ref())) {
-    return;
-  }
-  if (!v.visitField(27, "testComplexMap", *this->testComplexMap_ref())) {
-    return;
-  }
-  if (!v.visitField(28, "testUSet", *this->testUSet_ref())) {
-    return;
-  }
-  if (!v.visitField(29, "testSet", *this->testSet_ref())) {
-    return;
-  }
-  if (!v.visitField(30, "testOptionalBool", this->testOptionalBool_ref())) {
-    return;
-  }
-  if (!v.visitField(31, "dummy31", *this->dummy31_ref())) {
-    return;
-  }
-  if (!v.visitField(32, "testIOBufList", *this->testIOBufList_ref())) {
-    return;
-  }
-  if (!v.visitField(33, "testF14FastMap", *this->testF14FastMap_ref())) {
-    return;
-  }
-  if (!v.visitField(34, "testF14NodeMap", *this->testF14NodeMap_ref())) {
-    return;
-  }
-  if (!v.visitField(35, "testF14ValueMap", *this->testF14ValueMap_ref())) {
-    return;
-  }
-  if (!v.visitField(36, "testF14VectorMap", *this->testF14VectorMap_ref())) {
-    return;
-  }
-  if (!v.visitField(37, "testF14FastSet", *this->testF14FastSet_ref())) {
-    return;
-  }
-  if (!v.visitField(38, "testF14NodeSet", *this->testF14NodeSet_ref())) {
-    return;
-  }
-  if (!v.visitField(39, "testF14ValueSet", *this->testF14ValueSet_ref())) {
-    return;
-  }
-  if (!v.visitField(40, "testF14VectorSet", *this->testF14VectorSet_ref())) {
-    return;
-  }
-  if (!v.visitField(41, "testOptionalKeywordString", this->testOptionalKeywordString_ref())) {
-    return;
-  }
-  if (!v.visitField(42, "testOptionalKeywordIobuf", this->testOptionalKeywordIobuf_ref())) {
-    return;
-  }
-  if (!v.visitField(43, "testOptionalKeywordBool", this->testOptionalKeywordBool_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const TestReply& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.result_ref());
+  writer.writeField(2 /* field id */, self.valInt32_ref());
+  writer.writeField(3 /* field id */, self.valInt64_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void TestReply::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, result_ref());
-  writer.writeField(2 /* field id */, valInt32_ref());
-  writer.writeField(3 /* field id */, valInt64_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(TestReply& self, V&& v) {
+  if (!v.visitField(1, "result", *self.result_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "valInt32", *self.valInt32_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "valInt64", *self.valInt64_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const TestReply& self, V&& v) {
+  if (!v.visitField(1, "result", *self.result_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "valInt32", *self.valInt32_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "valInt64", *self.valInt64_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void TestReply::visitFields(V&& v) {
-  if (!v.visitField(1, "result", *this->result_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "valInt32", *this->valInt32_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "valInt64", *this->valInt64_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void TestReply::visitFields(V&& v) const {
-  if (!v.visitField(1, "result", *this->result_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "valInt32", *this->valInt32_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "valInt64", *this->valInt64_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const TestRequestStringKey& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.key_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void TestRequestStringKey::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, key_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(TestRequestStringKey& self, V&& v) {
+  if (!v.visitField(1, "key", *self.key_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const TestRequestStringKey& self, V&& v) {
+  if (!v.visitField(1, "key", *self.key_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void TestRequestStringKey::visitFields(V&& v) {
-  if (!v.visitField(1, "key", *this->key_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void TestRequestStringKey::visitFields(V&& v) const {
-  if (!v.visitField(1, "key", *this->key_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const TestReplyStringKey& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.result_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void TestReplyStringKey::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, result_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(TestReplyStringKey& self, V&& v) {
+  if (!v.visitField(1, "result", *self.result_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const TestReplyStringKey& self, V&& v) {
+  if (!v.visitField(1, "result", *self.result_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void TestReplyStringKey::visitFields(V&& v) {
-  if (!v.visitField(1, "result", *this->result_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void TestReplyStringKey::visitFields(V&& v) const {
-  if (!v.visitField(1, "result", *this->result_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const TestOptionalBool& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.optionalBool_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void TestOptionalBool::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, optionalBool_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(TestOptionalBool& self, V&& v) {
+  if (!v.visitField(1, "optionalBool", self.optionalBool_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const TestOptionalBool& self, V&& v) {
+  if (!v.visitField(1, "optionalBool", self.optionalBool_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void TestOptionalBool::visitFields(V&& v) {
-  if (!v.visitField(1, "optionalBool", this->optionalBool_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void TestOptionalBool::visitFields(V&& v) const {
-  if (!v.visitField(1, "optionalBool", this->optionalBool_ref())) {
-    return;
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const TestUnion& self, Writer&& writer) {
+  writer.writeStructBegin();
+  switch (int(self.getType())) {
+    case 1: {
+      writer.writeFieldAlways(1 /* field id */, *self.a_ref());
+      break;
+    }
+    case 2: {
+      writer.writeFieldAlways(2 /* field id */, *self.b_ref());
+      break;
+    }
+    case 3: {
+      writer.writeFieldAlways(3 /* field id */, *self.c_ref());
+      break;
+    }
+    default:
+      break;
   }
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void TestUnion::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  switch (int(getType())) {
-    case 1: {
-      writer.writeFieldAlways(1 /* field id */, *a_ref());
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(TestUnion& self, V&& v) {
+  switch (int(self.getType())) {
+    case 1:
+      v.visitField(1, "a", *self.a_ref());
       break;
-    }
-    case 2: {
-      writer.writeFieldAlways(2 /* field id */, *b_ref());
+    case 2:
+      v.visitField(2, "b", *self.b_ref());
       break;
-    }
-    case 3: {
-      writer.writeFieldAlways(3 /* field id */, *c_ref());
+    case 3:
+      v.visitField(3, "c", *self.c_ref());
       break;
-    }
     default:
       break;
   }
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+}
+
+template <class V>
+void visitFields(const TestUnion& self, V&& v) {
+  switch (int(self.getType())) {
+    case 1:
+      v.visitField(1, "a", *self.a_ref());
+      break;
+    case 2:
+      v.visitField(2, "b", *self.b_ref());
+      break;
+    case 3:
+      v.visitField(3, "c", *self.c_ref());
+      break;
+    default:
+      break;
+  }
+}
+
+template <class V>
+void foreachMember(TestUnion& self, V&& v) {
+  if (!v.template visitUnionMember<uint64_t>("a", [&self]() -> uint64_t& {return self.a_ref().emplace();})) {
+    return;
+  }
+  if (!v.template visitUnionMember<uint32_t>("b", [&self]() -> uint32_t& {return self.b_ref().emplace();})) {
+    return;
+  }
+  if (!v.template visitUnionMember<uint16_t>("c", [&self]() -> uint16_t& {return self.c_ref().emplace();})) {
+    return;
+  }
 }
 
 template <class V>
 void TestUnion::visitFields(V&& v) {
-  switch (int(getType())) {
-    case 1:
-      v.visitField(1, "a", *a_ref());
-      break;
-    case 2:
-      v.visitField(2, "b", *b_ref());
-      break;
-    case 3:
-      v.visitField(3, "c", *c_ref());
-      break;
-    default:
-      break;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void TestUnion::visitFields(V&& v) const {
-  switch (int(getType())) {
-    case 1:
-      v.visitField(1, "a", *a_ref());
-      break;
-    case 2:
-      v.visitField(2, "b", *b_ref());
-      break;
-    case 3:
-      v.visitField(3, "c", *c_ref());
-      break;
-    default:
-      break;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void TestUnion::foreachMember(V&& v) {
-  if (!v.template visitUnionMember<uint64_t>("a", [this]() -> uint64_t& {return this->a_ref().emplace();})) {
-    return;
-  }
-  if (!v.template visitUnionMember<uint32_t>("b", [this]() -> uint32_t& {return this->b_ref().emplace();})) {
-    return;
-  }
-  if (!v.template visitUnionMember<uint16_t>("c", [this]() -> uint16_t& {return this->c_ref().emplace();})) {
-    return;
-  }
+  carbon::test::thrift::foreachMember(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const TestF14Containers& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.fastMap_ref());
+  writer.writeField(2 /* field id */, self.nodeMap_ref());
+  writer.writeField(3 /* field id */, self.valueMap_ref());
+  writer.writeField(4 /* field id */, self.vectorMap_ref());
+  writer.writeField(5 /* field id */, self.fastSet_ref());
+  writer.writeField(6 /* field id */, self.nodeSet_ref());
+  writer.writeField(7 /* field id */, self.valueSet_ref());
+  writer.writeField(8 /* field id */, self.vectorSet_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void TestF14Containers::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, fastMap_ref());
-  writer.writeField(2 /* field id */, nodeMap_ref());
-  writer.writeField(3 /* field id */, valueMap_ref());
-  writer.writeField(4 /* field id */, vectorMap_ref());
-  writer.writeField(5 /* field id */, fastSet_ref());
-  writer.writeField(6 /* field id */, nodeSet_ref());
-  writer.writeField(7 /* field id */, valueSet_ref());
-  writer.writeField(8 /* field id */, vectorSet_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(TestF14Containers& self, V&& v) {
+  if (!v.visitField(1, "fastMap", *self.fastMap_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "nodeMap", *self.nodeMap_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "valueMap", *self.valueMap_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "vectorMap", *self.vectorMap_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "fastSet", *self.fastSet_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "nodeSet", *self.nodeSet_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "valueSet", *self.valueSet_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "vectorSet", *self.vectorSet_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const TestF14Containers& self, V&& v) {
+  if (!v.visitField(1, "fastMap", *self.fastMap_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "nodeMap", *self.nodeMap_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "valueMap", *self.valueMap_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "vectorMap", *self.vectorMap_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "fastSet", *self.fastSet_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "nodeSet", *self.nodeSet_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "valueSet", *self.valueSet_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "vectorSet", *self.vectorSet_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void TestF14Containers::visitFields(V&& v) {
-  if (!v.visitField(1, "fastMap", *this->fastMap_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "nodeMap", *this->nodeMap_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "valueMap", *this->valueMap_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "vectorMap", *this->vectorMap_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "fastSet", *this->fastSet_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "nodeSet", *this->nodeSet_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "valueSet", *this->valueSet_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "vectorSet", *this->vectorSet_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void TestF14Containers::visitFields(V&& v) const {
-  if (!v.visitField(1, "fastMap", *this->fastMap_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "nodeMap", *this->nodeMap_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "valueMap", *this->valueMap_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "vectorMap", *this->vectorMap_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "fastSet", *this->fastSet_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "nodeSet", *this->nodeSet_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "valueSet", *this->valueSet_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "vectorSet", *this->vectorSet_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const TestStdContainers& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.fastMap_ref());
+  writer.writeField(2 /* field id */, self.nodeMap_ref());
+  writer.writeField(3 /* field id */, self.valueMap_ref());
+  writer.writeField(4 /* field id */, self.vectorMap_ref());
+  writer.writeField(5 /* field id */, self.fastSet_ref());
+  writer.writeField(6 /* field id */, self.nodeSet_ref());
+  writer.writeField(7 /* field id */, self.valueSet_ref());
+  writer.writeField(8 /* field id */, self.vectorSet_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void TestStdContainers::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, fastMap_ref());
-  writer.writeField(2 /* field id */, nodeMap_ref());
-  writer.writeField(3 /* field id */, valueMap_ref());
-  writer.writeField(4 /* field id */, vectorMap_ref());
-  writer.writeField(5 /* field id */, fastSet_ref());
-  writer.writeField(6 /* field id */, nodeSet_ref());
-  writer.writeField(7 /* field id */, valueSet_ref());
-  writer.writeField(8 /* field id */, vectorSet_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(TestStdContainers& self, V&& v) {
+  if (!v.visitField(1, "fastMap", *self.fastMap_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "nodeMap", *self.nodeMap_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "valueMap", *self.valueMap_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "vectorMap", *self.vectorMap_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "fastSet", *self.fastSet_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "nodeSet", *self.nodeSet_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "valueSet", *self.valueSet_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "vectorSet", *self.vectorSet_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const TestStdContainers& self, V&& v) {
+  if (!v.visitField(1, "fastMap", *self.fastMap_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "nodeMap", *self.nodeMap_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "valueMap", *self.valueMap_ref())) {
+    return;
+  }
+  if (!v.visitField(4, "vectorMap", *self.vectorMap_ref())) {
+    return;
+  }
+  if (!v.visitField(5, "fastSet", *self.fastSet_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "nodeSet", *self.nodeSet_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "valueSet", *self.valueSet_ref())) {
+    return;
+  }
+  if (!v.visitField(8, "vectorSet", *self.vectorSet_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void TestStdContainers::visitFields(V&& v) {
-  if (!v.visitField(1, "fastMap", *this->fastMap_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "nodeMap", *this->nodeMap_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "valueMap", *this->valueMap_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "vectorMap", *this->vectorMap_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "fastSet", *this->fastSet_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "nodeSet", *this->nodeSet_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "valueSet", *this->valueSet_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "vectorSet", *this->vectorSet_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void TestStdContainers::visitFields(V&& v) const {
-  if (!v.visitField(1, "fastMap", *this->fastMap_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "nodeMap", *this->nodeMap_ref())) {
-    return;
-  }
-  if (!v.visitField(3, "valueMap", *this->valueMap_ref())) {
-    return;
-  }
-  if (!v.visitField(4, "vectorMap", *this->vectorMap_ref())) {
-    return;
-  }
-  if (!v.visitField(5, "fastSet", *this->fastSet_ref())) {
-    return;
-  }
-  if (!v.visitField(6, "nodeSet", *this->nodeSet_ref())) {
-    return;
-  }
-  if (!v.visitField(7, "valueSet", *this->valueSet_ref())) {
-    return;
-  }
-  if (!v.visitField(8, "vectorSet", *this->vectorSet_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const StructWithEnumUInt32& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void StructWithEnumUInt32::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(StructWithEnumUInt32& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const StructWithEnumUInt32& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void StructWithEnumUInt32::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void StructWithEnumUInt32::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const StructWithEnumUInt16& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void StructWithEnumUInt16::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(StructWithEnumUInt16& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const StructWithEnumUInt16& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void StructWithEnumUInt16::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void StructWithEnumUInt16::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const StructWithEnumUInt8& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void StructWithEnumUInt8::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(StructWithEnumUInt8& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const StructWithEnumUInt8& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void StructWithEnumUInt8::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void StructWithEnumUInt8::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const StructWithEnumInt32& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void StructWithEnumInt32::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(StructWithEnumInt32& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const StructWithEnumInt32& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void StructWithEnumInt32::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void StructWithEnumInt32::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const StructWithEnumInt16& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void StructWithEnumInt16::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(StructWithEnumInt16& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const StructWithEnumInt16& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void StructWithEnumInt16::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void StructWithEnumInt16::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const StructWithEnumInt8& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void StructWithEnumInt8::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(StructWithEnumInt8& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const StructWithEnumInt8& self, V&& v) {
+  if (!v.visitField(1, "testEnum", *self.testEnum_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void StructWithEnumInt8::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void StructWithEnumInt8::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", *this->testEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const StructWithOptionalEnumUInt32& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeField(2 /* field id */, self.testEmptyEnum_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void StructWithOptionalEnumUInt32::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeField(2 /* field id */, testEmptyEnum_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(StructWithOptionalEnumUInt32& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const StructWithOptionalEnumUInt32& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void StructWithOptionalEnumUInt32::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void StructWithOptionalEnumUInt32::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const StructWithOptionalEnumUInt16& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeField(2 /* field id */, self.testEmptyEnum_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void StructWithOptionalEnumUInt16::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeField(2 /* field id */, testEmptyEnum_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(StructWithOptionalEnumUInt16& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const StructWithOptionalEnumUInt16& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void StructWithOptionalEnumUInt16::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void StructWithOptionalEnumUInt16::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const StructWithOptionalEnumUInt8& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeField(2 /* field id */, self.testEmptyEnum_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void StructWithOptionalEnumUInt8::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeField(2 /* field id */, testEmptyEnum_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(StructWithOptionalEnumUInt8& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const StructWithOptionalEnumUInt8& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void StructWithOptionalEnumUInt8::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void StructWithOptionalEnumUInt8::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const StructWithOptionalEnumInt32& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeField(2 /* field id */, self.testEmptyEnum_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void StructWithOptionalEnumInt32::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeField(2 /* field id */, testEmptyEnum_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(StructWithOptionalEnumInt32& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const StructWithOptionalEnumInt32& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void StructWithOptionalEnumInt32::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void StructWithOptionalEnumInt32::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class Writer>
+void serialize(const StructWithOptionalEnumInt16& self, Writer&& writer) {
+  writer.writeStructBegin();
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeField(2 /* field id */, self.testEmptyEnum_ref());
+  writer.writeFieldStop();
+  writer.writeStructEnd();
 }
 
 template <class Writer>
 void StructWithOptionalEnumInt16::serialize(Writer&& writer) const {
-  writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeField(2 /* field id */, testEmptyEnum_ref());
-  writer.writeFieldStop();
-  writer.writeStructEnd();
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
+template <class V>
+void visitFields(StructWithOptionalEnumInt16& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void visitFields(const StructWithOptionalEnumInt16& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
+    return;
+  }
 }
 
 template <class V>
 void StructWithOptionalEnumInt16::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class V>
 void StructWithOptionalEnumInt16::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 
 template <class Writer>
-void StructWithOptionalEnumInt8::serialize(Writer&& writer) const {
+void serialize(const StructWithOptionalEnumInt8& self, Writer&& writer) {
   writer.writeStructBegin();
-  writer.writeField(1 /* field id */, testEnum_ref());
-  writer.writeField(2 /* field id */, testEmptyEnum_ref());
+  writer.writeField(1 /* field id */, self.testEnum_ref());
+  writer.writeField(2 /* field id */, self.testEmptyEnum_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
 
+template <class Writer>
+void StructWithOptionalEnumInt8::serialize(Writer&& writer) const {
+  carbon::test::thrift::serialize(*this, std::forward<Writer>(writer));
+}
+
 template <class V>
-void StructWithOptionalEnumInt8::visitFields(V&& v) {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
+void visitFields(StructWithOptionalEnumInt8& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
     return;
   }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
     return;
   }
 }
 
 template <class V>
+void visitFields(const StructWithOptionalEnumInt8& self, V&& v) {
+  if (!v.visitField(1, "testEnum", self.testEnum_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "testEmptyEnum", self.testEmptyEnum_ref())) {
+    return;
+  }
+}
+
+template <class V>
+void StructWithOptionalEnumInt8::visitFields(V&& v) {
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
+}
+
+template <class V>
 void StructWithOptionalEnumInt8::visitFields(V&& v) const {
-  if (!v.visitField(1, "testEnum", this->testEnum_ref())) {
-    return;
-  }
-  if (!v.visitField(2, "testEmptyEnum", this->testEmptyEnum_ref())) {
-    return;
-  }
+  carbon::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 } // namespace thrift
 } // namespace test

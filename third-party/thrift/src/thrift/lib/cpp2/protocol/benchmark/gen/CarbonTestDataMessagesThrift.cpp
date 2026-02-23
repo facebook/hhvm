@@ -19,7 +19,7 @@
 namespace benchmark {
 namespace thrift {
 
-void CarbonTestDataSmall::deserialize(carbon::CarbonProtocolReader& reader) {
+void deserialize(CarbonTestDataSmall& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -32,31 +32,140 @@ void CarbonTestDataSmall::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(intField1_ref(), fieldType);
+        reader.readField(self.intField1_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(longField1_ref(), fieldType);
+        reader.readField(self.longField1_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(shortString1_ref(), fieldType);
+        reader.readField(self.shortString1_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(intList1_ref(), fieldType);
+        reader.readField(self.intList1_ref(), fieldType);
         break;
       }
       case 5: {
-        reader.readField(stringMap1_ref(), fieldType);
+        reader.readField(self.stringMap1_ref(), fieldType);
         break;
       }
       case 6: {
-        reader.readField(boolField1_ref(), fieldType);
+        reader.readField(self.boolField1_ref(), fieldType);
         break;
       }
       case 7: {
-        reader.readField(doubleField1_ref(), fieldType);
+        reader.readField(self.doubleField1_ref(), fieldType);
+        break;
+      }
+      default: {
+        reader.skip(fieldType);
+        break;
+      }
+    }
+  }
+  reader.readStructEnd();
+}
+
+void CarbonTestDataSmall::deserialize(carbon::CarbonProtocolReader& reader) {
+  benchmark::thrift::deserialize(*this, reader);
+}
+
+void deserialize(CarbonTestDataMedium& self, carbon::CarbonProtocolReader& reader) {
+  reader.readStructBegin();
+  while (true) {
+    const auto pr = reader.readFieldHeader();
+    const auto fieldType = pr.first;
+    const auto fieldId = pr.second;
+
+    if (fieldType == carbon::FieldType::Stop) {
+      break;
+    }
+
+    switch (fieldId) {
+      case 1: {
+        reader.readField(self.intField1_ref(), fieldType);
+        break;
+      }
+      case 2: {
+        reader.readField(self.longField1_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(self.shortString1_ref(), fieldType);
+        break;
+      }
+      case 4: {
+        reader.readField(self.intList1_ref(), fieldType);
+        break;
+      }
+      case 5: {
+        reader.readField(self.stringMap1_ref(), fieldType);
+        break;
+      }
+      case 6: {
+        reader.readField(self.boolField1_ref(), fieldType);
+        break;
+      }
+      case 7: {
+        reader.readField(self.doubleField1_ref(), fieldType);
+        break;
+      }
+      case 8: {
+        reader.readField(self.intField2_ref(), fieldType);
+        break;
+      }
+      case 9: {
+        reader.readField(self.longField2_ref(), fieldType);
+        break;
+      }
+      case 10: {
+        reader.readField(self.shortString2_ref(), fieldType);
+        break;
+      }
+      case 11: {
+        reader.readField(self.intList2_ref(), fieldType);
+        break;
+      }
+      case 12: {
+        reader.readField(self.stringMap2_ref(), fieldType);
+        break;
+      }
+      case 13: {
+        reader.readField(self.boolField2_ref(), fieldType);
+        break;
+      }
+      case 14: {
+        reader.readField(self.doubleField2_ref(), fieldType);
+        break;
+      }
+      case 15: {
+        reader.readField(self.intField3_ref(), fieldType);
+        break;
+      }
+      case 16: {
+        reader.readField(self.longField3_ref(), fieldType);
+        break;
+      }
+      case 17: {
+        reader.readField(self.shortString3_ref(), fieldType);
+        break;
+      }
+      case 18: {
+        reader.readField(self.intList3_ref(), fieldType);
+        break;
+      }
+      case 19: {
+        reader.readField(self.stringMap3_ref(), fieldType);
+        break;
+      }
+      case 20: {
+        reader.readField(self.boolField3_ref(), fieldType);
+        break;
+      }
+      case 21: {
+        reader.readField(self.doubleField3_ref(), fieldType);
         break;
       }
       default: {
@@ -69,6 +178,10 @@ void CarbonTestDataSmall::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void CarbonTestDataMedium::deserialize(carbon::CarbonProtocolReader& reader) {
+  benchmark::thrift::deserialize(*this, reader);
+}
+
+void deserialize(CarbonTestDataLarge& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
     const auto pr = reader.readFieldHeader();
@@ -81,87 +194,255 @@ void CarbonTestDataMedium::deserialize(carbon::CarbonProtocolReader& reader) {
 
     switch (fieldId) {
       case 1: {
-        reader.readField(intField1_ref(), fieldType);
+        reader.readField(self.intField1_ref(), fieldType);
         break;
       }
       case 2: {
-        reader.readField(longField1_ref(), fieldType);
+        reader.readField(self.longField1_ref(), fieldType);
         break;
       }
       case 3: {
-        reader.readField(shortString1_ref(), fieldType);
+        reader.readField(self.shortString1_ref(), fieldType);
         break;
       }
       case 4: {
-        reader.readField(intList1_ref(), fieldType);
+        reader.readField(self.intList1_ref(), fieldType);
         break;
       }
       case 5: {
-        reader.readField(stringMap1_ref(), fieldType);
+        reader.readField(self.stringMap1_ref(), fieldType);
         break;
       }
       case 6: {
-        reader.readField(boolField1_ref(), fieldType);
+        reader.readField(self.boolField1_ref(), fieldType);
         break;
       }
       case 7: {
-        reader.readField(doubleField1_ref(), fieldType);
+        reader.readField(self.doubleField1_ref(), fieldType);
         break;
       }
       case 8: {
-        reader.readField(intField2_ref(), fieldType);
+        reader.readField(self.intField2_ref(), fieldType);
         break;
       }
       case 9: {
-        reader.readField(longField2_ref(), fieldType);
+        reader.readField(self.longField2_ref(), fieldType);
         break;
       }
       case 10: {
-        reader.readField(shortString2_ref(), fieldType);
+        reader.readField(self.shortString2_ref(), fieldType);
         break;
       }
       case 11: {
-        reader.readField(intList2_ref(), fieldType);
+        reader.readField(self.intList2_ref(), fieldType);
         break;
       }
       case 12: {
-        reader.readField(stringMap2_ref(), fieldType);
+        reader.readField(self.stringMap2_ref(), fieldType);
         break;
       }
       case 13: {
-        reader.readField(boolField2_ref(), fieldType);
+        reader.readField(self.boolField2_ref(), fieldType);
         break;
       }
       case 14: {
-        reader.readField(doubleField2_ref(), fieldType);
+        reader.readField(self.doubleField2_ref(), fieldType);
         break;
       }
       case 15: {
-        reader.readField(intField3_ref(), fieldType);
+        reader.readField(self.intField3_ref(), fieldType);
         break;
       }
       case 16: {
-        reader.readField(longField3_ref(), fieldType);
+        reader.readField(self.longField3_ref(), fieldType);
         break;
       }
       case 17: {
-        reader.readField(shortString3_ref(), fieldType);
+        reader.readField(self.shortString3_ref(), fieldType);
         break;
       }
       case 18: {
-        reader.readField(intList3_ref(), fieldType);
+        reader.readField(self.intList3_ref(), fieldType);
         break;
       }
       case 19: {
-        reader.readField(stringMap3_ref(), fieldType);
+        reader.readField(self.stringMap3_ref(), fieldType);
         break;
       }
       case 20: {
-        reader.readField(boolField3_ref(), fieldType);
+        reader.readField(self.boolField3_ref(), fieldType);
         break;
       }
       case 21: {
-        reader.readField(doubleField3_ref(), fieldType);
+        reader.readField(self.doubleField3_ref(), fieldType);
+        break;
+      }
+      case 22: {
+        reader.readField(self.intField4_ref(), fieldType);
+        break;
+      }
+      case 23: {
+        reader.readField(self.longField4_ref(), fieldType);
+        break;
+      }
+      case 24: {
+        reader.readField(self.shortString4_ref(), fieldType);
+        break;
+      }
+      case 25: {
+        reader.readField(self.intList4_ref(), fieldType);
+        break;
+      }
+      case 26: {
+        reader.readField(self.stringMap4_ref(), fieldType);
+        break;
+      }
+      case 27: {
+        reader.readField(self.boolField4_ref(), fieldType);
+        break;
+      }
+      case 28: {
+        reader.readField(self.doubleField4_ref(), fieldType);
+        break;
+      }
+      case 29: {
+        reader.readField(self.intField5_ref(), fieldType);
+        break;
+      }
+      case 30: {
+        reader.readField(self.longField5_ref(), fieldType);
+        break;
+      }
+      case 31: {
+        reader.readField(self.shortString5_ref(), fieldType);
+        break;
+      }
+      case 32: {
+        reader.readField(self.intList5_ref(), fieldType);
+        break;
+      }
+      case 33: {
+        reader.readField(self.stringMap5_ref(), fieldType);
+        break;
+      }
+      case 34: {
+        reader.readField(self.boolField5_ref(), fieldType);
+        break;
+      }
+      case 35: {
+        reader.readField(self.doubleField5_ref(), fieldType);
+        break;
+      }
+      case 36: {
+        reader.readField(self.intField6_ref(), fieldType);
+        break;
+      }
+      case 37: {
+        reader.readField(self.longField6_ref(), fieldType);
+        break;
+      }
+      case 38: {
+        reader.readField(self.shortString6_ref(), fieldType);
+        break;
+      }
+      case 39: {
+        reader.readField(self.intList6_ref(), fieldType);
+        break;
+      }
+      case 40: {
+        reader.readField(self.stringMap6_ref(), fieldType);
+        break;
+      }
+      case 41: {
+        reader.readField(self.boolField6_ref(), fieldType);
+        break;
+      }
+      case 42: {
+        reader.readField(self.doubleField6_ref(), fieldType);
+        break;
+      }
+      case 43: {
+        reader.readField(self.intField7_ref(), fieldType);
+        break;
+      }
+      case 44: {
+        reader.readField(self.longField7_ref(), fieldType);
+        break;
+      }
+      case 45: {
+        reader.readField(self.shortString7_ref(), fieldType);
+        break;
+      }
+      case 46: {
+        reader.readField(self.intList7_ref(), fieldType);
+        break;
+      }
+      case 47: {
+        reader.readField(self.stringMap7_ref(), fieldType);
+        break;
+      }
+      case 48: {
+        reader.readField(self.boolField7_ref(), fieldType);
+        break;
+      }
+      case 49: {
+        reader.readField(self.doubleField7_ref(), fieldType);
+        break;
+      }
+      case 50: {
+        reader.readField(self.intField8_ref(), fieldType);
+        break;
+      }
+      case 51: {
+        reader.readField(self.longField8_ref(), fieldType);
+        break;
+      }
+      case 52: {
+        reader.readField(self.shortString8_ref(), fieldType);
+        break;
+      }
+      case 53: {
+        reader.readField(self.intList8_ref(), fieldType);
+        break;
+      }
+      case 54: {
+        reader.readField(self.stringMap8_ref(), fieldType);
+        break;
+      }
+      case 55: {
+        reader.readField(self.boolField8_ref(), fieldType);
+        break;
+      }
+      case 56: {
+        reader.readField(self.doubleField8_ref(), fieldType);
+        break;
+      }
+      case 57: {
+        reader.readField(self.intField9_ref(), fieldType);
+        break;
+      }
+      case 58: {
+        reader.readField(self.longField9_ref(), fieldType);
+        break;
+      }
+      case 59: {
+        reader.readField(self.shortString9_ref(), fieldType);
+        break;
+      }
+      case 60: {
+        reader.readField(self.intList9_ref(), fieldType);
+        break;
+      }
+      case 61: {
+        reader.readField(self.stringMap9_ref(), fieldType);
+        break;
+      }
+      case 62: {
+        reader.readField(self.boolField9_ref(), fieldType);
+        break;
+      }
+      case 63: {
+        reader.readField(self.doubleField9_ref(), fieldType);
         break;
       }
       default: {
@@ -174,276 +455,7 @@ void CarbonTestDataMedium::deserialize(carbon::CarbonProtocolReader& reader) {
 }
 
 void CarbonTestDataLarge::deserialize(carbon::CarbonProtocolReader& reader) {
-  reader.readStructBegin();
-  while (true) {
-    const auto pr = reader.readFieldHeader();
-    const auto fieldType = pr.first;
-    const auto fieldId = pr.second;
-
-    if (fieldType == carbon::FieldType::Stop) {
-      break;
-    }
-
-    switch (fieldId) {
-      case 1: {
-        reader.readField(intField1_ref(), fieldType);
-        break;
-      }
-      case 2: {
-        reader.readField(longField1_ref(), fieldType);
-        break;
-      }
-      case 3: {
-        reader.readField(shortString1_ref(), fieldType);
-        break;
-      }
-      case 4: {
-        reader.readField(intList1_ref(), fieldType);
-        break;
-      }
-      case 5: {
-        reader.readField(stringMap1_ref(), fieldType);
-        break;
-      }
-      case 6: {
-        reader.readField(boolField1_ref(), fieldType);
-        break;
-      }
-      case 7: {
-        reader.readField(doubleField1_ref(), fieldType);
-        break;
-      }
-      case 8: {
-        reader.readField(intField2_ref(), fieldType);
-        break;
-      }
-      case 9: {
-        reader.readField(longField2_ref(), fieldType);
-        break;
-      }
-      case 10: {
-        reader.readField(shortString2_ref(), fieldType);
-        break;
-      }
-      case 11: {
-        reader.readField(intList2_ref(), fieldType);
-        break;
-      }
-      case 12: {
-        reader.readField(stringMap2_ref(), fieldType);
-        break;
-      }
-      case 13: {
-        reader.readField(boolField2_ref(), fieldType);
-        break;
-      }
-      case 14: {
-        reader.readField(doubleField2_ref(), fieldType);
-        break;
-      }
-      case 15: {
-        reader.readField(intField3_ref(), fieldType);
-        break;
-      }
-      case 16: {
-        reader.readField(longField3_ref(), fieldType);
-        break;
-      }
-      case 17: {
-        reader.readField(shortString3_ref(), fieldType);
-        break;
-      }
-      case 18: {
-        reader.readField(intList3_ref(), fieldType);
-        break;
-      }
-      case 19: {
-        reader.readField(stringMap3_ref(), fieldType);
-        break;
-      }
-      case 20: {
-        reader.readField(boolField3_ref(), fieldType);
-        break;
-      }
-      case 21: {
-        reader.readField(doubleField3_ref(), fieldType);
-        break;
-      }
-      case 22: {
-        reader.readField(intField4_ref(), fieldType);
-        break;
-      }
-      case 23: {
-        reader.readField(longField4_ref(), fieldType);
-        break;
-      }
-      case 24: {
-        reader.readField(shortString4_ref(), fieldType);
-        break;
-      }
-      case 25: {
-        reader.readField(intList4_ref(), fieldType);
-        break;
-      }
-      case 26: {
-        reader.readField(stringMap4_ref(), fieldType);
-        break;
-      }
-      case 27: {
-        reader.readField(boolField4_ref(), fieldType);
-        break;
-      }
-      case 28: {
-        reader.readField(doubleField4_ref(), fieldType);
-        break;
-      }
-      case 29: {
-        reader.readField(intField5_ref(), fieldType);
-        break;
-      }
-      case 30: {
-        reader.readField(longField5_ref(), fieldType);
-        break;
-      }
-      case 31: {
-        reader.readField(shortString5_ref(), fieldType);
-        break;
-      }
-      case 32: {
-        reader.readField(intList5_ref(), fieldType);
-        break;
-      }
-      case 33: {
-        reader.readField(stringMap5_ref(), fieldType);
-        break;
-      }
-      case 34: {
-        reader.readField(boolField5_ref(), fieldType);
-        break;
-      }
-      case 35: {
-        reader.readField(doubleField5_ref(), fieldType);
-        break;
-      }
-      case 36: {
-        reader.readField(intField6_ref(), fieldType);
-        break;
-      }
-      case 37: {
-        reader.readField(longField6_ref(), fieldType);
-        break;
-      }
-      case 38: {
-        reader.readField(shortString6_ref(), fieldType);
-        break;
-      }
-      case 39: {
-        reader.readField(intList6_ref(), fieldType);
-        break;
-      }
-      case 40: {
-        reader.readField(stringMap6_ref(), fieldType);
-        break;
-      }
-      case 41: {
-        reader.readField(boolField6_ref(), fieldType);
-        break;
-      }
-      case 42: {
-        reader.readField(doubleField6_ref(), fieldType);
-        break;
-      }
-      case 43: {
-        reader.readField(intField7_ref(), fieldType);
-        break;
-      }
-      case 44: {
-        reader.readField(longField7_ref(), fieldType);
-        break;
-      }
-      case 45: {
-        reader.readField(shortString7_ref(), fieldType);
-        break;
-      }
-      case 46: {
-        reader.readField(intList7_ref(), fieldType);
-        break;
-      }
-      case 47: {
-        reader.readField(stringMap7_ref(), fieldType);
-        break;
-      }
-      case 48: {
-        reader.readField(boolField7_ref(), fieldType);
-        break;
-      }
-      case 49: {
-        reader.readField(doubleField7_ref(), fieldType);
-        break;
-      }
-      case 50: {
-        reader.readField(intField8_ref(), fieldType);
-        break;
-      }
-      case 51: {
-        reader.readField(longField8_ref(), fieldType);
-        break;
-      }
-      case 52: {
-        reader.readField(shortString8_ref(), fieldType);
-        break;
-      }
-      case 53: {
-        reader.readField(intList8_ref(), fieldType);
-        break;
-      }
-      case 54: {
-        reader.readField(stringMap8_ref(), fieldType);
-        break;
-      }
-      case 55: {
-        reader.readField(boolField8_ref(), fieldType);
-        break;
-      }
-      case 56: {
-        reader.readField(doubleField8_ref(), fieldType);
-        break;
-      }
-      case 57: {
-        reader.readField(intField9_ref(), fieldType);
-        break;
-      }
-      case 58: {
-        reader.readField(longField9_ref(), fieldType);
-        break;
-      }
-      case 59: {
-        reader.readField(shortString9_ref(), fieldType);
-        break;
-      }
-      case 60: {
-        reader.readField(intList9_ref(), fieldType);
-        break;
-      }
-      case 61: {
-        reader.readField(stringMap9_ref(), fieldType);
-        break;
-      }
-      case 62: {
-        reader.readField(boolField9_ref(), fieldType);
-        break;
-      }
-      case 63: {
-        reader.readField(doubleField9_ref(), fieldType);
-        break;
-      }
-      default: {
-        reader.skip(fieldType);
-        break;
-      }
-    }
-  }
-  reader.readStructEnd();
+  benchmark::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace benchmark

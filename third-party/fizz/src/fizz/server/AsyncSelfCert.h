@@ -9,6 +9,7 @@
 #pragma once
 
 #include <fizz/protocol/Certificate.h>
+#include <fizz/protocol/HandshakeContext.h>
 #include <folly/futures/Future.h>
 
 namespace fizz {
@@ -26,5 +27,22 @@ class AsyncSelfCert : public SelfCert {
       SignatureScheme scheme,
       CertificateVerifyContext context,
       std::unique_ptr<folly::IOBuf> toBeSigned) const = 0;
+
+  struct CertificateAndSignature {
+    Buf encodedCertificate;
+    Buf signature;
+  };
+
+  /**
+   * Encodes the certificate (optionally compressed) and asynchronously signs
+   * the handshake transcript, returning both the encoded certificate and
+   * signature.
+   */
+  virtual folly::SemiFuture<folly::Optional<CertificateAndSignature>>
+  getCertificateAndSign(
+      folly::Optional<CertificateCompressionAlgorithm> algo,
+      SignatureScheme sigScheme,
+      CertificateVerifyContext verifyContext,
+      std::unique_ptr<HandshakeContext> handshakeContext) const;
 };
 } // namespace fizz

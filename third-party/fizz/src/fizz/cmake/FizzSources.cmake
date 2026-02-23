@@ -87,6 +87,7 @@ set(
         record/Types.cpp
         server/AeadCookieCipher.cpp
         server/AeadTokenCipher.cpp
+        server/AsyncSelfCert.cpp
         server/CookieCipher.cpp
         server/DefaultCertManager.cpp
         server/FizzServer.cpp

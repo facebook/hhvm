@@ -15,16 +15,233 @@
   limitations under the License.
 
 }}
+{{#import "codec/codec" as codec}}
+{{#import "common/constants" as constants}}
+{{#import "common/type" as types}}
 {{#import "types/field" as m_field}}
-{{#import "types/struct_methods_v2" as struct_methods}}
 
-{{! This partial generates a Thrift struct. }}
-{{#let export partial struct |s| captures |m_field struct_methods|}}
+{{! Type definition for a thrift struct. }}
+{{#let export partial definition |struct| captures |m_field|}}
+type {{struct.go_name}} struct {
+{{#each struct.fields_sorted as |field|}}
+    {{#partial m_field.definition field=field}}
+
+{{/each}}
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*{{struct.go_name}})(nil)
+{{#if struct.exception?}}
+var _ thrift.WritableException = (*{{struct.go_name}})(nil)
+{{/if struct.exception?}}
+{{#if (or struct.resp? struct.stream? struct.sink?)}}
+var _ thrift.WritableResult = (*{{struct.go_name}})(nil)
+
+{{! TODO: resp struct is an internal implementation detail. Can we unexport it? }}
+// Deprecated: {{struct.go_public_resp_name}} is deprecated, since it is supposed to be internal.
+type {{struct.go_public_resp_name}} = {{struct.go_name}}
+{{/if (or struct.resp? struct.stream? struct.sink?)}}
+{{#if struct.req?}}
+
+{{! TODO: req struct is an internal implementation detail. Can we unexport it? }}
+// Deprecated: {{struct.go_public_req_name}} is deprecated, since it is supposed to be internal.
+type {{struct.go_public_req_name}} = {{struct.go_name}}
+{{/if struct.req?}}
+{{/let partial}}
+
+{{! New*() }}
+{{#let export partial new |struct|}}
+func {{struct.go_qualified_new_func}}() *{{struct.go_name}} {
+    return (&{{struct.go_name}}{}).setDefaults()
+}
+{{/let partial}}
+
+{{! Error() }}
+{{#let export partial error |struct|}}
+func (x *{{struct.go_name}}) Error() string {
+    return x.String()
+}
+{{/let partial}}
+
+{{! Exception() }}
+{{#let export partial exception |struct|}}
+func (x *{{struct.go_name}}) Exception() thrift.WritableException {
+    {{#each struct.fields_sorted as |field|}}
+    {{^field.retval?}}
+    if x.{{field.go_name}} != nil {
+        return x.{{field.go_name}}
+    }
+    {{/field.retval?}}
+    {{/each}}
+    return nil
+}
+{{/let partial}}
+
+{{! getStructSpec() }}
+{{#let export partial get_spec |struct|}}
+func (x *{{struct.go_name}}) getStructSpec() *thrift.StructSpec {
+    return {{struct.struct_spec_name}}
+}
+{{/let partial}}
+
+{{! GetThriftStructMetadata() }}
+{{#let export partial get_thrift_metadata |struct|}}
+func (x *{{struct.go_name}}) GetThriftStructMetadata() *{{struct.program.metadata_qualifier}}{{#if struct.exception?}}ThriftException{{#else}}ThriftStruct{{/if}} {
+    return {{struct.struct_metadata_name}}
+}
+{{/let partial}}
+
+{{! Read() (v2) }}
+{{#let export partial read_v2 |struct|}}
+func (x *{{struct.go_name}}) Read(p thrift.Decoder) error {
+    return thrift.ReadStructSpec(p, x, x.getStructSpec())
+}
+{{/let partial}}
+
+{{! String() }}
+{{#let export partial string |struct|}}
+func (x *{{struct.go_name}}) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+{{/let partial}}
+
+{{! TypeName() }}
+{{#let export partial type_name |struct|}}
+func (x *{{struct.go_name}}) TypeName() string {
+    return "{{struct.name}}"
+}
+{{/let partial}}
+
+{{! Write() (v2) }}
+{{#let export partial write_v2 |struct|}}
+func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
+    {{#struct.union?}}
+    if countSet := x.CountSetFields(); countSet > 1 {
+        return fmt.Errorf("{{struct.go_name}} write union: no more than one field must be set (%d set).", countSet)
+    }
+    {{/struct.union?}}
+    return thrift.WriteStructSpec(p, x, x.getStructSpec())
+}
+{{/let partial}}
+
+{{! Write() }}
+{{#let export partial write |struct| captures |codec|}}
+func (x *{{struct.go_name}}) Write(p thrift.Encoder) error {
+    {{#if struct.union?}}
+    if countSet := x.CountSetFields(); countSet > 1 {
+        return fmt.Errorf("{{struct.go_name}} write union: no more than one field must be set (%d set).", countSet)
+    }
+    {{/if struct.union?}}
+    if err := p.WriteStructBegin("{{struct.name}}"); err != nil {
+        return thrift.PrependError("{{struct.go_name}} write struct begin error: ", err)
+    }
+
+    {{#each struct.fields_sorted as |field|}}
+    if err := x.writeField{{field.key_str}}(p); err != nil {
+        return err
+    }
+    {{/each}}
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("{{struct.go_name}} write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("{{struct.go_name}} write struct end error: ", err)
+    }
+    return nil
+}
+{{/let partial}}
+
+{{! Read() }}
+{{#let export partial read |struct| captures |codec|}}
+func (x *{{struct.go_name}}) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("{{struct.go_name}} read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("{{struct.go_name}} field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        {{#each struct.fields_sorted as |field|}}
+        {{#let type = field.type}}
+        case ((id == {{field.id}} && wireType == {{#partial codec.ttype type=type}}) || (id == thrift.NO_FIELD_ID && fieldName == "{{field.name}}")):  // {{field.name}}
+            fieldReadErr = x.readField{{field.key_str}}(p)
+        {{/each}}
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("{{struct.go_name}} read struct end error: ", err)
+    }
+
+    return nil
+}
+{{/let partial}}
+
+{{! CountSetFields() }}
+{{#let export partial count_set_fields |struct|}}
+func (x *{{struct.go_name}}) CountSetFields() int {
+    count := int(0)
+    {{#each struct.fields_sorted as |field|}}
+    if (x.IsSet{{field.go_name}}()) {
+        count++
+    }
+    {{/each}}
+    return count
+}
+{{/let partial}}
+
+{{! setDefaults() }}
+{{#let export partial set_defaults |struct| captures |constants types|}}
+func (x *{{struct.go_name}}) setDefaults() *{{struct.go_name}} {
+    return x{{#if (not struct.union?)}}{{#each struct.fields_sorted as |field|}}{{#let type = field.type}}{{!
+
+        // Fields with given default values.
+        }}{{#if (object.notnull? field.default_value)}}.
+        {{field.go_setter_name}}{{#if root_program.compat_setters?}}NonCompat{{/if}}({{!
+          }}{{#if (not type.primitive?)}}
+            {{#partial constants.const_value value=field.default_value root_const=null}},
+        {{#else}}{{!
+            }}{{#partial constants.const_value value=field.default_value root_const=null}}{{!
+        }}{{/if (not type.primitive?)}}{{!
+        }}){{#else}}{{!
+
+        // Non-optional fields without given default values.
+        }}{{#if (not field.optional?)}}.
+        {{field.go_setter_name}}{{#if root_program.compat_setters?}}NonCompat{{/if}}({{!
+            }}{{#partial types.natural_default_value type=type}}{{!
+        }}){{/if (not field.optional?)}}{{!
+        }}{{/if (object.notnull? field.default_value)}}{{!
+    }}{{/each}}{{/if (not struct.union?)}}
+}
+{{/let partial}}
+
+{{! This partial generates a complete Thrift struct. }}
+{{#let export partial struct |s| captures |m_field definition new count_set_fields exception write_v2 write read_v2 read string set_defaults get_spec get_thrift_metadata error type_name|}}
 {{! type definition }}
-{{#partial struct_methods.definition struct=s}}
+{{#partial definition struct=s}}
 
 {{! new function }}
-{{#partial struct_methods.new struct=s}}
+{{#partial new struct=s}}
 
 {{! methods }}
 {{#each s.fields_sorted as |field|}}
@@ -50,52 +267,52 @@
 
 {{! countSetFields }}
 {{#if s.union?}}
-{{#partial struct_methods.count_set_fields struct=s}}
+{{#partial count_set_fields struct=s}}
 {{/if s.union?}}
 
 {{#if (or s.resp? s.stream? s.sink?)}}
 
 {{! exception }}
-{{#partial struct_methods.exception struct=s}}
+{{#partial exception struct=s}}
 {{/if (or s.resp? s.stream? s.sink?)}}
 
 {{! write (serialize) }}
 {{#if s.use_reflect_codec?}}
-{{#partial struct_methods.write_v2 struct=s}}
+{{#partial write_v2 struct=s}}
 {{#else}}
-{{#partial struct_methods.write struct=s}}
+{{#partial write struct=s}}
 {{/if s.use_reflect_codec?}}
 
 {{! read (deserialize) }}
 {{#if s.use_reflect_codec?}}
-{{#partial struct_methods.read_v2 struct=s}}
+{{#partial read_v2 struct=s}}
 {{#else}}
-{{#partial struct_methods.read struct=s}}
+{{#partial read struct=s}}
 {{/if s.use_reflect_codec?}}
 
 {{! string }}
-{{#partial struct_methods.string struct=s}}
+{{#partial string struct=s}}
 
 {{! setDefaults }}
-{{#partial struct_methods.set_defaults struct=s}}
+{{#partial set_defaults struct=s}}
 {{#if s.use_reflect_codec?}}
 
 {{! getStructSpec }}
-{{#partial struct_methods.get_spec struct=s}}
+{{#partial get_spec struct=s}}
 {{/if s.use_reflect_codec?}}
 {{#if root_program.gen_metadata?}}
 {{#if (not s.req_resp?)}}
 
 {{! GetThrift(Struct|Exception)Metadata }}
-{{#partial struct_methods.get_thrift_metadata struct=s}}
+{{#partial get_thrift_metadata struct=s}}
 {{/if (not s.req_resp?)}}
 {{/if root_program.gen_metadata?}}
 {{#if s.exception?}}
 
 {{! error }}
-{{#partial struct_methods.error struct=s}}
+{{#partial error struct=s}}
 
 {{! TypeName }}
-{{#partial struct_methods.type_name struct=s}}
+{{#partial type_name struct=s}}
 {{/if s.exception?}}
 {{/let partial}}

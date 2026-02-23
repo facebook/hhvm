@@ -59,6 +59,9 @@ class Any final {
   // Get the protocol used to serialize the stored value
   const type::Protocol& protocol() const { return data_.protocol(); }
 
+  /// Returns a const reference to the underlying AnyStruct.
+  const type::AnyStruct& toThrift() const { return data_.toThrift(); }
+
   /**
    * Load (deserialize) the contained value into a DynamicValue.
    * The type information is extracted from the stored AnyData.

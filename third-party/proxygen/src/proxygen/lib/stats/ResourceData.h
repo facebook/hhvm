@@ -168,6 +168,14 @@ struct ResourceData : public PeriodicStatsDataBase {
     return memPressureSomeAvg300Pct_;
   }
 
+  [[nodiscard]] int64_t getMemEventsHighCount() const {
+    return memEventsHighCount_;
+  }
+
+  [[nodiscard]] int64_t getMemEventsMaxCount() const {
+    return memEventsMaxCount_;
+  }
+
   [[nodiscard]] double getCpuPressureAvg10Pct() const {
     return cpuPressureAvg10Pct_;
   }
@@ -367,6 +375,11 @@ struct ResourceData : public PeriodicStatsDataBase {
     memPressureSomeAvg300Pct_ = avg300;
   }
 
+  void setMemEventsStats(int64_t highCount, int64_t maxCount) {
+    memEventsHighCount_ = highCount;
+    memEventsMaxCount_ = maxCount;
+  }
+
   void setIoPressureStats(double avg10, double avg60, double avg300) {
     ioPressureAvg10Pct_ = avg10;
     ioPressureAvg60Pct_ = avg60;
@@ -438,6 +451,9 @@ struct ResourceData : public PeriodicStatsDataBase {
   double memPressureSomeAvg10Pct_{0};
   double memPressureSomeAvg60Pct_{0};
   double memPressureSomeAvg300Pct_{0};
+
+  int64_t memEventsHighCount_{0};
+  int64_t memEventsMaxCount_{0};
 
   double ioPressureAvg10Pct_{0};
   double ioPressureAvg60Pct_{0};

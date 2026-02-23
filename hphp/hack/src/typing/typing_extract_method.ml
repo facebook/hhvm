@@ -104,57 +104,50 @@ end = struct
       if is_invariant acc then
         acc
       else
-        (* Treat any generics / `this` appearing as refinements as invariant.
-            Doing so prevents us substituting for the upper or lower bounds of
-            generated type parameters and correctly handles cases like this:
+        (* The variance of generics / `this` inside refinements depends on
+           the refinement kind:
 
-           abstract class WithRfmt {
-             abstract const type T  as arraykey;
-             public function foo(this::T $_) : void {}
-           }
+           - Exact refinements (`= T`) are invariant. This prevents us
+             substituting for the upper or lower bounds of generated type
+             parameters and correctly handles cases like this:
 
-           Before any optimization, the generated type of
-           `meth_caller(WithRfmt::class, 'foo')` is:
+             abstract class WithRfmt {
+               abstract const type T  as arraykey;
+               public function foo(this::T $_) : void {}
+             }
 
-           ```
-           (function
-             <TThis as WithRfmt with type { T = T#0 }
-             , T#0 as arraykey
-             >(TThis, T#0): void
-           )
-           ```
-           if we don't treat `T#0` as invariant, we'll end up subsituting it for
-           is upper bound (`arraykey`) and end up with a type like this:
+             Before any optimization, the generated type of
+             `meth_caller(WithRfmt::class, 'foo')` is:
 
-           ```
-           (function
-             (WithRfmt with { type T as arraykey }
-             ,arraykey
-             ) : void
-           )
-           ```
-
-           and lose the restriction that the second argument must be connected
-           to the type constant `T` in the first, e.g. we would be free to
-           pass a subclass of `WithRfmt` with the type constant `T`
-           defined as `int` and a second argument of type `string`.
-
-           With the invariant treatment, we end up with a type like this:
-
-           ```
-           (function
-             <T#0 as arraykey>
-             (WithRfmt with type { T = T#0 }
-             ,T#0
+             ```
+             (function
+               <TThis as WithRfmt with type { T = T#0 }
+               , T#0 as arraykey
+               >(TThis, T#0): void
              )
-           ) : void
+             ```
 
-           We have correctly substituted `TThis` for its upper bound but we
-           have left `T#0`. We are then guaranteed that the second argument is
-           connected to the type constant `T` in the first argument.
-           ```
+             If we don't treat `T#0` as invariant in the exact refinement,
+             we would substitute it for its upper bound (`arraykey`) and
+             lose the restriction that the second argument must be connected
+             to the type constant `T` in the first.
+
+           - `as` (upper bound) refinements are covariant: we compose the
+             outer variance with covariant (identity).
+
+           - `super` (lower bound) refinements are contravariant: we compose
+             the outer variance with contravariant.
+
+           For `TRloose`, the variance of each bound position is composed
+           with the outer context variance using `mul`.
         *)
-        find_cr_consts (SMap.values cr_consts) ~update ~is_invariant ~acc ~env
+        find_cr_consts
+          (SMap.values cr_consts)
+          ~var
+          ~update
+          ~is_invariant
+          ~acc
+          ~env
     | Tfun fun_ty -> find_fun_ty fun_ty ~var ~update ~is_invariant ~acc ~env
     | Ttuple tuple_ty ->
       find_tuple_ty tuple_ty ~var ~update ~is_invariant ~acc ~env
@@ -173,35 +166,30 @@ end = struct
       find_with_variances tys variances ~var ~update ~is_invariant ~acc ~env
     end
 
-  and find_cr_consts cr_consts ~update ~is_invariant ~acc ~env =
+  and find_cr_consts cr_consts ~var ~update ~is_invariant ~acc ~env =
     match cr_consts with
     | [] -> acc
     | Typing_defs_core.{ rc_bound = TRexact ty; _ } :: cr_consts ->
+      (* Exact refinements (= T) are invariant *)
       let acc =
         find ty ~var:Ast_defs.Invariant ~update ~is_invariant ~acc ~env
       in
       if is_invariant acc then
         acc
       else
-        find_cr_consts cr_consts ~update ~is_invariant ~acc ~env
+        find_cr_consts cr_consts ~var ~update ~is_invariant ~acc ~env
     | Typing_defs_core.{ rc_bound = TRloose { tr_upper; tr_lower }; _ }
       :: cr_consts ->
-      let acc =
-        find_list
-          tr_upper
-          ~var:Ast_defs.Invariant
-          ~update
-          ~is_invariant
-          ~acc
-          ~env
-      in
+      (* Upper bounds (as T) are covariant: compose with outer variance *)
+      let acc = find_list tr_upper ~var ~update ~is_invariant ~acc ~env in
       if is_invariant acc then
         acc
       else
+        (* Lower bounds (super T) are contravariant: compose with outer variance *)
         let acc =
           find_list
             tr_lower
-            ~var:Ast_defs.Invariant
+            ~var:(mul var Ast_defs.Contravariant)
             ~update
             ~is_invariant
             ~acc
@@ -210,7 +198,7 @@ end = struct
         if is_invariant acc then
           acc
         else
-          find_cr_consts cr_consts ~update ~is_invariant ~acc ~env
+          find_cr_consts cr_consts ~var ~update ~is_invariant ~acc ~env
 
   and find_list tys ~var ~update ~is_invariant ~acc ~env =
     match tys with
@@ -348,26 +336,6 @@ end = struct
     in
     let _ =
       Typing_defs_core.transform_top_down_decl_ty ty ~ctx:() ~on_ty ~on_rc_bound
-    in
-    !res
-
-  let find_ty_params_in_refinement ty =
-    let open Typing_defs_core in
-    let res = ref SSet.empty in
-    let on_rc_bound rc_bound ~ctx:_ = (true, `Continue rc_bound)
-    and on_ty ty ~ctx =
-      match get_node ty with
-      | Tgeneric nm when ctx ->
-        res := SSet.add nm !res;
-        (ctx, `Stop ty)
-      | _ -> (ctx, `Continue ty)
-    in
-    let _ =
-      Typing_defs_core.transform_top_down_decl_ty
-        ty
-        ~ctx:false
-        ~on_ty
-        ~on_rc_bound
     in
     !res
 
@@ -517,14 +485,6 @@ end = struct
         ~is_invariant:all_invariant
         ~acc
         ~env
-    and in_rfmt =
-      let open Typing_defs_core in
-      List.fold_left
-        fun_ty.ft_tparams
-        ~init:SSet.empty
-        ~f:(fun acc { tp_constraints; _ } ->
-          List.fold_left tp_constraints ~init:acc ~f:(fun acc (_, ty) ->
-              SSet.union acc (find_ty_params_in_refinement ty)))
     and in_where_constraint =
       let open Typing_defs_core in
       List.fold_left
@@ -537,7 +497,7 @@ end = struct
     in
     SMap.mapi
       (fun nm var_opt ->
-        if SSet.mem nm in_rfmt || SSet.mem nm in_where_constraint then
+        if SSet.mem nm in_where_constraint then
           Some Ast_defs.Invariant
         else
           var_opt)

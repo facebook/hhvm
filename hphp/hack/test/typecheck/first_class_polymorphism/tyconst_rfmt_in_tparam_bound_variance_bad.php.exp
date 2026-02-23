@@ -1,0 +1,144 @@
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 102, characters 53-63:
+Invalid argument (Typing[4323])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 30, characters 5-6:
+  `T2` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 30, characters 11-18:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 30, characters 11-18:
+  Expected `arraykey`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
+  But got `mixed`
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 103, characters 58-68:
+Invalid argument (Typing[4110])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 34, characters 5-40:
+  Expected a class with `{type TC as arraykey}`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 18, characters 23-39:
+  But got `ConcreteTC3_Mixed`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 34, characters 31-38:
+  This `as` or `=` refinement constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 34, characters 31-38:
+  Expected `arraykey`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
+  But got `mixed`
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 106, characters 49-59:
+Invalid argument (Typing[4323])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 40, characters 5-6:
+  `T2` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 40, characters 11-18:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 40, characters 11-18:
+  Expected `arraykey`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
+  But got `mixed`
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 107, characters 54-64:
+Invalid argument (Typing[4323])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 5-6:
+  `T1` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 11-46:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 11-46:
+  Expected a class with `{type TC as arraykey}`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 18, characters 23-39:
+  But got `ConcreteTC3_Mixed`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 37-44:
+  This `as` or `=` refinement constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 5-6:
+  `T1` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 11-46:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 37-44:
+  Expected `arraykey`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
+  But got `mixed`
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 110, characters 56-67:
+Invalid argument (Typing[4323])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 54, characters 5-6:
+  `T2` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 54, characters 14-16:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-24:
+  Expected `string`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 54, characters 14-16:
+  But got `int`
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 111, characters 61-72:
+Invalid argument (Typing[4110])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 58, characters 5-38:
+  Expected a class with `{type TC super int}`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 21, characters 24-41:
+  But got `ConcreteTC3_String`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 58, characters 34-36:
+  This `super` refinement constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-24:
+  Expected `string`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 58, characters 34-36:
+  But got `int`
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 114, characters 52-63:
+Invalid argument (Typing[4323])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 64, characters 5-6:
+  `T2` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 64, characters 14-16:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-24:
+  Expected `string`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 64, characters 14-16:
+  But got `int`
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 115, characters 57-68:
+Invalid argument (Typing[4323])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 5-6:
+  `T1` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 11-44:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 11-44:
+  Expected a class with `{type TC super int}`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 21, characters 24-41:
+  But got `ConcreteTC3_String`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 40-42:
+  This `super` refinement constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 5-6:
+  `T1` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 11-44:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-24:
+  Expected `string`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 40-42:
+  But got `int`
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 118, characters 56-66:
+Invalid argument (Typing[4323])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 78, characters 5-6:
+  `T2` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 78, characters 11-18:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 78, characters 11-18:
+  Expected `arraykey`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
+  But got `mixed`
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 119, characters 61-71:
+Invalid argument (Typing[4323])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 81, characters 57-58:
+  `T2` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 81, characters 63-70:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 81, characters 63-70:
+  Expected `arraykey`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
+  But got `mixed`
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 122, characters 53-63:
+Invalid argument (Typing[4323])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 88, characters 5-6:
+  `T2` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 88, characters 11-18:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 88, characters 11-18:
+  Expected `arraykey`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
+  But got `mixed`
+ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 123, characters 58-68:
+Invalid argument (Typing[4323])
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 93, characters 54-55:
+  `T2` is a constrained type parameter
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 93, characters 60-67:
+  This type constraint is violated
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 93, characters 60-67:
+  Expected `arraykey`
+  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
+  But got `mixed`

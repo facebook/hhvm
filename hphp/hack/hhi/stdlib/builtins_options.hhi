@@ -168,3 +168,9 @@ function gc_mem_caches(): HH\FIXME\MISSING_RETURN_TYPE;
 function gc_check_heap(): HH\FIXME\MISSING_RETURN_TYPE;
 function get_visited_files(): keyset<string>;
 function record_visited_files(): void;
+function get_active_worker_counts(): shape(
+  "pagelet_workers" => int,
+  "xbox_workers" => int,
+  "http_workers" => int,
+  "cli_workers" => int,
+);

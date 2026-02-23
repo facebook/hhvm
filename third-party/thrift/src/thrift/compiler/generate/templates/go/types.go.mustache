@@ -64,11 +64,11 @@ var _ = metadata.GoUnusedProtection__
 {{#partial m_struct.struct s=struct:self}}
 
 {{/program:structs}}
-{{! Req/resp srtucts }}
-{{#program:req_resp_structs}}
-{{#partial m_struct.struct s=struct:self}}
+{{! Req/resp structs }}
+{{#each program:self.req_resp_structs as |s|}}
+{{#partial m_struct.struct s=s}}
 
-{{/program:req_resp_structs}}
+{{/each}}
 
 {{#program:structs?}}
 {{> common/registry}}

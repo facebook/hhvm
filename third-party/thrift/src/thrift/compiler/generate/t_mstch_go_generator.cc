@@ -143,6 +143,9 @@ class t_mstch_go_generator : public t_mstch_generator {
     def.property("thrift_imports", [&proto](const t_program& self) {
       return to_array(self.get_includes_for_codegen(), proto.of<t_program>());
     });
+    def.property("req_resp_structs", [this, &proto](const t_program&) {
+      return to_array(data_.req_resp_structs, proto.of<t_struct>());
+    });
 
     return std::move(def).make();
   }
@@ -519,16 +522,12 @@ class mstch_go_program : public mstch_program {
         {
             {"program:thrift_metadata_types",
              &mstch_go_program::thrift_metadata_types},
-            {"program:req_resp_structs", &mstch_go_program::req_resp_structs},
         });
   }
 
   mstch::node thrift_metadata_types() {
     return make_mstch_array(
         data_.thrift_metadata_types, *context_.type_factory);
-  }
-  mstch::node req_resp_structs() {
-    return make_mstch_array(data_.req_resp_structs, *context_.struct_factory);
   }
 
  private:

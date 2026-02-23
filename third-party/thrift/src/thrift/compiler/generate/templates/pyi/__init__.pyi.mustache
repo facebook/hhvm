@@ -14,12 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-
-Wraps FieldType with an optional type when there's no default value.
-
-}}{{^field:default_value}}{{^field:optional?}}__T.Optional[{{/field:optional?}}{{/field:default_value}}{{!
-}}{{#field:optional?}}__T.Optional[{{/field:optional?}}{{!
-}}{{#partial common.type_name type=type:self}}{{!
-}}{{^field:default_value}}{{^field:optional?}}]{{/field:optional?}}{{/field:default_value}}{{!
-}}{{#field:optional?}}]{{/field:optional?}}
+}}
+{{#import "common" as common}}
+{{#partial common.auto_generated_header}}

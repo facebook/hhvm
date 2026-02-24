@@ -138,7 +138,7 @@
                 }}{{> lib/fieldvalue}}{{!
             }}{{/field:explicit_value}}{{!
             }}{{^field:explicit_value}}{{!
-                }}{{#field:default_value}}{{!
+                }}{{#field:default}}{{!
                     }}{{#if field:optional?}}{{!
                         }}{{#if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
                             }}{{> lib/fieldvalue}}{{!
@@ -148,10 +148,10 @@
                     }}{{#else}}{{!
                         }}{{> lib/fieldvalue}}{{!
                     }}{{/if field:optional?}}{{!
-                }}{{/field:default_value}}{{!
-                }}{{^field:default_value}}{{!
+                }}{{/field:default}}{{!
+                }}{{^field:default}}{{!
                     }}::std::default::Default::default(){{!
-                }}{{/field:default_value}}{{!
+                }}{{/field:default}}{{!
             }}{{/field:explicit_value}}{{!
             }}{{#if field:has_adapter?}}, {{field:id}}){{/if field:has_adapter?}}{{!
             }},{{!

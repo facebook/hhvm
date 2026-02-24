@@ -23,7 +23,7 @@ impl ::std::default::Default for self::{{struct:rust_name}} {
         Self {{> lib/block}}{{!
         }}{{#struct:fields}}
             {{field:rust_name}}: {{!
-                }}{{#field:default_value}}{{!
+                }}{{#field:default}}{{!
                     }}{{#if field:optional?}}{{!
                         }}{{#if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
                             }}{{#if field:has_adapter?}}{{field:adapter_struct_qualified}}::from_thrift_default::<{{struct:rust_name}}>({{/if field:has_adapter?}}{{!
@@ -37,8 +37,8 @@ impl ::std::default::Default for self::{{struct:rust_name}} {
                         }}{{> lib/fieldvalue}}{{!
                         }}{{#if field:has_adapter?}}, {{field:id}}){{/if field:has_adapter?}}{{!
                     }}{{/if field:optional?}}{{!
-                }}{{/field:default_value}}{{!
-                }}{{^field:default_value}}{{!
+                }}{{/field:default}}{{!
+                }}{{^field:default}}{{!
                     }}{{#if field:optional?}}{{!
                         }}::std::option::Option::None{{!
                     }}{{#else}}{{!
@@ -46,7 +46,7 @@ impl ::std::default::Default for self::{{struct:rust_name}} {
                         }}::std::default::Default::default(){{!
                         }}{{#if field:has_adapter?}}, {{field:id}}){{/if field:has_adapter?}}{{!
                     }}{{/if field:optional?}}{{!
-                }}{{/field:default_value}}{{!
+                }}{{/field:default}}{{!
             }},{{!
         }}{{/struct:fields}}
             {{> lib/structvalue_epilogue}}
@@ -252,21 +252,21 @@ where
                 }}{{#if (not field:optional?)}}{{!
                     }}{{#if field:has_adapter?}}{{!
                         }}.unwrap_or_else(|| {{field:adapter_struct_qualified}}::from_thrift_default::<{{struct:rust_name}}>({{!
-                        }}{{#field:default_value}}{{> lib/value}}{{/field:default_value}}{{!
-                        }}{{^field:default_value}}::std::default::Default::default(){{/field:default_value}}{{!
+                        }}{{#field:default}}{{> lib/value}}{{/field:default}}{{!
+                        }}{{^field:default}}::std::default::Default::default(){{/field:default}}{{!
                         }}, {{field:id}})){{!
                     }}{{/if field:has_adapter?}}{{!
                     }}{{#if (not field:has_adapter?)}}{{!
-                        }}{{#field:default_value}}{{!
+                        }}{{#field:default}}{{!
                             }}{{#if value:simpleLiteral?}}{{!
                                 }}.unwrap_or({{> lib/value}}){{!
                             }}{{#else}}{{!
                                 }}.unwrap_or_else(|| {{> lib/value}}){{!
                             }}{{/if value:simpleLiteral?}}{{!
-                        }}{{/field:default_value}}{{!
-                        }}{{^field:default_value}}{{!
+                        }}{{/field:default}}{{!
+                        }}{{^field:default}}{{!
                             }}.unwrap_or_default(){{!
-                        }}{{/field:default_value}}{{!
+                        }}{{/field:default}}{{!
                     }}{{/if (not field:has_adapter?)}}{{!
                 }}{{/if (not field:optional?)}}{{!
             }},{{!

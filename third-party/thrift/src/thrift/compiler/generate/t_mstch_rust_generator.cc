@@ -861,6 +861,11 @@ class rust_generator_context {
         });
   }
 
+  const rust_const_value_info* get_info(const t_const_value* v) const {
+    auto it = info_map_.find(v);
+    return it == info_map_.end() ? nullptr : &it->second;
+  }
+
  private:
   std::unordered_map<const t_const_value*, rust_const_value_info> info_map_;
 
@@ -1064,8 +1069,180 @@ class t_mstch_rust_generator : public t_mstch_generator {
 
   prototype<t_const_value>::ptr make_prototype_for_const_value(
       const prototype_database& proto) const override {
+    using value_type = t_const_value::t_const_value_kind;
     auto base = t_whisker_generator::make_prototype_for_const_value(proto);
     auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
+
+    def.property("newtype?", [this](const t_const_value& self) {
+      auto* info = rust_context_->get_info(&self);
+      if (!info) {
+        return false;
+      }
+      return !info->newtype_chain.empty();
+    });
+
+    def.property(
+        "newtype_chain",
+        [this, &proto](const t_const_value& self) -> whisker::object {
+          auto* info = rust_context_->get_info(&self);
+          if (!info) {
+            return whisker::make::null;
+          }
+          whisker::array::raw chain;
+          for (auto* td : info->newtype_chain) {
+            chain.emplace_back(resolve_derived_t_type(proto, *td));
+          }
+          return whisker::make::array(std::move(chain));
+        });
+
+    def.property(
+        "newtype_chain_reversed",
+        [this, &proto](const t_const_value& self) -> whisker::object {
+          auto* info = rust_context_->get_info(&self);
+          if (!info) {
+            return whisker::make::null;
+          }
+          whisker::array::raw chain;
+          for (auto it = info->newtype_chain.rbegin();
+               it != info->newtype_chain.rend();
+               ++it) {
+            chain.emplace_back(resolve_derived_t_type(proto, **it));
+          }
+          return whisker::make::array(std::move(chain));
+        });
+
+    def.property(
+        "bool_value", [](const t_const_value& self) -> whisker::object {
+          if (self.kind() == value_type::CV_INTEGER) {
+            return whisker::make::boolean(self.get_integer() != 0);
+          }
+          return whisker::make::boolean(self.get_bool());
+        });
+
+    def.property("integer_value", [](const t_const_value& self) {
+      return whisker::make::string(std::to_string(self.get_integer()));
+    });
+
+    def.property("floatingPoint?", [](const t_const_value& self) {
+      return !self.type().empty() &&
+          self.type()->get_true_type()->is_floating_point();
+    });
+
+    def.property("floatingPointValue", [](const t_const_value& self) {
+      auto str = fmt::format(
+          "{}",
+          self.kind() == value_type::CV_INTEGER
+              ? static_cast<double>(self.get_integer())
+              : self.get_double());
+      if (str.find('.') == std::string::npos &&
+          str.find('e') == std::string::npos &&
+          str.find('E') == std::string::npos) {
+        str += ".0";
+      }
+      return whisker::make::string(std::move(str));
+    });
+
+    def.property("quoted", [](const t_const_value& self) {
+      return whisker::make::string(quote(self.get_string(), false));
+    });
+
+    def.property("exhaustive?", [this](const t_const_value& self) {
+      auto* info = rust_context_->get_info(&self);
+      if (!info) {
+        return false;
+      }
+      auto struct_type =
+          dynamic_cast<const t_structured*>(info->underlying_type);
+      return struct_type &&
+          struct_type->has_structured_annotation(kRustExhaustiveUri);
+    });
+
+    def.property(
+        "unionVariant", [this](const t_const_value& self) -> whisker::object {
+          auto* info = rust_context_->get_info(&self);
+          if (!info) {
+            return whisker::make::null;
+          }
+          auto struct_type =
+              dynamic_cast<const t_structured*>(info->underlying_type);
+          if (!struct_type || self.get_map().empty()) {
+            return whisker::make::null;
+          }
+          const auto& entry = self.get_map().at(0);
+          const auto& variant = entry.first->get_string();
+          for (auto&& field : struct_type->fields()) {
+            if (field.name() == variant) {
+              if (const t_const* annot =
+                      field.find_structured_annotation_or_null(kRustNameUri)) {
+                return whisker::make::string(
+                    get_annotation_property_string(annot, "name"));
+              } else {
+                return whisker::make::string(std::string(variant));
+              }
+            }
+          }
+          return whisker::make::null;
+        });
+
+    def.property(
+        "enumVariant", [](const t_const_value& self) -> whisker::object {
+          if (self.is_enum()) {
+            auto enum_value = self.get_enum_value();
+            if (enum_value) {
+              return whisker::make::string(mangle(enum_value->name()));
+            }
+          }
+          return whisker::make::null;
+        });
+
+    def.property("empty?", [](const t_const_value& self) {
+      auto kind = self.kind();
+      if (kind == value_type::CV_LIST) {
+        return self.get_list().empty();
+      }
+      if (kind == value_type::CV_MAP) {
+        return self.get_map().empty();
+      }
+      if (kind == value_type::CV_STRING) {
+        return self.get_string().empty();
+      }
+      return false;
+    });
+
+    def.property("indent", [this](const t_const_value& self) {
+      auto* info = rust_context_->get_info(&self);
+      if (!info) {
+        return whisker::make::string(std::string());
+      }
+      return whisker::make::string(std::string(4 * info->depth, ' '));
+    });
+
+    def.property(
+        "simpleLiteral?", [this](const t_const_value& self) -> whisker::object {
+          auto* info = rust_context_->get_info(&self);
+          if (!info) {
+            return whisker::make::boolean(false);
+          }
+          // Primitives have simple literals
+          if (info->underlying_type->is_bool() ||
+              info->underlying_type->is_byte() ||
+              info->underlying_type->is_any_int() ||
+              info->underlying_type->is_floating_point()) {
+            return whisker::make::boolean(true);
+          }
+          // Enum variants as well
+          if (info->underlying_type->is<t_enum>()) {
+            if (self.is_enum()) {
+              auto enum_value = self.get_enum_value();
+              if (enum_value) {
+                return whisker::make::string(mangle(enum_value->name()));
+              }
+            }
+            return whisker::make::boolean(false);
+          }
+          return whisker::make::boolean(false);
+        });
+
     return std::move(def).make();
   }
 
@@ -2157,7 +2334,7 @@ class mstch_rust_value : public mstch_base {
       : mstch_base(ctx, pos),
         const_value_(const_value),
         local_type_(type),
-        underlying_type_(step_through_typedefs(type, false)),
+        underlying_type_(type->get_true_type()),
         depth_(depth),
         options_(options) {
     register_methods(
@@ -2165,18 +2342,10 @@ class mstch_rust_value : public mstch_base {
         {
             {"value:underlying_type", &mstch_rust_value::underlying_type},
             {"value:local_type", &mstch_rust_value::local_type},
-            {"value:newtype?", &mstch_rust_value::is_newtype},
-            {"value:inner", &mstch_rust_value::inner},
             {"value:bool?", &mstch_rust_value::is_bool},
-            {"value:bool_value", &mstch_rust_value::bool_value},
             {"value:integer?", &mstch_rust_value::is_integer},
-            {"value:integer_value", &mstch_rust_value::integer_value},
-            {"value:floatingPoint?", &mstch_rust_value::is_floating_point},
-            {"value:floatingPointValue",
-             &mstch_rust_value::floating_point_value},
             {"value:string?", &mstch_rust_value::is_string},
             {"value:binary?", &mstch_rust_value::is_binary},
-            {"value:quoted", &mstch_rust_value::string_quoted},
             {"value:list?", &mstch_rust_value::is_list},
             {"value:list_elements", &mstch_rust_value::list_elements},
             {"value:set?", &mstch_rust_value::is_set},
@@ -2185,15 +2354,9 @@ class mstch_rust_value : public mstch_base {
             {"value:mapEntries", &mstch_rust_value::map_entries},
             {"value:struct?", &mstch_rust_value::is_struct},
             {"value:structFields", &mstch_rust_value::struct_fields},
-            {"value:exhaustive?", &mstch_rust_value::is_exhaustive},
             {"value:union?", &mstch_rust_value::is_union},
-            {"value:unionVariant", &mstch_rust_value::union_variant},
             {"value:unionValue", &mstch_rust_value::union_value},
             {"value:enum?", &mstch_rust_value::is_enum},
-            {"value:enumVariant", &mstch_rust_value::enum_variant},
-            {"value:empty?", &mstch_rust_value::is_empty},
-            {"value:indent", &mstch_rust_value::indent},
-            {"value:simpleLiteral?", &mstch_rust_value::simple_literal},
             {"value:self", &mstch_rust_value::self},
         });
   }
@@ -2206,51 +2369,13 @@ class mstch_rust_value : public mstch_base {
     return context_.type_factory->make_mstch_object(
         local_type_, context_, pos_);
   }
-  mstch::node is_newtype() { return has_newtype_annotation(underlying_type_); }
-  mstch::node inner() {
-    if (const auto* typedef_type = underlying_type_->try_as<t_typedef>()) {
-      auto inner_type = &typedef_type->type().deref();
-      return std::make_shared<mstch_rust_value>(
-          const_value_, inner_type, depth_, context_, pos_, options_);
-    }
-    return mstch::node();
-  }
   mstch::node is_bool() { return underlying_type_->is_bool(); }
-  mstch::node bool_value() {
-    if (const_value_->kind() == value_type::CV_INTEGER) {
-      return const_value_->get_integer() != 0;
-    }
-    return const_value_->get_bool();
-  }
   mstch::node is_integer() {
     return underlying_type_->is_byte() || underlying_type_->is_i16() ||
         underlying_type_->is_i32() || underlying_type_->is_i64();
   }
-  mstch::node integer_value() {
-    return std::to_string(const_value_->get_integer());
-  }
-  mstch::node is_floating_point() {
-    return underlying_type_->is_float() || underlying_type_->is_double();
-  }
-  mstch::node floating_point_value() {
-    auto str = fmt::format(
-        "{}",
-        const_value_->kind() == value_type::CV_INTEGER
-            ? const_value_->get_integer()
-            : const_value_->get_double());
-
-    if (str.find('.') == std::string::npos &&
-        str.find('e') == std::string::npos &&
-        str.find('E') == std::string::npos) {
-      str += ".0";
-    }
-    return str;
-  }
   mstch::node is_string() { return underlying_type_->is_string(); }
   mstch::node is_binary() { return underlying_type_->is_binary(); }
-  mstch::node string_quoted() {
-    return quote(const_value_->get_string(), false);
-  }
   mstch::node is_list() {
     return underlying_type_->is<t_list>() &&
         (const_value_->kind() == value_type::CV_LIST ||
@@ -2295,7 +2420,6 @@ class mstch_rust_value : public mstch_base {
         const_value_->kind() == value_type::CV_MAP;
   }
   mstch::node struct_fields();
-  mstch::node is_exhaustive();
   mstch::node is_union() {
     if (!underlying_type_->is<t_union>() ||
         const_value_->kind() != value_type::CV_MAP) {
@@ -2307,31 +2431,6 @@ class mstch_rust_value : public mstch_base {
     }
     return const_value_->get_map().size() == 1 &&
         const_value_->get_map().at(0).first->kind() == value_type::CV_STRING;
-  }
-  mstch::node union_variant() {
-    auto struct_type = dynamic_cast<const t_structured*>(underlying_type_);
-    if (!struct_type) {
-      return mstch::node();
-    }
-
-    if (const_value_->get_map().empty()) {
-      return mstch::node();
-    }
-
-    const auto& entry = const_value_->get_map().at(0);
-    const auto& variant = entry.first->get_string();
-
-    for (auto&& field : struct_type->fields()) {
-      if (field.name() == variant) {
-        if (const t_const* annot =
-                field.find_structured_annotation_or_null(kRustNameUri)) {
-          return get_annotation_property_string(annot, "name");
-        } else {
-          return variant;
-        }
-      }
-    }
-    return mstch::node();
   }
   mstch::node union_value() {
     auto struct_type = dynamic_cast<const t_structured*>(underlying_type_);
@@ -2357,42 +2456,6 @@ class mstch_rust_value : public mstch_base {
     return mstch::node();
   }
   mstch::node is_enum() { return underlying_type_->is<t_enum>(); }
-  mstch::node enum_variant() {
-    if (const_value_->is_enum()) {
-      auto enum_value = const_value_->get_enum_value();
-      if (enum_value) {
-        return mangle(enum_value->name());
-      }
-    }
-    return mstch::node();
-  }
-  mstch::node is_empty() {
-    auto kind = const_value_->kind();
-    if (kind == value_type::CV_LIST) {
-      return const_value_->get_list().empty();
-    }
-    if (kind == value_type::CV_MAP) {
-      return const_value_->get_map().empty();
-    }
-    if (kind == value_type::CV_STRING) {
-      return const_value_->get_string().empty();
-    }
-    return false;
-  }
-  mstch::node indent() { return std::string(4 * depth_, ' '); }
-  mstch::node simple_literal() {
-    // Primitives have simple literals
-    if (underlying_type_->is_bool() || underlying_type_->is_byte() ||
-        underlying_type_->is_any_int() ||
-        underlying_type_->is_floating_point()) {
-      return true;
-    }
-    // Enum variants as well
-    if (underlying_type_->is<t_enum>()) {
-      return enum_variant();
-    }
-    return false;
-  }
 
  private:
   const t_const_value* const_value_;
@@ -2575,12 +2638,6 @@ mstch::node mstch_rust_value::struct_fields() {
             &field, explicit_value, depth_ + 1, context_, pos_, options_));
   }
   return fields;
-}
-
-mstch::node mstch_rust_value::is_exhaustive() {
-  auto struct_type = dynamic_cast<const t_structured*>(underlying_type_);
-  return struct_type &&
-      struct_type->has_structured_annotation(kRustExhaustiveUri);
 }
 
 class rust_mstch_const : public mstch_const {

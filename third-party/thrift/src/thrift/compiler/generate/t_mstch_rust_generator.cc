@@ -1878,20 +1878,6 @@ class rust_mstch_service : public mstch_service {
   const rust_codegen_options& options_;
 };
 
-class rust_mstch_interaction : public rust_mstch_service {
- public:
-  using ast_type = t_interaction;
-
-  rust_mstch_interaction(
-      const t_interaction* interaction,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_service* containing_service,
-      const rust_codegen_options* options)
-      : rust_mstch_service(interaction, ctx, pos, options, containing_service) {
-  }
-};
-
 class rust_mstch_function : public mstch_function {
  public:
   rust_mstch_function(
@@ -1964,6 +1950,20 @@ class rust_mstch_function_factory {
       const {
     return std::make_shared<rust_mstch_function>(
         function, ctx, pos, function_upcamel_names);
+  }
+};
+
+class rust_mstch_interaction : public rust_mstch_service {
+ public:
+  using ast_type = t_interaction;
+
+  rust_mstch_interaction(
+      const t_interaction* interaction,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_service* containing_service,
+      const rust_codegen_options* options)
+      : rust_mstch_service(interaction, ctx, pos, options, containing_service) {
   }
 };
 

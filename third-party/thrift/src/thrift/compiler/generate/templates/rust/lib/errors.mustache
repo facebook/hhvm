@@ -53,7 +53,7 @@ pub mod {{service:snake}} {
     }
 
     {{/service:rust_exceptions}}
-    {{#service:functions}}
+    {{#service:rustFunctions}}
     {{#if (not function:starts_interaction?)}}
     {{#if function:exceptions?}}
     /// Errors for {{function:rust_name}} (client side).
@@ -883,7 +883,7 @@ pub mod {{service:snake}} {
 
     {{/if function:stream?}}
     {{/if (not function:starts_interaction?)}}
-    {{/service:functions}}
+    {{/service:rustFunctions}}
 }
 
 #[doc(inline)]

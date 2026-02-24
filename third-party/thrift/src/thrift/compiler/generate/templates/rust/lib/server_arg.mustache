@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{#service:functions}}{{#if (not function:starts_interaction?)}}
+{{#service:rustFunctions}}{{#if (not function:starts_interaction?)}}
 
 struct Args_{{service:rust_name}}_{{function:name}} {
     {{#function:args}}
@@ -62,4 +62,4 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{
     }
 }
 
-{{/if (not function:starts_interaction?)}}{{/service:functions}}
+{{/if (not function:starts_interaction?)}}{{/service:rustFunctions}}

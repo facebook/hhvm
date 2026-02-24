@@ -35,9 +35,9 @@ pub struct {{service:rust_name}}Impl<P, T, S = ::fbthrift::NoopSpawner> {
 {{#if service:interaction?}}
 pub struct {{service:rust_name}}Names {
     pub service: &'static ::std::ffi::CStr,
-    {{#service:functions}}
+    {{#service:rustFunctions}}
     pub method_{{function:name}}: &'static ::std::ffi::CStr,
-    {{/service:functions}}
+    {{/service:rustFunctions}}
 }
 {{/if service:interaction?}}
 
@@ -78,13 +78,13 @@ where
     {{#service:interactions}}
     const NAMES_{{service:rust_name}}: {{service:client_package}}::{{service:rust_name}}Names = {{service:client_package}}::{{service:rust_name}}Names {
         service: c"{{service:parent_service_name}}",
-        {{#service:functions}}
+        {{#service:rustFunctions}}
         method_{{function:name}}: c"{{service:parent_service_name}}.{{service:name}}.{{function:name}}",
-        {{/service:functions}}
+        {{/service:rustFunctions}}
     };
     {{/service:interactions}}
 
-    {{#service:functions}}
+    {{#service:rustFunctions}}
     {{#if (not function:starts_interaction?)}}
 
     fn _{{function:name}}_impl(
@@ -408,7 +408,7 @@ where
         .boxed()
     }
     {{/if (not function:starts_interaction?)}}
-    {{/service:functions}}
+    {{/service:rustFunctions}}
 }
 
 impl<P, T, S> ::fbthrift::help::GetTransport<T> for {{service:rust_name}}Impl<P, T, S>
@@ -476,7 +476,7 @@ where
 
 {{/service:extendedClients}}
 
-{{#service:functions}}{{#if (not function:starts_interaction?)}}
+{{#service:rustFunctions}}{{#if (not function:starts_interaction?)}}
 
 struct Args_{{service:rust_name}}_{{function:name}}<'a> {
     {{#function:args}}
@@ -510,7 +510,7 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
         p.write_struct_end();
     }
 }
-{{/if (not function:starts_interaction?)}}{{/service:functions}}
+{{/if (not function:starts_interaction?)}}{{/service:rustFunctions}}
 
 impl<P, T, S> {{service:rust_name}} for {{service:rust_name}}Impl<P, T, S>
 where
@@ -523,7 +523,7 @@ where
     S: ::fbthrift::help::Spawner,
 {{> lib/block}}
 
-    {{#service:functions}}
+    {{#service:rustFunctions}}
     {{#if (not function:starts_interaction?)}}
     fn {{function:rust_name}}(
         &self,{{!
@@ -555,7 +555,7 @@ where
             )
         )
     }
-    {{/if function:starts_interaction?}}{{/service:functions}}
+    {{/if function:starts_interaction?}}{{/service:rustFunctions}}
 }
 
 impl<P, T, S> {{service:rust_name}}Ext<T> for {{service:rust_name}}Impl<P, T, S>
@@ -569,7 +569,7 @@ where
     S: ::fbthrift::help::Spawner,
 {{> lib/block}}
 
-    {{#service:functions}}
+    {{#service:rustFunctions}}
     {{#if (not function:starts_interaction?)}}
     fn {{function:rust_name}}_with_rpc_opts(
         &self,{{!
@@ -586,7 +586,7 @@ where
         )
     }
     {{/if (not function:starts_interaction?)}}
-    {{/service:functions}}
+    {{/service:rustFunctions}}
     {{#if (not service:extendedClients)}}
 
     fn transport(&self) -> &T {

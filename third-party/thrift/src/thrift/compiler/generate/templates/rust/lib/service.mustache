@@ -21,7 +21,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
     }}{{#if service:docs?}}
     #![doc = {{service:docs}}]
     {{/if service:docs?}}{{!
-    }}{{#service:functions}}{{#if (not function:starts_interaction?)}}{{#if function:stream?}}
+    }}{{#service:rustFunctions}}{{#if (not function:starts_interaction?)}}{{#if function:stream?}}
 
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}StreamExn {
@@ -680,5 +680,5 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             p.write_struct_end();
         }
     }
-    {{/if (not function:starts_interaction?)}}{{/service:functions}}
+    {{/if (not function:starts_interaction?)}}{{/service:rustFunctions}}
 }

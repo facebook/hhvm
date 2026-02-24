@@ -14,14 +14,18 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-}}{{#value:newtype_chain}}{{!
-    }}{{type:package}}::{{type:rust_name}}({{!
-        }}{{#if typedef:has_adapter?}}{{!
-        }}{{typedef:adapter_qualified}}::from_thrift({{!
-        }}{{/if typedef:has_adapter?}}{{!
-}}{{/value:newtype_chain}}{{!
 }}{{#value:underlying_type}}{{!
+}}{{#if value:newtype?}}{{!
+    }}{{type:package}}::{{type:rust_name}}({{!
+        }}{{#value:underlying_type}}{{#type:typedef}}{{#if typedef:has_adapter?}}{{!
+        }}{{typedef:adapter_qualified}}::from_thrift({{!
+        }}{{/if typedef:has_adapter?}}{{/type:typedef}}{{/value:underlying_type}}{{!
+        }}{{#value:inner}}{{> lib/value}}{{/value:inner}}{{!
+        }}{{#value:underlying_type}}{{#type:typedef}}{{#if typedef:has_adapter?}}{{!
+        }}).expect("constant Thrift value should adapt without error"){{!
+        }}{{/if typedef:has_adapter?}}{{/type:typedef}}{{/value:underlying_type}}{{!
+    }}){{!
+}}{{/if value:newtype?}}{{!
 }}{{#if value:bool?}}{{value:bool_value}}{{/if value:bool?}}{{!
 }}{{#if value:integer?}}{{value:integer_value}}{{/if value:integer?}}{{!
 }}{{#if value:floatingPoint?}}{{value:floatingPointValue}}{{/if value:floatingPoint?}}{{!
@@ -177,10 +181,4 @@
     }}{{^value:enumVariant}}({{value:integer_value}}){{/value:enumVariant}}{{!
 }}{{/if value:enum?}}{{!
 }}{{/value:underlying_type}}{{!
-}}{{#value:newtype_chain_reversed}}{{!
-        }}{{#if typedef:has_adapter?}}{{!
-        }}).expect("constant Thrift value should adapt without error"){{!
-        }}{{/if typedef:has_adapter?}}{{!
-    }}){{!
-}}{{/value:newtype_chain_reversed}}{{!
 }}

@@ -201,7 +201,7 @@ void MySimpleStruct::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(MySimpleStruct& self, V&& v) {
   if (v.enterMixin(1, "MyBaseStruct", *self.myBaseStruct_ref())) {
-    (*self.myBaseStruct_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.myBaseStruct_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -223,7 +223,7 @@ void visitFields(MySimpleStruct& self, V&& v) {
 template <class V>
 void visitFields(const MySimpleStruct& self, V&& v) {
   if (v.enterMixin(1, "MyBaseStruct", *self.myBaseStruct_ref())) {
-    (*self.myBaseStruct_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.myBaseStruct_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -272,13 +272,13 @@ void ThriftTestRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(ThriftTestRequest& self, V&& v) {
   if (v.enterMixin(1, "Base", *self.base_ref())) {
-    (*self.base_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.base_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
   }
   if (v.enterMixin(2, "TinyStruct", *self.tinyStruct_ref())) {
-    (*self.tinyStruct_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.tinyStruct_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -297,13 +297,13 @@ void visitFields(ThriftTestRequest& self, V&& v) {
 template <class V>
 void visitFields(const ThriftTestRequest& self, V&& v) {
   if (v.enterMixin(1, "Base", *self.base_ref())) {
-    (*self.base_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.base_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
   }
   if (v.enterMixin(2, "TinyStruct", *self.tinyStruct_ref())) {
-    (*self.tinyStruct_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.tinyStruct_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;

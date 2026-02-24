@@ -151,7 +151,7 @@ void McGetRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McGetRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -167,7 +167,7 @@ void visitFields(McGetRequest& self, V&& v) {
 template <class V>
 void visitFields(const McGetRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -212,7 +212,7 @@ void McGetReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McGetReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -240,7 +240,7 @@ void visitFields(McGetReply& self, V&& v) {
 template <class V>
 void visitFields(const McGetReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -295,7 +295,7 @@ void McSetRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McSetRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -317,7 +317,7 @@ void visitFields(McSetRequest& self, V&& v) {
 template <class V>
 void visitFields(const McSetRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -367,7 +367,7 @@ void McSetReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McSetReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -392,7 +392,7 @@ void visitFields(McSetReply& self, V&& v) {
 template <class V>
 void visitFields(const McSetReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -445,7 +445,7 @@ void McDeleteRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McDeleteRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -470,7 +470,7 @@ void visitFields(McDeleteRequest& self, V&& v) {
 template <class V>
 void visitFields(const McDeleteRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -523,7 +523,7 @@ void McDeleteReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McDeleteReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -548,7 +548,7 @@ void visitFields(McDeleteReply& self, V&& v) {
 template <class V>
 void visitFields(const McDeleteReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -598,7 +598,7 @@ void McLeaseGetRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McLeaseGetRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -614,7 +614,7 @@ void visitFields(McLeaseGetRequest& self, V&& v) {
 template <class V>
 void visitFields(const McLeaseGetRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -660,7 +660,7 @@ void McLeaseGetReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McLeaseGetReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -691,7 +691,7 @@ void visitFields(McLeaseGetReply& self, V&& v) {
 template <class V>
 void visitFields(const McLeaseGetReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -750,7 +750,7 @@ void McLeaseSetRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McLeaseSetRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -775,7 +775,7 @@ void visitFields(McLeaseSetRequest& self, V&& v) {
 template <class V>
 void visitFields(const McLeaseSetRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -826,7 +826,7 @@ void McLeaseSetReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McLeaseSetReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -845,7 +845,7 @@ void visitFields(McLeaseSetReply& self, V&& v) {
 template <class V>
 void visitFields(const McLeaseSetReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -891,7 +891,7 @@ void McAddRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McAddRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -913,7 +913,7 @@ void visitFields(McAddRequest& self, V&& v) {
 template <class V>
 void visitFields(const McAddRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -961,7 +961,7 @@ void McAddReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McAddReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -980,7 +980,7 @@ void visitFields(McAddReply& self, V&& v) {
 template <class V>
 void visitFields(const McAddReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1026,7 +1026,7 @@ void McReplaceRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McReplaceRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1048,7 +1048,7 @@ void visitFields(McReplaceRequest& self, V&& v) {
 template <class V>
 void visitFields(const McReplaceRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1096,7 +1096,7 @@ void McReplaceReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McReplaceReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1115,7 +1115,7 @@ void visitFields(McReplaceReply& self, V&& v) {
 template <class V>
 void visitFields(const McReplaceReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1159,7 +1159,7 @@ void McGetsRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McGetsRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1175,7 +1175,7 @@ void visitFields(McGetsRequest& self, V&& v) {
 template <class V>
 void visitFields(const McGetsRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1220,7 +1220,7 @@ void McGetsReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McGetsReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1248,7 +1248,7 @@ void visitFields(McGetsReply& self, V&& v) {
 template <class V>
 void visitFields(const McGetsReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1304,7 +1304,7 @@ void McCasRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McCasRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1329,7 +1329,7 @@ void visitFields(McCasRequest& self, V&& v) {
 template <class V>
 void visitFields(const McCasRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1380,7 +1380,7 @@ void McCasReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McCasReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1399,7 +1399,7 @@ void visitFields(McCasReply& self, V&& v) {
 template <class V>
 void visitFields(const McCasReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1444,7 +1444,7 @@ void McIncrRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McIncrRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1463,7 +1463,7 @@ void visitFields(McIncrRequest& self, V&& v) {
 template <class V>
 void visitFields(const McIncrRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1509,7 +1509,7 @@ void McIncrReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McIncrReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1531,7 +1531,7 @@ void visitFields(McIncrReply& self, V&& v) {
 template <class V>
 void visitFields(const McIncrReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1579,7 +1579,7 @@ void McDecrRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McDecrRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1598,7 +1598,7 @@ void visitFields(McDecrRequest& self, V&& v) {
 template <class V>
 void visitFields(const McDecrRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1644,7 +1644,7 @@ void McDecrReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McDecrReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1666,7 +1666,7 @@ void visitFields(McDecrReply& self, V&& v) {
 template <class V>
 void visitFields(const McDecrReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1713,7 +1713,7 @@ void McMetagetRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McMetagetRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1729,7 +1729,7 @@ void visitFields(McMetagetRequest& self, V&& v) {
 template <class V>
 void visitFields(const McMetagetRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1775,7 +1775,7 @@ void McMetagetReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McMetagetReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1806,7 +1806,7 @@ void visitFields(McMetagetReply& self, V&& v) {
 template <class V>
 void visitFields(const McMetagetReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1864,7 +1864,7 @@ void McAppendRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McAppendRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1886,7 +1886,7 @@ void visitFields(McAppendRequest& self, V&& v) {
 template <class V>
 void visitFields(const McAppendRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1934,7 +1934,7 @@ void McAppendReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McAppendReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1953,7 +1953,7 @@ void visitFields(McAppendReply& self, V&& v) {
 template <class V>
 void visitFields(const McAppendReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -1999,7 +1999,7 @@ void McPrependRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McPrependRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2021,7 +2021,7 @@ void visitFields(McPrependRequest& self, V&& v) {
 template <class V>
 void visitFields(const McPrependRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2069,7 +2069,7 @@ void McPrependReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McPrependReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2088,7 +2088,7 @@ void visitFields(McPrependReply& self, V&& v) {
 template <class V>
 void visitFields(const McPrependReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2132,7 +2132,7 @@ void McTouchRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McTouchRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2148,7 +2148,7 @@ void visitFields(McTouchRequest& self, V&& v) {
 template <class V>
 void visitFields(const McTouchRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2190,7 +2190,7 @@ void McTouchReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McTouchReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2209,7 +2209,7 @@ void visitFields(McTouchReply& self, V&& v) {
 template <class V>
 void visitFields(const McTouchReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2252,7 +2252,7 @@ void McFlushReRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McFlushReRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2265,7 +2265,7 @@ void visitFields(McFlushReRequest& self, V&& v) {
 template <class V>
 void visitFields(const McFlushReRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2304,7 +2304,7 @@ void McFlushReReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McFlushReReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2323,7 +2323,7 @@ void visitFields(McFlushReReply& self, V&& v) {
 template <class V>
 void visitFields(const McFlushReReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2367,7 +2367,7 @@ void McFlushAllRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McFlushAllRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2383,7 +2383,7 @@ void visitFields(McFlushAllRequest& self, V&& v) {
 template <class V>
 void visitFields(const McFlushAllRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2425,7 +2425,7 @@ void McFlushAllReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McFlushAllReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2444,7 +2444,7 @@ void visitFields(McFlushAllReply& self, V&& v) {
 template <class V>
 void visitFields(const McFlushAllReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2488,7 +2488,7 @@ void McGatRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McGatRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2504,7 +2504,7 @@ void visitFields(McGatRequest& self, V&& v) {
 template <class V>
 void visitFields(const McGatRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2548,7 +2548,7 @@ void McGatReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McGatReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2573,7 +2573,7 @@ void visitFields(McGatReply& self, V&& v) {
 template <class V>
 void visitFields(const McGatReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2623,7 +2623,7 @@ void McGatsRequest::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McGatsRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2639,7 +2639,7 @@ void visitFields(McGatsRequest& self, V&& v) {
 template <class V>
 void visitFields(const McGatsRequest& self, V&& v) {
   if (v.enterMixin(1, "MemcacheRequestCommon", *self.memcacheRequestCommon_ref())) {
-    (*self.memcacheRequestCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheRequestCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2684,7 +2684,7 @@ void McGatsReply::serialize(Writer&& writer) const {
 template <class V>
 void visitFields(McGatsReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;
@@ -2712,7 +2712,7 @@ void visitFields(McGatsReply& self, V&& v) {
 template <class V>
 void visitFields(const McGatsReply& self, V&& v) {
   if (v.enterMixin(1, "MemcacheReplyCommon", *self.memcacheReplyCommon_ref())) {
-    (*self.memcacheReplyCommon_ref()).visitFields(std::forward<V>(v));
+    visitFields(*self.memcacheReplyCommon_ref(), std::forward<V>(v));
   }
   if (!v.leaveMixin()) {
     return;

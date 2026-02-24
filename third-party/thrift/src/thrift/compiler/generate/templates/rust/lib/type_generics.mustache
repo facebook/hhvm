@@ -16,26 +16,26 @@
 
 }}{{#if type:list?}}{{!
     }}<{{!
-        }}{{#type:true_type.elem_type}}{{!
+        }}{{#type:list_elem_type}}{{!
             }}{{> lib/type}}{{!
-        }}{{/type:true_type.elem_type}}{{!
+        }}{{/type:list_elem_type}}{{!
     }}>{{!
 }}{{#else if type:set?}}{{!
     }}<{{!
-        }}{{#type:true_type.elem_type}}{{!
+        }}{{#type:set_elem_type}}{{!
             }}{{#if type:floating_point?}}::fbthrift::export::OrderedFloat<{{> lib/type}}>{{!
             }}{{#else}}{{> lib/type}}{{/if type:floating_point?}}{{!
-        }}{{/type:true_type.elem_type}}{{!
+        }}{{/type:set_elem_type}}{{!
     }}>{{!
 }}{{#else if type:map?}}{{!
     }}<{{!
-        }}{{#type:true_type.key_type}}{{!
+        }}{{#type:key_type}}{{!
             }}{{#if type:floating_point?}}::fbthrift::export::OrderedFloat<{{> lib/type}}>{{!
             }}{{#else}}{{> lib/type}}{{/if type:floating_point?}}{{!
-        }}{{/type:true_type.key_type}}, {{!
-        }}{{#type:true_type.val_type}}{{!
+        }}{{/type:key_type}}, {{!
+        }}{{#type:value_type}}{{!
             }}{{> lib/type}}{{!
-        }}{{/type:true_type.val_type}}{{!
+        }}{{/type:value_type}}{{!
     }}>{{!
 }}{{/if type:list?}}{{!
 }}

@@ -17,7 +17,7 @@
 }}{{#field:type}}{{!
     }}{{#if type:string?}}::std::primitive::str{{!
     }}{{#else if type:list?}}{{!
-      }}[{{#type:true_type.elem_type}}{{> lib/type}}{{/type:true_type.elem_type}}]{{!
+      }}[{{#type:list_elem_type}}{{> lib/type}}{{/type:list_elem_type}}]{{!
     }}{{#else}}{{!
       }}{{> lib/type}}{{!
     }}{{/if type:string?}}{{!

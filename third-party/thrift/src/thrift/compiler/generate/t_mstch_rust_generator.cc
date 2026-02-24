@@ -1262,7 +1262,7 @@ class t_mstch_rust_generator : public t_mstch_generator {
     def.property("rust", [](const t_type& self) {
       auto rust_type = get_type_annotation(&self);
       if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
-        return fmt::format("fbthrift::builtin_types::{}", rust_type);
+        rust_type = fmt::format("fbthrift::builtin_types::{}", rust_type);
       }
       return rust_type;
     });
@@ -1323,7 +1323,7 @@ class t_mstch_rust_generator : public t_mstch_generator {
         rust_type = get_annotation_property_string(annot, "name");
       }
       if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
-        return std::string("fbthrift::builtin_types::") + rust_type;
+        rust_type = fmt::format("fbthrift::builtin_types::{}", rust_type);
       }
       return rust_type;
     });
@@ -1399,7 +1399,7 @@ class t_mstch_rust_generator : public t_mstch_generator {
     def.property("type_rust", [](const t_field& self) {
       auto rust_type = get_type_annotation(&self);
       if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
-        return std::string("fbthrift::builtin_types::") + rust_type;
+        rust_type = fmt::format("fbthrift::builtin_types::{}", rust_type);
       }
       return rust_type;
     });

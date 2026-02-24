@@ -51,12 +51,12 @@
         #[inline]
         fn rs_thrift_write(&self, p: &mut P) {
             p.write_set_begin(
-                <{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}} as ::fbthrift::GetTType>::TTYPE,
+                <{{#type:true_type.elem_type}}{{> lib/type}}{{/type:true_type.elem_type}} as ::fbthrift::GetTType>::TTYPE,
                 self.0.len(),
             );
             for v in &self.0 {
                 p.write_set_value_begin();
-                {{#type:set_elem_type}}{{> lib/write}}{{/type:set_elem_type}}(v, p);
+                {{#type:true_type.elem_type}}{{> lib/write}}{{/type:true_type.elem_type}}(v, p);
             }
             p.write_set_end();
         }
@@ -68,11 +68,11 @@
     {
         #[inline]
         fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            if <{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void {
+            if <{{#type:true_type.elem_type}}{{> lib/type}}{{/type:true_type.elem_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void {
                 ::anyhow::bail!(::fbthrift::ProtocolError::VoidCollectionElement);
             }
 
-            let (_elem_ty, len) = p.read_set_begin(P::min_size::<{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}}>())?;
+            let (_elem_ty, len) = p.read_set_begin(P::min_size::<{{#type:true_type.elem_type}}{{> lib/type}}{{/type:true_type.elem_type}}>())?;
             let mut set = <{{> lib/type}}>::with_capacity(len.unwrap_or(0));
 
             if let ::std::option::Option::Some(0) = len {
@@ -85,7 +85,7 @@
                 if !more {
                     break;
                 }
-                {{#type:set_elem_type}}let v: {{> lib/type}} = {{> lib/read}}(p){{/type:set_elem_type}}?;
+                {{#type:true_type.elem_type}}let v: {{> lib/type}} = {{> lib/read}}(p){{/type:true_type.elem_type}}?;
                 p.read_set_value_end()?;
                 set.insert(v);
 
@@ -109,15 +109,15 @@
         #[inline]
         fn rs_thrift_write(&self, p: &mut P) {
             p.write_map_begin(
-                <{{#type:key_type}}{{> lib/type}}{{/type:key_type}} as ::fbthrift::GetTType>::TTYPE,
-                <{{#type:value_type}}{{> lib/type}}{{/type:value_type}} as ::fbthrift::GetTType>::TTYPE,
+                <{{#type:true_type.key_type}}{{> lib/type}}{{/type:true_type.key_type}} as ::fbthrift::GetTType>::TTYPE,
+                <{{#type:true_type.val_type}}{{> lib/type}}{{/type:true_type.val_type}} as ::fbthrift::GetTType>::TTYPE,
                 self.0.len(),
             );
             for (k, v) in &self.0 {
                 p.write_map_key_begin();
-                {{#type:key_type}}{{> lib/write}}{{/type:key_type}}(k, p);
+                {{#type:true_type.key_type}}{{> lib/write}}{{/type:true_type.key_type}}(k, p);
                 p.write_map_value_begin();
-                {{#type:value_type}}{{> lib/write}}{{/type:value_type}}(v, p);
+                {{#type:true_type.val_type}}{{> lib/write}}{{/type:true_type.val_type}}(v, p);
             }
             p.write_map_end();
         }
@@ -129,13 +129,13 @@
     {
         #[inline]
         fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            if <{{#type:key_type}}{{> lib/type}}{{/type:key_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
-                && <{{#type:value_type}}{{> lib/type}}{{/type:value_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+            if <{{#type:true_type.key_type}}{{> lib/type}}{{/type:true_type.key_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+                && <{{#type:true_type.val_type}}{{> lib/type}}{{/type:true_type.val_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
             {
                 ::anyhow::bail!(::fbthrift::ProtocolError::VoidCollectionElement);
             }
 
-            let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<{{#type:key_type}}{{> lib/type}}{{/type:key_type}}>() + P::min_size::<{{#type:value_type}}{{> lib/type}}{{/type:value_type}}>())?;
+            let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<{{#type:true_type.key_type}}{{> lib/type}}{{/type:true_type.key_type}}>() + P::min_size::<{{#type:true_type.val_type}}{{> lib/type}}{{/type:true_type.val_type}}>())?;
             let mut map = <{{> lib/type}}>::with_capacity(len.unwrap_or(0));
 
             if let ::std::option::Option::Some(0) = len {
@@ -148,9 +148,9 @@
                 if !more {
                     break;
                 }
-                {{#type:key_type}}let k: {{> lib/type}} = {{> lib/read}}(p){{/type:key_type}}?;
+                {{#type:true_type.key_type}}let k: {{> lib/type}} = {{> lib/read}}(p){{/type:true_type.key_type}}?;
                 p.read_map_value_begin()?;
-                {{#type:value_type}}let v: {{> lib/type}} = {{> lib/read}}(p){{/type:value_type}}?;
+                {{#type:true_type.val_type}}let v: {{> lib/type}} = {{> lib/read}}(p){{/type:true_type.val_type}}?;
                 p.read_map_value_end()?;
                 map.insert(k, v);
 
@@ -236,12 +236,12 @@
         #[inline]
         fn rs_thrift_write(&self, p: &mut P) {
             p.write_set_begin(
-                <{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}} as ::fbthrift::GetTType>::TTYPE,
+                <{{#type:true_type.elem_type}}{{> lib/type}}{{/type:true_type.elem_type}} as ::fbthrift::GetTType>::TTYPE,
                 self.0.len(),
             );
             for v in &self.0 {
                 p.write_set_value_begin();
-                {{#type:set_elem_type}}{{> lib/write}}{{/type:set_elem_type}}(v, p);
+                {{#type:true_type.elem_type}}{{> lib/write}}{{/type:true_type.elem_type}}(v, p);
             }
             p.write_set_end();
         }
@@ -253,11 +253,11 @@
     {
         #[inline]
         fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            if <{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void {
+            if <{{#type:true_type.elem_type}}{{> lib/type}}{{/type:true_type.elem_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void {
                 ::anyhow::bail!(::fbthrift::ProtocolError::VoidCollectionElement);
             }
 
-            let (_elem_ty, len) = p.read_set_begin(P::min_size::<{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}}>())?;
+            let (_elem_ty, len) = p.read_set_begin(P::min_size::<{{#type:true_type.elem_type}}{{> lib/type}}{{/type:true_type.elem_type}}>())?;
             let mut set = <{{> lib/annfieldtype}}>::with_capacity(len.unwrap_or(0));
 
             if let ::std::option::Option::Some(0) = len {
@@ -270,7 +270,7 @@
                 if !more {
                     break;
                 }
-                {{#type:set_elem_type}}let v: {{> lib/type}} = {{> lib/read}}(p){{/type:set_elem_type}}?;
+                {{#type:true_type.elem_type}}let v: {{> lib/type}} = {{> lib/read}}(p){{/type:true_type.elem_type}}?;
                 p.read_set_value_end()?;
                 set.insert(v);
 
@@ -294,15 +294,15 @@
         #[inline]
         fn rs_thrift_write(&self, p: &mut P) {
             p.write_map_begin(
-                <{{#type:key_type}}{{> lib/type}}{{/type:key_type}} as ::fbthrift::GetTType>::TTYPE,
-                <{{#type:value_type}}{{> lib/type}}{{/type:value_type}} as ::fbthrift::GetTType>::TTYPE,
+                <{{#type:true_type.key_type}}{{> lib/type}}{{/type:true_type.key_type}} as ::fbthrift::GetTType>::TTYPE,
+                <{{#type:true_type.val_type}}{{> lib/type}}{{/type:true_type.val_type}} as ::fbthrift::GetTType>::TTYPE,
                 self.0.len(),
             );
             for (k, v) in &self.0 {
                 p.write_map_key_begin();
-                {{#type:key_type}}{{> lib/write}}{{/type:key_type}}(k, p);
+                {{#type:true_type.key_type}}{{> lib/write}}{{/type:true_type.key_type}}(k, p);
                 p.write_map_value_begin();
-                {{#type:value_type}}{{> lib/write}}{{/type:value_type}}(v, p);
+                {{#type:true_type.val_type}}{{> lib/write}}{{/type:true_type.val_type}}(v, p);
             }
             p.write_map_end();
         }
@@ -314,13 +314,13 @@
     {
         #[inline]
         fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
-            if <{{#type:key_type}}{{> lib/type}}{{/type:key_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
-                && <{{#type:value_type}}{{> lib/type}}{{/type:value_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+            if <{{#type:true_type.key_type}}{{> lib/type}}{{/type:true_type.key_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
+                && <{{#type:true_type.val_type}}{{> lib/type}}{{/type:true_type.val_type}} as ::fbthrift::GetTType>::TTYPE == ::fbthrift::TType::Void
             {
                 ::anyhow::bail!(::fbthrift::ProtocolError::VoidCollectionElement);
             }
 
-            let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<{{#type:key_type}}{{> lib/type}}{{/type:key_type}}>() + P::min_size::<{{#type:value_type}}{{> lib/type}}{{/type:value_type}}>())?;
+            let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<{{#type:true_type.key_type}}{{> lib/type}}{{/type:true_type.key_type}}>() + P::min_size::<{{#type:true_type.val_type}}{{> lib/type}}{{/type:true_type.val_type}}>())?;
             let mut map = <{{> lib/annfieldtype}}>::with_capacity(len.unwrap_or(0));
 
             if let ::std::option::Option::Some(0) = len {
@@ -333,9 +333,9 @@
                 if !more {
                     break;
                 }
-                {{#type:key_type}}let k: {{> lib/type}} = {{> lib/read}}(p){{/type:key_type}}?;
+                {{#type:true_type.key_type}}let k: {{> lib/type}} = {{> lib/read}}(p){{/type:true_type.key_type}}?;
                 p.read_map_value_begin()?;
-                {{#type:value_type}}let v: {{> lib/type}} = {{> lib/read}}(p){{/type:value_type}}?;
+                {{#type:true_type.val_type}}let v: {{> lib/type}} = {{> lib/read}}(p){{/type:true_type.val_type}}?;
                 p.read_map_value_end()?;
                 map.insert(k, v);
 

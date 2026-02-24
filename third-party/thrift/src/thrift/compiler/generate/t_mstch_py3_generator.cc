@@ -587,31 +587,6 @@ class py3_mstch_interaction : public py3_mstch_service {
   }
 };
 
-class py3_mstch_function : public mstch_function {
- public:
-  py3_mstch_function(
-      const t_function* f, mstch_context& ctx, mstch_element_position pos)
-      : mstch_function(f, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"function:eb", &py3_mstch_function::event_based},
-            {"function:stack_arguments?", &py3_mstch_function::stack_arguments},
-        });
-  }
-
-  mstch::node event_based() {
-    return function_->get_unstructured_annotation("thread") == "eb" ||
-        function_->has_structured_annotation(kCppProcessInEbThreadUri) ||
-        interface().has_unstructured_annotation("process_in_event_base") ||
-        interface().has_structured_annotation(kCppProcessInEbThreadUri);
-  }
-
-  mstch::node stack_arguments() {
-    return cpp2::is_stack_arguments(*context_.options, *function_);
-  }
-};
-
 class py3_mstch_type : public mstch_type {
  public:
   py3_mstch_type(
@@ -1328,6 +1303,29 @@ class t_mstch_py3_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_function>::ptr make_prototype_for_function(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_function(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_function>::extends(std::move(base));
+
+    def.property("eb?", [this](const t_function& self) {
+      if (self.get_unstructured_annotation("thread") == "eb" ||
+          self.has_structured_annotation(kCppProcessInEbThreadUri)) {
+        return true;
+      }
+      const t_interface* parent = context().get_function_parent(&self);
+      assert(parent != nullptr);
+      return parent->has_unstructured_annotation("process_in_event_base") ||
+          parent->has_structured_annotation(kCppProcessInEbThreadUri);
+    });
+    def.property("stack_arguments?", [this](const t_function& self) {
+      return cpp2::is_stack_arguments(compiler_options(), self);
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_named>::ptr make_prototype_for_named(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_named(proto);
@@ -1459,7 +1457,6 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_program>(&type_context_);
   mstch_context_.add<py3_mstch_service>(program_);
   mstch_context_.add<py3_mstch_interaction>(program_);
-  mstch_context_.add<py3_mstch_function>();
   mstch_context_.add<py3_mstch_type>(&type_context_);
   mstch_context_.add<py3_mstch_typedef>();
   mstch_context_.add<py3_mstch_struct>();

@@ -53,7 +53,7 @@ defined in ServicesCallbacks, along with appropriate arguments.
 {{/service:extends?}}
 
 {{#service:supportedFunctions}}
-void {{service:name}}Wrapper::async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(
+void {{service:name}}Wrapper::async_{{#if function:eb?}}eb{{#else}}tm{{/if}}_{{function:cpp_name}}(
   {{> services/cpp_handler_callback_type}} callback{{#function:args}}
     , {{#field:type}}{{!
             }}{{^function:stack_arguments?}}{{> types/cpp_arg_type}}{{/function:stack_arguments?}}{{!

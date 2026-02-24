@@ -84,7 +84,6 @@ int get_thrift_spec_req(t_field_qualifier qualifier) {
       return 3;
   }
 }
-} // namespace
 
 /**
  * Python code generator.
@@ -3940,5 +3939,7 @@ THRIFT_REGISTER_GENERATOR(
     "    asyncio:         Generate asyncio-friendly RPC services.\n"
     "    utf8strings:     Encode/decode strings using utf8 in the generated "
     "code.\n");
+
+} // namespace
 
 } // namespace apache::thrift::compiler

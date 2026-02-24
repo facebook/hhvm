@@ -17,6 +17,7 @@
 {{#import "common/constants" as constants}}
 {{#import "common/type" as types}}
 {{#import "codec/codec" as codec}}
+{{#import "types/enum" as m_enum}}
 {{#import "types/field" as m_field}}
 {{#import "types/struct" as m_struct}}
 {{#import "types/typedef" as m_typedef}}
@@ -57,7 +58,7 @@ var _ = metadata.GoUnusedProtection__
 {{/program:typedefs}}
 {{! Enums }}
 {{#program:enums}}
-{{> types/enum}}
+{{#partial m_enum.enum e=enum:self}}
 
 {{/program:enums}}
 {{! Structs }}

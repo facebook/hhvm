@@ -14,47 +14,45 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-
-  This template generates a Thrift enum.
-
 }}
-type {{enum:go_name}} int32
+{{#let export partial enum |e|}}
+type {{e.go_name}} int32
 
 const (
-{{#enum:values}}
-    {{enum:go_name}}_{{enum_value:name}} {{enum:go_name}} = {{enum_value:value}}
-{{/enum:values}}
+{{#each e.values as |ev|}}
+    {{e.go_name}}_{{ev.name}} {{e.go_name}} = {{ev.value}}
+{{/each}}
 )
 
-// Enum value maps for {{enum:go_name}}
+// Enum value maps for {{e.go_name}}
 var (
-    {{enum:go_name}}ToName = map[{{enum:go_name}}]string {
-    {{#enum:values}}
-        {{enum:go_name}}_{{enum_value:name}}: "{{enum_value:name}}",
-    {{/enum:values}}
+    {{e.go_name}}ToName = map[{{e.go_name}}]string {
+    {{#each e.values as |ev|}}
+        {{e.go_name}}_{{ev.name}}: "{{ev.name}}",
+    {{/each}}
     }
 
-    {{enum:go_name}}ToValue = map[string]{{enum:go_name}} {
-    {{#enum:values}}
-        "{{enum_value:name}}": {{enum:go_name}}_{{enum_value:name}},
-    {{/enum:values}}
+    {{e.go_name}}ToValue = map[string]{{e.go_name}} {
+    {{#each e.values as |ev|}}
+        "{{ev.name}}": {{e.go_name}}_{{ev.name}},
+    {{/each}}
     }
 )
 
-func (x {{enum:go_name}}) String() string {
-    if v, ok := {{enum:go_name}}ToName[x]; ok {
+func (x {{e.go_name}}) String() string {
+    if v, ok := {{e.go_name}}ToName[x]; ok {
         return v
     }
     return "<UNSET>"
 }
-{{#program:compat?}}
+{{#if e.program.compat?}}
 
-// Deprecated: Use {{enum:go_name}}ToValue instead (e.g. `x, ok := {{enum:go_name}}ToValue["name"]`).
-func {{enum:go_name}}FromString(s string) ({{enum:go_name}}, error) {
-    if v, ok := {{enum:go_name}}ToValue[s]; ok {
+// Deprecated: Use {{e.go_name}}ToValue instead (e.g. `x, ok := {{e.go_name}}ToValue["name"]`).
+func {{e.go_name}}FromString(s string) ({{e.go_name}}, error) {
+    if v, ok := {{e.go_name}}ToValue[s]; ok {
         return v, nil
     }
-    return {{enum:go_name}}(0), fmt.Errorf("not a valid {{enum:go_name}} string")
+    return {{e.go_name}}(0), fmt.Errorf("not a valid {{e.go_name}} string")
 }
-{{/program:compat?}}
+{{/if e.program.compat?}}
+{{/let partial}}

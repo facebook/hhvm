@@ -65,7 +65,10 @@ DEBUG_ONLY bool throwable_has_expected_props() {
 ALWAYS_INLINE
 Object createAndConstruct(Class* cls, const Array& args) {
   Object inst{cls};
-  tvDecRefGen(g_context->invokeFunc(cls->getCtor(), args, inst.get()));
+  // TODO(named_params) this forces all systemlib methods/functions to not
+  // have named parameters.
+  tvDecRefGen(g_context->invokeFunc(cls->getCtor(), args,
+                                    nullptr, inst.get()));
   return inst;
 }
 

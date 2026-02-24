@@ -517,7 +517,7 @@ TypedValue HHVM_FUNCTION(array_map,
     for (ArrayIter iter(arr1); iter; ++iter) {
       auto const arg = iter.secondValPlus();
       auto result =
-        g_context->invokeFuncFew(ctx, 1, &arg, RuntimeCoeffects::fixme());
+        g_context->invokeFuncFew(ctx, 1, nullptr, &arg, RuntimeCoeffects::fixme());
       // if keyConverted is false, it's possible that ret will have fewer
       // elements than cell_arr1; keys int(1) and string('1') may both be
       // present
@@ -559,7 +559,7 @@ TypedValue HHVM_FUNCTION(array_map,
     Array params = params_ai.toArray();
     if (ctx.func) {
       auto result = Variant::attach(
-        g_context->invokeFunc(ctx, params, RuntimeCoeffects::fixme())
+        g_context->invokeFunc(ctx, params, nullptr, RuntimeCoeffects::fixme())
       );
       ret_ai.append(result);
     } else {

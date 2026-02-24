@@ -1190,6 +1190,7 @@ void VariableUnserializer::unserializeVariant(
           }
           if (cls) {
             return Object::attach(g_context->createObject(cls, init_null_variant,
+                                                          nullptr /* namedArgNames */,
                                                           false /* init */));
           }
         }

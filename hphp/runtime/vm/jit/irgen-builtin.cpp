@@ -913,7 +913,9 @@ SSATmp* opt_foldable(IRGS& env,
     RID().setJitFolding(true);
     SCOPE_EXIT{ RID().setJitFolding(false); };
 
-    auto retVal = g_context->invokeFunc(func, args.toArray(), nullptr,
+    // TODO(named_params): we need to handle named args here in case we have
+    // builtins with named params.
+    auto retVal = g_context->invokeFunc(func, args.toArray(), nullptr, nullptr,
                                         const_cast<Class*>(cls),
                                         RuntimeCoeffects::fixme(), false);
     SCOPE_EXIT { tvDecRefGen(retVal); };

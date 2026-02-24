@@ -465,7 +465,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_object,
     obj->o_setArray(properties.toArray());
 
     // And finally initialize the object by calling the constructor.
-    obj = init_object(class_name, paramsArray, obj.get());
+    obj = init_object(class_name, paramsArray, nullptr /* namedArgNames */, obj.get());
 
     return obj;
   }

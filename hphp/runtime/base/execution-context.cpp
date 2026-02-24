@@ -1115,34 +1115,38 @@ static Class* loadClass(StringData* clsName) {
 
 ObjectData* ExecutionContext::createObject(StringData* clsName,
                                            const Variant& params,
+                                           const ArrayData* namedArgNames,
                                            bool init /* = true */) {
-  return createObject(loadClass(clsName), params, init);
+  return createObject(loadClass(clsName), params, namedArgNames, init);
 }
 
 ObjectData* ExecutionContext::createObject(const Class* class_,
                                            const Variant& params,
+                                           const ArrayData* namedArgNames,
                                            bool init) {
   callerDynamicConstructChecks(class_);
   auto o = Object::attach(ObjectData::newInstance(const_cast<Class*>(class_)));
   if (init) {
-    initObject(class_, params, o.get());
+    initObject(class_, params, namedArgNames, o.get());
   }
 
   return o.detach();
 }
 
 ObjectData* ExecutionContext::createObjectOnly(StringData* clsName) {
-  return createObject(clsName, init_null_variant, false);
+  return createObject(clsName, init_null_variant, nullptr, false);
 }
 
 ObjectData* ExecutionContext::initObject(StringData* clsName,
                                          const Variant& params,
+                                         const ArrayData* namedArgNames,
                                          ObjectData* o) {
-  return initObject(loadClass(clsName), params, o);
+  return initObject(loadClass(clsName), params, namedArgNames, o);
 }
 
 ObjectData* ExecutionContext::initObject(const Class* class_,
                                          const Variant& params,
+                                         const ArrayData* namedArgNames,
                                          ObjectData* o) {
   auto ctor = class_->getCtor();
   if (!(ctor->attrs() & AttrPublic)) {
@@ -1154,8 +1158,9 @@ ObjectData* ExecutionContext::initObject(const Class* class_,
   if (!isContainerOrNull(params)) {
     throw_param_is_not_container();
   }
-  tvDecRefGen(invokeFunc(ctor, params, o, nullptr, RuntimeCoeffects::fixme(),
-                         true, false, true, false, Array()));
+  tvDecRefGen(invokeFunc(ctor, params, namedArgNames, o, nullptr,
+                         RuntimeCoeffects::fixme(), true, false, true,
+                         false, Array()));
   return o;
 }
 
@@ -1303,10 +1308,10 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
       invokeFunc(
         Func::lookup(s_enter_async_entry_point.get()),
         make_vec_array(Variant{it}),
-        nullptr, nullptr, RuntimeCoeffects::defaults(), false
+        nullptr, nullptr, nullptr, RuntimeCoeffects::defaults(), false
       );
     } else {
-      invokeFunc(it, init_null_variant, nullptr, nullptr,
+      invokeFunc(it, init_null_variant, nullptr, nullptr, nullptr,
                  RuntimeCoeffects::defaults(), false);
     }
   }
@@ -1558,8 +1563,8 @@ ALWAYS_INLINE
 TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
                                             uint32_t numArgsInclUnpack,
-                                            RuntimeCoeffects providedCoeffects,
                                             const ArrayData* namedArgNames,
+                                            RuntimeCoeffects providedCoeffects,
                                             bool hasGenerics, bool dynamic,
                                             bool allowDynCallNoPointer) {
   assertx(f);
@@ -1655,6 +1660,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
 
 TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         const Variant& args_,
+                                        const ArrayData* namedArgNames /* = null */,
                                         ObjectData* thiz /* = NULL */,
                                         Class* cls /* = NULL */,
                                         RuntimeCoeffects providedCoeffects
@@ -1696,10 +1702,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
     throwReadonlyMismatch(f, kReadonlyReturnId);
   }
 
-  return invokeFuncImpl(f, thiz, cls, numArgs, providedCoeffects,
-                        // TODO(named_params) support invoke with
-                        // named args.
-                        nullptr, hasGenerics, dynamic,
+  return invokeFuncImpl(f, thiz, cls, numArgs, namedArgNames,
+                        providedCoeffects, hasGenerics, dynamic,
                         allowDynCallNoPointer);
 }
 
@@ -1707,12 +1711,11 @@ TypedValue ExecutionContext::invokeFuncFew(
   const Func* f,
   ExecutionContext::ThisOrClass thisOrCls,
   uint32_t numArgs,
+  const ArrayData* namedArgNames /* = null */,
   const TypedValue* argv,
   RuntimeCoeffects providedCoeffects,
   bool dynamic /* = true */,
-  bool allowDynCallNoPointer
-  /* = false */
-) {
+  bool allowDynCallNoPointer /* = false */) {
   VMRegAnchor _;
   auto& stack = vmStack();
 
@@ -1746,9 +1749,7 @@ TypedValue ExecutionContext::invokeFuncFew(
   }
 
   return invokeFuncImpl(f, thisOrCls.left(), thisOrCls.right(), numArgs,
-                        providedCoeffects,
-                        // TODO(named_params) support invoking with named args
-                        nullptr /* namedArgNames */,
+                        namedArgNames, providedCoeffects,
                         false /* hasGenerics */, dynamic, false);
 }
 
@@ -1939,7 +1940,8 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
 
   // Default arg values are not currently allowed to depend on class context.
   auto v = Variant::attach(
-    g_context->invokeFuncFew(func, nullptr, 0, nullptr,
+    // TODO(named_params): Support eval with named args.
+    g_context->invokeFuncFew(func, nullptr, 0, nullptr, nullptr,
                              RuntimeCoeffects::defaults(), true, true)
   );
   m_evaledArgs.set(key, *v.asTypedValue());
@@ -2147,7 +2149,9 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 
     auto const obj = ctx && fp->hasThis() ? fp->getThis() : nullptr;
     auto const cls = ctx && fp->hasClass() ? fp->getClass() : nullptr;
-    auto const wh = invokeFunc(f, args.toArray(), obj, cls,
+    // TODO(named_params) support debugging calls with named args here
+    const ArrayData* namedArgNames = nullptr;
+    auto const wh = invokeFunc(f, args.toArray(), namedArgNames, obj, cls,
                                RuntimeCoeffects::defaults(), false);
     assertx(f->isAsync());
     assertx(tvIsObject(wh));

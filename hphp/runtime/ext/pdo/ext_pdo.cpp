@@ -531,7 +531,7 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
   }
   ObjectData* inst = object.get();
   tvDecRefGen(
-    g_context->invokeFunc(cls->getCtor(), ctor_args.toArray(), inst)
+    g_context->invokeFunc(cls->getCtor(), ctor_args.toArray(), nullptr, inst)
   );
 }
 

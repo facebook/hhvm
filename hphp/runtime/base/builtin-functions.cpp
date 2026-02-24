@@ -659,8 +659,10 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
   if (ctx.func == nullptr || (!isContainer(params) && !params.isNull())) {
     return init_null();
   }
+  // TODO(named_params) support calling user funcs with named args.
+  const ArrayData* namedArgNames = nullptr;
   return Variant::attach(
-    g_context->invokeFunc(ctx.func, params, ctx.this_, ctx.cls,
+    g_context->invokeFunc(ctx.func, params, namedArgNames, ctx.this_, ctx.cls,
                           providedCoeffects, ctx.dynamic,
                           checkRef, allowDynCallNoPointer)
   );
@@ -672,7 +674,7 @@ invoke(const String& function, const Variant& params,
   Func* func = Func::load(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     auto ret = Variant::attach(
-      g_context->invokeFunc(func, params, nullptr, nullptr,
+      g_context->invokeFunc(func, params, nullptr, nullptr, nullptr,
                             RuntimeCoeffects::fixme(), true, false,
                             allowDynCallNoPointer)
 
@@ -687,7 +689,8 @@ invoke(const String& function, const Variant& params,
 }
 
 Variant invoke_static_method(const String& s, const String& method,
-                             const Variant& params, bool fatal /* = true */) {
+                             const Variant& params, const ArrayData* namedArgNames,
+                             bool fatal /* = true */) {
   HPHP::Class* class_ = Class::lookup(s.get());
   if (class_ == nullptr) {
     o_invoke_failed(s.data(), method.data(), fatal);
@@ -700,7 +703,7 @@ Variant invoke_static_method(const String& s, const String& method,
     return init_null();
   }
   auto ret = Variant::attach(
-    g_context->invokeFunc(f, params, nullptr, class_, RuntimeCoeffects::fixme())
+    g_context->invokeFunc(f, params, namedArgNames, nullptr, class_, RuntimeCoeffects::fixme())
   );
   return ret;
 }
@@ -975,18 +978,21 @@ Object create_object_only(const String& s) {
   return Object::attach(g_context->createObjectOnly(s.get()));
 }
 
-Object init_object(const String& s, const Array& params, ObjectData* o) {
-  return Object{g_context->initObject(s.get(), params, o)};
+Object init_object(const String& s, const Array& params,
+                   const ArrayData* namedArgNames, ObjectData* o) {
+  return Object{g_context->initObject(s.get(), params, namedArgNames, o)};
 }
 
 Object
-create_object(const String& s, const Array& params, bool init /* = true */) {
-  return Object::attach(g_context->createObject(s.get(), params, init));
+create_object(const String& s, const Array& params,
+              const ArrayData* namedArgNames /* = nullptr */, bool init /* = true */) {
+  return Object::attach(g_context->createObject(s.get(), params, namedArgNames, init));
 }
 
 Object
-create_object(const Class* cls, const Array& params, bool init /* = true */) {
-  return Object::attach(g_context->createObject(cls, params, init));
+create_object(const Class* cls, const Array& params,
+              const ArrayData* namedArgNames /* = nullptr */, bool init /* = true */) {
+  return Object::attach(g_context->createObject(cls, params, namedArgNames, init));
 }
 
 void throw_object(const Object& e) {

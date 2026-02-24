@@ -733,7 +733,7 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
   }
   CoeffectsAutoGuard _;
   return Variant::attach(
-    g_context->invokeFunc(ctx, params, RuntimeCoeffects::automatic())
+    g_context->invokeFunc(ctx, params, nullptr, RuntimeCoeffects::automatic())
   );
 }
 
@@ -763,7 +763,7 @@ Variant ObjectData::o_invoke_few_args(const String& s,
   }
 
   return Variant::attach(
-    g_context->invokeFuncFew(ctx, count, args, providedCoeffects)
+    g_context->invokeFuncFew(ctx, count, nullptr, args, providedCoeffects)
   );
 }
 
@@ -828,7 +828,7 @@ ObjectData* ObjectData::clone() {
     clone->unlockObject();
     SCOPE_EXIT { clone->lockObject(); };
     CoeffectsAutoGuard _;
-    g_context->invokeMethodV(clone.get(), method, InvokeArgs{},
+    g_context->invokeMethodV(clone.get(), method, InvokeArgs{}, nullptr,
                              RuntimeCoeffects::automatic());
   }
   return clone.detach();
@@ -1031,7 +1031,7 @@ void ObjectData::setReifiedGenerics(Class* cls, ArrayData* reifiedTypes) {
   auto const meth = cls->lookupMethod(s_86reifiedinit.get());
   assertx(meth != nullptr);
   g_context->invokeMethod(this, meth, InvokeArgs(&arg, 1),
-                          RuntimeCoeffects::fixme());
+                          nullptr, RuntimeCoeffects::fixme());
 }
 
 // called from jit code
@@ -1664,7 +1664,7 @@ Variant ObjectData::InvokeSimple(ObjectData* obj, const StaticString& name,
                                  RuntimeCoeffects providedCoeffects) {
   auto const meth = obj->methodNamed(name.get());
   return meth
-    ? g_context->invokeMethodV(obj, meth, InvokeArgs{}, providedCoeffects)
+    ? g_context->invokeMethodV(obj, meth, InvokeArgs{}, nullptr, providedCoeffects)
     : uninit_null();
 }
 
@@ -1708,7 +1708,7 @@ String ObjectData::invokeToString() {
   }
   CoeffectsAutoGuard _;
   auto const tv = g_context->invokeMethod(this, method, InvokeArgs{},
-                                          RuntimeCoeffects::automatic());
+                                          nullptr, RuntimeCoeffects::automatic());
   if (!isStringType(tv.m_type) &&
       !isClassType(tv.m_type) &&
       !isLazyClassType(tv.m_type)) {

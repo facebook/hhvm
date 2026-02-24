@@ -211,7 +211,8 @@ Variant invoke(const String& function, const Variant& params,
                bool allowDynCallNoPointer = false);
 
 Variant invoke_static_method(const String& s, const String& method,
-                             const Variant& params, bool fatal = true);
+                             const Variant& params, const ArrayData* namedArgNames,
+                             bool fatal = true);
 
 void o_invoke_failed(const char *cls, const char *meth, bool fatal = true);
 
@@ -260,9 +261,12 @@ bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op);
 void check_collection_cast_to_array();
 
 Object create_object_only(const String& s);
-Object create_object(const String& s, const Array &params, bool init = true);
-Object create_object(const Class* cls, const Array &params, bool init = true);
-Object init_object(const String& s, const Array &params, ObjectData* o);
+Object create_object(const String& s, const Array &params,
+                     const ArrayData* namedArgNames = nullptr, bool init = true);
+Object create_object(const Class* cls, const Array &params,
+                     const ArrayData* namedArgNames = nullptr, bool init = true);
+Object init_object(const String& s, const Array &params,
+                   const ArrayData* namedArgNames, ObjectData* o);
 
 [[noreturn]] void throw_object(const Object& e);
 #if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8))
@@ -272,13 +276,15 @@ Object init_object(const String& s, const Array &params, ObjectData* o);
 #endif
 
 [[noreturn]] inline
-void throw_object(const String& s, const Array& params, bool init = true) {
-  throw_object(create_object(s, params, init));
+void throw_object(const String& s, const Array& params,
+                  const ArrayData* namedArgNames = nullptr, bool init = true) {
+  throw_object(create_object(s, params, namedArgNames, init));
 }
 
 [[noreturn]] inline
-void throw_object(const Class* cls, const Array& params, bool init = true) {
-  throw_object(create_object(cls, params, init));
+void throw_object(const Class* cls, const Array& params,
+                  const ArrayData* namedArgNames = nullptr, bool init = true) {
+  throw_object(create_object(cls, params, namedArgNames, init));
 }
 
 void throw_missing_arguments_nr(const char *fn, int expected, int got)

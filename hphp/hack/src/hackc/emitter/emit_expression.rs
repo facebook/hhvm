@@ -2743,7 +2743,7 @@ fn get_fcall_args_common<T>(
     readonly_this: bool,
     readonly_predicate: fn(&T) -> bool,
     is_inout_arg: fn(&T) -> bool,
-    named_arg_names: Option<Vec<StringId>>,
+    named_arg_names: Vec<StringId>,
 ) -> FCallArgs {
     let mut flags = FCallArgsFlags::default();
     flags.set(FCallArgsFlags::HasUnpack, uarg.is_some());
@@ -2761,7 +2761,7 @@ fn get_fcall_args_common<T>(
         args.len() as u32,
         args.iter().map(is_inout_arg).collect(),
         readonly_args,
-        named_arg_names.unwrap_or_else(|| vec![]),
+        named_arg_names,
         async_eager_label,
         context,
     )
@@ -2775,6 +2775,7 @@ fn get_fcall_args_no_inout(
     lock_while_unwinding: bool,
     readonly_return: bool,
     readonly_this: bool,
+    named_arg_names: Vec<StringId>,
 ) -> FCallArgs {
     get_fcall_args_common(
         args,
@@ -2786,9 +2787,7 @@ fn get_fcall_args_no_inout(
         readonly_this,
         is_readonly_expr,
         |_| false,
-        // TODO(named_params): Once we have named params for constructors,
-        // we'll want to pass in the names here.
-        None,
+        named_arg_names,
     )
 }
 
@@ -2812,7 +2811,7 @@ fn get_fcall_args(
         readonly_this,
         |arg: &ast::Argument| is_readonly_expr(arg.to_expr_ref()),
         |arg: &ast::Argument| arg.is_inout(),
-        Some(named_arg_names),
+        named_arg_names,
     )
 }
 
@@ -3934,7 +3933,6 @@ fn emit_new<'a>(
     if is_reflection_class_builtin {
         scope::with_unnamed_locals(e, |e| {
             // TODO(named_params): Losing named argument information for reflection classes
-            // TODO(named_params): Losing named argument information for constructor calls
             let arg_exprs: Vec<&ast::Expr> = args
                 .iter()
                 .map(|arg| match arg {
@@ -3955,6 +3953,7 @@ fn emit_new<'a>(
             ))
         })
     } else {
+        let named_arg_names = get_named_arg_names(args);
         let newobj_instrs = match cexpr {
             ClassExpr::Id(ast_defs::Id(_, cname)) => {
                 let id = ClassName::from_ast_name_and_mangle(cname);
@@ -3987,15 +3986,19 @@ fn emit_new<'a>(
             ]),
         };
         scope::with_unnamed_locals(e, |e| {
-            let arg_exprs: Vec<&ast::Expr> = args
-                .iter()
-                .map(|arg| match arg {
-                    ast::Argument::Anormal(expr) => expr,
-                    ast::Argument::Ainout(_, expr) => expr,
-                    ast::Argument::Anamed(_, expr) => expr,
-                })
-                .collect();
-            let instr_args = emit_exprs(e, env, &arg_exprs)?;
+            let instr_args = if named_arg_names.len() > 0 {
+                emit_args_with_named_reordering(e, env, args)?
+            } else {
+                let arg_exprs: Vec<&ast::Expr> = args
+                    .iter()
+                    .map(|arg| match arg {
+                        ast::Argument::Anormal(expr) => expr,
+                        ast::Argument::Ainout(_, expr) => expr,
+                        ast::Argument::Anamed(_, expr) => expr,
+                    })
+                    .collect();
+                emit_exprs(e, env, &arg_exprs)?
+            };
             let instr_uargs = match uarg {
                 None => instr::empty(),
                 Some(uarg) => emit_expr(e, env, uarg)?,
@@ -4010,9 +4013,8 @@ fn emit_new<'a>(
                     instr_uargs,
                     emit_pos(pos),
                     {
-                        // TODO(named_params): Losing named argument information for constructor fcall args
                         let arg_exprs: Vec<ast::Expr> = args
-                            .iter()
+                            .into_iter()
                             .map(|arg| match arg {
                                 ast::Argument::Anormal(expr) => expr.clone(),
                                 ast::Argument::Ainout(_, expr) => expr.clone(),
@@ -4027,6 +4029,7 @@ fn emit_new<'a>(
                             true,
                             true,  // we do not need to enforce readonly return for constructors
                             false, // we do not need to enforce readonly this for constructors
+                            named_arg_names,
                         ))
                     },
                     instr::pop_c(),

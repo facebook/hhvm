@@ -393,15 +393,19 @@ public:
 public:
   ObjectData* createObject(const Class* cls,
                            const Variant& params,
+                           const ArrayData* namedArgNames,
                            bool init);
   ObjectData* createObject(StringData* clsName,
                            const Variant& params,
+                           const ArrayData* namedArgNames,
                            bool init = true);
   ObjectData* initObject(const Class* cls,
                          const Variant& params,
+                         const ArrayData* namedArgNames,
                          ObjectData* o);
   ObjectData* initObject(StringData* clsName,
                          const Variant& params,
+                         const ArrayData* namedArgNames,
                          ObjectData* o);
   ObjectData* createObjectOnly(StringData* clsName);
 
@@ -494,6 +498,7 @@ public:
 
   TypedValue invokeFunc(const Func* f,
                         const Variant& args_ = init_null_variant,
+                        const ArrayData* namedArgNames = nullptr,
                         ObjectData* this_ = nullptr,
                         Class* class_ = nullptr,
                         RuntimeCoeffects providedCoeffects =
@@ -506,11 +511,13 @@ public:
 
   TypedValue invokeFunc(const CallCtx& ctx,
                         const Variant& args_,
+                        const ArrayData* namedArgNames,
                         RuntimeCoeffects providedCoeffects);
 
   TypedValue invokeFuncFew(const Func* f,
                            ThisOrClass thisOrCls,
                            uint32_t numArgs,
+                           const ArrayData* namedArgNames,
                            const TypedValue* argv,
                            RuntimeCoeffects providedCoeffects,
                            bool dynamic = true,
@@ -522,6 +529,7 @@ public:
 
   TypedValue invokeFuncFew(const CallCtx& ctx,
                            uint32_t numArgs,
+                           const ArrayData* namedArgNames,
                            const TypedValue* argv,
                            RuntimeCoeffects providedCoeffects);
 
@@ -529,6 +537,7 @@ public:
     ObjectData* obj,
     const Func* meth,
     InvokeArgs args,
+    const ArrayData* namedArgNames,
     RuntimeCoeffects providedCoeffects
   );
 
@@ -536,6 +545,7 @@ public:
     ObjectData* obj,
     const Func* meth,
     InvokeArgs args,
+    const ArrayData* namedArgNames,
     RuntimeCoeffects providedCoeffects
   );
 
@@ -551,8 +561,8 @@ public:
 private:
   TypedValue invokeFuncImpl(const Func* f, ObjectData* thiz, Class* cls,
                             uint32_t numArgsInclUnpack,
-                            RuntimeCoeffects providedCoeffects,
                             const ArrayData* namedArgNames,
+                            RuntimeCoeffects providedCoeffects,
                             bool hasGenerics,
                             bool dynamic, bool allowDynCallNoPointer);
 

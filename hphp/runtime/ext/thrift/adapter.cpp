@@ -46,7 +46,7 @@ Variant applyAdapter(Variant value, Class& adapter, const String& methodName) {
   }
   try {
     return Variant::attach(
-        g_context->invokeFuncFew(method, &adapter, 1, value.asTypedValue(),
+        g_context->invokeFuncFew(method, &adapter, 1, nullptr, value.asTypedValue(),
                                 RuntimeCoeffects::fixme(), false /* dynamic */));
   } catch (const Object& o) {
     thrift_error(folly::sformat("adapter method {}::{}() threw an exception: {}",

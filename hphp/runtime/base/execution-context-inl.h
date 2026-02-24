@@ -252,9 +252,10 @@ inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {
 inline TypedValue ExecutionContext::invokeFunc(
   const CallCtx& ctx,
   const Variant& args_,
+  const ArrayData* namedArgNames,
   RuntimeCoeffects providedCoeffects
 ) {
-  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls,
+  return invokeFunc(ctx.func, args_, namedArgNames, ctx.this_, ctx.cls,
                     providedCoeffects, ctx.dynamic);
 }
 
@@ -263,12 +264,13 @@ inline TypedValue ExecutionContext::invokeFuncFew(
   ExecutionContext::ThisOrClass thisOrCls,
   RuntimeCoeffects providedCoeffects
 ) {
-  return invokeFuncFew(f, thisOrCls, 0, nullptr, providedCoeffects);
+  return invokeFuncFew(f, thisOrCls, 0, nullptr, nullptr, providedCoeffects);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(
   const CallCtx& ctx,
   uint32_t numArgs,
+  const ArrayData* namedArgNames,
   const TypedValue* argv,
   RuntimeCoeffects providedCoeffects
 ) {
@@ -282,6 +284,7 @@ inline TypedValue ExecutionContext::invokeFuncFew(
     ctx.func,
     thisOrCls,
     numArgs,
+    namedArgNames,
     argv,
     providedCoeffects,
     ctx.dynamic
@@ -292,12 +295,14 @@ inline TypedValue ExecutionContext::invokeMethod(
   ObjectData* obj,
   const Func* meth,
   InvokeArgs args,
+  const ArrayData* namedArgNames,
   RuntimeCoeffects providedCoeffects
 ) {
   return invokeFuncFew(
     meth,
     obj,
     args.size(),
+    namedArgNames,
     args.start(),
     providedCoeffects,
     false,
@@ -309,10 +314,11 @@ inline Variant ExecutionContext::invokeMethodV(
   ObjectData* obj,
   const Func* meth,
   InvokeArgs args,
+  const ArrayData* namedArgNames,
   RuntimeCoeffects providedCoeffects
 ) {
   // Construct variant without triggering incref.
-  return Variant::attach(invokeMethod(obj, meth, args, providedCoeffects));
+  return Variant::attach(invokeMethod(obj, meth, args, namedArgNames, providedCoeffects));
 }
 
 inline ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {

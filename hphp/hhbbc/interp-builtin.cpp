@@ -774,11 +774,12 @@ Optional<Type> const_fold(ISS& env,
   ITRACE(2, "invoking: {}\n", func->fullName());
 
   assertx(!Cfg::Jit::Enabled);
-  // NB: Coeffects are already checked prior to here by `shouldAttemptToFold`
+  // NB: Coeffects are already checked prior to here by `shouldAttemptToFold`.
+  // TODO(named_params) support constant folding calls with named args.
   return eval_cell(
     [&] {
       auto const retVal = g_context->invokeFuncFew(
-        func, cls, args.size(), args.data(), RuntimeCoeffects::none(),
+        func, cls, args.size(), nullptr, args.data(), RuntimeCoeffects::none(),
         false, false);
       assertx(tvIsPlausible(retVal));
       return retVal;

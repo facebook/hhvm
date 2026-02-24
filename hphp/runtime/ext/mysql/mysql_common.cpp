@@ -1126,7 +1126,7 @@ Variant MySQLStmt::result_metadata() {
   Object obj{cls};
 
   tvDecRefGen(
-    g_context->invokeFunc(cls->getCtor(), args, obj.get())
+    g_context->invokeFunc(cls->getCtor(), args, nullptr, obj.get())
   );
   return obj;
 }

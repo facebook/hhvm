@@ -1776,6 +1776,8 @@ void emitNewObjS(IRGS& env, SpecialClsRef ref) {
 void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   assertx(fca.numRets == 1);
   assertx(fca.asyncEagerOffset == kInvalidOffset);
+  // TODO(named_params) don't interpret constructor calls
+  if (fca.hasNamedArgs()) return interpOne(env);
   auto const objPos = static_cast<int32_t>(fca.numInputs() + (kNumActRecCells - 1));
   auto const obj = topC(env, BCSPRelOffset{objPos});
   if (!obj->isA(TObj)) PUNT(FCallCtor-NonObj);
@@ -1870,11 +1872,15 @@ void emitFCallObjMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
                         ObjMethodOp subop) {
   auto const methodName = topC(env);
   if (!methodName->isA(TStr)) return interpOne(env);
+  // TODO(named_params): JIT support for object method calls with named args.
+  if (fca.hasNamedArgs()) return interpOne(env);
   fcallObjMethod(env, fca, clsHint, subop, methodName, true, true);
 }
 
 void emitFCallObjMethodD(IRGS& env, FCallArgs fca, const StringData* clsHint,
                          ObjMethodOp subop, const StringData* methodName) {
+  // TODO(named_params): JIT support for object method calls with named args.
+  if (fca.hasNamedArgs()) return interpOne(env);
   fcallObjMethod(env, fca, clsHint, subop, cns(env, methodName), false, false);
 }
 
@@ -1909,6 +1915,8 @@ void emitFCallClsMethodD(IRGS& env,
                          FCallArgs fca,
                          const StringData* className,
                          const StringData* methodName) {
+  // TODO(named_params): JIT support for object method calls with named args.
+  if (fca.hasNamedArgs()) return interpOne(env);
   auto const lookup = lookupKnownMaybe(env, className);
   auto const slow = [&]() {
     auto const callerCtx = [&] {

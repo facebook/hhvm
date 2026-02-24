@@ -331,7 +331,8 @@ struct ElmUCompare {
       *acc.getValue(right).asTypedValue()
     };
     auto ret = Variant::attach(
-      g_context->invokeFuncFew(*ctx, 2, args, RuntimeCoeffects::fixme())
+      g_context->invokeFuncFew(*ctx, 2, /* namedArgNames=*/ nullptr,
+                               args, RuntimeCoeffects::fixme())
     );
     if (ctx->func->takesInOutParams()) {
       assertx(ret.isArray());

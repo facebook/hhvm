@@ -339,8 +339,8 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
     frameinfo
   );
 
-  g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
-                        RuntimeCoeffects::defaults(), ctx.dynamic);
+  g_context->invokeFunc(func, params, nullptr /* namedArgNames */, ctx.this_,
+                        ctx.cls, RuntimeCoeffects::defaults(), ctx.dynamic);
 }
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
@@ -373,7 +373,9 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
     frameinfo
   );
 
-  g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
+  // TODO(named_params) add user profiler support for calls with named args.
+  const ArrayData* namedArgNames = nullptr;
+  g_context->invokeFunc(func, params, namedArgNames, ctx.this_, ctx.cls,
                         RuntimeCoeffects::defaults(), ctx.dynamic);
 }
 
@@ -409,7 +411,8 @@ static Variant call_intercept_handler(
   par.append(args);
 
   auto ret = Variant::attach(
-    g_context->invokeFunc(f, par.toVariant(), callCtx.this_, callCtx.cls,
+    g_context->invokeFunc(f, par.toVariant(), nullptr /* namedArgNames */,
+                          callCtx.this_, callCtx.cls,
                           RuntimeCoeffects::defaults(), callCtx.dynamic)
   );
 
@@ -464,9 +467,11 @@ static Variant call_intercept_handler_callback(
     assertx(tvIsVec(generics));
     return Array(val(generics).parr);
   }();
+  // TODO(named_params) support calls with named args in fb_intercept2
+  const ArrayData* namedArgNames = nullptr;
   return Variant::attach(
-    g_context->invokeFunc(f, args, callCtx.this_, callCtx.cls,
-                          RuntimeCoeffects::defaults(),
+    g_context->invokeFunc(f, args, namedArgNames, callCtx.this_,
+                          callCtx.cls, RuntimeCoeffects::defaults(),
                           callCtx.dynamic, false, false, readonly_return,
                           std::move(reifiedGenerics))
   );

@@ -332,8 +332,8 @@ Variant coeffects_call_helper(const Variant& function, const char* name,
     coeffects = closure->getCoeffects();
   }
   return Variant::attach(
-    g_context->invokeFunc(ctx.func, init_null_variant, ctx.this_, ctx.cls,
-                          coeffects, ctx.dynamic)
+    g_context->invokeFunc(ctx.func, init_null_variant, nullptr, ctx.this_,
+                          ctx.cls, coeffects, ctx.dynamic)
   );
 }
 

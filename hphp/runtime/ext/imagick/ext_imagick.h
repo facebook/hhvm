@@ -82,7 +82,7 @@ struct ImagickExtension final : Extension {
       Object ret = allocObject(); \
       tvDecRefGen(\
         g_context->invokeFunc(classof()->getCtor(), make_vec_array(arg), \
-                              ret.get()) \
+                              nullptr, ret.get()) \
       );\
       return ret; \
     } \

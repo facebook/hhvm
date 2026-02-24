@@ -390,7 +390,8 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
                                           const String& name,
                                           const Variant& params) {
   if (obj.isNull()) {
-    return invoke_static_method(cls, name, params);
+    // TODO(named_params) support invoke_method with named args
+    return invoke_static_method(cls, name, params, nullptr);
   }
 
   if (!obj.is(KindOfObject)) {
@@ -424,19 +425,19 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
   ctx.dynamic = true;
 
   return Variant::attach(
-    g_context->invokeFunc(ctx, params, RuntimeCoeffects::fixme())
+    g_context->invokeFunc(ctx, params, nullptr, RuntimeCoeffects::fixme())
   );
 }
 
 Object HHVM_FUNCTION(hphp_create_object, const String& name,
                      const Variant& params) {
-  return Object::attach(g_context->createObject(name.get(), params));
+  return Object::attach(g_context->createObject(name.get(), params, nullptr));
 }
 
 Object HHVM_FUNCTION(hphp_create_object_without_constructor,
                       const String& name) {
   return Object::attach(
-    g_context->createObject(name.get(), init_null_variant, false)
+    g_context->createObject(name.get(), init_null_variant, nullptr, false)
   );
 }
 

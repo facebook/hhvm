@@ -182,7 +182,7 @@ static Object _node_as_zval(SimpleXMLElement* sxe, xmlNodePtr node,
                             SXE_ITER itertype, const char* name,
                             const xmlChar* nsprefix, bool isprefix) {
   auto sxeObj = Native::object<SimpleXMLElement>(sxe);
-  Object obj = create_object(sxeObj->getClassName(), Array(), false);
+  Object obj = create_object(sxeObj->getClassName(), Array(), nullptr, false);
   auto subnode = Native::data<SimpleXMLElement>(obj.get());
   subnode->iter.type = itertype;
   if (name) {
@@ -729,7 +729,7 @@ static Variant _get_base_node_value(SimpleXMLElement* sxe_ref,
     }
   } else {
     auto sxeRefObj = Native::object<SimpleXMLElement>(sxe_ref);
-    Object obj = create_object(sxeRefObj->getClassName(), Array(), false);
+    Object obj = create_object(sxeRefObj->getClassName(), Array(), nullptr, false);
     auto subnode = Native::data<SimpleXMLElement>(obj.get());
     if (nsprefix && *nsprefix) {
       subnode->iter.nsprefix = xmlStrdup((xmlChar*)nsprefix);
@@ -1181,7 +1181,7 @@ static Variant HHVM_FUNCTION(simplexml_import_dom,
     if (!cls) {
       return init_null();
     }
-    Object obj = create_object(cls->nameStr(), Array(), false);
+    Object obj = create_object(cls->nameStr(), Array(), nullptr, false);
     auto sxe = Native::data<SimpleXMLElement>(obj.get());
     sxe->node = libxml_register_node(nodep);
     return obj;
@@ -1210,7 +1210,7 @@ static Variant HHVM_FUNCTION(simplexml_load_string,
     return false;
   }
 
-  Object obj = create_object(cls->nameStr(), Array(), false);
+  Object obj = create_object(cls->nameStr(), Array(), nullptr, false);
   auto sxe = Native::data<SimpleXMLElement>(obj.get());
   sxe->node = libxml_register_node(xmlDocGetRootElement(doc));
   sxe->iter.nsprefix = ns.size() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;
@@ -1257,7 +1257,7 @@ HHVM_FUNCTION(simplexml_load_file, const String& filename,
     return false;
   }
 
-  Object obj = create_object(cls->nameStr(), Array(), false);
+  Object obj = create_object(cls->nameStr(), Array(), nullptr, false);
   auto sxe = Native::data<SimpleXMLElement>(obj.get());
   sxe->node = libxml_register_node(xmlDocGetRootElement(doc));
   sxe->iter.nsprefix = ns.size() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;

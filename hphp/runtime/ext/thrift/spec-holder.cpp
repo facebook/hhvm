@@ -332,7 +332,7 @@ Object StructSpec::newObject(Class& cls) const {
     ? withDefaultValuesFunc : lookupWithDefaultValuesFunc(cls);
 
   auto obj = g_context->invokeFuncFew(
-    func, &cls, 0, nullptr, RuntimeCoeffects::pure(), false /* dynamic */);
+    func, &cls, 0, nullptr, nullptr, RuntimeCoeffects::pure(), false /* dynamic */);
   if (tvIsObject(obj)) {
     return Object::attach(obj.m_data.pobj);
   }
@@ -356,7 +356,7 @@ void StructSpec::clearTerseFields(const Class& cls, const Object& obj) const {
   }();
   if (func == nullptr) return;
   g_context->invokeFuncFew(
-    func, obj.get(), 0, nullptr, RuntimeCoeffects::write_props());
+    func, obj.get(), 0, nullptr, nullptr, RuntimeCoeffects::write_props());
 }
 
 }

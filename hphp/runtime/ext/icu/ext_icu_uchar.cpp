@@ -98,7 +98,7 @@ static UBool enumCharType_callback(CallCtx* ctx,
   args[1].m_data.num = limit;
   args[2].m_data.num = type;
   tvDecRefGen(
-    g_context->invokeFuncFew(*ctx, 3, args, RuntimeCoeffects::fixme())
+    g_context->invokeFuncFew(*ctx, 3, nullptr, args, RuntimeCoeffects::fixme())
   );
   return true;
 }
@@ -165,7 +165,7 @@ static UBool enumCharNames_callback(CallCtx *ctx,
   tvCopy(*charName.asTypedValue(), args[2]);
 
   tvDecRefGen(
-    g_context->invokeFuncFew(*ctx, 3, args, RuntimeCoeffects::fixme())
+    g_context->invokeFuncFew(*ctx, 3, nullptr, args, RuntimeCoeffects::fixme())
   );
   return true;
 }

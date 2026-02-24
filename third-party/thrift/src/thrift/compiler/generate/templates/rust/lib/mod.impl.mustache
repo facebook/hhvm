@@ -200,7 +200,7 @@
     }{{!
     }}{{/if type:binary?}}{{!
 
-    }}{{#if (not typedef:newtype?)}}{{#if type:i64?}}
+    }}{{#if type:i64?}}{{#if (not (and type:typedef? typedef:newtype?))}}
 
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{> lib/type}}>
     where
@@ -223,7 +223,7 @@
             ::std::result::Result::Ok(LocalImpl({{> lib/type}}::rs_thrift_read(p)?))
         }
     }{{!
-    }}{{/if type:i64?}}{{/if (not typedef:newtype?)}}{{!
+    }}{{/if (not (and type:typedef? typedef:newtype?))}}{{/if type:i64?}}{{!
 }}{{/program:nonstandardTypes}}{{!
 
 }}{{#program:nonstandardFields}}{{#field:type}}{{!
@@ -385,7 +385,7 @@
     }{{!
     }}{{/if type:binary?}}{{!
 
-    }}{{#if (not typedef:newtype?)}}{{#if type:i64?}}
+    }}{{#if type:i64?}}{{#if (not (and type:typedef? typedef:newtype?))}}
 
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{> lib/annfieldtype}}>
     where
@@ -409,7 +409,7 @@
         }
     }{{!
 
-    }}{{/if type:i64?}}{{/if (not typedef:newtype?)}}{{!
+    }}{{/if (not (and type:typedef? typedef:newtype?))}}{{/if type:i64?}}{{!
 
 }}{{/field:type}}{{/program:nonstandardFields}}
 {{! newline}}

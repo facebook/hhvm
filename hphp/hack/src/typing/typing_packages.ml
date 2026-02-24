@@ -140,7 +140,28 @@ let can_access_by_package_rules
           | Some pkg_name -> Env.is_package_loaded env pkg_name
           | None -> true
         in
-        if is_target_package_before_override_loaded then
+        let is_target_package_before_override_soft_required =
+          match
+            ( Env.get_soft_package_requirement env,
+              target_package_before_override )
+          with
+          | (Some soft_required_package_name, Some pkg_name) ->
+            let soft_required_package =
+              Env.get_package_by_name env (snd soft_required_package_name)
+            in
+            let target_package_before_override =
+              Env.get_package_by_name env pkg_name
+            in
+            package_includes
+              soft_required_package
+              target_package_before_override
+          | (Some _, None) -> true
+          | _ -> false
+        in
+        if
+          is_target_package_before_override_loaded
+          || is_target_package_before_override_soft_required
+        then
           `Yes
         else
           let warn_info =

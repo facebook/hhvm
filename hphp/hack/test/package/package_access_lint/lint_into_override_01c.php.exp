@@ -1,10 +1,1 @@
-warning: Lint[5655] This is a cross-boundary edge. Although the callee is already in the caller package pkg1 via __PackageOverride('pkg1'), cross-boundary edges contribute to the bloating of pkg1 and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg1) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
-
-lint_into_override_01c.php--bar.php:7:10
-    5 |   <<__SoftRequirePackage('pkg2')>>
-    6 |   public function bar(): void {
-[1] 7 |     (new C1())->foo();
-    8 |   }
-    9 | }
-
-
+No lint errors

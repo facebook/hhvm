@@ -883,6 +883,15 @@ final class ThriftContextPropState {
     return ($root_product_id as int);
   }
 
+  public readonly function getProductOptionalityUseCase()[leak_safe]: ?string {
+    if ($this->storage->baggage is null) {
+      return null;
+    }
+    return HH\Readonly\as_mut(
+      $this->storage->baggage?->product_optionality_use_case,
+    );
+  }
+
   // Immutable setter for the root_product_id
   public function setRootProductId(int $root_product_id): ?int {
     $current_root_product_id = $this->getRootProductId();

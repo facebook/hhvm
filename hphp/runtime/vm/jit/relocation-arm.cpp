@@ -290,13 +290,13 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
  */
 constexpr auto kFarJccLen = 3 * kInstructionSize;
 
-TCA farJccTarget(TCA inst) {
+TCA farCondBranchTarget(TCA inst) {
   auto const b = Instruction::Cast(inst);
   auto const ldr = b->NextInstruction();
   auto const br = ldr->NextInstruction();
   auto const next = br->NextInstruction();
 
-  if (b->IsCondBranchImm() &&
+  if ((b->IsCondBranchImm() || b->IsCompareBranch()) &&
       b->ImmPCOffsetTarget() == next &&
       ldr->IsLoadLiteral() &&
       ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
@@ -320,6 +320,12 @@ ConditionCode farJccCond(TCA inst) {
   return arm::convertCC(InvertCondition(static_cast<Condition>(b->Bits(3, 0))));
 }
 
+std::pair<Register,bool> farCbDetails(TCA inst) {
+  auto const b = Instruction::Cast(inst);
+  assertx(b->IsCompareBranch());
+  Register reg = Register(b->Rt(), b->Bit(31) ? kXRegSize : kWRegSize);
+  return {reg, b->Bit(24)};
+}
 
 /*
  * This function attempts to optimize a "far jcc" pattern, i.e.:
@@ -340,8 +346,8 @@ ConditionCode farJccCond(TCA inst) {
  *
  * This function returns whether or not the code was optimized.
  */
-bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
-                    size_t& srcCount, size_t& destCount) {
+bool optimizeFarCondBranch(Env& env, TCA srcAddr, TCA destAddr,
+                           size_t& srcCount, size_t& destCount) {
   auto const srcFrom = Instruction::Cast(srcAddr);
   auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
   auto const src = Instruction::Cast(srcAddrActual);
@@ -350,7 +356,7 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
   if (env.far.contains(src)) return false;
   if (env.end < srcAddr + kFarJccLen) return false;
 
-  auto const target = farJccTarget(srcAddrActual);
+  auto const target = farCondBranchTarget(srcAddrActual);
   if (!target) return false;
 
   // We can only rely on the target address to shrink the code sequence if it's
@@ -388,19 +394,39 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
   vixl::MacroAssembler a { env.destBlock };
   env.destBlock.setFrontier(destAddr);
 
-  // This inverts the condition code for us.
-  auto const cc = arm::convertCC(farJccCond(srcAddrActual));
+  auto const b = Instruction::Cast(srcAddrActual);
+  if (b->IsCondBranchImm()) {
+    // This inverts the condition code for us.
+    auto const cc = arm::convertCC(farJccCond(srcAddrActual));
 
-  if (is_int19(imm)) {
-    a.b(imm, cc);
+    if (is_int19(imm)) {
+      a.b(imm, cc);
+    } else {
+      // Branch over the next instruction.
+      const int nextImm = 2;
+      a.b(nextImm, vixl::InvertCondition(cc));
+      // NB: the imm offset was computed relative to destAddr, but we emitted an
+      // extra branch above, thus the -1 here.
+      a.b(imm - 1);
+      destCount++;
+    }
   } else {
-    // Branch over the next instruction.
-    const int nextImm = 2;
-    a.b(nextImm, vixl::InvertCondition(cc));
-    // NB: the imm offset was computed relative to destAddr, but we emitted an
-    // extra branch above, thus the -1 here.
-    a.b(imm - 1);
-    destCount++;
+    assertx(b->IsCompareBranch());
+    std::pair<Register,bool> details = farCbDetails(srcAddrActual);
+
+    if (is_int19(imm)) {
+      if (!details.second) a.cbnz(details.first, imm);
+      else a.cbz(details.first, imm);
+    } else {
+      // Branch over the next instruction.
+      const int nextImm = 2;
+      if (!details.second) a.cbz(details.first, nextImm);
+      else a.cbnz(details.first, nextImm);
+      // NB: the imm offset was computed relative to destAddr, but we emitted an
+      // extra branch above, thus the -1 here.
+      a.b(imm - 1);
+      destCount++;
+    }
   }
 
   srcCount = kFarJccLen >> kInstructionSizeLog2;
@@ -977,7 +1003,7 @@ size_t relocateImpl(Env& env) {
         }
         // Relocate functions are needed for correctness, while optimize
         // functions will attempt to improve instruction sequences.
-        optimizeFarJcc(env, srcAddr, destAddr, srcCount, destCount) ||
+        optimizeFarCondBranch(env, srcAddr, destAddr, srcCount, destCount) ||
         optimizeFarJmp(env, srcAddr, destAddr, srcCount, destCount) ||
         relocatePCRelative(env, srcAddr, destAddr, srcCount, destCount) ||
         relocateImmediate(env, srcAddr, destAddr, srcCount, destCount);

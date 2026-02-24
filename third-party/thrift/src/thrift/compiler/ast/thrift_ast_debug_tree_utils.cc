@@ -567,7 +567,7 @@ scope& addChildForProgram(
     scope& namespaceScope =
         programScope.make_child("namespaces (size: {})", namespaceCount);
     for (const auto& [k, v] : program.namespaces()) {
-      namespaceScope.make_child("{}: {}", k, v);
+      namespaceScope.make_child("{}: {}", k, v->ns());
     }
   }
 

@@ -926,8 +926,8 @@ class t_hack_generator : public t_concat_generator {
     if (auto hack_ns = namespaces.find("hack"); hack_ns != namespaces.end()) {
       // Provided hack namespace can be empty
       // Empty Hack namespace should be treated as no namespace
-      if (!hack_ns->second.empty()) {
-        ns = hack_ns->second;
+      if (!hack_ns->second->ns().empty()) {
+        ns = hack_ns->second->ns();
         std::replace(ns.begin(), ns.end(), '.', '\\');
         type_ = HackThriftNamespaceType::HACK;
       }

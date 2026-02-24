@@ -713,7 +713,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_program& node) {
   if (!node.namespaces().empty()) {
     auto langs = t_const_value::make_map();
     for (const auto& [lang, langNamespace] : node.namespaces()) {
-      langs->add_map(val(lang), val(langNamespace));
+      langs->add_map(val(lang), val(langNamespace->ns()));
     }
     schema->add_map(val("namespaces"), std::move(langs));
   }

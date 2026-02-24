@@ -595,7 +595,7 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
   def.property("namespaces", [&](const t_program& self) -> map::ptr {
     map::raw result;
     for (const auto& [language, value] : self.namespaces()) {
-      result[language] = string(value);
+      result[language] = string(value->ns());
     }
     return map::of(std::move(result));
   });

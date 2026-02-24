@@ -67,7 +67,7 @@ class add_namespace {
   std::map<std::string, std::string> get_namespaces() const {
     std::map<std::string, std::string> namespaces;
     for (const auto& [lang, ns] : prog_.namespaces()) {
-      namespaces[lang] = ns;
+      namespaces[lang] = ns->ns();
     }
     return namespaces;
   }

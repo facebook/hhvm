@@ -39,6 +39,7 @@
 #include <thrift/compiler/ast/t_list.h>
 #include <thrift/compiler/ast/t_map.h>
 #include <thrift/compiler/ast/t_named.h>
+#include <thrift/compiler/ast/t_namespace.h>
 #include <thrift/compiler/ast/t_package.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_service.h>
@@ -199,15 +200,19 @@ class t_program : public t_named {
     language_includes_[std::move(language)].push_back(std::move(path));
   }
 
-  /**
-   * Language neutral namespace/packaging
-   *
-   * @param language - The target language (i.e. py, cpp) to generate code
-   * @param name_space - //TODO add definition of name_space
-   */
   void set_namespace(
-      const std::string& language, const std::string& name_space) {
-    namespaces_.emplace(language, name_space);
+      const std::string& language,
+      const std::string& name_space,
+      source_range range = {}) {
+    if (namespaces_.contains(language)) {
+      // There is already a namespace for the given language. This is unexpected
+      // (and should be an error), but is handled for backwards compatibility.
+      return;
+    }
+    auto ns = std::make_unique<t_namespace>(language, name_space);
+    ns->set_src_range(range);
+    namespaces_[language] = ns.get();
+    nodes_.push_back(std::move(ns));
   }
 
   /**
@@ -240,7 +245,7 @@ class t_program : public t_named {
 
   t_global_scope* global_scope() const { return global_scope_.get(); }
 
-  const std::map<std::string, std::string>& namespaces() const {
+  const std::map<std::string, t_namespace*>& namespaces() const {
     return namespaces_;
   }
 
@@ -356,7 +361,7 @@ class t_program : public t_named {
   std::string path_; // initialized in ctor init-list
   std::string full_path_;
   std::string include_prefix_;
-  std::map<std::string, std::string> namespaces_;
+  std::map<std::string, t_namespace*> namespaces_;
   std::unordered_map<std::string, std::vector<std::string>> language_includes_;
   std::shared_ptr<t_global_scope> global_scope_;
   scope::program_scope program_scope_;

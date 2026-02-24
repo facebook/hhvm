@@ -111,7 +111,7 @@ void t_program::add_enum_definition(
 const std::string& t_program::get_namespace(const std::string& language) const {
   auto pos = namespaces_.find(language);
   static const auto& kEmpty = *new std::string();
-  return (pos != namespaces_.end() ? pos->second : kEmpty);
+  return (pos != namespaces_.end() ? pos->second->ns() : kEmpty);
 }
 
 std::vector<std::string> t_program::gen_namespace_or_default(
@@ -120,8 +120,8 @@ std::vector<std::string> t_program::gen_namespace_or_default(
 
   auto pos = namespaces_.find(language);
   if (pos != namespaces_.end()) {
-    if (!pos->second.empty()) {
-      split(ret, pos->second, boost::algorithm::is_any_of("."));
+    if (!pos->second->ns().empty()) {
+      split(ret, pos->second->ns(), boost::algorithm::is_any_of("."));
     }
     return ret;
   }

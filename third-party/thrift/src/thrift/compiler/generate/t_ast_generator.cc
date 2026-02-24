@@ -295,7 +295,7 @@ type::Schema t_ast_generator::gen_schema(
 
       for (const auto& [lang, langNamespace] : program.namespaces()) {
         info.namespaces()[lang] = static_cast<type::ValueId>(
-            intern_value(std::make_unique<t_const_value>(langNamespace)));
+            intern_value(std::make_unique<t_const_value>(langNamespace->ns())));
       }
 
       ast.sources()[program_id] = std::move(info);

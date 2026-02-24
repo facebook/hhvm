@@ -31,6 +31,7 @@
 #include <thrift/compiler/ast/t_function.h>
 #include <thrift/compiler/ast/t_interface.h>
 #include <thrift/compiler/ast/t_named.h>
+#include <thrift/compiler/ast/t_namespace.h>
 #include <thrift/compiler/ast/t_node.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_struct.h>
@@ -399,13 +400,13 @@ void validate_python_namespaces(sema_context& ctx, const t_program& program) {
     return;
   }
 
-  const std::map<std::string, std::string>& namespaces = program.namespaces();
+  const std::map<std::string, t_namespace*>& namespaces = program.namespaces();
 
   // If there are no Python namespaces, there is nothing to do.
   if (std::none_of(
           namespaces.begin(),
           namespaces.end(),
-          [](const std::pair<const std::string, std::string>& it) {
+          [](const std::pair<const std::string, t_namespace*>& it) {
             const std::string& key = it.first;
             return key.find("py") == 0; // i.e., key.starts_with("py")
           })) {

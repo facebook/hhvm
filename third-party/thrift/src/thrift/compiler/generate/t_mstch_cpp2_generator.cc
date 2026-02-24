@@ -1051,12 +1051,13 @@ class cpp_mstch_program : public mstch_program {
   mstch::node fatal_languages() {
     mstch::array a;
     for (const auto& pair : program_->namespaces()) {
-      if (!pair.second.empty()) {
+      if (!pair.second->ns().empty()) {
         a.emplace_back(
             mstch::map{
                 {"language:safe_name", get_fatal_string_short_id(pair.first)},
                 {"language:safe_namespace",
-                 get_fatal_namespace_name_short_id(pair.first, pair.second)},
+                 get_fatal_namespace_name_short_id(
+                     pair.first, pair.second->ns())},
                 {"last?", false},
             });
       }
@@ -1086,11 +1087,11 @@ class cpp_mstch_program : public mstch_program {
     unique_names.emplace(get_fatal_string_short_id(program_), program_->name());
     // languages and namespaces
     for (const auto& pair : program_->namespaces()) {
-      if (!pair.second.empty()) {
+      if (!pair.second->ns().empty()) {
         unique_names.emplace(get_fatal_string_short_id(pair.first), pair.first);
         unique_names.emplace(
-            get_fatal_namespace_name_short_id(pair.first, pair.second),
-            get_fatal_namespace(pair.first, pair.second));
+            get_fatal_namespace_name_short_id(pair.first, pair.second->ns()),
+            get_fatal_namespace(pair.first, pair.second->ns()));
       }
     }
     // enums

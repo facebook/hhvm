@@ -242,12 +242,12 @@ class package_name_generator_util {
   }
 
   static package_name_generator_util from_namespaces(
-      const std::map<std::string, std::string>& namespaces) {
+      const std::map<std::string, t_namespace*>& namespaces) {
     std::vector<package_name_generator> pkg_generators;
     pkg_generators.reserve(namespaces.size());
     for (const auto& [lang, ns] : namespaces) {
-      if (!ns.empty()) {
-        pkg_generators.emplace_back(lang, ns);
+      if (!ns->ns().empty()) {
+        pkg_generators.emplace_back(lang, ns->ns());
       }
     }
     return package_name_generator_util(std::move(pkg_generators));
@@ -416,11 +416,11 @@ class package_name_generator_util {
 
 inline std::string get_package(
     const std::string& program_path,
-    const std::map<std::string, std::string>& namespaces) {
+    const std::map<std::string, t_namespace*>& namespaces) {
   int non_empty_count = 0;
   std::string non_empty_key;
   for (const auto& [lang, ns] : namespaces) {
-    if (!ns.empty()) {
+    if (!ns->ns().empty()) {
       non_empty_count++;
       non_empty_key = lang;
     }
@@ -435,7 +435,8 @@ inline std::string get_package(
     // If there is only a single namespace, use that to generate the package
     // name.
     assert(!non_empty_key.empty() && namespaces.contains(non_empty_key));
-    return package_name_generator(non_empty_key, namespaces.at(non_empty_key))
+    return package_name_generator(
+               non_empty_key, namespaces.at(non_empty_key)->ns())
         .generate();
   }
   auto gen = package_name_generator_util::from_namespaces(namespaces);
@@ -497,14 +498,14 @@ inline replacement_content get_replacement_content(
     return content;
   }
 
-  const std::map<std::string, std::string>& namespaces = program.namespaces();
+  const std::map<std::string, t_namespace*>& namespaces = program.namespaces();
   if (!namespaces.contains("cpp2")) {
     if (!namespaces.contains("cpp")) {
       content.namespace_content += fmt::format(
           "namespace cpp2 \"cpp2\" {}\n", kBackwardsCompatibleNamespaceComment);
     } else {
-      content.namespace_content +=
-          fmt::format("namespace cpp2 \"{}.cpp2\"\n", namespaces.at("cpp"));
+      content.namespace_content += fmt::format(
+          "namespace cpp2 \"{}.cpp2\"\n", namespaces.at("cpp")->ns());
     }
   }
 

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <folly/Portability.h>
+
 #if FOLLY_HAS_COROUTINES
 #include <thrift/lib/cpp2/async/TwoWayBridgeUtil.h>
 #endif

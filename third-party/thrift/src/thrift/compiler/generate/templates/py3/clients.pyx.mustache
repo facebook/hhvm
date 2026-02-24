@@ -105,8 +105,9 @@ cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:
 
 {{#program:services}}
 from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{service:name}}AsyncClient, c{{service:name}}ClientWrapper
+  {{#let parent_service_name=service:name}}
 {{#service:supportedInteractions}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{service:parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper
+from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper
 {{/service:supportedInteractions}}
 {{#service:extends}}
 {{#service:externalProgram?}}
@@ -191,21 +192,22 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
 
 {{/service:supportedFunctions}}
 
+  {{#let parent_service_name=service:name}}
 {{#service:supportedInteractions}}
     def create{{service:name}}(
-            {{service:parent_service_name}} self
+            {{parent_service_name}} self
     ):
-        interaction = {{service:parent_service_name}}_{{service:name}}()
+        interaction = {{parent_service_name}}_{{service:name}}()
         bridgeFutureWith[unique_ptr[cClientWrapper]](
             interaction._executor,
-            down_cast_ptr[c{{service:parent_service_name}}ClientWrapper, cClientWrapper](self._client.get()).create{{service:name}}(),
+            down_cast_ptr[c{{parent_service_name}}ClientWrapper, cClientWrapper](self._client.get()).create{{service:name}}(),
             thrift.py3.client.interactions_callback,
             <PyObject *> interaction
         )
         return interaction
 
     async def async_create{{service:name}}(
-            {{service:parent_service_name}} self
+            {{parent_service_name}} self
     ):
         return self.create{{service:name}}()
 
@@ -222,7 +224,7 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
 
 {{#service:supportedInteractions}}
 @cython.auto_pickle(False)
-cdef class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
+cdef class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
     }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
     }}{{service:programName}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
   }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
@@ -230,7 +232,7 @@ cdef class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}
 {{#service:supportedFunctions}}
     @cython.always_allow_keywords(True)
     def {{function:name}}(
-            {{service:parent_service_name}}_{{service:name}} self{{#function:args}},
+            {{parent_service_name}}_{{service:name}} self{{#function:args}},
             {{#field:type}}{{!
                 }}{{#type:hasCythonType?}}{{^type:integer?}}{{> types/cython_python_type}} {{/type:integer?}}{{/type:hasCythonType?}}{{!
                 }}{{field:py_name}}{{#type:integer?}} not None{{/type:integer?}}{{^type:number?}} not None{{/type:number?}}{{!
@@ -261,11 +263,11 @@ cdef class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}](
             self._executor,
-            down_cast_ptr[c{{service:parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper, {{!
+            down_cast_ptr[c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper, {{!
             }}cClientWrapper](self._client.get()).{{function:cpp_name}}(rpc_options._cpp_obj, {{#function:args}}
                 {{#field:type}}{{> clients/cython_python_to_cpp_arg}}{{/field:type}},{{/function:args}}
             ),
-            {{service:parent_service_name}}_{{service:name}}_{{function:name}}_callback,
+            {{parent_service_name}}_{{service:name}}_{{function:name}}_callback,
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)

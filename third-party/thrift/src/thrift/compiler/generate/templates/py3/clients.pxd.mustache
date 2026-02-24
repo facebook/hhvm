@@ -42,8 +42,9 @@ cdef class {{service:name}}{{#service:extends}}({{#service:externalProgram?}}{{!
   }}){{/service:extends}}{{^service:extends?}}(thrift.py3.client.Client){{/service:extends?}}:
     pass
 
+  {{#let parent_service_name=service:name}}
 {{#service:supportedInteractions}}
-cdef class {{service:parent_service_name}}_{{service:name}}(thrift.py3.client.Client):
+cdef class {{parent_service_name}}_{{service:name}}(thrift.py3.client.Client):
     pass
 
 {{/service:supportedInteractions}}

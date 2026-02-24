@@ -42,14 +42,16 @@ folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:
 }
 
 {{/service:supportedFunctions}}
+  {{#let parent_service_cpp_name=service:cpp_name}}
+  {{#let parent_service_name=service:name}}
 {{#service:supportedInteractions}}
 
 folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
-{{service:parent_service_name}}ClientWrapper::create{{service:name}}() {
+{{parent_service_name}}ClientWrapper::create{{service:name}}() {
   return folly::via(
       channel_->getEventBase(),
       [=, this]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
-        auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<{{interaction:parent_service_cpp_name}}AsyncClient::{{service:name}}>((({{interaction:parent_service_cpp_name}}AsyncClient*)async_client_.get())->create{{service:name}}()));
+        auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<{{parent_service_cpp_name}}AsyncClient::{{service:name}}>((({{parent_service_cpp_name}}AsyncClient*)async_client_.get())->create{{service:name}}()));
         return static_cast<std::unique_ptr<::thrift::py3::ClientWrapper>>(std::make_unique<{{service:name}}InteractionWrapper>(std::move(interaction_client), channel_));
       }
   );
@@ -59,10 +61,10 @@ folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
 {{#service:supportedInteractions}}
 {{#service:supportedFunctions}}
 folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>
-{{service:parent_service_name}}ClientWrapper::{{service:name}}InteractionWrapper::{{function:cpp_name}}(
+{{parent_service_name}}ClientWrapper::{{service:name}}InteractionWrapper::{{function:cpp_name}}(
     apache::thrift::RpcOptions& rpcOptions{{#function:args}},
     {{#field:type}}{{> types/cpp_value_type}}{{/field:type}} arg_{{field:py_name}}{{/function:args}}) {
-  auto* client = static_cast<::{{#service:cppNamespaces}}{{value}}::{{/service:cppNamespaces}}{{interaction:parent_service_cpp_name}}AsyncClient::{{service:name}}*>(async_client_.get());
+  auto* client = static_cast<::{{#service:cppNamespaces}}{{value}}::{{/service:cppNamespaces}}{{parent_service_cpp_name}}AsyncClient::{{service:name}}*>(async_client_.get());
   {{> clients/clients_wrapper.cpp_func_body}}
 
 }

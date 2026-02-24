@@ -565,28 +565,6 @@ class py3_mstch_service : public mstch_service {
   std::set<const t_interaction*, interaction_name_less> supported_interactions_;
 };
 
-class py3_mstch_interaction : public py3_mstch_service {
- public:
-  using ast_type = t_interaction;
-
-  py3_mstch_interaction(
-      const t_interaction* interaction,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_service* containing_service,
-      const t_program* prog)
-      : py3_mstch_service(interaction, ctx, pos, prog, containing_service) {
-    register_methods(
-        this,
-        {{"interaction:parent_service_cpp_name",
-          &py3_mstch_interaction::parent_service_cpp_name}});
-  }
-
-  mstch::node parent_service_cpp_name() {
-    return cpp2::get_name(containing_service_);
-  }
-};
-
 class py3_mstch_type : public mstch_type {
  public:
   py3_mstch_type(
@@ -1456,7 +1434,6 @@ py3_type_context::cached_properties& py3_type_context::get_cached_props(
 void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_program>(&type_context_);
   mstch_context_.add<py3_mstch_service>(program_);
-  mstch_context_.add<py3_mstch_interaction>(program_);
   mstch_context_.add<py3_mstch_type>(&type_context_);
   mstch_context_.add<py3_mstch_typedef>();
   mstch_context_.add<py3_mstch_struct>();

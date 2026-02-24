@@ -60,9 +60,10 @@ class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
         }}{{/function:return_type}}: ...
 
 {{/service:supportedFunctions}}
+  {{#let parent_service_name=service:name}}
 {{#service:supportedInteractions}}
-    def create{{service:name}}(self) -> {{service:parent_service_name}}_{{service:name}}: ...
-    def async_create{{service:name}}(self) -> {{service:parent_service_name}}_{{service:name}}: ...
+    def create{{service:name}}(self) -> {{parent_service_name}}_{{service:name}}: ...
+    def async_create{{service:name}}(self) -> {{parent_service_name}}_{{service:name}}: ...
 {{/service:supportedInteractions}}
 {{^service:supportedInteractions}}
 {{^service:supportedFunctions}}
@@ -71,10 +72,10 @@ class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
 {{/service:supportedInteractions}}
 {{#service:supportedInteractions}}
 
-_{{service:parent_service_name}}_{{service:name}} = _typing.TypeVar('_{{service:parent_service_name}}_{{service:name}}', bound='{{service:parent_service_name}}_{{service:name}}')
+_{{parent_service_name}}_{{service:name}} = _typing.TypeVar('_{{parent_service_name}}_{{service:name}}', bound='{{parent_service_name}}_{{service:name}}')
 
 
-class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
+class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
     }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
     }}{{service:programName}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
   }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):

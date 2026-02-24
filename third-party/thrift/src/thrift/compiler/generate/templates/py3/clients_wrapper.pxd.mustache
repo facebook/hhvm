@@ -65,12 +65,13 @@ cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:n
     }}{{service:cpp_name}}AsyncClient":
       pass
 
+  {{#let parent_service_name=service:name}}
 {{#service:supportedInteractions}}
 cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
     }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
-  cdef cppclass c{{service:parent_service_name}}AsyncClient_{{service:name}} {{!
+  cdef cppclass c{{parent_service_name}}AsyncClient_{{service:name}} {{!
     }}"::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{!
-    }}{{service:parent_service_name}}AsyncClient::{{service:name}}":
+    }}{{parent_service_name}}AsyncClient::{{service:name}}":
       pass
 
 {{/service:supportedInteractions}}
@@ -119,9 +120,10 @@ cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/clients_wra
     cFollyFuture[unique_ptr[cClientWrapper]]& create{{service:name}}()
     {{/service:supportedInteractions}}
 
+  {{#let parent_service_name=service:name}}
   {{#service:supportedInteractions}}
-  cdef cppclass c{{service:parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper "{{!
-  }}::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{service:parent_service_name}}ClientWrapper{{!
+  cdef cppclass c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper "{{!
+  }}::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{parent_service_name}}ClientWrapper{{!
   }}::{{service:name}}InteractionWrapper"(cClientWrapper):
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

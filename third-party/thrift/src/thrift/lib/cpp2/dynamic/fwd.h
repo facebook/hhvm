@@ -16,11 +16,30 @@
 
 #pragma once
 
+#include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 
+#include <concepts>
 #include <cstdint>
+#include <string_view>
 
 namespace apache::thrift::dynamic {
+
+// ValidationCallbacks concept — configurable validation for deserialization
+template <typename T>
+concept DeserializeValidationCallbacks = requires(
+    T t,
+    const type_system::StructuredNode& parent,
+    const type_system::UnionNode& unionNode,
+    int16_t fieldId,
+    std::string_view fieldName,
+    protocol::TType wireType) {
+  {
+    t.onUnknownField(parent, fieldId, fieldName, wireType)
+  } -> std::same_as<void>;
+  { t.onTypeMismatch(fieldName, wireType, wireType) } -> std::same_as<void>;
+  { t.onMultipleUnionFields(unionNode, uint32_t{}) } -> std::same_as<void>;
+};
 
 // Forward declarations for all dynamic types
 
@@ -87,6 +106,13 @@ DynamicValue deserializeValue(
     ProtocolReader& prot,
     type_system::TypeRef type,
     std::pmr::memory_resource* mr = nullptr);
+
+template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+DynamicValue deserializeValue(
+    ProtocolReader& prot,
+    type_system::TypeRef type,
+    std::pmr::memory_resource* mr,
+    Callbacks& callbacks);
 
 namespace detail {
 

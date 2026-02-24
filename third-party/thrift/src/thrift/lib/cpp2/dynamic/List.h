@@ -167,6 +167,13 @@ class List final {
       const type_system::TypeRef::List& type,
       std::pmr::memory_resource* alloc);
 
+  template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+  friend List deserialize(
+      ProtocolReader& reader,
+      const type_system::TypeRef::List& type,
+      std::pmr::memory_resource* alloc,
+      Callbacks& callbacks);
+
  private:
   explicit List(std::unique_ptr<detail::IList, detail::FreeDeleter> impl);
 

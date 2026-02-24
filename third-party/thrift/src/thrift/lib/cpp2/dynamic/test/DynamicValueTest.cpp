@@ -917,5 +917,289 @@ TEST(DynamicValueTest, SimpleJSONStructRoundTrip) {
   }
 }
 
+// ============================================================================
+// ValidationCallbacks tests
+// ============================================================================
+
+struct RecordingValidationCallbacks {
+  struct UnknownFieldEvent {
+    std::string parentUri;
+    int16_t fieldId;
+    std::string fieldName;
+    protocol::TType wireType;
+  };
+  struct TypeMismatchEvent {
+    std::string context;
+    protocol::TType expected;
+    protocol::TType actual;
+  };
+  struct MultipleUnionFieldsEvent {
+    std::string unionUri;
+    uint32_t fieldCount;
+  };
+
+  std::vector<UnknownFieldEvent> unknownFields;
+  std::vector<TypeMismatchEvent> typeMismatches;
+  std::vector<MultipleUnionFieldsEvent> multipleUnionFields;
+
+  void onUnknownField(
+      const type_system::StructuredNode& parent,
+      int16_t fieldId,
+      std::string_view fieldName,
+      protocol::TType ftype) {
+    unknownFields.push_back(
+        {std::string(parent.uri()), fieldId, std::string(fieldName), ftype});
+  }
+
+  void onTypeMismatch(
+      std::string_view context,
+      protocol::TType expected,
+      protocol::TType actual) {
+    typeMismatches.push_back({std::string(context), expected, actual});
+  }
+
+  void onMultipleUnionFields(
+      const type_system::UnionNode& type, uint32_t fieldCount) {
+    multipleUnionFields.push_back({std::string(type.uri()), fieldCount});
+  }
+};
+
+static_assert(
+    DeserializeValidationCallbacks<detail::ThrowingValidationCallbacks>);
+static_assert(DeserializeValidationCallbacks<RecordingValidationCallbacks>);
+
+struct ValidationCallbacksTest : ::testing::Test {
+  static constexpr auto kWriterStructUri =
+      "facebook.com/thrift/test/WriterStruct";
+  static constexpr auto kReaderStructUri =
+      "facebook.com/thrift/test/ReaderStruct";
+  static constexpr auto kWriterUnionUri =
+      "facebook.com/thrift/test/WriterUnion";
+  static constexpr auto kReaderUnionUri =
+      "facebook.com/thrift/test/ReaderUnion";
+
+  std::unique_ptr<type_system::TypeSystem> writerTypeSystem;
+  std::unique_ptr<type_system::TypeSystem> readerTypeSystem;
+
+  ValidationCallbacksTest() {
+    // Writer schema: struct with fields {1: i32 a, 2: string b, 3: i64 c}
+    {
+      type_system::TypeSystemBuilder builder;
+      builder.addType(
+          kWriterStructUri,
+          def::Struct({
+              def::Field(
+                  def::Identity(1, "a"), def::AlwaysPresent, TypeIds::I32),
+              def::Field(
+                  def::Identity(2, "b"), def::AlwaysPresent, TypeIds::String),
+              def::Field(
+                  def::Identity(3, "c"), def::AlwaysPresent, TypeIds::I64),
+          }));
+      builder.addType(
+          kWriterUnionUri,
+          def::Union({
+              def::Field(
+                  def::Identity(1, "intValue"), def::Optional, TypeIds::I32),
+              def::Field(
+                  def::Identity(2, "strValue"), def::Optional, TypeIds::String),
+          }));
+      writerTypeSystem = std::move(builder).build();
+    }
+
+    // Reader schema: struct with fields {1: i32 a, 2: string b} (no field c)
+    {
+      type_system::TypeSystemBuilder builder;
+      builder.addType(
+          kReaderStructUri,
+          def::Struct({
+              def::Field(
+                  def::Identity(1, "a"), def::AlwaysPresent, TypeIds::I32),
+              def::Field(
+                  def::Identity(2, "b"), def::AlwaysPresent, TypeIds::String),
+          }));
+      builder.addType(
+          kReaderUnionUri,
+          def::Union({
+              def::Field(
+                  def::Identity(1, "intValue"), def::Optional, TypeIds::I32),
+          }));
+      readerTypeSystem = std::move(builder).build();
+    }
+  }
+
+  const type_system::StructNode& writerStructNode() {
+    return writerTypeSystem->getUserDefinedTypeOrThrow(kWriterStructUri)
+        .asStruct();
+  }
+  const type_system::StructNode& readerStructNode() {
+    return readerTypeSystem->getUserDefinedTypeOrThrow(kReaderStructUri)
+        .asStruct();
+  }
+  const type_system::UnionNode& writerUnionNode() {
+    return writerTypeSystem->getUserDefinedTypeOrThrow(kWriterUnionUri)
+        .asUnion();
+  }
+  const type_system::UnionNode& readerUnionNode() {
+    return readerTypeSystem->getUserDefinedTypeOrThrow(kReaderUnionUri)
+        .asUnion();
+  }
+};
+
+TEST_F(ValidationCallbacksTest, UnknownStructField) {
+  // Serialize with writer schema (has fields a, b, c)
+  auto writerValue = DynamicValue::makeDefault(writerStructNode().asRef());
+  writerValue.asStruct().setField("a", DynamicValue::makeI32(10));
+  writerValue.asStruct().setField("b", DynamicValue::makeString("hello"));
+  writerValue.asStruct().setField("c", DynamicValue::makeI64(999));
+
+  folly::IOBufQueue bufQueue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&bufQueue);
+  serializeValue(writer, writerValue);
+
+  // Deserialize with reader schema (only has fields a, b)
+  auto buf = bufQueue.move();
+  CompactProtocolReader reader;
+  reader.setInput(buf.get());
+
+  RecordingValidationCallbacks callbacks;
+  auto result =
+      deserializeValue(reader, readerStructNode().asRef(), nullptr, callbacks);
+
+  // Should have recorded one unknown field event for field c (id=3)
+  ASSERT_EQ(callbacks.unknownFields.size(), 1);
+  EXPECT_EQ(callbacks.unknownFields[0].fieldId, 3);
+  EXPECT_EQ(callbacks.unknownFields[0].wireType, protocol::T_I64);
+
+  // Deserialized struct should have only a and b with correct values
+  EXPECT_EQ(result.asStruct().getField("a")->asI32(), 10);
+  EXPECT_EQ(result.asStruct().getField("b")->asString().view(), "hello");
+}
+
+TEST_F(ValidationCallbacksTest, UnknownUnionField) {
+  // Serialize a union with field strValue (id=2), which is unknown to reader
+  auto writerValue = DynamicValue::makeDefault(writerUnionNode().asRef());
+  writerValue.asUnion().setField("strValue", DynamicValue::makeString("test"));
+
+  folly::IOBufQueue bufQueue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&bufQueue);
+  serializeValue(writer, writerValue);
+
+  // Deserialize with reader schema (only has intValue, id=1)
+  auto buf = bufQueue.move();
+  CompactProtocolReader reader;
+  reader.setInput(buf.get());
+
+  RecordingValidationCallbacks callbacks;
+  auto result =
+      deserializeValue(reader, readerUnionNode().asRef(), nullptr, callbacks);
+
+  // Should have recorded one unknown field event for field strValue (id=2)
+  ASSERT_EQ(callbacks.unknownFields.size(), 1);
+  EXPECT_EQ(callbacks.unknownFields[0].fieldId, 2);
+
+  // Deserialized union should be empty
+  EXPECT_TRUE(result.asUnion().isEmpty());
+}
+
+TEST_F(ValidationCallbacksTest, StructFieldTypeMismatch) {
+  // Write a struct where field 2 (string in schema) is written as i32
+  folly::IOBufQueue bufQueue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&bufQueue);
+
+  writer.writeStructBegin("test");
+  // Field 1: i32 a = 10 (correct type)
+  writer.writeFieldBegin("a", protocol::T_I32, 1);
+  writer.writeI32(10);
+  writer.writeFieldEnd();
+  // Field 2: should be string, but write as i32 (type mismatch)
+  writer.writeFieldBegin("b", protocol::T_I32, 2);
+  writer.writeI32(42);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+
+  auto buf = bufQueue.move();
+  CompactProtocolReader reader;
+  reader.setInput(buf.get());
+
+  RecordingValidationCallbacks callbacks;
+  auto result =
+      deserializeValue(reader, readerStructNode().asRef(), nullptr, callbacks);
+
+  // Should have recorded one type mismatch for field b
+  ASSERT_EQ(callbacks.typeMismatches.size(), 1);
+  EXPECT_EQ(callbacks.typeMismatches[0].expected, protocol::T_STRING);
+  EXPECT_EQ(callbacks.typeMismatches[0].actual, protocol::T_I32);
+
+  // Field a should have correct value, field b should be default
+  EXPECT_EQ(result.asStruct().getField("a")->asI32(), 10);
+  // Field b is always-present, so it should exist with default value ("")
+  EXPECT_EQ(result.asStruct().getField("b")->asString().view(), "");
+}
+
+TEST_F(ValidationCallbacksTest, MultipleUnionFields) {
+  // Write a union-shaped struct with two fields
+  folly::IOBufQueue bufQueue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&bufQueue);
+
+  writer.writeStructBegin("test");
+  // First field: intValue (id=1)
+  writer.writeFieldBegin("intValue", protocol::T_I32, 1);
+  writer.writeI32(42);
+  writer.writeFieldEnd();
+  // Second field: also i32 to avoid type mismatch, use id=1 again or any
+  // Actually we need a second distinct field. Use field id 99 (unknown).
+  writer.writeFieldBegin("extra", protocol::T_I32, 99);
+  writer.writeI32(100);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+
+  auto buf = bufQueue.move();
+  CompactProtocolReader reader;
+  reader.setInput(buf.get());
+
+  RecordingValidationCallbacks callbacks;
+  auto result =
+      deserializeValue(reader, readerUnionNode().asRef(), nullptr, callbacks);
+
+  // Should have recorded one multipleUnionFields event
+  ASSERT_EQ(callbacks.multipleUnionFields.size(), 1);
+
+  // The first valid field (intValue) should still be active
+  EXPECT_FALSE(result.asUnion().isEmpty());
+  EXPECT_EQ(result.asUnion().getField("intValue").asI32(), 42);
+}
+
+TEST_F(ValidationCallbacksTest, DefaultBehaviorPreserved) {
+  // Write a struct where field 2 (string in schema) is written as i32
+  folly::IOBufQueue bufQueue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&bufQueue);
+
+  writer.writeStructBegin("test");
+  writer.writeFieldBegin("a", protocol::T_I32, 1);
+  writer.writeI32(10);
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("b", protocol::T_I32, 2);
+  writer.writeI32(42);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+
+  auto buf = bufQueue.move();
+  CompactProtocolReader reader;
+  reader.setInput(buf.get());
+
+  // The 3-arg overload should throw on type mismatch (same as before)
+  EXPECT_THROW(
+      deserializeValue(reader, readerStructNode().asRef(), nullptr),
+      std::runtime_error);
+}
+
 } // namespace
 } // namespace apache::thrift::dynamic

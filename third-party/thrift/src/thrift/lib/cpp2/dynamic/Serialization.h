@@ -35,6 +35,33 @@
 
 namespace apache::thrift::dynamic {
 
+namespace detail {
+
+// Default validation callbacks that skip unknown fields and throw on errors
+struct ThrowingValidationCallbacks {
+  void onUnknownField(
+      const type_system::StructuredNode&,
+      int16_t,
+      std::string_view,
+      protocol::TType) {}
+
+  void onTypeMismatch(
+      std::string_view context,
+      protocol::TType expected,
+      protocol::TType actual) {
+    throw std::runtime_error(
+        fmt::format(
+            "type mismatch in {}: {} vs {}", context, expected, actual));
+  }
+
+  void onMultipleUnionFields(const type_system::UnionNode&, uint32_t) {
+    throw std::runtime_error(
+        "Union cannot have more than one field during deserialization");
+  }
+};
+
+} // namespace detail
+
 // ============================================================================
 // serialize - converts Datum to wire format
 // ============================================================================
@@ -246,12 +273,20 @@ List deserialize(
     const type_system::TypeRef::List& type,
     std::pmr::memory_resource* alloc);
 
+template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+List deserialize(
+    ProtocolReader& reader,
+    const type_system::TypeRef::List& type,
+    std::pmr::memory_resource* alloc,
+    Callbacks& callbacks);
+
 // Set
-template <typename ProtocolReader>
+template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
 Set deserialize(
     ProtocolReader& reader,
     const type_system::TypeRef::Set& type,
-    std::pmr::memory_resource* alloc) {
+    std::pmr::memory_resource* alloc,
+    Callbacks& callbacks) {
   Set ret(type, alloc);
 
   protocol::TType ttype;
@@ -261,7 +296,8 @@ Set deserialize(
   // Handle protocols that omit container sizes (e.g., SimpleJSON)
   if constexpr (ProtocolReader::kOmitsContainerSizes()) {
     while (reader.peekSet()) {
-      ret.insert(deserializeValue(reader, type.elementType(), alloc));
+      ret.insert(
+          deserializeValue(reader, type.elementType(), alloc, callbacks));
     }
     reader.readSetEnd();
     return ret;
@@ -274,13 +310,15 @@ Set deserialize(
 
   // T_VOID indicates protocol doesn't encode type information (e.g.,
   // SimpleJSON)
-  if (ttype != protocol::TType::T_VOID &&
-      type_system::ToTTypeFn{}(type.elementType()) != ttype) {
-    throw std::runtime_error(
-        fmt::format(
-            "type mismatch in set deserialization: {} vs {}",
-            ttype,
-            type_system::ToTTypeFn{}(type.elementType())));
+  auto expected = type_system::ToTTypeFn{}(type.elementType());
+  if (ttype != protocol::TType::T_VOID && expected != ttype) {
+    // If callback didn't throw, skip remaining set data and return empty
+    for (; size > 0; --size) {
+      callbacks.onTypeMismatch("set element", expected, ttype);
+      reader.skip(ttype);
+    }
+    reader.readSetEnd();
+    return ret;
   }
 
   if (!apache::thrift::canReadNElements(reader, size, {ttype})) {
@@ -289,19 +327,30 @@ Set deserialize(
 
   ret.reserve(size);
   for (; size > 0; --size) {
-    ret.insert(deserializeValue(reader, type.elementType(), alloc));
+    ret.insert(deserializeValue(reader, type.elementType(), alloc, callbacks));
   }
 
   reader.readSetEnd();
   return ret;
 }
 
-// Map
 template <typename ProtocolReader>
+Set deserialize(
+    ProtocolReader& reader,
+    const type_system::TypeRef::Set& type,
+    std::pmr::memory_resource* alloc) {
+  detail::ThrowingValidationCallbacks callbacks;
+  return deserialize(reader, type, alloc, callbacks);
+}
+
+// Map
+template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+
 Map deserialize(
     ProtocolReader& reader,
     const type_system::TypeRef::Map& type,
-    std::pmr::memory_resource* alloc) {
+    std::pmr::memory_resource* alloc,
+    Callbacks& callbacks) {
   Map ret(type, alloc);
 
   protocol::TType keyTType;
@@ -312,8 +361,8 @@ Map deserialize(
   // Handle protocols that omit container sizes (e.g., SimpleJSON)
   if constexpr (ProtocolReader::kOmitsContainerSizes()) {
     while (reader.peekMap()) {
-      auto key = deserializeValue(reader, type.keyType(), alloc);
-      auto value = deserializeValue(reader, type.valueType(), alloc);
+      auto key = deserializeValue(reader, type.keyType(), alloc, callbacks);
+      auto value = deserializeValue(reader, type.valueType(), alloc, callbacks);
       ret.insert(std::move(key), std::move(value));
     }
     reader.readMapEnd();
@@ -327,22 +376,28 @@ Map deserialize(
 
   // T_VOID indicates protocol doesn't encode type information (e.g.,
   // SimpleJSON)
-  if (keyTType != protocol::TType::T_VOID &&
-      type_system::ToTTypeFn{}(type.keyType()) != keyTType) {
-    throw std::runtime_error(
-        fmt::format(
-            "type mismatch in map key deserialization: {} vs {}",
-            keyTType,
-            type_system::ToTTypeFn{}(type.keyType())));
+  auto expectedKey = type_system::ToTTypeFn{}(type.keyType());
+  if (keyTType != protocol::TType::T_VOID && expectedKey != keyTType) {
+    // If callback didn't throw, skip remaining map data and return empty
+    for (; size > 0; --size) {
+      callbacks.onTypeMismatch("map key", expectedKey, keyTType);
+      reader.skip(keyTType);
+      reader.skip(valueTType);
+    }
+    reader.readMapEnd();
+    return ret;
   }
 
-  if (valueTType != protocol::TType::T_VOID &&
-      type_system::ToTTypeFn{}(type.valueType()) != valueTType) {
-    throw std::runtime_error(
-        fmt::format(
-            "type mismatch in map value deserialization: {} vs {}",
-            valueTType,
-            type_system::ToTTypeFn{}(type.valueType())));
+  auto expectedValue = type_system::ToTTypeFn{}(type.valueType());
+  if (valueTType != protocol::TType::T_VOID && expectedValue != valueTType) {
+    // If callback didn't throw, skip remaining map data and return empty
+    for (; size > 0; --size) {
+      callbacks.onTypeMismatch("map value", expectedValue, valueTType);
+      reader.skip(keyTType);
+      reader.skip(valueTType);
+    }
+    reader.readMapEnd();
+    return ret;
   }
 
   if (!apache::thrift::canReadNElements(reader, size, {keyTType, valueTType})) {
@@ -351,13 +406,22 @@ Map deserialize(
 
   ret.reserve(size);
   for (; size > 0; --size) {
-    auto key = deserializeValue(reader, type.keyType(), alloc);
-    auto value = deserializeValue(reader, type.valueType(), alloc);
+    auto key = deserializeValue(reader, type.keyType(), alloc, callbacks);
+    auto value = deserializeValue(reader, type.valueType(), alloc, callbacks);
     ret.insert(std::move(key), std::move(value));
   }
 
   reader.readMapEnd();
   return ret;
+}
+
+template <typename ProtocolReader>
+Map deserialize(
+    ProtocolReader& reader,
+    const type_system::TypeRef::Map& type,
+    std::pmr::memory_resource* alloc) {
+  detail::ThrowingValidationCallbacks callbacks;
+  return deserialize(reader, type, alloc, callbacks);
 }
 
 // Struct
@@ -367,10 +431,26 @@ Struct deserialize(
     const type_system::StructNode&,
     std::pmr::memory_resource*);
 
+template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+
+Struct deserialize(
+    ProtocolReader&,
+    const type_system::StructNode&,
+    std::pmr::memory_resource*,
+    Callbacks&);
+
 // Union
 template <typename ProtocolReader>
 Union deserialize(
     ProtocolReader&, const type_system::UnionNode&, std::pmr::memory_resource*);
+
+template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+
+Union deserialize(
+    ProtocolReader&,
+    const type_system::UnionNode&,
+    std::pmr::memory_resource*,
+    Callbacks&);
 
 // Unsupported types
 template <typename ProtocolReader>
@@ -379,6 +459,19 @@ int deserialize(
     const type_system::OpaqueAliasNode&,
     std::pmr::memory_resource*) {
   throw std::logic_error("Unimplemented: deserialize(OpaqueAliasNode)");
+}
+
+template <
+    typename ProtocolReader,
+    typename T,
+    DeserializeValidationCallbacks Callbacks>
+  requires(!folly::is_instantiation_of_v<folly::not_null, std::decay_t<T>>)
+auto deserialize(
+    ProtocolReader& reader,
+    T&& type,
+    std::pmr::memory_resource* mr,
+    Callbacks&) {
+  return deserialize(reader, std::forward<T>(type), mr);
 }
 
 // Helper overload for not_null pointers
@@ -393,6 +486,21 @@ auto deserialize(
 // ============================================================================
 
 /**
+ * Deserialize a DynamicValue from a protocol reader with validation callbacks.
+ */
+template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+
+DynamicValue deserializeValue(
+    ProtocolReader& prot,
+    type_system::TypeRef type,
+    std::pmr::memory_resource* mr,
+    Callbacks& callbacks) {
+  return DynamicValue(type, type.visit([&](auto&& t) {
+    return detail::Datum::make(deserialize(prot, t, mr, callbacks));
+  }));
+}
+
+/**
  * Deserialize a DynamicValue from a protocol reader.
  */
 template <typename ProtocolReader>
@@ -400,9 +508,8 @@ DynamicValue deserializeValue(
     ProtocolReader& prot,
     type_system::TypeRef type,
     std::pmr::memory_resource* mr) {
-  return DynamicValue(type, type.visit([&](auto&& t) {
-    return detail::Datum::make(deserialize(prot, t, mr));
-  }));
+  detail::ThrowingValidationCallbacks callbacks;
+  return deserializeValue(prot, type, mr, callbacks);
 }
 
 /**
@@ -471,11 +578,13 @@ void serialize(ProtocolWriter& writer, const List& list) {
 }
 
 // Deserialize List - overrides the placeholder in the deserialize section above
-template <typename ProtocolReader>
+template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+
 List deserialize(
     ProtocolReader& reader,
     const type_system::TypeRef::List& type,
-    std::pmr::memory_resource* alloc) {
+    std::pmr::memory_resource* alloc,
+    Callbacks& callbacks) {
   return type.elementType().matchKind(
       [&]<type_system::TypeRef::Kind elemTypeKind>(
           type_system::TypeRef::KindConstant<elemTypeKind>) -> List {
@@ -502,10 +611,11 @@ List deserialize(
         if constexpr (ProtocolReader::kOmitsContainerSizes()) {
           while (reader.peekList()) {
             if constexpr (std::is_same_v<elemDatumType, bool>) {
-              bool value = deserialize(reader, elemTypeNode, alloc);
+              bool value = deserialize(reader, elemTypeNode, alloc, callbacks);
               data.emplace_back(static_cast<std::byte>(value));
             } else {
-              data.emplace_back(deserialize(reader, elemTypeNode, alloc));
+              data.emplace_back(
+                  deserialize(reader, elemTypeNode, alloc, callbacks));
             }
           }
           reader.readListEnd();
@@ -517,13 +627,15 @@ List deserialize(
           }
 
           // T_VOID indicates protocol doesn't encode type information
-          if (ttype != protocol::TType::T_VOID &&
-              type_system::ToTTypeFn{}(type.elementType()) != ttype) {
-            throw std::runtime_error(
-                fmt::format(
-                    "type mismatch in deserialization: {} vs {}",
-                    ttype,
-                    type_system::ToTTypeFn{}(type.elementType())));
+          auto expected = type_system::ToTTypeFn{}(type.elementType());
+          if (ttype != protocol::TType::T_VOID && expected != ttype) {
+            // If callback didn't throw, skip remaining list data, return empty
+            for (; size > 0; --size) {
+              callbacks.onTypeMismatch("list element", expected, ttype);
+              reader.skip(ttype);
+            }
+            reader.readListEnd();
+            return List(std::move(implPtr));
           }
 
           if (!apache::thrift::canReadNElements(reader, size, {ttype})) {
@@ -541,19 +653,29 @@ List deserialize(
             // For bool elements (stored as std::byte), deserialize and cast
             data.reserve(size);
             for (; size > 0; --size) {
-              bool value = deserialize(reader, elemTypeNode, alloc);
+              bool value = deserialize(reader, elemTypeNode, alloc, callbacks);
               data.emplace_back(static_cast<std::byte>(value));
             }
           } else {
             data.reserve(size);
             for (; size > 0; --size) {
-              data.emplace_back(deserialize(reader, elemTypeNode, alloc));
+              data.emplace_back(
+                  deserialize(reader, elemTypeNode, alloc, callbacks));
             }
           }
           reader.readListEnd();
           return List(std::move(implPtr));
         }
       });
+}
+
+template <typename ProtocolReader>
+List deserialize(
+    ProtocolReader& reader,
+    const type_system::TypeRef::List& type,
+    std::pmr::memory_resource* alloc) {
+  detail::ThrowingValidationCallbacks callbacks;
+  return deserialize(reader, type, alloc, callbacks);
 }
 
 // ============================================================================
@@ -596,11 +718,13 @@ void serialize(ProtocolWriter& writer, const Struct& structValue) {
   writer.writeStructEnd();
 }
 
-template <typename ProtocolReader>
+template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+
 Struct deserialize(
     ProtocolReader& reader,
     const type_system::StructNode& type,
-    std::pmr::memory_resource* alloc) {
+    std::pmr::memory_resource* alloc,
+    Callbacks& callbacks) {
   Struct ret(type, alloc);
 
   std::string name;
@@ -644,20 +768,25 @@ Struct deserialize(
       // T_VOID indicates protocol doesn't encode type information (e.g.,
       // SimpleJSON)
       if (ftype != protocol::TType::T_VOID && ftype != field.wireType()) {
-        throw std::runtime_error(
+        callbacks.onTypeMismatch(
             fmt::format(
-                "Expected field {} on struct {} to have wire-type {} but got {}",
+                "field '{}' on struct '{}'",
                 field.identity().name(),
-                type.uri(),
-                field.wireType(),
-                ftype));
+                type.uri()),
+            field.wireType(),
+            ftype);
+        // If callback didn't throw, skip the mismatched field data
+        reader.skip(ftype);
+        reader.readFieldEnd();
+        continue;
       }
 
       // Use virtual interface to set the field
-      ret.setField(handle, deserializeValue(reader, field.type(), alloc));
+      ret.setField(
+          handle, deserializeValue(reader, field.type(), alloc, callbacks));
     } else {
       // Unknown field
-      // TODO: store instead of skipping
+      callbacks.onUnknownField(type, fid, name, ftype);
       reader.skip(ftype);
     }
 
@@ -667,6 +796,15 @@ Struct deserialize(
   reader.readStructEnd();
 
   return ret;
+}
+
+template <typename ProtocolReader>
+Struct deserialize(
+    ProtocolReader& reader,
+    const type_system::StructNode& type,
+    std::pmr::memory_resource* alloc) {
+  detail::ThrowingValidationCallbacks callbacks;
+  return deserialize(reader, type, alloc, callbacks);
 }
 
 // ============================================================================
@@ -699,11 +837,13 @@ void serialize(ProtocolWriter& writer, const Union& unionValue) {
   writer.writeStructEnd();
 }
 
-template <typename ProtocolReader>
+template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+
 Union deserialize(
     ProtocolReader& reader,
     const type_system::UnionNode& type,
-    std::pmr::memory_resource* alloc) {
+    std::pmr::memory_resource* alloc,
+    Callbacks& callbacks) {
   Union ret(type, alloc);
 
   std::string name;
@@ -739,22 +879,23 @@ Union deserialize(
     // T_VOID indicates protocol doesn't encode type information (e.g.,
     // SimpleJSON)
     if (ftype != protocol::TType::T_VOID && ftype != field.wireType()) {
-      throw std::runtime_error(
+      callbacks.onTypeMismatch(
           fmt::format(
-              "Expected field {} on union {} to have wire-type {} but got {}",
-              field.identity().name(),
-              type.uri(),
-              field.wireType(),
-              ftype));
+              "field '{}' on union '{}'", field.identity().name(), type.uri()),
+          field.wireType(),
+          ftype);
+      // If callback didn't throw, skip the mismatched field data
+      reader.skip(ftype);
+    } else {
+      ret.activeFieldDef_ = &field;
+      ret.activeFieldData_ = field.type().visit([&](auto&& t) {
+        return ret.makeDatumPtr(
+            detail::Datum::make(deserialize(reader, t, alloc, callbacks)));
+      });
     }
-
-    ret.activeFieldDef_ = &field;
-    ret.activeFieldData_ = field.type().visit([&](auto&& t) {
-      return ret.makeDatumPtr(
-          detail::Datum::make(deserialize(reader, t, alloc)));
-    });
   } else {
-    // Unknown field - skip it
+    // Unknown field
+    callbacks.onUnknownField(type, fid, name, ftype);
     reader.skip(ftype);
   }
 
@@ -763,13 +904,29 @@ Union deserialize(
   // Read field stop
   reader.readFieldBegin(name, ftype, fid);
   if (ftype != protocol::T_STOP) {
-    throw std::runtime_error(
-        "Union cannot have more than one field during deserialization");
+    // Drain remaining fields and count them
+    uint32_t totalFields = 1; // first field already deserialized
+    while (ftype != protocol::T_STOP) {
+      totalFields++;
+      reader.skip(ftype);
+      reader.readFieldEnd();
+      reader.readFieldBegin(name, ftype, fid);
+    }
+    callbacks.onMultipleUnionFields(type, totalFields);
   }
 
   reader.readStructEnd();
 
   return ret;
+}
+
+template <typename ProtocolReader>
+Union deserialize(
+    ProtocolReader& reader,
+    const type_system::UnionNode& type,
+    std::pmr::memory_resource* alloc) {
+  detail::ThrowingValidationCallbacks callbacks;
+  return deserialize(reader, type, alloc, callbacks);
 }
 
 } // namespace apache::thrift::dynamic

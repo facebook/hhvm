@@ -110,6 +110,13 @@ class Set final {
       const type_system::TypeRef::Set& type,
       std::pmr::memory_resource* alloc);
 
+  template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+  friend Set deserialize(
+      ProtocolReader& reader,
+      const type_system::TypeRef::Set& type,
+      std::pmr::memory_resource* alloc,
+      Callbacks& callbacks);
+
  private:
   explicit Set(std::unique_ptr<detail::ISet, detail::FreeDeleter> impl);
 

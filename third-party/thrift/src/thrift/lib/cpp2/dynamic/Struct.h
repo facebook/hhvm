@@ -167,6 +167,12 @@ class Struct final {
       ProtocolReader& reader,
       const type_system::StructNode& type,
       std::pmr::memory_resource* mr);
+  template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+  friend Struct deserialize(
+      ProtocolReader& reader,
+      const type_system::StructNode& type,
+      std::pmr::memory_resource* mr,
+      Callbacks& callbacks);
   friend Struct fromRecord(
       const type_system::SerializableRecord& r,
       const type_system::StructNode& structType,

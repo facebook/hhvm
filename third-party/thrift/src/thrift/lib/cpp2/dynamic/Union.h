@@ -168,6 +168,12 @@ class Union final {
       ProtocolReader& reader,
       const type_system::UnionNode& type,
       std::pmr::memory_resource* mr);
+  template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+  friend Union deserialize(
+      ProtocolReader& reader,
+      const type_system::UnionNode& type,
+      std::pmr::memory_resource* mr,
+      Callbacks& callbacks);
   friend Union fromRecord(
       const type_system::SerializableRecord& r,
       const type_system::UnionNode& unionType,

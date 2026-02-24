@@ -687,11 +687,12 @@ class DynamicValue final {
   template <typename ProtocolWriter>
   friend void serializeValue(ProtocolWriter& prot, const DynamicConstRef& v);
 
-  template <typename ProtocolReader>
+  template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
   friend DynamicValue deserializeValue(
       ProtocolReader& prot,
       type_system::TypeRef type,
-      std::pmr::memory_resource* mr);
+      std::pmr::memory_resource* mr,
+      Callbacks& callbacks);
 
   friend class DynamicConstRef;
   friend class DynamicRef;

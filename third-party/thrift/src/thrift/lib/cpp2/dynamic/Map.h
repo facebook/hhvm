@@ -121,6 +121,13 @@ class Map final {
       const type_system::TypeRef::Map& type,
       std::pmr::memory_resource* alloc);
 
+  template <typename ProtocolReader, DeserializeValidationCallbacks Callbacks>
+  friend Map deserialize(
+      ProtocolReader& reader,
+      const type_system::TypeRef::Map& type,
+      std::pmr::memory_resource* alloc,
+      Callbacks& callbacks);
+
  private:
   explicit Map(std::unique_ptr<detail::IMap, detail::FreeDeleter> impl);
 

@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <unordered_set>
 
 #include <boost/algorithm/string/classification.hpp>
@@ -814,6 +815,146 @@ std::string get_resolved_name(const t_field* field) {
   return get_resolved_name(&field->type().deref());
 }
 
+struct rust_const_value_info {
+  unsigned depth;
+  const t_type* local_type;
+  const t_type* underlying_type;
+  // Pre-computed newtype typedef chain (outermost first).
+  // Each entry is a newtype typedef that wraps the next layer.
+  std::vector<const t_typedef*> newtype_chain;
+};
+
+class rust_generator_context {
+ public:
+  void register_visitors(t_whisker_generator::context_visitor& visitor) {
+    visitor.add_const_visitor(
+        [this](
+            const t_whisker_generator::whisker_generator_visitor_context&,
+            const t_const& node) {
+          populate_value(node.value(), node.type(), 0);
+        });
+    visitor.add_field_visitor(
+        [this](
+            const t_whisker_generator::whisker_generator_visitor_context&,
+            const t_field& node) {
+          if (auto value = node.default_value()) {
+            populate_value(value, node.type().get_type(), 2);
+          }
+        });
+    visitor.add_structured_definition_visitor(
+        [this](
+            const t_whisker_generator::whisker_generator_visitor_context&,
+            const t_structured& node) {
+          for (const t_const& ann : node.structured_annotations()) {
+            populate_value(ann.value(), ann.type(), 1);
+          }
+        });
+    // Field annotations are visited separately since the field visitor
+    // doesn't cover annotations.
+    visitor.add_field_visitor(
+        [this](
+            const t_whisker_generator::whisker_generator_visitor_context&,
+            const t_field& node) {
+          for (const t_const& ann : node.structured_annotations()) {
+            populate_value(ann.value(), ann.type(), 3);
+          }
+        });
+  }
+
+ private:
+  std::unordered_map<const t_const_value*, rust_const_value_info> info_map_;
+
+  void populate_value(
+      const t_const_value* value, const t_type* type, unsigned depth) {
+    if (!value || info_map_.count(value)) {
+      return;
+    }
+
+    const t_type* underlying = type->get_true_type();
+
+    // Build the newtype chain: walk through typedefs that are newtypes
+    // from the original type to the underlying type.
+    std::vector<const t_typedef*> chain;
+    {
+      const t_type* cursor = type;
+      while (cursor != underlying) {
+        if (const auto* td = cursor->try_as<t_typedef>()) {
+          if (has_newtype_annotation(td)) {
+            chain.push_back(td);
+          }
+          cursor = &td->type().deref();
+        } else {
+          break;
+        }
+      }
+    }
+
+    info_map_[value] = rust_const_value_info{
+        depth,
+        type,
+        underlying,
+        std::move(chain),
+    };
+
+    // Recurse into children
+    if (underlying->is<t_list>() || underlying->is<t_set>()) {
+      const t_type* elem_type = nullptr;
+      if (const auto* list_type = underlying->try_as<t_list>()) {
+        elem_type = list_type->elem_type().get_type();
+      } else if (const auto* set_type = underlying->try_as<t_set>()) {
+        elem_type = set_type->elem_type().get_type();
+      }
+      if (elem_type) {
+        for (auto elem : value->get_list()) {
+          populate_value(elem, elem_type, depth + 3);
+        }
+      }
+    } else if (const auto* map_type = underlying->try_as<t_map>()) {
+      auto key_type = &map_type->key_type().deref();
+      auto val_type = &map_type->val_type().deref();
+      for (auto entry : value->get_map()) {
+        populate_value(entry.first, key_type, depth + 3);
+        populate_value(entry.second, val_type, depth + 3);
+      }
+    } else if (const auto* struct_type = underlying->try_as<t_structured>()) {
+      if (underlying->is<t_union>()) {
+        // Union: only one field is set
+        if (!value->get_map().empty() &&
+            value->get_map().at(0).first->kind() ==
+                t_const_value::t_const_value_kind::CV_STRING) {
+          const auto& entry = value->get_map().at(0);
+          const auto& variant = entry.first->get_string();
+          for (auto&& field : struct_type->fields()) {
+            if (field.name() == variant) {
+              populate_value(entry.second, field.type().get_type(), depth + 1);
+              break;
+            }
+          }
+        }
+      } else {
+        // Struct/exception: iterate all fields
+        std::map<std::string, const t_const_value*> map_entries;
+        for (auto entry : value->get_map()) {
+          if (entry.first->kind() ==
+              t_const_value::t_const_value_kind::CV_STRING) {
+            map_entries[entry.first->get_string()] = entry.second;
+          }
+        }
+        for (auto&& field : struct_type->fields()) {
+          auto it = map_entries.find(field.name());
+          if (it != map_entries.end() && it->second) {
+            populate_value(it->second, field.type().get_type(), depth + 1);
+          }
+          // Also populate field defaults at depth+1
+          if (auto default_val = field.default_value()) {
+            populate_value(default_val, field.type().get_type(), depth + 1);
+          }
+        }
+      }
+    }
+  }
+};
+
 } // namespace
 
 class t_mstch_rust_generator : public t_mstch_generator {
@@ -835,9 +976,15 @@ class t_mstch_rust_generator : public t_mstch_generator {
   void generate_split_types();
   void fill_validator_visitors(ast_validator&) const override;
 
+  void initialize_context(context_visitor& visitor) override {
+    rust_context_ = std::make_unique<rust_generator_context>();
+    rust_context_->register_visitors(visitor);
+  }
+
  private:
   void set_mstch_factories();
   rust_codegen_options options_;
+  std::unique_ptr<rust_generator_context> rust_context_;
   whisker::map::raw globals(prototype_database& proto) const override {
     whisker::map::raw globals = t_mstch_generator::globals(proto);
     globals["rust_annotation_name"] = whisker::dsl::make_function(
@@ -912,6 +1059,13 @@ class t_mstch_rust_generator : public t_mstch_generator {
       auto type = self.type()->get_true_type();
       return type->is<t_container>() || type->is<t_structured>();
     });
+    return std::move(def).make();
+  }
+
+  prototype<t_const_value>::ptr make_prototype_for_const_value(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_const_value(proto);
+    auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
     return std::move(def).make();
   }
 
@@ -2040,8 +2194,10 @@ class mstch_rust_value : public mstch_base {
             {"value:empty?", &mstch_rust_value::is_empty},
             {"value:indent", &mstch_rust_value::indent},
             {"value:simpleLiteral?", &mstch_rust_value::simple_literal},
+            {"value:self", &mstch_rust_value::self},
         });
   }
+  whisker::object self() { return make_self(*const_value_); }
   mstch::node underlying_type() {
     return context_.type_factory->make_mstch_object(
         underlying_type_, context_, pos_);

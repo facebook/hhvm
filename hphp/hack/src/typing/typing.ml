@@ -1339,7 +1339,7 @@ end = struct
             env
             (Some fe_package_requirement);
         ]
-    and access_errs =
+    and (access_errs, access_linter_errors) =
       TVis.check_top_level_access
         ~should_check_package_boundary:
           (if
@@ -1358,6 +1358,12 @@ end = struct
         fe_package
         name
     in
+    List.iter access_linter_errors ~f:(fun (pos, w) ->
+        Lints_diagnostics.package_into_override
+          pos
+          w.current_package
+          w.target_package
+          w.target_package_before_override);
     Option.iter
       ~f:(Typing_error_utils.add_typing_error ~env)
       (Typing_error.multiple_opt (other_errs @ access_errs))
@@ -3653,7 +3659,7 @@ end = struct
         make_result env cst_pos (Aast.Id id) ty
       | Some const ->
         (if Env.check_packages env then
-          let access_error_opt =
+          match
             TVis.check_package_access
               ~should_check_package_boundary:(`Yes "global constant")
               ~use_pos:cst_pos
@@ -3661,10 +3667,16 @@ end = struct
               env
               const.cd_package
               cst_name
-          in
-          Option.iter
-            ~f:(Typing_error_utils.add_typing_error ~env)
-            access_error_opt);
+          with
+          | TVis.Package_access_error err ->
+            Typing_error_utils.add_typing_error ~env err
+          | TVis.Package_access_linter_error (pos, w) ->
+            Lints_diagnostics.package_into_override
+              pos
+              w.current_package
+              w.target_package
+              w.target_package_before_override
+          | TVis.Package_access_ok -> ());
 
         let ((env, ty_err_opt), ty) =
           Phase.localize_no_subst env ~ignore_errors:true const.cd_type
@@ -5119,15 +5131,24 @@ end = struct
         if (not (String.equal (snd mid) "class")) && should_check_packages then begin
           match Env.get_class env class_name with
           | Decl_entry.Found class_ ->
-            Option.iter
-              ~f:(Typing_error_utils.add_typing_error ~env)
-              (TVis.check_package_access
+            (match
+               TVis.check_package_access
                  ~should_check_package_boundary:(`Yes "class constant")
                  ~use_pos:p
                  ~def_pos:(Cls.pos class_)
                  env
                  (Cls.get_package class_)
-                 class_name)
+                 class_name
+             with
+            | TVis.Package_access_error err ->
+              Typing_error_utils.add_typing_error ~env err
+            | TVis.Package_access_linter_error (pos, w) ->
+              Lints_diagnostics.package_into_override
+                pos
+                w.current_package
+                w.target_package
+                w.target_package_before_override
+            | TVis.Package_access_ok -> ())
           | Decl_entry.DoesNotExist
           | Decl_entry.NotYetAvailable ->
             ()
@@ -9226,7 +9247,7 @@ end = struct
              }))
 
   (* Parameterised on whether we should build a function type wrapped by FunctionRef or not.
-     We can't do the wrapping outside becuase the wrapping only happens on some of the exit
+     We can't do the wrapping outside because the wrapping only happens on some of the exit
      points, and it needs to get put into the TAST as well. *)
   let synth_function_type_help
       ~build_function_ref_type pos (class_name, method_name) env =
@@ -11727,7 +11748,7 @@ end = struct
           let (env, ty) = Env.fresh_type_error env p in
           make_result env [] (Aast.CI c) ty
         | Decl_entry.Found class_ ->
-          (if not is_attribute_param then
+          if not is_attribute_param then (
             let should_check_package_boundary =
               if inside_nameof || is_attribute || is_catch then
                 `No
@@ -11744,18 +11765,26 @@ end = struct
               end else
                 `Yes "class"
             in
-            List.iter
-              ~f:(Typing_error_utils.add_typing_error ~env)
-              (TVis.check_top_level_access
-                 ~in_signature:false
-                 ~should_check_package_boundary
-                 ~use_pos:p
-                 ~def_pos:(Cls.pos class_)
-                 env
-                 (Cls.internal class_)
-                 (Cls.get_module class_)
-                 (Cls.get_package class_)
-                 id));
+            let (access_errs, access_linter_errs) =
+              TVis.check_top_level_access
+                ~in_signature:false
+                ~should_check_package_boundary
+                ~use_pos:p
+                ~def_pos:(Cls.pos class_)
+                env
+                (Cls.internal class_)
+                (Cls.get_module class_)
+                (Cls.get_package class_)
+                id
+            in
+            List.iter access_linter_errs ~f:(fun (pos, w) ->
+                Lints_diagnostics.package_into_override
+                  pos
+                  w.current_package
+                  w.target_package
+                  w.target_package_before_override);
+            List.iter ~f:(Typing_error_utils.add_typing_error ~env) access_errs
+          );
 
           (* Don't add Exact superfluously to class type if it's final *)
           let exact =

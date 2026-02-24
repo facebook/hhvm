@@ -10,6 +10,12 @@
 open Typing_defs
 open Typing_env_types
 
+type package_access_result =
+  | Package_access_ok
+  | Package_access_error of Typing_error.t
+  | Package_access_linter_error of
+      (Pos.t * Typing_packages.package_warning_info)
+
 val check_class_access :
   is_method:bool ->
   use_pos:Pos.t ->
@@ -45,7 +51,7 @@ val check_package_access :
   env ->
   Aast_defs.package_membership option ->
   string ->
-  Typing_error.t option
+  package_access_result
 
 val check_top_level_access :
   should_check_package_boundary:Typing_packages.check_reason ->
@@ -57,7 +63,7 @@ val check_top_level_access :
   string option ->
   Aast_defs.package_membership option ->
   string ->
-  Typing_error.t list
+  Typing_error.t list * (Pos.t * Typing_packages.package_warning_info) list
 
 val check_meth_caller_access :
   use_pos:Pos.t ->

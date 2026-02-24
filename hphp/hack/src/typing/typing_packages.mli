@@ -6,6 +6,12 @@
  *
  *)
 
+type package_warning_info = {
+  current_package: (string * Pos.t) option;
+  target_package: (string * Pos.t) option;
+  target_package_before_override: string option;
+}
+
 type package_error_info = {
   current_package: (string * Pos.t) option;
   current_package_assignment_kind: string;
@@ -33,6 +39,7 @@ val can_access_by_package_rules :
   target_pos:Pos_or_decl.t ->
   target_id:string ->
   [ `Yes
+  | `YesWarning of package_warning_info
   | `PackageNotSatisfied of package_error_info
   | `PackageSoftIncludes of package_error_info
   ]

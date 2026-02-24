@@ -16,6 +16,12 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module Cls = Folded_class
 
+type package_access_result =
+  | Package_access_ok
+  | Package_access_error of Typing_error.t
+  | Package_access_linter_error of
+      (Pos.t * Typing_packages.package_warning_info)
+
 (* Is a private member defined on class/trait [origin_id] visible
  * from code in class/trait [self_id]?
  *
@@ -156,7 +162,7 @@ let check_package_access
     target_package
     target_id =
   match should_check_package_boundary with
-  | `No -> None
+  | `No -> Package_access_ok
   | `Yes target_symbol_spec ->
     let loaded_packages = Env.get_loaded_packages_list env in
     let included_packages = Env.get_included_packages env in
@@ -168,7 +174,8 @@ let check_package_access
           ~target_pos:def_pos
           ~target_id
       with
-      | `Yes -> None
+      | `Yes -> Package_access_ok
+      | `YesWarning w -> Package_access_linter_error (use_pos, w)
       | `PackageNotSatisfied
           Typing_packages.
             {
@@ -178,7 +185,7 @@ let check_package_access
               target_package_assignment_kind;
               target_id;
             } ->
-        Some
+        Package_access_error
           (Typing_error.package
              (Cross_pkg_access
                 {
@@ -204,7 +211,7 @@ let check_package_access
               target_package_assignment_kind;
               target_id;
             } ->
-        Some
+        Package_access_error
           (Typing_error.package
              (Soft_included_access
                 {
@@ -370,14 +377,15 @@ let check_top_level_access
         target_package
         target_id
     else
-      None
+      Package_access_ok
   in
   match (module_error, package_error) with
-  | (Some e1, Some e2) -> [e1; e2]
-  | (Some e, _)
-  | (_, Some e) ->
-    [e]
-  | _ -> []
+  | (Some e1, Package_access_error e2) -> ([e1; e2], [])
+  | (Some e, Package_access_linter_error w) -> ([e], [w])
+  | (Some e, Package_access_ok) -> ([e], [])
+  | (None, Package_access_error e) -> ([e], [])
+  | (None, Package_access_linter_error w) -> ([], [w])
+  | (None, Package_access_ok) -> ([], [])
 
 let check_expression_tree_vis ~use_pos ~def_pos env vis =
   let open Typing_error in

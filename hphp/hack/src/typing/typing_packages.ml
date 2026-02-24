@@ -32,6 +32,12 @@ let get_package_violation env current_pkg target_pkg =
         else
           Some r))
 
+type package_warning_info = {
+  current_package: (string * Pos.t) option;
+  target_package: (string * Pos.t) option;
+  target_package_before_override: string option;
+}
+
 type package_error_info = {
   current_package: (string * Pos.t) option;
   current_package_assignment_kind: string;
@@ -73,6 +79,18 @@ let get_package_profile
       "package override" )
   | _ -> (None, None, "")
 
+let package_includes current_pkg target_pkg =
+  match (current_pkg, target_pkg) with
+  | (Some current_pkg, Some target_pkg) ->
+    (match Package.relationship current_pkg target_pkg with
+    | Equal
+    | Includes ->
+      true
+    | Soft_includes
+    | Unrelated ->
+      false)
+  | _ -> false
+
 let can_access_by_package_rules
     ~(env : Typing_env_types.env)
     ~(target_package_membership : Aast_defs.package_membership option)
@@ -95,14 +113,41 @@ let can_access_by_package_rules
   then
     `Yes
   else
+    let current_package_membership = Env.get_current_package_membership env in
     let (current_pkg, current_package, current_package_assignment_kind) =
-      Env.get_current_package_membership env |> get_package_profile env
+      get_package_profile env current_package_membership
     in
     let (target_pkg, target_package, target_package_assignment_kind) =
       get_package_profile env target_package_membership
     in
     match get_package_violation env current_pkg target_pkg with
-    | None -> `Yes
+    | None ->
+      (* There are no package errrors, but emit a warning if the edge introduces a new
+       * dependency a file in a package due to package rules and a file with a packageoverride *)
+      (match (current_package_membership, target_package_membership) with
+      | ( Some (Aast_defs.PackageConfigAssignment _),
+          Some (Aast_defs.PackageOverride _) )
+        when package_includes current_pkg target_pkg ->
+        let target_package_before_override =
+          Option.map
+            (PackageInfo.get_package_for_file
+               (Env.get_tcopt env |> TypecheckerOptions.package_info)
+               (Relative_path.suffix target_file))
+            ~f:Package.get_package_name
+        in
+        let is_target_package_before_override_loaded =
+          match target_package_before_override with
+          | Some pkg_name -> Env.is_package_loaded env pkg_name
+          | None -> true
+        in
+        if is_target_package_before_override_loaded then
+          `Yes
+        else
+          let warn_info =
+            { current_package; target_package; target_package_before_override }
+          in
+          `YesWarning warn_info
+      | _ -> `Yes)
     | Some pkg_relationship ->
       let err_info =
         {

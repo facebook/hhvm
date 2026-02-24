@@ -120,4 +120,6 @@ module Codes = struct
   let class_pointer_to_string = 5653
 
   (* let deprecated_nullsafe_on_null = 5654 *)
+
+  let package_into_override = 5655
 end

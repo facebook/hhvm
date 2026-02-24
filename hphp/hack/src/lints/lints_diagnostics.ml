@@ -353,3 +353,32 @@ let awaitable_awaitable pos =
     ^ " You probably want to use await inside this async lambda,"
     ^ " so stack traces include the lambda position."
     ^ " If this is intentional, please annotate the return type.")
+
+let package_into_override
+    pos current_package target_package target_package_before_override =
+  let current_package_name =
+    Option.value_map current_package ~default:"<none>" ~f:fst
+  in
+  let target_package_name =
+    Option.value_map target_package ~default:"<none>" ~f:fst
+  in
+  let target_package_before_override_name =
+    Option.value target_package_before_override ~default:"<none>"
+  in
+  Lints.add
+    Codes.package_into_override
+    Lint_error
+    pos
+    ("This is a cross-boundary edge. Although the callee is already in the caller package "
+    ^ current_package_name
+    ^ " via __PackageOverride('"
+    ^ target_package_name
+    ^ "'), cross-boundary edges contribute to the bloating of "
+    ^ target_package_name
+    ^ " and SHOULD BE REMOVED. "
+    ^ "Either move the callee into the caller's package via hg mv, "
+    ^ "use `__RequirePackage` (if the whole function should only be invoked from "
+    ^ target_package_before_override_name
+    ^ ") or gate this reference via a `package` check "
+    ^ "(if this portion of the function is meant to be gated by an environment check)."
+    )

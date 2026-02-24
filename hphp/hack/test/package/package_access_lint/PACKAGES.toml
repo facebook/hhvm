@@ -1,0 +1,18 @@
+[packages]
+
+[packages.pkg1]
+include_paths=["//"]
+
+[packages.pkg2]
+include_paths=[
+    "//warning_01.php",
+    "//warning_02.php",
+    "//warning_03b.php",
+]
+includes = ["pkg1"]
+
+[packages.pkg3]
+include_paths=[
+    "//warning_03a.php",
+]
+includes = ["pkg2", "pkg1"]

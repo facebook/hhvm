@@ -277,31 +277,47 @@ and check_type_integrity
   | Tapply ((_p, cid), argl) -> begin
     match Env.get_class_or_typedef env cid with
     | Decl_entry.Found (Env.ClassResult class_info) ->
-      Typing_visibility.check_top_level_access
-        ~should_check_package_boundary
-        ~in_signature
-        ~use_pos
-        ~def_pos:(Cls.pos class_info)
-        env
-        (Cls.internal class_info)
-        (Cls.get_module class_info)
-        (Cls.get_package class_info)
-        cid
-      |> List.iter ~f:(Typing_error_utils.add_typing_error ~env);
+      (let (errs, linter_errs) =
+         Typing_visibility.check_top_level_access
+           ~should_check_package_boundary
+           ~in_signature
+           ~use_pos
+           ~def_pos:(Cls.pos class_info)
+           env
+           (Cls.internal class_info)
+           (Cls.get_module class_info)
+           (Cls.get_package class_info)
+           cid
+       in
+       List.iter linter_errs ~f:(fun (pos, w) ->
+           Lints_diagnostics.package_into_override
+             pos
+             w.current_package
+             w.target_package
+             w.target_package_before_override);
+       List.iter errs ~f:(Typing_error_utils.add_typing_error ~env));
       let tparams = Cls.tparams class_info in
       check_targs_integrity ~in_signature (Cls.pos class_info) argl tparams
     | Decl_entry.Found (Env.TypedefResult typedef) ->
-      Typing_visibility.check_top_level_access
-        ~should_check_package_boundary
-        ~in_signature
-        ~use_pos
-        ~def_pos:typedef.td_pos
-        env
-        typedef.td_internal
-        (Option.map typedef.td_module ~f:snd)
-        typedef.td_package
-        cid
-      |> List.iter ~f:(Typing_error_utils.add_typing_error ~env);
+      (let (errs, linter_errs) =
+         Typing_visibility.check_top_level_access
+           ~should_check_package_boundary
+           ~in_signature
+           ~use_pos
+           ~def_pos:typedef.td_pos
+           env
+           typedef.td_internal
+           (Option.map typedef.td_module ~f:snd)
+           typedef.td_package
+           cid
+       in
+       List.iter linter_errs ~f:(fun (pos, w) ->
+           Lints_diagnostics.package_into_override
+             pos
+             w.current_package
+             w.target_package
+             w.target_package_before_override);
+       List.iter errs ~f:(Typing_error_utils.add_typing_error ~env));
       check_targs_integrity ~in_signature typedef.td_pos argl typedef.td_tparams
     | Decl_entry.DoesNotExist
     | Decl_entry.NotYetAvailable ->

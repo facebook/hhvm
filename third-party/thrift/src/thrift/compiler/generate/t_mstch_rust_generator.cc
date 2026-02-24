@@ -2535,7 +2535,7 @@ class mstch_rust_struct_field : public mstch_base {
         {
             {"field:self", &mstch_rust_struct_field::self},
             {"field:explicit_value", &mstch_rust_struct_field::explicit_value},
-            {"field:default", &mstch_rust_struct_field::rust_default},
+            {"field:default_value", &mstch_rust_struct_field::rust_default},
             {"field:type", &mstch_rust_struct_field::type},
             {"field:box?", &mstch_rust_struct_field::is_boxed},
             {"field:arc?", &mstch_rust_struct_field::is_arc},
@@ -2653,7 +2653,7 @@ class rust_mstch_const : public mstch_const {
     register_methods(
         this,
         {
-            {"constant:rust", &rust_mstch_const::rust_typed_value},
+            {"constant:value", &rust_mstch_const::rust_typed_value},
         });
   }
   mstch::node rust_typed_value() {
@@ -2677,7 +2677,7 @@ class rust_mstch_field : public mstch_field {
     register_methods(
         this,
         {
-            {"field:default", &rust_mstch_field::rust_default},
+            {"field:default_value", &rust_mstch_field::rust_default},
             {"field:rust_structured_annotations",
              &rust_mstch_field::rust_structured_annotations},
         });

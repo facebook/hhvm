@@ -915,5 +915,52 @@ inline int8_t JSONProtocolReaderCommon::peekCharSafe() {
   return peek.empty() ? 0 : *peek.data();
 }
 
+inline protocol::TType JSONProtocolReaderCommon::peekValueTType() {
+  // Save all reader state that ensureAndReadContext/readWhitespace modify.
+  auto savedIn = in_;
+  auto savedWhitespace = skippedWhitespace_;
+  auto savedChars = skippedChars_;
+  auto savedIsUnread = skippedIsUnread_;
+  auto savedKeyish = keyish_;
+  int savedMeta = context.empty() ? 0 : context.back().meta;
+
+  auto restoreState = [&]() {
+    in_ = savedIn;
+    skippedWhitespace_ = savedWhitespace;
+    skippedChars_ = savedChars;
+    skippedIsUnread_ = savedIsUnread;
+    keyish_ = savedKeyish;
+    if (!context.empty()) {
+      context.back().meta = savedMeta;
+    }
+  };
+
+  try {
+    bool keyish;
+    ensureAndReadContext(keyish);
+    readWhitespace();
+    auto ch = peekCharSafe();
+    restoreState();
+
+    using namespace apache::thrift::detail::json;
+    if (ch == kJSONObjectStart) {
+      return protocol::TType::T_STRUCT;
+    } else if (ch == kJSONArrayStart) {
+      return protocol::TType::T_LIST;
+    } else if (ch == kJSONStringDelimiter) {
+      return protocol::TType::T_STRING;
+    } else if (ch == 't' || ch == 'f') {
+      return protocol::TType::T_BOOL;
+    } else if (ch == '-' || ch == '+' || (ch >= '0' && ch <= '9')) {
+      return protocol::TType::T_DOUBLE;
+    }
+    // 'n' (null), EOF, or unknown
+    return protocol::TType::T_VOID;
+  } catch (...) {
+    restoreState();
+    return protocol::TType::T_VOID;
+  }
+}
+
 } // namespace thrift
 } // namespace apache

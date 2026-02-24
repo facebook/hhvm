@@ -23,6 +23,7 @@
 #include <thrift/lib/cpp2/dynamic/detail/ConcreteList.h>
 #include <thrift/lib/cpp2/dynamic/detail/Datum.h>
 #include <thrift/lib/cpp2/dynamic/fwd.h>
+#include <thrift/lib/cpp2/protocol/JSONProtocolCommon.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/protocol/Traits.h>
 
@@ -295,7 +296,16 @@ Set deserialize(
 
   // Handle protocols that omit container sizes (e.g., SimpleJSON)
   if constexpr (ProtocolReader::kOmitsContainerSizes()) {
+    auto expected = type_system::ToTTypeFn{}(type.elementType());
     while (reader.peekSet()) {
+      if constexpr (ProtocolReader::kOmitsContainerElemTypes()) {
+        auto peeked = reader.peekValueTType();
+        if (!isJsonTypeCompatible(peeked, expected)) {
+          callbacks.onTypeMismatch("set element", expected, peeked);
+          reader.skip(protocol::TType::T_VOID);
+          continue;
+        }
+      }
       ret.insert(
           deserializeValue(reader, type.elementType(), alloc, callbacks));
     }
@@ -360,8 +370,37 @@ Map deserialize(
 
   // Handle protocols that omit container sizes (e.g., SimpleJSON)
   if constexpr (ProtocolReader::kOmitsContainerSizes()) {
+    auto expectedKeyTType = type_system::ToTTypeFn{}(type.keyType());
+    auto expectedValueTType = type_system::ToTTypeFn{}(type.valueType());
     while (reader.peekMap()) {
+      // For protocols without wire type info, peek at the key's JSON type.
+      if constexpr (ProtocolReader::kOmitsContainerElemTypes()) {
+        auto peekedKey = reader.peekValueTType();
+        if (!isJsonTypeCompatible(peekedKey, expectedKeyTType)) {
+          callbacks.onTypeMismatch("map key", expectedKeyTType, peekedKey);
+          reader.skip(protocol::TType::T_VOID); // skip key
+          // Still check value type before skipping it
+          auto peekedValue = reader.peekValueTType();
+          if (!isJsonTypeCompatible(peekedValue, expectedValueTType)) {
+            callbacks.onTypeMismatch(
+                "map value", expectedValueTType, peekedValue);
+          }
+          reader.skip(protocol::TType::T_VOID); // skip value
+          continue;
+        }
+      }
       auto key = deserializeValue(reader, type.keyType(), alloc, callbacks);
+
+      // For protocols without wire type info, peek at the value's JSON type.
+      if constexpr (ProtocolReader::kOmitsContainerElemTypes()) {
+        auto peekedValue = reader.peekValueTType();
+        if (!isJsonTypeCompatible(peekedValue, expectedValueTType)) {
+          callbacks.onTypeMismatch(
+              "map value", expectedValueTType, peekedValue);
+          reader.skip(protocol::TType::T_VOID);
+          continue;
+        }
+      }
       auto value = deserializeValue(reader, type.valueType(), alloc, callbacks);
       ret.insert(std::move(key), std::move(value));
     }
@@ -609,7 +648,16 @@ List deserialize(
 
         // Handle protocols that omit container sizes (e.g., SimpleJSON)
         if constexpr (ProtocolReader::kOmitsContainerSizes()) {
+          auto expected = type_system::ToTTypeFn{}(type.elementType());
           while (reader.peekList()) {
+            if constexpr (ProtocolReader::kOmitsContainerElemTypes()) {
+              auto peeked = reader.peekValueTType();
+              if (!isJsonTypeCompatible(peeked, expected)) {
+                callbacks.onTypeMismatch("list element", expected, peeked);
+                reader.skip(protocol::TType::T_VOID);
+                continue;
+              }
+            }
             if constexpr (std::is_same_v<elemDatumType, bool>) {
               bool value = deserialize(reader, elemTypeNode, alloc, callbacks);
               data.emplace_back(static_cast<std::byte>(value));
@@ -779,6 +827,22 @@ Struct deserialize(
         reader.skip(ftype);
         reader.readFieldEnd();
         continue;
+      } else if constexpr (ProtocolReader::kOmitsContainerSizes()) {
+        if (ftype == protocol::TType::T_VOID) {
+          auto peeked = reader.peekValueTType();
+          if (!isJsonTypeCompatible(peeked, field.wireType())) {
+            callbacks.onTypeMismatch(
+                fmt::format(
+                    "field '{}' on struct '{}'",
+                    field.identity().name(),
+                    type.uri()),
+                field.wireType(),
+                peeked);
+            reader.skip(protocol::TType::T_VOID);
+            reader.readFieldEnd();
+            continue;
+          }
+        }
       }
 
       // Use virtual interface to set the field
@@ -876,17 +940,34 @@ Union deserialize(
   if (handle.valid()) {
     const auto& field = type.at(handle);
 
-    // T_VOID indicates protocol doesn't encode type information (e.g.,
-    // SimpleJSON)
+    // Check for type mismatch
+    bool mismatch = false;
     if (ftype != protocol::TType::T_VOID && ftype != field.wireType()) {
       callbacks.onTypeMismatch(
           fmt::format(
               "field '{}' on union '{}'", field.identity().name(), type.uri()),
           field.wireType(),
           ftype);
-      // If callback didn't throw, skip the mismatched field data
       reader.skip(ftype);
-    } else {
+      mismatch = true;
+    } else if constexpr (ProtocolReader::kOmitsContainerSizes()) {
+      if (ftype == protocol::TType::T_VOID) {
+        auto peeked = reader.peekValueTType();
+        if (!isJsonTypeCompatible(peeked, field.wireType())) {
+          callbacks.onTypeMismatch(
+              fmt::format(
+                  "field '{}' on union '{}'",
+                  field.identity().name(),
+                  type.uri()),
+              field.wireType(),
+              peeked);
+          reader.skip(protocol::TType::T_VOID);
+          mismatch = true;
+        }
+      }
+    }
+
+    if (!mismatch) {
       ret.activeFieldDef_ = &field;
       ret.activeFieldData_ = field.type().visit([&](auto&& t) {
         return ret.makeDatumPtr(

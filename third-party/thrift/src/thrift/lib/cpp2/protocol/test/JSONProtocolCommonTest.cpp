@@ -269,3 +269,109 @@ TEST_F(JSONProtocolCommonTest, string_ascii_stress) {
     EXPECT_EQ(e, f);
   }
 }
+
+TEST_F(JSONProtocolCommonTest, peekValueTType) {
+  using TType = apache::thrift::protocol::TType;
+
+  auto peek = [](std::string_view json) {
+    auto buf = folly::IOBuf::copyBuffer(json);
+    apache::thrift::JSONProtocolReaderCommon reader;
+    reader.setInput(buf.get());
+    return reader.peekValueTType();
+  };
+
+  // JSON object → T_STRUCT
+  EXPECT_EQ(TType::T_STRUCT, peek("{"));
+  EXPECT_EQ(TType::T_STRUCT, peek("  {"));
+
+  // JSON array → T_LIST
+  EXPECT_EQ(TType::T_LIST, peek("["));
+  EXPECT_EQ(TType::T_LIST, peek("  ["));
+
+  // JSON string → T_STRING
+  EXPECT_EQ(TType::T_STRING, peek("\"hello\""));
+  EXPECT_EQ(TType::T_STRING, peek("  \"\""));
+
+  // JSON number → T_DOUBLE
+  EXPECT_EQ(TType::T_DOUBLE, peek("42"));
+  EXPECT_EQ(TType::T_DOUBLE, peek("-1"));
+  EXPECT_EQ(TType::T_DOUBLE, peek("+3"));
+  EXPECT_EQ(TType::T_DOUBLE, peek("0.5"));
+  EXPECT_EQ(TType::T_DOUBLE, peek("  123"));
+
+  // JSON boolean → T_BOOL
+  EXPECT_EQ(TType::T_BOOL, peek("true"));
+  EXPECT_EQ(TType::T_BOOL, peek("false"));
+  EXPECT_EQ(TType::T_BOOL, peek("  true"));
+
+  // JSON null → T_VOID
+  EXPECT_EQ(TType::T_VOID, peek("null"));
+  EXPECT_EQ(TType::T_VOID, peek("  null"));
+
+  // Empty / EOF → T_VOID
+  EXPECT_EQ(TType::T_VOID, peek(""));
+  EXPECT_EQ(TType::T_VOID, peek("  "));
+}
+
+TEST_F(JSONProtocolCommonTest, peekValueTType_does_not_consume) {
+  using TType = apache::thrift::protocol::TType;
+
+  // Verify peeking doesn't advance the cursor
+  auto buf = folly::IOBuf::copyBuffer("\"hello\"");
+  apache::thrift::JSONProtocolReaderCommon reader;
+  reader.setInput(buf.get());
+
+  auto pos_before = reader.getCursorPosition();
+  auto ttype = reader.peekValueTType();
+  auto pos_after = reader.getCursorPosition();
+
+  EXPECT_EQ(TType::T_STRING, ttype);
+  EXPECT_EQ(pos_before, pos_after);
+}
+
+TEST_F(JSONProtocolCommonTest, isJsonTypeCompatible) {
+  using TType = apache::thrift::protocol::TType;
+  using apache::thrift::isJsonTypeCompatible;
+
+  // Exact match always compatible
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_STRING, TType::T_STRING));
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_BOOL, TType::T_BOOL));
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_DOUBLE, TType::T_DOUBLE));
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_LIST, TType::T_LIST));
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_STRUCT, TType::T_STRUCT));
+
+  // T_VOID (null/unknown) is compatible with anything
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_VOID, TType::T_STRING));
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_VOID, TType::T_I32));
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_VOID, TType::T_BOOL));
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_VOID, TType::T_LIST));
+
+  // JSON number (T_DOUBLE) compatible with all numeric thrift types
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_DOUBLE, TType::T_BYTE));
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_DOUBLE, TType::T_I16));
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_DOUBLE, TType::T_I32));
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_DOUBLE, TType::T_I64));
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_DOUBLE, TType::T_FLOAT));
+
+  // JSON number NOT compatible with non-numeric types
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_DOUBLE, TType::T_STRING));
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_DOUBLE, TType::T_BOOL));
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_DOUBLE, TType::T_LIST));
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_DOUBLE, TType::T_STRUCT));
+
+  // JSON object (T_STRUCT) compatible with T_MAP
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_STRUCT, TType::T_MAP));
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_STRUCT, TType::T_LIST));
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_STRUCT, TType::T_STRING));
+
+  // JSON array (T_LIST) compatible with T_SET
+  EXPECT_TRUE(isJsonTypeCompatible(TType::T_LIST, TType::T_SET));
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_LIST, TType::T_MAP));
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_LIST, TType::T_STRING));
+
+  // Incompatible types
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_STRING, TType::T_I32));
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_STRING, TType::T_BOOL));
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_BOOL, TType::T_STRING));
+  EXPECT_FALSE(isJsonTypeCompatible(TType::T_BOOL, TType::T_I32));
+}

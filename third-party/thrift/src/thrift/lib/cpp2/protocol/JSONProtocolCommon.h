@@ -211,6 +211,13 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
   static constexpr std::size_t fixedSizeInContainer(TType) { return 0; }
   void skipBytes(size_t bytes) { in_.skip(bytes); }
 
+  /**
+   * Peeks at the next JSON value's type without consuming any data.
+   * Returns the TType corresponding to the JSON value's leading character.
+   * Returns T_VOID for null, unknown, or if peeking fails.
+   */
+  protocol::TType peekValueTType();
+
  protected:
   enum class ContextType { MAP, ARRAY };
 
@@ -327,6 +334,54 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
   bool skippedIsUnread_{false};
   bool allowDecodeUTF8_{true};
 };
+
+// Check if a peeked JSON TType is compatible with an expected thrift TType.
+// Used for protocols that omit container element types (e.g., SimpleJSON).
+// JSON has fewer types than Thrift, so multiple Thrift types map to the same
+// JSON representation (e.g., all numeric types are JSON numbers).
+inline bool isJsonTypeCompatible(
+    protocol::TType peeked, protocol::TType expected) {
+  if (peeked == expected) {
+    return true;
+  }
+  switch (peeked) {
+    case protocol::TType::T_VOID:
+      // null/unknown — skip check
+      return true;
+    case protocol::TType::T_DOUBLE:
+    case protocol::TType::T_BYTE:
+    case protocol::TType::T_I16:
+    case protocol::TType::T_I32:
+    case protocol::TType::T_I64:
+    case protocol::TType::T_FLOAT:
+      // JSON numbers are compatible with all numeric thrift types
+      return expected == protocol::TType::T_DOUBLE ||
+          expected == protocol::TType::T_BYTE ||
+          expected == protocol::TType::T_I16 ||
+          expected == protocol::TType::T_I32 ||
+          expected == protocol::TType::T_I64 ||
+          expected == protocol::TType::T_FLOAT;
+    case protocol::TType::T_STRUCT:
+    case protocol::TType::T_MAP:
+      // JSON objects can be structs or maps
+      return expected == protocol::TType::T_STRUCT ||
+          expected == protocol::TType::T_MAP;
+    case protocol::TType::T_LIST:
+    case protocol::TType::T_SET:
+      // JSON arrays can be lists or sets
+      return expected == protocol::TType::T_LIST ||
+          expected == protocol::TType::T_SET;
+    case protocol::TType::T_STOP:
+    case protocol::TType::T_BOOL:
+    case protocol::TType::T_U64:
+    case protocol::TType::T_STRING:
+    case protocol::TType::T_UTF8:
+    case protocol::TType::T_UTF16:
+    case protocol::TType::T_STREAM:
+    default:
+      return false;
+  }
+}
 
 } // namespace apache::thrift
 

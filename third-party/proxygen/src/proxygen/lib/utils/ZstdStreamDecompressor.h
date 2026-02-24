@@ -16,7 +16,9 @@
 #define ZDICT_STATIC_LINKING_ONLY
 #endif
 
+#include <cstdint>
 #include <memory>
+#include <optional>
 #include <zdict.h>
 #include <zstd.h>
 
@@ -28,7 +30,9 @@ namespace proxygen {
 
 class ZstdStreamDecompressor : public StreamDecompressor {
  public:
-  explicit ZstdStreamDecompressor(bool reuseOutBuf = false);
+  explicit ZstdStreamDecompressor(
+      bool reuseOutBuf = false,
+      std::optional<uint64_t> maxDecompressionRatio = std::nullopt);
 
   // May return nullptr on error / no output.
   std::unique_ptr<folly::IOBuf> decompress(const folly::IOBuf* in) override;
@@ -60,5 +64,9 @@ class ZstdStreamDecompressor : public StreamDecompressor {
                                               // 0-sized
 
   bool reuseOutBuf_; // Controls whether we may reuse the decompress outBuf
+
+  std::optional<uint64_t> maxDecompressionRatio_;
+  uint64_t totalInputBytes_{0};
+  uint64_t totalOutputBytes_{0};
 };
 } // namespace proxygen

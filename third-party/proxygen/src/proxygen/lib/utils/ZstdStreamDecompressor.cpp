@@ -17,11 +17,13 @@ void ZstdStreamDecompressor::freeDCtx(ZSTD_DCtx* dctx) {
   ZSTD_freeDCtx(dctx);
 }
 
-ZstdStreamDecompressor::ZstdStreamDecompressor(bool reuseOutBuf)
+ZstdStreamDecompressor::ZstdStreamDecompressor(
+    bool reuseOutBuf, std::optional<uint64_t> maxDecompressionRatio)
     : status_(ZstdStatusType::NONE),
       dctx_(ZSTD_createDCtx()),
       cachedIOBuf_(nullptr),
-      reuseOutBuf_(reuseOutBuf) {
+      reuseOutBuf_(reuseOutBuf),
+      maxDecompressionRatio_(maxDecompressionRatio) {
 }
 
 std::unique_ptr<folly::IOBuf> ZstdStreamDecompressor::decompress(
@@ -51,6 +53,7 @@ std::unique_ptr<folly::IOBuf> ZstdStreamDecompressor::decompress(
       appender.ensure(outBufAllocSize);
       DCHECK_GT(appender.length(), 0);
 
+      auto prevIbufPos = ibuf.pos;
       ZSTD_outBuffer obuf = {appender.writableData(), appender.length(), 0};
       auto ret = ZSTD_decompressStream(dctx_.get(), &obuf, &ibuf);
       if (ZSTD_isError(ret)) {
@@ -61,6 +64,20 @@ std::unique_ptr<folly::IOBuf> ZstdStreamDecompressor::decompress(
       }
 
       appender.append(obuf.pos);
+
+      // Track cumulative bytes for ratio enforcement.
+      totalInputBytes_ += (ibuf.pos - prevIbufPos);
+      totalOutputBytes_ += obuf.pos;
+
+      auto maxDecompressionRatio =
+          maxDecompressionRatio_.value_or(std::numeric_limits<uint64_t>::max());
+      bool exceeded =
+          totalInputBytes_ > 0 &&
+          totalOutputBytes_ / totalInputBytes_ > maxDecompressionRatio;
+      if (exceeded) {
+        status_ = ZstdStatusType::ERROR;
+        return nullptr;
+      }
     }
   }
 

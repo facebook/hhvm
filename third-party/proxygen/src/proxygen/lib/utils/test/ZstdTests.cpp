@@ -242,3 +242,88 @@ TEST_F(ZstdTests, CompressDecompressStreamingProxygenIndependent) {
         std::move(input_pieces), true, reuseBuf);
   }
 }
+
+// ---- maxDecompressionRatio tests ----
+
+// Helper: create a highly compressible buffer (all zeros).
+static std::unique_ptr<folly::IOBuf> makeCompressibleBuf(size_t size) {
+  auto buf = folly::IOBuf::create(size);
+  buf->append(size);
+  ::memset(buf->writableData(), 0, size);
+  return buf;
+}
+
+TEST_F(ZstdTests, MaxDecompressionRatio_FailsWhenRatioTooSmall) {
+  // 1 MB of zeros compresses extremely well; a ratio of 10 should be exceeded.
+  constexpr size_t kOrigSize = 1024 * 1024;
+  auto original = makeCompressibleBuf(kOrigSize);
+  auto compressed = compress(original);
+  ASSERT_NE(compressed, nullptr);
+
+  auto zd = std::make_unique<ZstdStreamDecompressor>(
+      /*reuseOutBuf=*/false, /*maxDecompressionRatio=*/10);
+
+  auto decompressed = zd->decompress(compressed.get());
+  EXPECT_TRUE(zd->hasError());
+  EXPECT_EQ(decompressed, nullptr);
+}
+
+TEST_F(ZstdTests, MaxDecompressionRatio_PassesWhenRatioLargeEnough) {
+  constexpr size_t kOrigSize = 1024 * 1024;
+  auto original = makeCompressibleBuf(kOrigSize);
+  auto compressed = compress(original);
+  ASSERT_NE(compressed, nullptr);
+
+  // Use a very large ratio so decompression succeeds.
+  auto zd = std::make_unique<ZstdStreamDecompressor>(
+      /*reuseOutBuf=*/false, /*maxDecompressionRatio=*/1000000);
+
+  auto decompressed = zd->decompress(compressed.get());
+  EXPECT_FALSE(zd->hasError());
+  EXPECT_NE(decompressed, nullptr);
+  EXPECT_EQ(decompressed->computeChainDataLength(), kOrigSize);
+}
+
+TEST_F(ZstdTests, MaxDecompressionRatio_PassesWhenUnspecified) {
+  constexpr size_t kOrigSize = 1024 * 1024;
+  auto original = makeCompressibleBuf(kOrigSize);
+  auto compressed = compress(original);
+  ASSERT_NE(compressed, nullptr);
+
+  // Default: no ratio limit.
+  auto zd = std::make_unique<ZstdStreamDecompressor>(/*reuseOutBuf=*/false);
+
+  auto decompressed = zd->decompress(compressed.get());
+  EXPECT_FALSE(zd->hasError());
+  EXPECT_NE(decompressed, nullptr);
+  EXPECT_EQ(decompressed->computeChainDataLength(), kOrigSize);
+}
+
+TEST_F(ZstdTests, MaxDecompressionRatio_StreamingChunksFailure) {
+  // Feed compressed data in small pieces; cumulative ratio should still
+  // trigger.
+  constexpr size_t kOrigSize = 1024 * 1024;
+  auto original = makeCompressibleBuf(kOrigSize);
+  auto compressed = compress(original);
+  ASSERT_NE(compressed, nullptr);
+
+  auto zd = std::make_unique<ZstdStreamDecompressor>(
+      /*reuseOutBuf=*/false, /*maxDecompressionRatio=*/10);
+
+  // Split compressed data into small chunks.
+  auto coalesced = compressed->coalesce();
+  auto totalLen = compressed->computeChainDataLength();
+  constexpr size_t kChunkSize = 128;
+
+  bool errorDetected = false;
+  for (size_t offset = 0; offset < totalLen; offset += kChunkSize) {
+    auto chunkLen = std::min(kChunkSize, totalLen - offset);
+    auto chunk = folly::IOBuf::wrapBuffer(coalesced.data() + offset, chunkLen);
+    auto piece = zd->decompress(chunk.get());
+    if (zd->hasError()) {
+      errorDetected = true;
+      break;
+    }
+  }
+  EXPECT_TRUE(errorDetected);
+}

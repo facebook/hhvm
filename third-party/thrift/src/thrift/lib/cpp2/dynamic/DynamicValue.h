@@ -716,6 +716,14 @@ class DynamicValue final {
       const type_system::SerializableRecord& r,
       const type_system::StructNode& structType,
       std::pmr::memory_resource* mr);
+  friend Map fromRecord(
+      const type_system::SerializableRecord& r,
+      const type_system::TypeRef::Map& mapType,
+      std::pmr::memory_resource* mr);
+  friend Set fromRecord(
+      const type_system::SerializableRecord& r,
+      const type_system::TypeRef::Set& setType,
+      std::pmr::memory_resource* mr);
 
   /**
    * Returns the datum stored in this value.

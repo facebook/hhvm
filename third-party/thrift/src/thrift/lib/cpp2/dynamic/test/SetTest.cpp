@@ -20,7 +20,9 @@
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
+#include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 #include <thrift/lib/cpp2/dynamic/Serialization.h>
+#include <thrift/lib/cpp2/dynamic/Set.h>
 #include <thrift/lib/cpp2/dynamic/detail/ConcreteSet.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
@@ -277,6 +279,56 @@ TEST(SetTest, IterationEmpty) {
 
   EXPECT_EQ(count, 0);
   EXPECT_EQ(set.begin(), set.end());
+}
+
+TEST(SetTest, FromRecordBasic) {
+  using SerializableRecord = type_system::SerializableRecord;
+
+  auto setType = makeSetType(type_system::TypeSystem::I32());
+
+  SerializableRecord record = SerializableRecord::Set({
+      SerializableRecord::Int32(10),
+      SerializableRecord::Int32(20),
+      SerializableRecord::Int32(30),
+  });
+
+  auto set = fromRecord(record, setType, nullptr);
+
+  EXPECT_EQ(set.size(), 3);
+  EXPECT_TRUE(set.contains(DynamicValue::makeI32(10)));
+  EXPECT_TRUE(set.contains(DynamicValue::makeI32(20)));
+  EXPECT_TRUE(set.contains(DynamicValue::makeI32(30)));
+  EXPECT_FALSE(set.contains(DynamicValue::makeI32(40)));
+}
+
+TEST(SetTest, FromRecordEmpty) {
+  using SerializableRecord = type_system::SerializableRecord;
+
+  auto setType = makeSetType(type_system::TypeSystem::I32());
+
+  SerializableRecord record = SerializableRecord::Set({});
+
+  auto set = fromRecord(record, setType, nullptr);
+
+  EXPECT_EQ(set.size(), 0);
+  EXPECT_TRUE(set.isEmpty());
+}
+
+TEST(SetTest, FromRecordI64) {
+  using SerializableRecord = type_system::SerializableRecord;
+
+  auto setType = makeSetType(type_system::TypeSystem::I64());
+
+  SerializableRecord record = SerializableRecord::Set({
+      SerializableRecord::Int64(100),
+      SerializableRecord::Int64(200),
+  });
+
+  auto set = fromRecord(record, setType, nullptr);
+
+  EXPECT_EQ(set.size(), 2);
+  EXPECT_TRUE(set.contains(DynamicValue::makeI64(100)));
+  EXPECT_TRUE(set.contains(DynamicValue::makeI64(200)));
 }
 
 } // namespace

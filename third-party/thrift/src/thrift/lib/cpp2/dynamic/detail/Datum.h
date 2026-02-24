@@ -577,18 +577,18 @@ inline int32_t fromRecord(
 
 // String
 inline String fromRecord(
-    const type_system::SerializableRecord&,
+    const type_system::SerializableRecord& r,
     type_system::TypeRef::String,
-    std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: fromRecord(TypeRef::String)");
+    std::pmr::memory_resource* mr) {
+  return String(r.asText(), mr);
 }
 
 // Binary
 inline Binary fromRecord(
-    const type_system::SerializableRecord&,
+    const type_system::SerializableRecord& r,
     type_system::TypeRef::Binary,
-    std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: fromRecord(TypeRef::Binary)");
+    std::pmr::memory_resource* mr) {
+  return Binary(r.asByteArray()->clone(), mr);
 }
 
 // Any
@@ -599,21 +599,17 @@ inline Any fromRecord(
   throw std::logic_error("Unimplemented: fromRecord(TypeRef::Any)");
 }
 
-// Set
-inline Set fromRecord(
-    const type_system::SerializableRecord&,
-    const type_system::TypeRef::Set&,
-    std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: fromRecord(TypeRef::Set)");
-}
+// Set (defined in Set.cpp)
+Set fromRecord(
+    const type_system::SerializableRecord& r,
+    const type_system::TypeRef::Set& setType,
+    std::pmr::memory_resource* mr);
 
-// Map
-inline Map fromRecord(
-    const type_system::SerializableRecord&,
-    const type_system::TypeRef::Map&,
-    std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: fromRecord(TypeRef::Map)");
-}
+// Map (defined in Map.cpp)
+Map fromRecord(
+    const type_system::SerializableRecord& r,
+    const type_system::TypeRef::Map& mapType,
+    std::pmr::memory_resource* mr);
 
 // Union (defined in Union.cpp)
 Union fromRecord(

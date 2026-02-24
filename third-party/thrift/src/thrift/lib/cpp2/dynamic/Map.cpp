@@ -47,6 +47,33 @@ Map makeMap(
   return Map(mapType, allocator);
 }
 
+Map fromRecord(
+    const type_system::SerializableRecord& r,
+    const type_system::TypeRef::Map& mapType,
+    std::pmr::memory_resource* alloc) {
+  auto ret = makeMap(mapType, alloc);
+
+  const auto& mapRecords = r.asMap();
+  const type_system::TypeRef keyType = mapType.keyType();
+  const type_system::TypeRef valueType = mapType.valueType();
+
+  for (const auto& entry : mapRecords) {
+    const type_system::SerializableRecord& keyRecord = entry.first;
+    const type_system::SerializableRecord& valueRecord = entry.second;
+    auto keyDatum = keyType.visit([&](auto&& t) {
+      return detail::Datum::make(fromRecord(keyRecord, t, alloc));
+    });
+    auto valueDatum = valueType.visit([&](auto&& t) {
+      return detail::Datum::make(fromRecord(valueRecord, t, alloc));
+    });
+    ret.insert(
+        DynamicValue(keyType, std::move(keyDatum)),
+        DynamicValue(valueType, std::move(valueDatum)));
+  }
+
+  return ret;
+}
+
 // Map method implementations
 Map::Map(type_system::TypeRef::Map mapType, std::pmr::memory_resource* mr)
     : mapType_(mapType), mr_(mr), impl_(nullptr) {}

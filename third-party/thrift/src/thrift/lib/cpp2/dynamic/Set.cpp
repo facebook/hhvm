@@ -40,6 +40,22 @@ Set makeSet(
   return Set(setType, allocator);
 }
 
+Set fromRecord(
+    const type_system::SerializableRecord& r,
+    const type_system::TypeRef::Set& setType,
+    std::pmr::memory_resource* alloc) {
+  auto ret = makeSet(setType, alloc);
+  const auto& setRecords = r.asSet();
+  const type_system::TypeRef elementType = setType.elementType();
+  for (const auto& elementRecord : setRecords) {
+    auto datum = elementType.visit([&](auto&& t) {
+      return detail::Datum::make(fromRecord(elementRecord, t, alloc));
+    });
+    ret.insert(DynamicValue(elementType, std::move(datum)));
+  }
+  return ret;
+}
+
 // Set method implementations
 Set::Set(type_system::TypeRef::Set setType, std::pmr::memory_resource* mr)
     : setType_(setType), mr_(mr), impl_(nullptr) {}

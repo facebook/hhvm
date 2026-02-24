@@ -20,6 +20,8 @@
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
+#include <thrift/lib/cpp2/dynamic/Map.h>
+#include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 #include <thrift/lib/cpp2/dynamic/Serialization.h>
 #include <thrift/lib/cpp2/dynamic/detail/ConcreteMap.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
@@ -497,6 +499,154 @@ TEST(MapTest, IterationModifyValue) {
   auto val3 = map.get(DynamicValue::makeI32(3));
   ASSERT_TRUE(val3.has_value());
   EXPECT_EQ(val3->asI32(), 300);
+}
+
+TEST(MapTest, FromRecordBasic) {
+  using SerializableRecord = type_system::SerializableRecord;
+
+  auto mapType = makeMapType(
+      type_system::TypeSystem::I32(), type_system::TypeSystem::I64());
+
+  SerializableRecord record = SerializableRecord::Map({
+      {SerializableRecord::Int32(1), SerializableRecord::Int64(100)},
+      {SerializableRecord::Int32(2), SerializableRecord::Int64(200)},
+      {SerializableRecord::Int32(3), SerializableRecord::Int64(300)},
+  });
+
+  auto map = fromRecord(record, mapType, nullptr);
+
+  EXPECT_EQ(map.size(), 3);
+
+  auto val1 = map.get(DynamicValue::makeI32(1));
+  ASSERT_TRUE(val1.has_value());
+  EXPECT_EQ(val1->asI64(), 100);
+
+  auto val2 = map.get(DynamicValue::makeI32(2));
+  ASSERT_TRUE(val2.has_value());
+  EXPECT_EQ(val2->asI64(), 200);
+
+  auto val3 = map.get(DynamicValue::makeI32(3));
+  ASSERT_TRUE(val3.has_value());
+  EXPECT_EQ(val3->asI64(), 300);
+
+  EXPECT_FALSE(map.get(DynamicValue::makeI32(4)).has_value());
+}
+
+TEST(MapTest, FromRecordEmpty) {
+  using SerializableRecord = type_system::SerializableRecord;
+
+  auto mapType = makeMapType(
+      type_system::TypeSystem::I32(), type_system::TypeSystem::I64());
+
+  SerializableRecord record = SerializableRecord::Map({});
+
+  auto map = fromRecord(record, mapType, nullptr);
+
+  EXPECT_EQ(map.size(), 0);
+  EXPECT_TRUE(map.isEmpty());
+}
+
+TEST(MapTest, FromRecordNestedMap) {
+  using SerializableRecord = type_system::SerializableRecord;
+
+  auto innerMapType = makeMapType(
+      type_system::TypeSystem::I32(), type_system::TypeSystem::I32());
+  auto outerMapType = makeMapType(
+      type_system::TypeSystem::I32(), type_system::TypeRef(innerMapType));
+
+  SerializableRecord record = SerializableRecord::Map({
+      {SerializableRecord::Int32(1),
+       SerializableRecord::Map({
+           {SerializableRecord::Int32(10), SerializableRecord::Int32(100)},
+           {SerializableRecord::Int32(20), SerializableRecord::Int32(200)},
+       })},
+      {SerializableRecord::Int32(2),
+       SerializableRecord::Map({
+           {SerializableRecord::Int32(30), SerializableRecord::Int32(300)},
+       })},
+  });
+
+  auto map = fromRecord(record, outerMapType, nullptr);
+
+  EXPECT_EQ(map.size(), 2);
+
+  auto val1 = map.get(DynamicValue::makeI32(1));
+  ASSERT_TRUE(val1.has_value());
+  auto& innerMap1 = val1->asMap();
+  EXPECT_EQ(innerMap1.size(), 2);
+
+  auto inner1_10 = innerMap1.get(DynamicValue::makeI32(10));
+  ASSERT_TRUE(inner1_10.has_value());
+  EXPECT_EQ(inner1_10->asI32(), 100);
+
+  auto inner1_20 = innerMap1.get(DynamicValue::makeI32(20));
+  ASSERT_TRUE(inner1_20.has_value());
+  EXPECT_EQ(inner1_20->asI32(), 200);
+
+  auto val2 = map.get(DynamicValue::makeI32(2));
+  ASSERT_TRUE(val2.has_value());
+  auto& innerMap2 = val2->asMap();
+  EXPECT_EQ(innerMap2.size(), 1);
+
+  auto inner2_30 = innerMap2.get(DynamicValue::makeI32(30));
+  ASSERT_TRUE(inner2_30.has_value());
+  EXPECT_EQ(inner2_30->asI32(), 300);
+}
+
+TEST(MapTest, FromRecordStringKeys) {
+  using SerializableRecord = type_system::SerializableRecord;
+
+  auto mapType = makeMapType(
+      type_system::TypeSystem::String(), type_system::TypeSystem::I32());
+
+  SerializableRecord record = SerializableRecord::Map({
+      {SerializableRecord::text("hello"), SerializableRecord::Int32(1)},
+      {SerializableRecord::text("world"), SerializableRecord::Int32(2)},
+  });
+
+  auto map = fromRecord(record, mapType, nullptr);
+
+  EXPECT_EQ(map.size(), 2);
+
+  auto val1 = map.get(DynamicValue::makeString("hello"));
+  ASSERT_TRUE(val1.has_value());
+  EXPECT_EQ(val1->asI32(), 1);
+
+  auto val2 = map.get(DynamicValue::makeString("world"));
+  ASSERT_TRUE(val2.has_value());
+  EXPECT_EQ(val2->asI32(), 2);
+}
+
+TEST(MapTest, FromRecordBinaryValues) {
+  using SerializableRecord = type_system::SerializableRecord;
+
+  auto mapType = makeMapType(
+      type_system::TypeSystem::I32(), type_system::TypeSystem::Binary());
+
+  auto makeBuf = [](std::string_view s) { return folly::IOBuf::copyBuffer(s); };
+
+  SerializableRecord record = SerializableRecord::Map({
+      {SerializableRecord::Int32(1),
+       SerializableRecord::ByteArray(makeBuf("abc"))},
+      {SerializableRecord::Int32(2),
+       SerializableRecord::ByteArray(makeBuf("xyz"))},
+  });
+
+  auto map = fromRecord(record, mapType, nullptr);
+
+  EXPECT_EQ(map.size(), 2);
+
+  auto val1 = map.get(DynamicValue::makeI32(1));
+  ASSERT_TRUE(val1.has_value());
+  EXPECT_EQ(val1->asBinary().computeChainDataLength(), 3);
+  auto cursor1 = val1->asBinary().cursor();
+  EXPECT_EQ(cursor1.readFixedString(3), "abc");
+
+  auto val2 = map.get(DynamicValue::makeI32(2));
+  ASSERT_TRUE(val2.has_value());
+  EXPECT_EQ(val2->asBinary().computeChainDataLength(), 3);
+  auto cursor2 = val2->asBinary().cursor();
+  EXPECT_EQ(cursor2.readFixedString(3), "xyz");
 }
 
 } // namespace

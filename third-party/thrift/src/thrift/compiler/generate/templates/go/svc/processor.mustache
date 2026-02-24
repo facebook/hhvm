@@ -16,108 +16,291 @@
 
 }}{{!
 
-  This tempalte defined the client type/functions for a thrift service.
+  This template defines the processor type/functions for a thrift service.
 
 }}
-type {{service:go_name}}Processor struct {
-    {{#service:extends?}}
-    {{#service:extends}}
-    // Inherited/extended processor
-    *{{service:go_qualified_name}}Processor
-    {{/service:extends}}
-    {{/service:extends?}}
-    {{^service:extends?}}
-    processorFunctionMap map[string]thrift.ProcessorFunction
-    functionServiceMap   map[string]string
-    handler              {{service:go_name}}
-    {{/service:extends?}}
+{{#import "common/type" as types}}
+
+{{#let export partial func_rpc_name |func svc|}}{{!
+}}{{#if svc.interaction?}}{{svc.name}}.{{/if svc.interaction?}}{{func.name}}{{!
+}}{{/let partial}}
+
+{{#let export partial proc_func_name |func svc|}}{{!
+}}procFunc{{svc.go_name}}{{func.go_name}}{{!
+}}{{/let partial}}
+
+{{#let export partial server_func_stream |func svc| captures |types|}}{{!
+}}func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    {{#if func.params.fields?}}
+    args := reqStruct.(*req{{svc.go_name}}{{func.go_name}})
+    {{/if func.params.fields?}}
+    firstResponse := newResp{{svc.go_name}}{{func.go_name}}()
+    {{#if func.creates_interaction?}}fbthriftInteraction, {{/if func.creates_interaction?}}{{#if func.stream_has_first_response?}}retval, {{/if func.stream_has_first_response?}}elemProducerFunc, initialErr := p.handler.{{func.go_name}}({{!
+        }}ctx{{#if func.params.fields?}}, {{/if}}{{!
+        }}{{#each (array.enumerate func.params.fields with_last=true) as |index field last?|}}{{!
+          }}args.{{field.go_name}}{{!
+          }}{{#if (not last?)}}, {{/if (not last?)}}{{!
+        }}{{/each}})
+    if initialErr != nil {
+        {{#if func.exceptions?}}
+        switch v := initialErr.(type) {
+        {{#each func.exceptions as |ex|}}
+        case *{{#partial types.go_type type=ex.type}}:
+            firstResponse.{{ex.go_name}} = v
+            onFirstResponse(firstResponse)
+        {{/each}}
+        default:
+            internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFirstResponse(x)
+        }
+        {{/if func.exceptions?}}
+        {{#if (not func.exceptions?)}}
+        internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        {{/if (not func.exceptions?)}}
+        onStreamComplete()
+        return
+    }
+
+    {{#if func.creates_interaction?}}
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    {{/if func.creates_interaction?}}
+    {{#if func.stream_has_first_response?}}
+    firstResponse.{{func.retval_field_name}} = {{#if (not func.return_type.nilable?)}}&{{/if (not func.return_type.nilable?)}}retval
+    {{/if func.stream_has_first_response?}}
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan {{#if func.stream.elem_type.structured?}}*{{/if func.stream.elem_type.structured?}}{{#partial types.go_type type=func.stream.elem_type}}, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStream{{svc.go_name}}{{func.go_name}}()
+            streamWrapStruct.{{func.retval_field_name}} = {{#if (not func.stream.elem_type.nilable?)}}&{{/if (not func.stream.elem_type.nilable?)}}elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        {{#if func.stream_exceptions?}}
+        streamWrapStruct := newStream{{svc.go_name}}{{func.go_name}}()
+        switch v := streamErr.(type) {
+        {{#each func.stream.exceptions as |ex|}}
+        case *{{#partial types.go_type type=ex.type}}:
+            streamWrapStruct.{{ex.go_name}} = v
+            onStreamNext(streamWrapStruct)
+        {{/each}}
+        default:
+            internalErr := fmt.Errorf("Internal stream handler error {{func.go_name}}: %w", streamErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onStreamNext(x)
+        }
+        {{/if func.stream_exceptions?}}
+        {{#if (not func.stream_exceptions?)}}
+        internalErr := fmt.Errorf("Internal stream handler error {{func.go_name}}: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+        {{/if (not func.stream_exceptions?)}}
+    }
+    onStreamComplete()
+}{{!
+}}{{/let partial}}
+
+{{#let export partial server_func_response |func svc| captures |types|}}{{!
+}}func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    {{#if func.params.fields?}}
+    args := reqStruct.(*req{{svc.go_name}}{{func.go_name}})
+    {{/if func.params.fields?}}
+    {{#if (not func.oneway?)}}
+    result := newResp{{svc.go_name}}{{func.go_name}}()
+    {{/if (not func.oneway?)}}
+    {{#if func.creates_interaction?}}fbthriftInteraction, {{/if func.creates_interaction?}}{{#if (not func.return_type.void?)}}retval, {{/if (not func.return_type.void?)}}err := p.handler.{{func.go_name}}({{!
+        }}ctx{{#if func.params.fields?}}, {{/if}}{{!
+        }}{{#each (array.enumerate func.params.fields with_last=true) as |index field last?|}}{{!
+          }}args.{{field.go_name}}{{!
+          }}{{#if (not last?)}}, {{/if (not last?)}}{{!
+        }}{{/each}})
+    if err != nil {
+        {{#if func.exceptions?}}
+        switch v := err.(type) {
+        {{#each func.exceptions as |ex|}}
+        case *{{#partial types.go_type type=ex.type}}:
+            result.{{ex.go_name}} = v
+            return result, nil
+        {{/each}}
+        default:
+            internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", err)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            return x, internalErr
+        }
+        {{/if func.exceptions?}}
+        {{#if (not func.exceptions?)}}
+        internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+        {{/if (not func.exceptions?)}}
+    }
+
+    {{#if func.creates_interaction?}}
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    {{/if func.creates_interaction?}}
+    {{#if (not func.return_type.void?)}}
+    result.{{func.retval_field_name}} = {{#if (not func.return_type.nilable?)}}&{{/if (not func.return_type.nilable?)}}retval
+    {{/if (not func.return_type.void?)}}
+    {{#if func.oneway?}}
+    return nil, nil
+    {{/if func.oneway?}}
+    {{#if (not func.oneway?)}}
+    return result, nil
+    {{/if (not func.oneway?)}}
+}{{!
+}}{{/let partial}}
+
+{{#let export partial server_func_sink |func svc|}}{{!
+}}func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}{{!
+}}{{/let partial}}
+
+{{#let export partial processor_function |func svc| captures |server_func_stream server_func_response server_func_sink|}}{{!
+}}type procFunc{{svc.go_name}}{{func.go_name}} struct {
+    handler {{svc.go_name}}
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFunc{{svc.go_name}}{{func.go_name}})(nil)
+
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) NewReqArgs() thrift.ReadableStruct {
+    return newReq{{svc.go_name}}{{func.go_name}}()
 }
 
-func New{{service:go_name}}Processor(handler {{service:go_name}}) *{{service:go_name}}Processor {
-    p := &{{service:go_name}}Processor{
-    {{#service:extends?}}
-    {{#service:extends}}
-        {{service:go_package_alias_prefix}}New{{service:go_name}}Processor(handler),
-    {{/service:extends}}
-    {{/service:extends?}}
-    {{^service:extends?}}
+{{#if func.stream?}}
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+{{#partial server_func_stream func=func svc=svc}}
+{{#else if func.sink?}}
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+{{#partial server_func_sink func=func svc=svc}}
+{{#else}}
+{{#partial server_func_response func=func svc=svc}}
+{{/if func.stream?}}{{!
+}}{{/let partial}}
+
+{{#let export partial processor |svc| captures |func_rpc_name proc_func_name processor_function|}}{{!
+}}type {{svc.go_name}}Processor struct {
+    {{#if svc.extends}}
+    // Inherited/extended processor
+    *{{svc.extends.go_qualified_name}}Processor
+    {{/if svc.extends}}
+    {{#if (not svc.extends)}}
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
+    handler              {{svc.go_name}}
+    {{/if (not svc.extends)}}
+}
+
+func New{{svc.go_name}}Processor(handler {{svc.go_name}}) *{{svc.go_name}}Processor {
+    p := &{{svc.go_name}}Processor{
+    {{#if svc.extends}}
+        {{svc.extends.go_package_alias_prefix}}New{{svc.extends.go_name}}Processor(handler),
+    {{/if svc.extends}}
+    {{#if (not svc.extends)}}
         handler:              handler,
         processorFunctionMap: make(map[string]thrift.ProcessorFunction),
         functionServiceMap:   make(map[string]string),
-    {{/service:extends?}}
+    {{/if (not svc.extends)}}
     }
-    {{#service:functions}}
-    {{#function:go_server_supported?}}
-    p.AddToProcessorFunctionMap("{{> svc/func_rpc_name}}", &{{> svc/proc_func_name}}{handler: handler})
-    {{/function:go_server_supported?}}
-    {{/service:functions}}
-    {{#service:functions}}
-    {{#function:go_server_supported?}}
-    p.AddToFunctionServiceMap("{{> svc/func_rpc_name}}", "{{service:go_name}}")
-    {{/function:go_server_supported?}}
-    {{/service:functions}}
+    {{#each svc.functions as |func|}}
+    {{#if func.go_server_supported?}}
+    p.AddToProcessorFunctionMap("{{#partial func_rpc_name func=func svc=svc}}", &{{#partial proc_func_name func=func svc=svc}}{handler: handler})
+    {{/if func.go_server_supported?}}
+    {{/each}}
+    {{#each svc.functions as |func|}}
+    {{#if func.go_server_supported?}}
+    p.AddToFunctionServiceMap("{{#partial func_rpc_name func=func svc=svc}}", "{{svc.go_name}}")
+    {{/if func.go_server_supported?}}
+    {{/each}}
 
     return p
 }
-{{^service:extends?}}
+{{#if (not svc.extends)}}
 
-func (p *{{service:go_name}}Processor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+func (p *{{svc.go_name}}Processor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
     p.processorFunctionMap[key] = processorFunction
 }
 
-func (p *{{service:go_name}}Processor) AddToFunctionServiceMap(key, service string) {
+func (p *{{svc.go_name}}Processor) AddToFunctionServiceMap(key, service string) {
     p.functionServiceMap[key] = service
 }
 
-func (p *{{service:go_name}}Processor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
+func (p *{{svc.go_name}}Processor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
     return p.processorFunctionMap[key]
 }
 
-func (p *{{service:go_name}}Processor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+func (p *{{svc.go_name}}Processor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
     return p.processorFunctionMap
 }
 
-func (p *{{service:go_name}}Processor) FunctionServiceMap() map[string]string {
+func (p *{{svc.go_name}}Processor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
-func (p *{{service:go_name}}Processor) PackageName() string {
-    return "{{program:go_pkg_name}}"
+func (p *{{svc.go_name}}Processor) PackageName() string {
+    return "{{svc.program.go_pkg_name}}"
 }
-{{/service:extends?}}
+{{/if (not svc.extends)}}
 
-func (p *{{service:go_name}}Processor) GetInteractionProcessors() []thrift.Processor {
-{{#service:interactions?}}
+func (p *{{svc.go_name}}Processor) GetInteractionProcessors() []thrift.Processor {
+{{#if svc.interactions}}
     return []thrift.Processor{
-    {{#service:interactions}}
-        New{{service:go_name}}Processor(nil),
-    {{/service:interactions}}
+    {{#each svc.interactions as |interaction|}}
+        New{{interaction.go_name}}Processor(nil),
+    {{/each}}
     }
-{{/service:interactions?}}
-{{^service:interactions?}}
+{{/if svc.interactions}}
+{{#if (not svc.interactions)}}
     return []thrift.Processor{}
-{{/service:interactions?}}
+{{/if (not svc.interactions)}}
 }
 
-{{#program:gen_metadata?}}
-func (p *{{service:go_name}}Processor) GetThriftMetadata() *{{program:metadata_qualifier}}ThriftMetadata {
-    return GetThriftMetadataForService("{{service:scoped_name}}")
+{{#if svc.program.gen_metadata?}}
+func (p *{{svc.go_name}}Processor) GetThriftMetadata() *{{svc.program.metadata_qualifier}}ThriftMetadata {
+    return GetThriftMetadataForService("{{svc.scoped_name}}")
 }
-{{/program:gen_metadata?}}
+{{/if svc.program.gen_metadata?}}
 
-{{#service:functions}}
-{{#function:go_server_supported?}}
+{{#each svc.functions as |func|}}
+{{#if func.go_server_supported?}}
 
-{{> svc/processor_function}}
+{{#partial processor_function func=func svc=svc}}
 
-{{/function:go_server_supported?}}
-{{/service:functions}}
-{{#service:interaction?}}
+{{/if func.go_server_supported?}}
+{{/each}}
+{{#if svc.interaction?}}
 
-func (p *{{service:go_name}}Processor) OnTermination() {
+func (p *{{svc.go_name}}Processor) OnTermination() {
     // If the underlying handler implements OnTermination()
     if terminable, ok := p.handler.(thrift.Terminable); ok {
         terminable.OnTermination()
     }
 }
-{{/service:interaction?}}
+{{/if svc.interaction?}}
+{{/let partial}}

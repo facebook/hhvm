@@ -19,6 +19,7 @@
 {{#import "types/field" as m_field}}
 {{#import "svc/client" as m_client}}
 {{#import "svc/handler" as m_handler}}
+{{#import "svc/processor" as m_proc}}
 {{> common/auto_generated_go}}
 
 {{#program:docs?}}
@@ -67,7 +68,7 @@ var _ = metadata.GoUnusedProtection__
 
 {{#partial m_client.client svc=service:self}}
 
-{{> svc/processor}}
+{{#partial m_proc.processor svc=service:self}}
 
 {{/program:interactions}}
 
@@ -76,6 +77,6 @@ var _ = metadata.GoUnusedProtection__
 
 {{#partial m_client.client svc=service:self}}
 
-{{> svc/processor}}
+{{#partial m_proc.processor svc=service:self}}
 
 {{/program:services}}

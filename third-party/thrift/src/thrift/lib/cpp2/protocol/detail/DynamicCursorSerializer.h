@@ -356,7 +356,7 @@ class ContainerDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
     static_assert(
         std::is_arithmetic_v<T>, "readChunk only supports arithmetic types");
     auto n = std::min<size_t>(buf.size(), remaining_);
-    if (vectorize<Tag>) {
+    if constexpr (vectorize<Tag>) {
       protocol_->template readArithmeticVector<T>(buf.data(), n);
     } else {
       for (size_t i = 0; i < n; i++) {
@@ -782,7 +782,7 @@ class ContainerDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
       folly::throw_exception<std::runtime_error>(
           "writeChunk doesn't support maps");
     }
-    if (vectorize<Tag>) {
+    if constexpr (vectorize<Tag>) {
       using T = view_type<Tag>;
       protocol_->template writeArithmeticVector<T>(value.data(), value.size());
     } else {

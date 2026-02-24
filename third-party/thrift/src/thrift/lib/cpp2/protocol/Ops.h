@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystemTraits.h>
 #include <thrift/lib/cpp2/protocol/FieldMaskRef.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
@@ -21,6 +23,30 @@
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 
 namespace apache::thrift::protocol {
+
+// Policy for handling unknown field IDs during transcoding.
+// Only applies to field name-based protocols (e.g., SimpleJSON) where a field
+// name cannot be resolved to a field ID. Field ID-based protocols (e.g.,
+// Binary, Compact) always encode field IDs on the wire, so all field IDs are
+// known.
+enum class UnknownFieldIdPolicy {
+  Throw, // Throw exception on unknown field
+  Drop, // Drop unknown fields silently
+};
+
+// Returns a serialized buffer containing a transcoded object from one protocol
+// to another.
+// input is borrowed and will be unmodified when the function returns.
+// typeRef is optional, required for field name-based protocols.
+template <
+    typename FromSerializer,
+    typename ToSerializer,
+    bool Contiguous = false>
+std::unique_ptr<folly::IOBuf> transcodeSerialized(
+    std::unique_ptr<folly::IOBuf>& input,
+    std::optional<type_system::TypeRef> typeRef = std::nullopt,
+    UnknownFieldIdPolicy unknownFieldIdPolicy = UnknownFieldIdPolicy::Drop);
+
 // Returns a serialized buffer containing a new object that contains only the
 // masked fields present in the input serialized object (which must be a
 // structured type).
@@ -35,6 +61,10 @@ using apache::thrift::detail::ContainerDynamicCursorWriter;
 using apache::thrift::detail::DynamicCursorSerializationWrapper;
 using apache::thrift::detail::StructuredDynamicCursorReader;
 using apache::thrift::detail::StructuredDynamicCursorWriter;
+
+// Use existing ToTTypeFn from TypeSystemTraits
+using apache::thrift::type_system::ToTTypeFn;
+inline constexpr ToTTypeFn toTType;
 
 template <typename Serializer, bool Contiguous>
 struct FilterVisitor {
@@ -351,7 +381,283 @@ struct FilterVisitor {
     }
   }
 };
+
+template <typename FromSerializer, typename ToSerializer, bool Contiguous>
+struct TranscodeVisitor {
+  using Reader = typename FromSerializer::ProtocolReader;
+  using Writer = typename ToSerializer::ProtocolWriter;
+
+  UnknownFieldIdPolicy unknownFieldIdPolicy_;
+  std::optional<type_system::TypeRef> typeRef_;
+
+  explicit TranscodeVisitor(
+      UnknownFieldIdPolicy unknownFieldIdPolicy,
+      std::optional<type_system::TypeRef> typeRef)
+      : unknownFieldIdPolicy_(unknownFieldIdPolicy),
+        typeRef_(std::move(typeRef)) {}
+
+  std::unique_ptr<folly::IOBuf> operator()(
+      std::unique_ptr<folly::IOBuf>& input) {
+    DynamicCursorSerializationWrapper<Reader, Writer> inputWrapper(
+        std::move(input), typeRef_);
+    DynamicCursorSerializationWrapper<Reader, Writer> outputWrapper(typeRef_);
+
+    auto reader = inputWrapper.template beginRead<Contiguous>();
+    auto writer = outputWrapper.beginWrite();
+    try {
+      onStruct(reader, writer);
+      inputWrapper.endRead(std::move(reader));
+      outputWrapper.endWrite(std::move(writer));
+    } catch (...) {
+      inputWrapper.abandonRead(std::move(reader));
+      outputWrapper.abandonWrite(std::move(writer));
+      throw;
+    }
+    input = std::move(inputWrapper).serializedData();
+    return std::move(outputWrapper).serializedData();
+  }
+
+  template <
+      typename ProtocolReader,
+      typename ProtocolWriter,
+      bool InnerContiguous>
+  void onField(
+      StructuredDynamicCursorReader<ProtocolReader, InnerContiguous>& reader,
+      StructuredDynamicCursorWriter<ProtocolWriter>& writer) {
+    // Check for unknown field (field ID == 0)
+    if (reader.fieldId() == 0) {
+      if (unknownFieldIdPolicy_ == UnknownFieldIdPolicy::Throw) {
+        throw std::runtime_error("Unknown field encountered during transcode");
+      }
+      // Drop the field - skip uses the protocol's field type
+      reader.skip();
+      return;
+    }
+
+    // Get field type - use TypeRef if protocol doesn't encode types (e.g.,
+    // SimpleJSON)
+    protocol::TType fieldType = reader.fieldType();
+    if (fieldType == protocol::TType::T_VOID) {
+      auto fieldTypeRef = reader.fieldTypeRef();
+      if (fieldTypeRef) {
+        fieldType = toTType(*fieldTypeRef);
+      } else {
+        throw std::runtime_error(
+            "Field name-based protocol requires TypeRef for type resolution");
+      }
+    }
+
+    onItem(reader, fieldType, reader.fieldId(), writer);
+  }
+
+  template <typename Reader, typename Writer, typename FieldId>
+  void onItem(
+      Reader& reader, protocol::TType type, FieldId fieldId, Writer& writer) {
+    auto withFieldId = [&](auto&& f, auto&&... args) {
+      if constexpr (std::is_same_v<FieldId, std::nullopt_t>) {
+        return f(std::forward<decltype(args)>(args)...);
+      } else {
+        return f(fieldId, std::forward<decltype(args)>(args)...);
+      }
+    };
+    auto transcodePrimitive = [&]<typename Tag>(Tag /*tag*/) {
+      withFieldId([&](auto... maybeFieldId) {
+        writer.write(maybeFieldId..., Tag{}, reader.read(Tag{}));
+      });
+    };
+
+    switch (type) {
+      case protocol::TType::T_BOOL:
+        transcodePrimitive(type::bool_t{});
+        break;
+      case protocol::TType::T_BYTE:
+        transcodePrimitive(type::byte_t{});
+        break;
+      case protocol::TType::T_I16:
+        transcodePrimitive(type::i16_t{});
+        break;
+      case protocol::TType::T_I32:
+        transcodePrimitive(type::i32_t{});
+        break;
+      case protocol::TType::T_I64:
+        transcodePrimitive(type::i64_t{});
+        break;
+      case protocol::TType::T_DOUBLE:
+        transcodePrimitive(type::double_t{});
+        break;
+      case protocol::TType::T_FLOAT:
+        transcodePrimitive(type::float_t{});
+        break;
+      case protocol::TType::T_STRING: {
+        // Determine if this is string or binary by checking TypeRef
+        std::optional<type_system::TypeRef> typeRef;
+        if constexpr (requires { reader.fieldTypeRef(); }) {
+          typeRef = reader.fieldTypeRef();
+        } else if constexpr (requires { reader.nextTypeRef(); }) {
+          typeRef = reader.nextTypeRef();
+        }
+
+        // Use string_t for string fields, binary_t for binary or when no
+        // TypeRef
+        if (typeRef && typeRef->isString()) {
+          transcodePrimitive(type::string_t{});
+        } else {
+          transcodePrimitive(type::binary_t{});
+        }
+        break;
+      }
+
+      case protocol::TType::T_STRUCT: {
+        auto childReader = reader.beginReadStructured();
+        auto childWriter = withFieldId([&](auto... maybeFieldId) {
+          return writer.beginWriteStructured(maybeFieldId...);
+        });
+        onStruct(childReader, childWriter);
+        reader.endRead(std::move(childReader));
+        writer.endWrite(std::move(childWriter));
+        break;
+      }
+      case protocol::TType::T_LIST:
+      case protocol::TType::T_SET: {
+        auto childReader = reader.beginReadContainer();
+        auto childWriter = withFieldId([&](auto... maybeFieldId) {
+          return writer.beginWriteContainer(
+              maybeFieldId...,
+              type,
+              childReader.remaining(),
+              childReader.valueType());
+        });
+        onList(childReader, childWriter);
+        reader.endRead(std::move(childReader));
+        writer.endWrite(std::move(childWriter));
+        break;
+      }
+      case protocol::TType::T_MAP: {
+        auto childReader = reader.beginReadContainer();
+        auto childWriter = withFieldId([&](auto... maybeFieldId) {
+          return writer.beginWriteContainer(
+              maybeFieldId...,
+              type,
+              childReader.remaining(),
+              childReader.valueType(),
+              childReader.keyType());
+        });
+        onMap(childReader, childWriter);
+        reader.endRead(std::move(childReader));
+        writer.endWrite(std::move(childWriter));
+        break;
+      }
+      default:
+        throw std::runtime_error("Unknown type during transcode");
+    }
+  }
+
+  template <
+      typename ProtocolReader,
+      typename ProtocolWriter,
+      bool InnerContiguous>
+  void onStruct(
+      StructuredDynamicCursorReader<ProtocolReader, InnerContiguous>& reader,
+      StructuredDynamicCursorWriter<ProtocolWriter>& writer) {
+    while (reader.fieldType() != protocol::TType::T_STOP) {
+      onField(reader, writer);
+    }
+  }
+
+  template <
+      typename ProtocolReader,
+      typename ProtocolWriter,
+      bool InnerContiguous>
+  void onList(
+      ContainerDynamicCursorReader<ProtocolReader, InnerContiguous>& reader,
+      ContainerDynamicCursorWriter<ProtocolWriter>& writer) {
+    // Check if both protocols support arithmetic vectors for chunked transfer
+    constexpr bool supportsChunked =
+        ProtocolReader::kSupportsArithmeticVectors() &&
+        ProtocolWriter::kSupportsArithmeticVectors();
+
+    // For non-chunked protocols or non-arithmetic types, handle individually
+    if constexpr (!supportsChunked) {
+      while (reader.remaining()) {
+        onItem(reader, reader.valueType(), std::nullopt, writer);
+      }
+      return;
+    }
+
+    switch (reader.valueType()) {
+      case protocol::TType::T_BOOL:
+      case protocol::TType::T_BYTE:
+      case protocol::TType::T_I16:
+      case protocol::TType::T_I32:
+      case protocol::TType::T_I64:
+      case protocol::TType::T_FLOAT:
+      case protocol::TType::T_DOUBLE:
+        break;
+      default:
+        while (reader.remaining()) {
+          onItem(reader, reader.valueType(), std::nullopt, writer);
+        }
+        return;
+    }
+
+    auto transcodeChunked = [&]<typename Tag>(Tag tag) {
+      type::native_type<Tag> buffer[64];
+      while (reader.remaining()) {
+        writer.writeChunk(tag, reader.readChunk(tag, buffer));
+      }
+    };
+
+    switch (reader.valueType()) {
+      case protocol::TType::T_BOOL:
+        transcodeChunked(type::bool_t{});
+        break;
+      case protocol::TType::T_BYTE:
+        transcodeChunked(type::byte_t{});
+        break;
+      case protocol::TType::T_I16:
+        transcodeChunked(type::i16_t{});
+        break;
+      case protocol::TType::T_I32:
+        transcodeChunked(type::i32_t{});
+        break;
+      case protocol::TType::T_I64:
+        transcodeChunked(type::i64_t{});
+        break;
+      case protocol::TType::T_DOUBLE:
+        transcodeChunked(type::double_t{});
+        break;
+      case protocol::TType::T_FLOAT:
+        transcodeChunked(type::float_t{});
+        break;
+      default:
+        throw std::runtime_error("Unexpected type in list transcode");
+    }
+  }
+
+  template <
+      typename ProtocolReader,
+      typename ProtocolWriter,
+      bool InnerContiguous>
+  void onMap(
+      ContainerDynamicCursorReader<ProtocolReader, InnerContiguous>& reader,
+      ContainerDynamicCursorWriter<ProtocolWriter>& writer) {
+    while (reader.remaining()) {
+      onItem(reader, reader.keyType(), std::nullopt, writer);
+      onItem(reader, reader.valueType(), std::nullopt, writer);
+    }
+  }
+};
 } // namespace detail
+
+template <typename FromSerializer, typename ToSerializer, bool Contiguous>
+std::unique_ptr<folly::IOBuf> transcodeSerialized(
+    std::unique_ptr<folly::IOBuf>& input,
+    std::optional<type_system::TypeRef> typeRef,
+    UnknownFieldIdPolicy unknownFieldIdPolicy) {
+  detail::TranscodeVisitor<FromSerializer, ToSerializer, Contiguous> visitor(
+      unknownFieldIdPolicy, typeRef);
+  return visitor(input);
+}
 
 template <typename Serializer, bool Contiguous>
 std::unique_ptr<folly::IOBuf> filterSerialized(

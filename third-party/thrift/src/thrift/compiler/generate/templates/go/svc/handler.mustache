@@ -1,0 +1,53 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  Defines v2 partials for handler templates.
+
+}}
+{{#import "common/type" as types}}
+{{#import "types/field" as m_field}}
+
+{{#let export partial handler_func_signature |func| captures |types m_field|}}
+  {{#pragma ignore-newlines}}
+{{func.go_name}}({{func.ctx_arg_name}} context.Context{{#if func.params.fields?}}, {{/if}}
+{{#each (array.enumerate func.params.fields with_last=true) as |index field last?|}}
+{{field.go_arg_name}} {{#partial m_field.field_type field=field}}
+{{#if (not last?)}}, {{/if}}
+{{/each}}) {{!}}
+{{#if func.oneway?}}(error)
+{{#else if func.sink?}}NOT_IMPLEMENTED
+{{#else if func.stream?}}({{#if func.creates_interaction?}}*{{func.created_interaction.go_name}}Processor, {{/if}}{{#if func.stream_has_first_response?}}{{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}, {{/if}}func(context.Context, chan<- {{#if func.stream.elem_type.structured?}}*{{/if}}{{#partial types.go_type type=func.stream.elem_type}}) error, error)
+{{#else}}({{#if func.creates_interaction?}}*{{func.created_interaction.go_name}}Processor, {{/if}}{{#if (not func.return_type.void?)}}{{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}, {{/if}}error)
+{{/if func.oneway?}}
+{{/let partial}}
+
+{{#let export partial handler_interface |svc| captures |handler_func_signature|}}
+type {{svc.go_name}} interface {
+    {{#if svc.extends}}
+    // Inherited/extended service
+    {{svc.extends.go_qualified_name}}
+
+    {{/if svc.extends}}
+    {{#each svc.functions as |func|}}
+    {{#if func.go_server_supported?}}
+    {{#partial handler_func_signature func=func}}
+
+    {{/if func.go_server_supported?}}
+    {{/each}}
+}
+{{/let partial}}

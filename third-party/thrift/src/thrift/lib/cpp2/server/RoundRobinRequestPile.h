@@ -121,14 +121,7 @@ class RoundRobinRequestPile : public RequestPileBase {
     PileSelectionFunction getDefaultPileSelectionFunc(
         unsigned defaultPriority = static_cast<unsigned>(concurrency::NORMAL));
 
-    std::string describe() const {
-      return fmt::format(
-          "{{Options name={} numBucketsPerPriority={{{}}} numMaxRequests={} numMaxRequestsPerPriority={{{}}}}}",
-          name,
-          fmt::join(numBucketsPerPriority, ","),
-          numMaxRequests,
-          fmt::join(numMaxRequestsPerPriority, ","));
-    }
+    std::string describe() const;
   };
 
   // The default number of buckets for each priority is 1

@@ -16,12 +16,22 @@
 
 #include <utility>
 
+#include <fmt/ranges.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 
 #include <thrift/lib/cpp/concurrency/Thread.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 
 namespace apache::thrift {
+
+std::string RoundRobinRequestPile::Options::describe() const {
+  return fmt::format(
+      "{{Options name={} numBucketsPerPriority={{{}}} numMaxRequests={} numMaxRequestsPerPriority={{{}}}}}",
+      name,
+      fmt::join(numBucketsPerPriority, ","),
+      numMaxRequests,
+      fmt::join(numMaxRequestsPerPriority, ","));
+}
 
 RoundRobinRequestPile::PileSelectionFunction
 RoundRobinRequestPile::Options::getDefaultPileSelectionFunc(

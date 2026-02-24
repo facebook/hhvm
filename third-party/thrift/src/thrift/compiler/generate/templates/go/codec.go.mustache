@@ -28,12 +28,12 @@
 {{#import "spec/spec" as spec}}
 {{> common/auto_generated_go}}
 
-package {{program:go_pkg_name}}
+package {{root_program.go_pkg_name}}
 
 import (
-    {{#program:thrift_imports}}
-    {{program:go_package_alias}} "{{program:go_import_path}}"
-    {{/program:thrift_imports}}
+    {{#each root_program.thrift_imports as |program|}}
+    {{program.go_package_alias}} "{{program.go_import_path}}"
+    {{/each}}
     thrift "{{constants.thrift_lib_import}}"
 )
 
@@ -43,7 +43,7 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    {{#each program:self.thrift_metadata_types as |type|}}
+    {{#each root_program.thrift_metadata_types as |type|}}
     {{type.codec_type_spec_name}} = &thrift.TypeSpec{
         FullName: "{{type.full_name}}",
         {{#partial spec.codec_type_spec_setter type=type}}:
@@ -54,11 +54,11 @@ var (
 
 // Premade struct specs
 var (
-    {{#program:structs}}
-    {{struct:struct_spec_name}} =
-        {{#partial spec.codec_struct_spec struct=struct:self}}
-    {{/program:structs}}
-    {{#each program:self.req_resp_structs as |s|}}
+    {{#each root_program.structured_definitions as |s|}}
+    {{s.struct_spec_name}} =
+        {{#partial spec.codec_struct_spec struct=s}}
+    {{/each}}
+    {{#each root_program.req_resp_structs as |s|}}
     {{s.struct_spec_name}} =
         {{#partial spec.codec_struct_spec struct=s}}
     {{/each}}
@@ -66,7 +66,7 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    {{#each program:self.thrift_metadata_types as |type|}}
+    {{#each root_program.thrift_metadata_types as |type|}}
     {{#if type.named?}}
     fbthriftTypeSpecsMap[{{type.codec_type_spec_name}}.FullName] = {{type.codec_type_spec_name}}
     {{/if type.named?}}

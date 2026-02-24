@@ -19,7 +19,7 @@
   Protection for unused imports.
 
 }}
-{{#program:thrift_imports}}
-var _ = {{program:go_package_alias}}.GoUnusedProtection__
-{{/program:thrift_imports}}
+{{#each root_program.thrift_imports as |program|}}
+var _ = {{program.go_package_alias}}.GoUnusedProtection__
+{{/each}}
 {{! new line }}

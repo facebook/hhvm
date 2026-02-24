@@ -22,10 +22,10 @@
 {{#import "svc/processor" as m_proc}}
 {{> common/auto_generated_go}}
 
-{{#program:docs?}}
-{{program:docs}}
-{{/program:docs?}}
-package {{program:go_pkg_name}}
+{{#if root_program.docs?}}
+{{root_program.docs}}
+{{/if root_program.docs?}}
+package {{root_program.go_pkg_name}}
 
 import (
     "context"
@@ -36,15 +36,13 @@ import (
     "reflect"
     "sync"
 
-    {{#program:thrift_imports}}
-    {{program:go_package_alias}} "{{program:go_import_path}}"
-    {{/program:thrift_imports}}
+    {{#each root_program.thrift_imports as |program|}}
+    {{program.go_package_alias}} "{{program.go_import_path}}"
+    {{/each}}
     thrift "{{constants.thrift_lib_import}}"
-    {{#program:gen_metadata?}}
-    {{#program:import_metadata_package?}}
+    {{#if (and root_program.gen_metadata? root_program.import_metadata_package?)}}
     metadata "{{constants.thrift_metadata_import}}"
-    {{/program:import_metadata_package?}}
-    {{/program:gen_metadata?}}
+    {{/if (and root_program.gen_metadata? root_program.import_metadata_package?)}}
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -57,26 +55,24 @@ var _ = iter.Pull[bool]
 var _ = reflect.Ptr
 var _ = sync.OnceFunc
 var _ = thrift.VOID
-{{#program:gen_metadata?}}
-{{#program:import_metadata_package?}}
+{{#if (and root_program.gen_metadata? root_program.import_metadata_package?)}}
 var _ = metadata.GoUnusedProtection__
-{{/program:import_metadata_package?}}
-{{/program:gen_metadata?}}
+{{/if (and root_program.gen_metadata? root_program.import_metadata_package?)}}
 
-{{#program:interactions}}
-{{#partial m_handler.handler_interface svc=service:self}}
+{{#each root_program.interactions as |interaction|}}
+{{#partial m_handler.handler_interface svc=interaction}}
 
-{{#partial m_client.client svc=service:self}}
+{{#partial m_client.client svc=interaction}}
 
-{{#partial m_proc.processor svc=service:self}}
+{{#partial m_proc.processor svc=interaction}}
 
-{{/program:interactions}}
+{{/each}}
 
-{{#program:services}}
-{{#partial m_handler.handler_interface svc=service:self}}
+{{#each root_program.services as |service|}}
+{{#partial m_handler.handler_interface svc=service}}
 
-{{#partial m_client.client svc=service:self}}
+{{#partial m_client.client svc=service}}
 
-{{#partial m_proc.processor svc=service:self}}
+{{#partial m_proc.processor svc=service}}
 
-{{/program:services}}
+{{/each}}

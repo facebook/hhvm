@@ -19,12 +19,12 @@
 {{#import "common/type" as types}}
 {{> common/auto_generated_go}}
 
-package {{program:go_pkg_name}}
+package {{root_program.go_pkg_name}}
 
 import (
-    {{#program:thrift_imports}}
-    {{program:go_package_alias}} "{{program:go_import_path}}"
-    {{/program:thrift_imports}}
+    {{#each root_program.thrift_imports as |program|}}
+    {{program.go_package_alias}} "{{program.go_import_path}}"
+    {{/each}}
     thrift "{{constants.thrift_lib_import}}"
 )
 
@@ -34,20 +34,16 @@ var _ = thrift.VOID
 
 var GoUnusedProtection__ int
 
-{{#program:constants}}
-{{#constant:docs?}}
-{{! new line before documented constant}}
-{{constant:docs}}{{!
-}}{{/constant:docs?}}{{!
-}}{{#constant:var?}}var {{/constant:var?}}{{!
-}}{{^constant:var?}}const {{/constant:var?}}{{!
-}}{{constant:go_name}} {{!
-  }}{{#constant:type}}{{!
-    }}{{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}} = {{!
-      }}{{#partial constants.const_value value=constant:value root_const=constant:self}}
-  {{/constant:type}}
-{{#constant:docs?}}
+{{#each root_program.consts as |const|}}
+{{#if const.docs?}}{{!
+}}{{const.docs}}{{!
+}}{{/if const.docs?}}{{!
+}}{{#if const.var?}}var{{#else}}const{{/if const.var?}} {{!}}{{!
+}}{{const.go_name}} {{!
+    }}{{#if const.type.structured?}}*{{/if const.type.structured?}}{{#partial types.go_type type=const.type}} = {{!
+      }}{{#partial constants.const_value value=const.value root_const=const}}
+{{#if const.docs?}}
 {{! new line after documented constant}}
 
-{{/constant:docs?}}{{!
-}}{{/program:constants}}
+{{/if const.docs?}}{{!
+}}{{/each}}

@@ -38,11 +38,11 @@
 
 {{#let export partial handler_interface |svc| captures |handler_func_signature|}}
 type {{svc.go_name}} interface {
-    {{#if svc.extends}}
+    {{#if (and (not svc.interaction?) svc.extends)}}
     // Inherited/extended service
     {{svc.extends.go_qualified_name}}
 
-    {{/if svc.extends}}
+    {{/if (and (not svc.interaction?) svc.extends)}}
     {{#each svc.functions as |func|}}
     {{#if func.go_server_supported?}}
     {{#partial handler_func_signature func=func}}

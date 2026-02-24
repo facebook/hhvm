@@ -27,31 +27,31 @@
 {{#import "metadata/metadata" as m_metadata}}
 {{> common/auto_generated_go}}
 
-package {{program:go_pkg_name}}
+package {{root_program.go_pkg_name}}
 
 import (
     "maps"
 
-    {{#program:thrift_imports}}
-    {{program:go_package_alias}} "{{program:go_import_path}}"
-    {{/program:thrift_imports}}
+    {{#each root_program.thrift_imports as |program|}}
+    {{program.go_package_alias}} "{{program.go_import_path}}"
+    {{/each}}
     thrift "{{constants.thrift_lib_import}}"
-    {{#program:import_metadata_package?}}
+    {{#if root_program.import_metadata_package?}}
     metadata "{{constants.thrift_metadata_import}}"
-    {{/program:import_metadata_package?}}
+    {{/if root_program.import_metadata_package?}}
 )
 
 // (needed to ensure safety because of naive import list construction)
 {{> common/unused_imports_protection}}
 var _ = thrift.VOID
 var _ = maps.Copy[map[int]int, map[int]int]
-{{#program:import_metadata_package?}}
+{{#if root_program.import_metadata_package?}}
 var _ = metadata.GoUnusedProtection__
-{{/program:import_metadata_package?}}
+{{/if root_program.import_metadata_package?}}
 
 // Premade Thrift types
 var (
-    {{#each program:self.thrift_metadata_types as |type|}}
+    {{#each root_program.thrift_metadata_types as |type|}}
     {{type.metadata_name}} =
         &{{root_program.metadata_qualifier}}ThriftType{
             {{#partial m_metadata.thrift_type_setter type=type}}:
@@ -62,20 +62,20 @@ var (
 
 // Premade struct metadatas
 var (
-    {{#program:structs}}
-    {{#if struct:exception?}}
-    {{struct:struct_metadata_name}} =
-        {{#partial m_metadata.thrift_metadata_exception struct=struct:self}}
+    {{#each root_program.structured_definitions as |s|}}
+    {{#if s.exception?}}
+    {{s.struct_metadata_name}} =
+        {{#partial m_metadata.thrift_metadata_exception struct=s}}
     {{#else}}
-    {{struct:struct_metadata_name}} =
-        {{#partial m_metadata.thrift_metadata_struct struct=struct:self}}
-    {{/if struct:exception?}}
-    {{/program:structs}}
+    {{s.struct_metadata_name}} =
+        {{#partial m_metadata.thrift_metadata_struct struct=s}}
+    {{/if s.exception?}}
+    {{/each}}
 )
 
-var premadeThriftTypesMap = func() map[string]*{{program:metadata_qualifier}}ThriftType {
-    fbthriftThriftTypesMap := make(map[string]*{{program:metadata_qualifier}}ThriftType)
-    {{#each program:self.thrift_metadata_types as |type|}}
+var premadeThriftTypesMap = func() map[string]*{{root_program.metadata_qualifier}}ThriftType {
+    fbthriftThriftTypesMap := make(map[string]*{{root_program.metadata_qualifier}}ThriftType)
+    {{#each root_program.thrift_metadata_types as |type|}}
     {{#if type.named?}}
     fbthriftThriftTypesMap["{{type.full_name}}"] = {{type.metadata_name}}
     {{/if type.named?}}
@@ -83,52 +83,52 @@ var premadeThriftTypesMap = func() map[string]*{{program:metadata_qualifier}}Thr
     return fbthriftThriftTypesMap
 }()
 
-var structMetadatas = func() []*{{program:metadata_qualifier}}ThriftStruct {
-    fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftStruct, 0)
-    {{#program:structs}}
-    {{^struct:exception?}}
-    fbthriftResults = append(fbthriftResults, {{struct:struct_metadata_name}})
-    {{/struct:exception?}}
-    {{/program:structs}}
+var structMetadatas = func() []*{{root_program.metadata_qualifier}}ThriftStruct {
+    fbthriftResults := make([]*{{root_program.metadata_qualifier}}ThriftStruct, 0)
+    {{#each root_program.structured_definitions as |s|}}
+    {{^s.exception?}}
+    fbthriftResults = append(fbthriftResults, {{s.struct_metadata_name}})
+    {{/s.exception?}}
+    {{/each}}
     return fbthriftResults
 }()
 
-var exceptionMetadatas = func() []*{{program:metadata_qualifier}}ThriftException {
-    fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftException, 0)
-    {{#program:structs}}
-    {{#struct:exception?}}
-    fbthriftResults = append(fbthriftResults, {{struct:struct_metadata_name}})
-    {{/struct:exception?}}
-    {{/program:structs}}
+var exceptionMetadatas = func() []*{{root_program.metadata_qualifier}}ThriftException {
+    fbthriftResults := make([]*{{root_program.metadata_qualifier}}ThriftException, 0)
+    {{#each root_program.structured_definitions as |s|}}
+    {{#if s.exception?}}
+    fbthriftResults = append(fbthriftResults, {{s.struct_metadata_name}})
+    {{/if s.exception?}}
+    {{/each}}
     return fbthriftResults
 }()
 
-var enumMetadatas = func() []*{{program:metadata_qualifier}}ThriftEnum {
-    fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftEnum, 0)
-    {{#program:enums}}
+var enumMetadatas = func() []*{{root_program.metadata_qualifier}}ThriftEnum {
+    fbthriftResults := make([]*{{root_program.metadata_qualifier}}ThriftEnum, 0)
+    {{#each root_program.enums as |enum|}}
     fbthriftResults = append(fbthriftResults,
-        {{#partial m_metadata.thrift_metadata_enum enum=enum:self}}
+        {{#partial m_metadata.thrift_metadata_enum enum=enum}}
     )
-    {{/program:enums}}
+    {{/each}}
     return fbthriftResults
 }()
 
-var serviceMetadatas = func() []*{{program:metadata_qualifier}}ThriftService {
-    fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftService, 0)
-    {{#program:services}}
+var serviceMetadatas = func() []*{{root_program.metadata_qualifier}}ThriftService {
+    fbthriftResults := make([]*{{root_program.metadata_qualifier}}ThriftService, 0)
+    {{#each root_program.services as |service|}}
     fbthriftResults = append(fbthriftResults,
-        {{#partial m_metadata.thrift_metadata_service service=service:self}}
+        {{#partial m_metadata.thrift_metadata_service service=service}}
     )
-    {{/program:services}}
+    {{/each}}
     return fbthriftResults
 }()
 
 // Thrift metadata for this package, as well as all of its recursive imports.
-var packageThriftMetadata = func() *{{program:metadata_qualifier}}ThriftMetadata {
-    allEnumsMap := make(map[string]*{{program:metadata_qualifier}}ThriftEnum)
-    allStructsMap := make(map[string]*{{program:metadata_qualifier}}ThriftStruct)
-    allExceptionsMap := make(map[string]*{{program:metadata_qualifier}}ThriftException)
-    allServicesMap := make(map[string]*{{program:metadata_qualifier}}ThriftService)
+var packageThriftMetadata = func() *{{root_program.metadata_qualifier}}ThriftMetadata {
+    allEnumsMap := make(map[string]*{{root_program.metadata_qualifier}}ThriftEnum)
+    allStructsMap := make(map[string]*{{root_program.metadata_qualifier}}ThriftStruct)
+    allExceptionsMap := make(map[string]*{{root_program.metadata_qualifier}}ThriftException)
+    allServicesMap := make(map[string]*{{root_program.metadata_qualifier}}ThriftService)
 
     // Add enum metadatas from the current program...
     for _, enumMetadata := range enumMetadatas {
@@ -148,10 +148,10 @@ var packageThriftMetadata = func() *{{program:metadata_qualifier}}ThriftMetadata
     }
 
     // Obtain Thrift metadatas from recursively included programs...
-    var recursiveThriftMetadatas []*{{program:metadata_qualifier}}ThriftMetadata
-    {{#program:thrift_imports}}
-    recursiveThriftMetadatas = append(recursiveThriftMetadatas, {{program:go_package_alias}}.GetThriftMetadata())
-    {{/program:thrift_imports}}
+    var recursiveThriftMetadatas []*{{root_program.metadata_qualifier}}ThriftMetadata
+    {{#each root_program.thrift_imports as |program|}}
+    recursiveThriftMetadatas = append(recursiveThriftMetadatas, {{program.go_package_alias}}.GetThriftMetadata())
+    {{/each}}
 
     // ...now merge metadatas from recursively included programs.
     for _, thriftMetadata := range recursiveThriftMetadatas {
@@ -161,7 +161,7 @@ var packageThriftMetadata = func() *{{program:metadata_qualifier}}ThriftMetadata
         maps.Copy(allServicesMap, thriftMetadata.GetServices())
     }
 
-    return {{program:metadata_qualifier}}NewThriftMetadata().
+    return {{root_program.metadata_qualifier}}NewThriftMetadata().
         SetEnums(allEnumsMap).
         SetStructs(allStructsMap).
         SetExceptions(allExceptionsMap).
@@ -170,19 +170,19 @@ var packageThriftMetadata = func() *{{program:metadata_qualifier}}ThriftMetadata
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata ThriftType for a given full type name.
-func GetMetadataThriftType(fullName string) *{{program:metadata_qualifier}}ThriftType {
+func GetMetadataThriftType(fullName string) *{{root_program.metadata_qualifier}}ThriftType {
     return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.
-func GetThriftMetadata() *{{program:metadata_qualifier}}ThriftMetadata {
+func GetThriftMetadata() *{{root_program.metadata_qualifier}}ThriftMetadata {
     return packageThriftMetadata
 }
 
 // GetThriftMetadataForService returns Thrift metadata for the given service.
-func GetThriftMetadataForService(scopedServiceName string) *{{program:metadata_qualifier}}ThriftMetadata {
+func GetThriftMetadataForService(scopedServiceName string) *{{root_program.metadata_qualifier}}ThriftMetadata {
     allServicesMap := packageThriftMetadata.GetServices()
-    relevantServicesMap := make(map[string]*{{program:metadata_qualifier}}ThriftService)
+    relevantServicesMap := make(map[string]*{{root_program.metadata_qualifier}}ThriftService)
 
     serviceMetadata := allServicesMap[scopedServiceName]
     // Visit and record all recursive parents of the target service.
@@ -195,7 +195,7 @@ func GetThriftMetadataForService(scopedServiceName string) *{{program:metadata_q
         }
     }
 
-    return {{program:metadata_qualifier}}NewThriftMetadata().
+    return {{root_program.metadata_qualifier}}NewThriftMetadata().
         SetEnums(packageThriftMetadata.GetEnums()).
         SetStructs(packageThriftMetadata.GetStructs()).
         SetExceptions(packageThriftMetadata.GetExceptions()).

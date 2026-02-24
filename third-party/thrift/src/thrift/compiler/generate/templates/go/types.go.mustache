@@ -23,21 +23,19 @@
 {{#import "types/typedef" as m_typedef}}
 {{> common/auto_generated_go}}
 
-package {{program:go_pkg_name}}
+package {{root_program.go_pkg_name}}
 
 import (
     "fmt"
     "reflect"
 
-    {{#program:thrift_imports}}
-    {{program:go_package_alias}} "{{program:go_import_path}}"
-    {{/program:thrift_imports}}
+    {{#each root_program.thrift_imports as |program|}}
+    {{program.go_package_alias}} "{{program.go_import_path}}"
+    {{/each}}
     thrift "{{constants.thrift_lib_import}}"
-    {{#program:gen_metadata?}}
-    {{#program:import_metadata_package?}}
+    {{#if (and root_program.gen_metadata? root_program.import_metadata_package?)}}
     metadata "{{constants.thrift_metadata_import}}"
-    {{/program:import_metadata_package?}}
-    {{/program:gen_metadata?}}
+    {{/if (and root_program.gen_metadata? root_program.import_metadata_package?)}}
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -45,33 +43,46 @@ import (
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
-{{#program:gen_metadata?}}
-{{#program:import_metadata_package?}}
+{{#if (and root_program.gen_metadata? root_program.import_metadata_package?)}}
 var _ = metadata.GoUnusedProtection__
-{{/program:import_metadata_package?}}
-{{/program:gen_metadata?}}
+{{/if (and root_program.gen_metadata? root_program.import_metadata_package?)}}
 
 {{! Typedefs }}
-{{#program:typedefs}}
-{{#partial m_typedef.typedef t=typedef:self}}
+{{#each root_program.typedefs as |t|}}
+{{#partial m_typedef.typedef t=t}}
 
-{{/program:typedefs}}
+{{/each}}
 {{! Enums }}
-{{#program:enums}}
-{{#partial m_enum.enum e=enum:self}}
+{{#each root_program.enums as |e|}}
+{{#partial m_enum.enum e=e}}
 
-{{/program:enums}}
+{{/each}}
 {{! Structs }}
-{{#program:structs}}
-{{#partial m_struct.struct s=struct:self}}
+{{#each root_program.structured_definitions as |s|}}
+{{#partial m_struct.struct s=s}}
 
-{{/program:structs}}
+{{/each}}
 {{! Req/resp structs }}
-{{#each program:self.req_resp_structs as |s|}}
+{{#each root_program.req_resp_structs as |s|}}
 {{#partial m_struct.struct s=s}}
 
 {{/each}}
 
-{{#program:structs?}}
-{{> common/registry}}
-{{/program:structs?}}
+{{#if root_program.structs?}}
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+  RegisterType(name string, initializer func() any)
+}) {
+    {{#each root_program.structured_definitions as |struct|}}
+    {{#if struct.uri}}
+    registry.RegisterType("{{struct.uri}}", func() any { return {{struct.go_qualified_new_func}}() })
+    {{/if struct.uri}}
+    {{/each}}
+
+    {{#each root_program.enums as |enum|}}
+    {{#if enum.uri}}
+    registry.RegisterType("{{enum.uri}}", func() any { return {{enum.go_name}}(0) })
+    {{/if enum.uri}}
+    {{/each}}
+}
+{{/if root_program.structs?}}

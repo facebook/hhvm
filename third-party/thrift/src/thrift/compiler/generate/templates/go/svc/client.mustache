@@ -39,11 +39,11 @@
 {{#let export partial client_interface |svc| captures |client_func_signature|}}{{!
 }}type {{svc.go_name}}Client interface {
     io.Closer
-    {{#if svc.extends}}
+    {{#if (and (not svc.interaction?) svc.extends)}}
     // Inherited/extended service
     {{svc.extends.go_qualified_name}}Client
 
-    {{/if svc.extends}}
+    {{/if (and (not svc.interaction?) svc.extends)}}
     {{#each svc.functions as |func|}}
     {{#if func.go_client_supported?}}
     {{#partial client_func_signature func=func}}
@@ -221,10 +221,10 @@
 }}{{#partial client_interface svc=svc}}
 
 type {{svc.go_client_name}} struct {
-    {{#if svc.extends}}
+    {{#if (and (not svc.interaction?) svc.extends)}}
     // Inherited/extended service
     {{svc.extends.go_qualified_name}}Client
-    {{/if svc.extends}}
+    {{/if (and (not svc.interaction?) svc.extends)}}
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
@@ -232,9 +232,9 @@ var _ {{svc.go_name}}Client = (*{{svc.go_client_name}})(nil)
 
 func New{{svc.go_name}}ChannelClient(channel thrift.RequestChannel) {{svc.go_name}}Client {
     return &{{svc.go_client_name}}{
-        {{#if svc.extends}}
+        {{#if (and (not svc.interaction?) svc.extends)}}
         {{svc.extends.go_name}}Client: {{svc.extends.go_package_alias_prefix}}New{{svc.extends.go_name}}ChannelClient(channel),
-        {{/if svc.extends}}
+        {{/if (and (not svc.interaction?) svc.extends)}}
         ch: channel,
     }
 }

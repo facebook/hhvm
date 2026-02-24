@@ -206,27 +206,25 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context
 
 {{#let export partial processor |svc| captures |func_rpc_name proc_func_name processor_function|}}{{!
 }}type {{svc.go_name}}Processor struct {
-    {{#if svc.extends}}
+    {{#if (and (not svc.interaction?) svc.extends)}}
     // Inherited/extended processor
     *{{svc.extends.go_qualified_name}}Processor
-    {{/if svc.extends}}
-    {{#if (not svc.extends)}}
+    {{#else}}
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
     handler              {{svc.go_name}}
-    {{/if (not svc.extends)}}
+    {{/if (and (not svc.interaction?) svc.extends)}}
 }
 
 func New{{svc.go_name}}Processor(handler {{svc.go_name}}) *{{svc.go_name}}Processor {
     p := &{{svc.go_name}}Processor{
-    {{#if svc.extends}}
+    {{#if (and (not svc.interaction?) svc.extends)}}
         {{svc.extends.go_package_alias_prefix}}New{{svc.extends.go_name}}Processor(handler),
-    {{/if svc.extends}}
-    {{#if (not svc.extends)}}
+    {{#else}}
         handler:              handler,
         processorFunctionMap: make(map[string]thrift.ProcessorFunction),
         functionServiceMap:   make(map[string]string),
-    {{/if (not svc.extends)}}
+    {{/if (and (not svc.interaction?) svc.extends)}}
     }
     {{#each svc.functions as |func|}}
     {{#if func.go_server_supported?}}
@@ -241,7 +239,7 @@ func New{{svc.go_name}}Processor(handler {{svc.go_name}}) *{{svc.go_name}}Proces
 
     return p
 }
-{{#if (not svc.extends)}}
+{{#if (or svc.interaction? (not svc.extends))}}
 
 func (p *{{svc.go_name}}Processor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
     p.processorFunctionMap[key] = processorFunction
@@ -266,19 +264,18 @@ func (p *{{svc.go_name}}Processor) FunctionServiceMap() map[string]string {
 func (p *{{svc.go_name}}Processor) PackageName() string {
     return "{{svc.program.go_pkg_name}}"
 }
-{{/if (not svc.extends)}}
+{{/if (or svc.interaction? (not svc.extends))}}
 
 func (p *{{svc.go_name}}Processor) GetInteractionProcessors() []thrift.Processor {
-{{#if svc.interactions}}
+{{#if (and (not svc.interaction?) svc.interactions)}}
     return []thrift.Processor{
     {{#each svc.interactions as |interaction|}}
         New{{interaction.go_name}}Processor(nil),
     {{/each}}
     }
-{{/if svc.interactions}}
-{{#if (not svc.interactions)}}
+{{#else}}
     return []thrift.Processor{}
-{{/if (not svc.interactions)}}
+{{/if (and (not svc.interaction?) svc.interactions)}}
 }
 
 {{#if svc.program.gen_metadata?}}

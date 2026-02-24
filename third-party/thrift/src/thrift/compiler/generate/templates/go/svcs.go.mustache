@@ -17,6 +17,7 @@
 {{#import "common/constants" as constants}}
 {{#import "common/type" as types}}
 {{#import "types/field" as m_field}}
+{{#import "svc/client" as m_client}}
 {{#import "svc/handler" as m_handler}}
 {{> common/auto_generated_go}}
 
@@ -64,7 +65,7 @@ var _ = metadata.GoUnusedProtection__
 {{#program:interactions}}
 {{#partial m_handler.handler_interface svc=service:self}}
 
-{{> svc/client}}
+{{#partial m_client.client svc=service:self}}
 
 {{> svc/processor}}
 
@@ -73,7 +74,7 @@ var _ = metadata.GoUnusedProtection__
 {{#program:services}}
 {{#partial m_handler.handler_interface svc=service:self}}
 
-{{> svc/client}}
+{{#partial m_client.client svc=service:self}}
 
 {{> svc/processor}}
 

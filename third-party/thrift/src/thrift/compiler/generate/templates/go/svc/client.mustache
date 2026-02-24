@@ -16,67 +16,251 @@
 
 }}{{!
 
-  This template defined the client type/functions for a thrift service.
+  This template defines the client type/functions for a thrift service.
 
 }}
-type {{service:go_name}}Client interface {
+{{#import "common/type" as types}}
+{{#import "types/field" as m_field}}
+
+{{#let export partial client_func_signature |func| captures |types m_field|}}
+  {{#pragma ignore-newlines}}
+{{func.go_name}}({{func.ctx_arg_name}} context.Context{{#if func.params.fields?}}, {{/if}}
+{{#each (array.enumerate func.params.fields with_last=true) as |index field last?|}}
+{{field.go_arg_name}} {{#partial m_field.field_type field=field}}
+{{#if (not last?)}}, {{/if}}
+{{/each}}) {{!}}
+{{#if func.oneway?}}(error)
+{{#else if func.sink?}}({{#if func.creates_interaction?}}{{func.created_interaction.go_name}}Client, {{/if}}{{#if func.sink_has_first_response?}}{{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}, {{/if}}func(iter.Seq2[{{#if func.sink.elem_type.structured?}}*{{/if}}{{#partial types.go_type type=func.sink.elem_type}}, error]) ({{#if func.sink.final_response_type}}{{#if func.sink.final_response_type.structured?}}*{{/if}}{{#partial types.go_type type=func.sink.final_response_type}}, {{/if}}error), error)
+{{#else if func.stream?}}({{#if func.creates_interaction?}}{{func.created_interaction.go_name}}Client, {{/if}}{{#if func.stream_has_first_response?}}{{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}, {{/if}}iter.Seq2[{{#if func.stream.elem_type.structured?}}*{{/if}}{{#partial types.go_type type=func.stream.elem_type}}, error], error)
+{{#else}}({{#if func.creates_interaction?}}{{func.created_interaction.go_name}}Client, {{/if}}{{#if (not func.return_type.void?)}}{{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}, {{/if}}error)
+{{/if func.oneway?}}
+{{/let partial}}
+
+{{#let export partial client_interface |svc| captures |client_func_signature|}}{{!
+}}type {{svc.go_name}}Client interface {
     io.Closer
-    {{#service:extends}}
+    {{#if svc.extends}}
     // Inherited/extended service
-    {{service:go_qualified_name}}Client
+    {{svc.extends.go_qualified_name}}Client
 
-    {{/service:extends}}
-    {{#service:functions}}
-    {{#function:go_client_supported?}}
-    {{> svc/client_func_signature}}
+    {{/if svc.extends}}
+    {{#each svc.functions as |func|}}
+    {{#if func.go_client_supported?}}
+    {{#partial client_func_signature func=func}}
 
-    {{/function:go_client_supported?}}
-    {{/service:functions}}
-}
+    {{/if func.go_client_supported?}}
+    {{/each}}
+}{{!
+}}{{/let partial}}
 
-type {{service:go_client_name}} struct {
-    {{#service:extends?}}
-    {{#service:extends}}
+{{#let export partial client_func_request_sink |func svc| captures |types client_func_signature|}}{{!
+}}func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
+    {{#if func.sink_has_first_response?}}
+    var fbthriftFirstRespZero {{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}
+    {{/if func.sink_has_first_response?}}
+    fbthriftReq := &req{{svc.go_name}}{{func.go_name}}{
+        {{#each func.params.fields as |field|}}
+        {{field.go_name}}: {{field.go_arg_name}},
+        {{/each}}
+    }
+    fbthriftFirstResp := newResp{{svc.go_name}}{{func.go_name}}()
+
+    {{#if func.creates_interaction?}}
+    fbthriftChannel := thrift.NewInteractionChannel(c.ch, "{{func.created_interaction.name}}")
+    fbthriftInteractionClient := New{{func.created_interaction.go_name}}ChannelClient(fbthriftChannel)
+    {{#else}}
+    fbthriftChannel := c.ch
+    {{/if func.creates_interaction?}}
+
+    fbthriftSinkFn, fbthriftErr := fbthriftChannel.SendRequestSink(
+        {{func.ctx_arg_name}},
+        "{{#if svc.interaction?}}{{svc.name}}.{{/if}}{{func.name}}",
+        fbthriftReq,
+        fbthriftFirstResp,
+    )
+    if fbthriftErr != nil {
+        return {{#if func.creates_interaction?}}nil, {{/if}}{{#if func.sink_has_first_response?}}fbthriftFirstRespZero, {{/if}}nil, fbthriftErr
+    }
+
+    fbthriftSinkCallback := func(elemSeq iter.Seq2[{{#if func.sink.elem_type.structured?}}*{{/if}}{{#partial types.go_type type=func.sink.elem_type}}, error]) ({{#if func.sink.final_response_type}}{{#if func.sink.final_response_type.structured?}}*{{/if}}{{#partial types.go_type type=func.sink.final_response_type}}, {{/if}}error) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range elemSeq {
+                sinkPayload := newSink{{svc.go_name}}{{func.go_name}}()
+                if err != nil {
+                    {{#if func.sink_exceptions?}}
+                    switch v := err.(type) {
+                    {{#each func.sink.exceptions as |ex|}}
+                    case *{{#partial types.go_type type=ex.type}}:
+                        sinkPayload.{{ex.go_name}} = v
+                        yield(sinkPayload, nil)
+                    {{/each}}
+                    default:
+                        yield(nil, err)
+                    }
+                    {{/if func.sink_exceptions?}}
+                    {{#if (not func.sink_exceptions?)}}
+                    yield(nil, err)
+                    {{/if (not func.sink_exceptions?)}}
+                    return
+                }
+                sinkPayload.{{func.retval_field_name}} = {{#if (not func.sink.elem_type.nilable?)}}&{{/if}}elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        fbthriftFinalResp := newRespFinal{{svc.go_name}}{{func.go_name}}()
+        fbthriftFinalErr := fbthriftSinkFn(sinkPayloadSeq, fbthriftFinalResp)
+        if fbthriftFinalErr != nil {
+            return {{#partial types.go_zero_value type=func.sink.final_response_type}}, fbthriftFinalErr
+        } else if fbthriftFinalEx := fbthriftFinalResp.Exception(); fbthriftFinalEx != nil {
+            return {{#partial types.go_zero_value type=func.sink.final_response_type}}, fbthriftFinalEx
+        }
+        return fbthriftFinalResp.Get{{func.retval_field_name}}(), nil
+    }
+
+    return {{#if func.creates_interaction?}}fbthriftInteractionClient, {{/if}}{{#if func.sink_has_first_response?}}fbthriftFirstResp.Get{{func.retval_field_name}}(), {{/if}}fbthriftSinkCallback, nil
+}{{!
+}}{{/let partial}}
+
+{{#let export partial client_func_request_response |func svc| captures |types client_func_signature|}}{{!
+}}func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
+    fbthriftReq := &req{{svc.go_name}}{{func.go_name}}{
+        {{#each func.params.fields as |field|}}
+        {{field.go_name}}: {{field.go_arg_name}},
+        {{/each}}
+    }
+    {{#if func.creates_interaction?}}
+    fbthriftChannel := thrift.NewInteractionChannel(c.ch, "{{func.created_interaction.name}}")
+    fbthriftInteractionClient := New{{func.created_interaction.go_name}}ChannelClient(fbthriftChannel)
+    {{#else}}
+    fbthriftChannel := c.ch
+    {{/if func.creates_interaction?}}
+    fbthriftResp := newResp{{svc.go_name}}{{func.go_name}}()
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        {{func.ctx_arg_name}},
+        "{{#if svc.interaction?}}{{svc.name}}.{{/if}}{{func.name}}",
+        fbthriftReq,
+        fbthriftResp,
+    )
+    if fbthriftErr != nil {
+        return {{#if func.creates_interaction?}}nil, {{/if}}{{#if (not func.return_type.void?)}}{{#partial types.go_zero_value type=func.return_type}}, {{/if}}fbthriftErr
+    }
+    return {{#if func.creates_interaction?}}fbthriftInteractionClient, {{/if}}{{#if (not func.return_type.void?)}}fbthriftResp.Get{{func.retval_field_name}}(), {{/if}}nil
+}{{!
+}}{{/let partial}}
+
+{{#let export partial client_func_request_no_response |func svc| captures |client_func_signature|}}{{!
+}}func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
+    fbthriftReq := &req{{svc.go_name}}{{func.go_name}}{
+        {{#each func.params.fields as |field|}}
+        {{field.go_name}}: {{field.go_arg_name}},
+        {{/each}}
+    }
+    return c.ch.SendRequestNoResponse({{func.ctx_arg_name}}, "{{#if svc.interaction?}}{{svc.name}}.{{/if}}{{func.name}}", fbthriftReq)
+}{{!
+}}{{/let partial}}
+
+{{#let export partial client_func_request_stream |func svc| captures |types client_func_signature|}}{{!
+}}func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
+    {{#if func.stream_has_first_response?}}
+    var fbthriftRespZero {{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}
+    {{/if func.stream_has_first_response?}}
+    // Must be a cancellable context to prevent goroutine leaks
+    if {{func.ctx_arg_name}}.Done() == nil {
+		return {{#if func.creates_interaction?}}nil, {{/if}}{{#if func.stream_has_first_response?}}fbthriftRespZero, {{/if}}nil, errors.New("context does not support cancellation")
+	}
+    fbthriftStreamCtx, fbthriftStreamCancel := context.WithCancel({{func.ctx_arg_name}})
+
+    fbthriftReq := &req{{svc.go_name}}{{func.go_name}}{
+        {{#each func.params.fields as |field|}}
+        {{field.go_name}}: {{field.go_arg_name}},
+        {{/each}}
+    }
+    fbthriftResp := newResp{{svc.go_name}}{{func.go_name}}()
+
+    {{#if func.creates_interaction?}}
+    fbthriftChannel := thrift.NewInteractionChannel(c.ch, "{{func.created_interaction.name}}")
+    fbthriftInteractionClient := New{{func.created_interaction.go_name}}ChannelClient(fbthriftChannel)
+    {{#else}}
+    fbthriftChannel := c.ch
+    {{/if func.creates_interaction?}}
+
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStream{{svc.go_name}}{{func.go_name}}()
+    }
+
+    fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestStream(
+        fbthriftStreamCtx,
+        "{{#if svc.interaction?}}{{svc.name}}.{{/if}}{{func.name}}",
+        fbthriftReq,
+        fbthriftResp,
+        fbthriftNewStreamElemFn,
+    )
+    if fbthriftErr != nil {
+        fbthriftStreamCancel()
+        return {{#if func.creates_interaction?}}nil, {{/if}}{{#if func.stream_has_first_response?}}fbthriftRespZero, {{/if}}nil, fbthriftErr
+    }
+    fbthriftStreamSeqAdapter := func(yield func({{#if func.stream.elem_type.structured?}}*{{/if}}{{#partial types.go_type type=func.stream.elem_type}}, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield({{#partial types.go_zero_value type=func.stream.elem_type}}, err)
+                return
+            }
+            fbthriftRes := elem.(*stream{{svc.go_name}}{{func.go_name}})
+            if !yield(fbthriftRes.Get{{func.retval_field_name}}(), nil) {
+                return
+            }
+        }
+    }
+    return {{#if func.creates_interaction?}}fbthriftInteractionClient, {{/if}}{{#if func.stream_has_first_response?}}fbthriftResp.Get{{func.retval_field_name}}(), {{/if}}fbthriftStreamSeqAdapter, nil
+}{{!
+}}{{/let partial}}
+
+{{#let export partial client |svc| captures |types client_interface client_func_signature client_func_request_sink client_func_request_response client_func_request_no_response client_func_request_stream|}}{{!
+}}{{#partial client_interface svc=svc}}
+
+type {{svc.go_client_name}} struct {
+    {{#if svc.extends}}
     // Inherited/extended service
-    {{service:go_qualified_name}}Client
-    {{/service:extends}}
-    {{/service:extends?}}
+    {{svc.extends.go_qualified_name}}Client
+    {{/if svc.extends}}
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ {{service:go_name}}Client = (*{{service:go_client_name}})(nil)
+var _ {{svc.go_name}}Client = (*{{svc.go_client_name}})(nil)
 
-func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) {{service:go_name}}Client {
-    return &{{service:go_client_name}}{
-        {{#service:extends?}}
-        {{#service:extends}}
-        {{service:go_name}}Client: {{service:go_package_alias_prefix}}New{{service:go_name}}ChannelClient(channel),
-        {{/service:extends}}
-        {{/service:extends?}}
+func New{{svc.go_name}}ChannelClient(channel thrift.RequestChannel) {{svc.go_name}}Client {
+    return &{{svc.go_client_name}}{
+        {{#if svc.extends}}
+        {{svc.extends.go_name}}Client: {{svc.extends.go_package_alias_prefix}}New{{svc.extends.go_name}}ChannelClient(channel),
+        {{/if svc.extends}}
         ch: channel,
     }
 }
 
 func init() {
-    thrift.InternalRegisterClientConstructor[{{service:go_name}}Client](New{{service:go_name}}ChannelClient)
+    thrift.InternalRegisterClientConstructor[{{svc.go_name}}Client](New{{svc.go_name}}ChannelClient)
 }
 
-func (c *{{service:go_client_name}}) Close() error {
+func (c *{{svc.go_client_name}}) Close() error {
     return c.ch.Close()
 }
 
-{{#service:functions}}
-{{#function:go_client_supported?}}
-{{#if function:oneway?}}
-{{> svc/client_func_request_no_response}}
-{{#else if function:sink?}}
-{{> svc/client_func_request_sink}}
-{{#else if function:stream?}}
-{{> svc/client_func_request_stream}}
+{{#each svc.functions as |func|}}
+{{#if func.go_client_supported?}}
+{{#if func.oneway?}}
+{{#partial client_func_request_no_response func=func svc=svc}}
+{{#else if func.sink?}}
+{{#partial client_func_request_sink func=func svc=svc}}
+{{#else if func.stream?}}
+{{#partial client_func_request_stream func=func svc=svc}}
 {{#else}}
-{{> svc/client_func_request_response}}
-{{/if function:oneway?}}
+{{#partial client_func_request_response func=func svc=svc}}
+{{/if func.oneway?}}
+{{!newline}}
 
 
-{{/function:go_client_supported?}}
-{{/service:functions}}
+{{/if func.go_client_supported?}}
+{{/each}}
+{{/let partial}}

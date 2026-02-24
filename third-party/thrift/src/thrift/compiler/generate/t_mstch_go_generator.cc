@@ -14,28 +14,38 @@
  * limitations under the License.
  */
 
-#include <filesystem>
-#include <memory>
-#include <set>
 #include <string>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <fmt/format.h>
-#include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/generate/go/util.h>
-#include <thrift/compiler/generate/t_mstch_generator.h>
+#include <thrift/compiler/generate/t_whisker_generator.h>
+#include <thrift/compiler/generate/templates.h>
 
 namespace apache::thrift::compiler {
 
 namespace {
 
-class t_mstch_go_generator : public t_mstch_generator {
+class t_mstch_go_generator : public t_whisker_generator {
  public:
-  using t_mstch_generator::t_mstch_generator;
+  using t_whisker_generator::t_whisker_generator;
 
   std::string template_prefix() const override { return "go"; }
 
+  whisker::source_manager template_source_manager() const final {
+    return whisker::source_manager{
+        std::make_unique<in_memory_source_manager_backend>(
+            create_templates_by_path())};
+  }
+
   void generate_program() override;
+
+  strictness_options strictness() const override {
+    strictness_options strict;
+    strict.boolean_conditional = false;
+    strict.printable_types = false;
+    return strict;
+  }
 
  private:
   void initialize_context(context_visitor& visitor) override {
@@ -45,13 +55,13 @@ class t_mstch_go_generator : public t_mstch_generator {
     data_.compute_req_resp_structs();
     data_.compute_thrift_metadata_types();
 
-    if (auto gen_metadata = get_option("gen_metadata")) {
+    if (auto gen_metadata = get_compiler_option("gen_metadata")) {
       data_.gen_metadata = (gen_metadata.value() == "true");
     }
-    if (auto gen_default_get = get_option("gen_default_get")) {
+    if (auto gen_default_get = get_compiler_option("gen_default_get")) {
       data_.gen_default_get = (gen_default_get.value() == "true");
     }
-    if (auto use_reflect_codec = get_option("use_reflect_codec")) {
+    if (auto use_reflect_codec = get_compiler_option("use_reflect_codec")) {
       data_.use_reflect_codec = (use_reflect_codec.value() == "true");
     }
 
@@ -463,7 +473,7 @@ class t_mstch_go_generator : public t_mstch_generator {
 
   prototype<t_const>::ptr make_prototype_for_const(
       const prototype_database& proto) const override {
-    auto base = t_mstch_generator::make_prototype_for_const(proto);
+    auto base = t_whisker_generator::make_prototype_for_const(proto);
     auto def = whisker::dsl::prototype_builder<h_const>::extends(base);
 
     def.property("var?", [](const t_const& self) {
@@ -479,7 +489,7 @@ class t_mstch_go_generator : public t_mstch_generator {
 
   prototype<t_const_value>::ptr make_prototype_for_const_value(
       const prototype_database& proto) const override {
-    auto base = t_mstch_generator::make_prototype_for_const_value(proto);
+    auto base = t_whisker_generator::make_prototype_for_const_value(proto);
     auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
 
     def.property("go_quoted_value", [](const t_const_value& self) {
@@ -512,13 +522,13 @@ class t_mstch_go_generator : public t_mstch_generator {
 void t_mstch_go_generator::generate_program() {
   out_dir_base_ = "gen-go";
 
-  const auto& prog = cached_program(program_);
-  render_to_file(prog, "const.go", "const.go");
-  render_to_file(prog, "types.go", "types.go");
-  render_to_file(prog, "svcs.go", "svcs.go");
-  render_to_file(prog, "codec.go", "codec.go");
+  whisker::object context = whisker::make::map();
+  render_to_file("const.go", "const.go", context);
+  render_to_file("types.go", "types.go", context);
+  render_to_file("svcs.go", "svcs.go", context);
+  render_to_file("codec.go", "codec.go", context);
   if (data_.gen_metadata) {
-    render_to_file(prog, "metadata.go", "metadata.go");
+    render_to_file("metadata.go", "metadata.go", context);
   }
 }
 

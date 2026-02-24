@@ -47,6 +47,16 @@ void StressTestStats::log() const {
       memoryStats.p100);
   LOG(INFO) << fmt::format(
       "  Clients idle:        {} bytes", memoryStats.connectionsIdle);
+  if (rpcStats.totalCpuCycles > 0) {
+    LOG(INFO) << fmt::format(
+        "Total CPU cycles:      {}", rpcStats.totalCpuCycles);
+    if (rpcStats.numSuccess + rpcStats.numFailure > 0) {
+      LOG(INFO) << fmt::format(
+          "Avg CPU cycles/req:    {:.2f}",
+          static_cast<double>(rpcStats.totalCpuCycles) /
+              (rpcStats.numSuccess + rpcStats.numFailure));
+    }
+  }
 }
 
 } // namespace apache::thrift::stress

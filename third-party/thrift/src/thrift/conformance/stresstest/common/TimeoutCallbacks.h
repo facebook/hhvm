@@ -45,6 +45,7 @@ class WarmupDoneTimeout : public folly::HHWheelTimer::Callback {
     stats_.numSuccess = 0;
     stats_.numFailure = 0;
     stats_.latencyHistogram.clear();
+    stats_.totalCpuCycles = 0;
   }
 
  private:

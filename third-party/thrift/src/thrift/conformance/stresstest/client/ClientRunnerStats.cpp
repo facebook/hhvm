@@ -28,6 +28,7 @@ void ClientRpcStats::combine(const ClientRpcStats& other) {
   latencyHistogram.merge(other.latencyHistogram);
   numSuccess += other.numSuccess;
   numFailure += other.numFailure;
+  totalCpuCycles += other.totalCpuCycles;
 }
 
 void ClientThreadMemoryStats::combine(const ClientThreadMemoryStats& other) {

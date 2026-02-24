@@ -27,6 +27,7 @@ struct ClientRpcStats {
   folly::Histogram<double> latencyHistogram;
   uint64_t numSuccess{0};
   uint64_t numFailure{0};
+  uint64_t totalCpuCycles{0};
 };
 
 struct ClientThreadMemoryStats {

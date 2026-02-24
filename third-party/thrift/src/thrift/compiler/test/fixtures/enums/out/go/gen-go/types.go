@@ -29,7 +29,7 @@ const (
     IncludedEnumAlias_THIRD IncludedEnumAlias = includedEnum.IncludedEnum_THIRD
 )
 
-// Enum value maps for IncludedEnum
+// Enum value maps for IncludedEnumAlias
 var (
     IncludedEnumAliasToName  = includedEnum.IncludedEnumToName
     IncludedEnumAliasToValue = includedEnum.IncludedEnumToValue

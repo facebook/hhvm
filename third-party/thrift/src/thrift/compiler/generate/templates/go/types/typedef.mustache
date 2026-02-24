@@ -14,27 +14,73 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-
-  This template generates a thrift typedef
-
 }}
-{{#import "types/typedef_methods" as m_typedef_methods}}
-type {{typedef:go_name}} = {{#typedef:type}}{{#partial types.go_type type=type:self}}{{/typedef:type}}
-{{#typedef:type}}
-{{#type:enum?}}
-{{#type:enum}}
+{{#import "common/type" as types}}
+{{#import "codec/codec" as codec}}
 
-{{> types/typedef_enum}}
-{{/type:enum}}
-{{/type:enum?}}
-{{/typedef:type}}
+{{! Typedef enum constants, value maps, and compat functions. }}
+{{#let export partial typedef_enum |typedef|}}
+const (
+{{#each typedef.true_type.values as |ev|}}
+    {{typedef.go_name}}_{{ev.name}} {{typedef.go_name}} = {{typedef.resolved.go_qualified_name}}_{{ev.name}}
+{{/each}}
+)
+
+// Enum value maps for {{typedef.go_name}}
+var (
+    {{typedef.go_name}}ToName  = {{typedef.resolved.go_qualified_name}}ToName
+    {{typedef.go_name}}ToValue = {{typedef.resolved.go_qualified_name}}ToValue
+)
+{{#if typedef.program.compat?}}
+
+// Deprecated: Use {{typedef.go_name}}ToValue instead (e.g. `x, ok := {{typedef.go_name}}ToValue["name"]`).
+func {{typedef.go_name}}FromString(s string) ({{typedef.go_name}}, error) {
+    return {{typedef.resolved.go_qualified_name}}FromString(s)
+}
+{{/if typedef.program.compat?}}
+{{/let partial}}
+
+{{! New*() }}
+{{#let export partial new |typedef| captures |types|}}
+func {{typedef.go_qualified_new_func}}() {{#if typedef.resolved.structured?}}*{{/if}}{{typedef.go_name}} {
+    return {{#partial types.natural_default_value type=typedef.resolved}}
+}
+{{/let partial}}
+
+{{! Write() }}
+{{#let export partial write |typedef| captures |codec|}}
+func {{typedef.go_qualified_write_func}}(item {{#if typedef.resolved.structured?}}*{{/if}}{{typedef.go_name}}, p thrift.Encoder) error {
+    {{#partial codec.encode type=typedef.resolved}}
+    return nil
+}
+{{/let partial}}
+
+{{! Read() }}
+{{#let export partial read |typedef| captures |codec|}}
+func {{typedef.go_qualified_read_func}}(p thrift.Decoder) ({{#if typedef.resolved.structured?}}*{{/if}}{{typedef.go_name}}, error) {
+    var decodeResult {{#if typedef.resolved.structured?}}*{{/if}}{{typedef.go_name}}
+    decodeErr := func() error {
+        {{#partial codec.decode type=typedef.resolved}}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+{{/let partial}}
+
+{{#let export partial typedef |t| captures |types codec typedef_enum new write read|}}
+type {{t.go_name}} = {{#partial types.go_type type=t.resolved}}
+{{#if t.true_type.enum?}}
+
+{{#partial typedef_enum typedef=t}}
+{{/if t.true_type.enum?}}
 
 {{! new function }}
-{{#partial m_typedef_methods.new typedef=typedef:self}}
+{{#partial new typedef=t}}
 
 {{! write (serialize) }}
-{{#partial m_typedef_methods.write typedef=typedef:self}}
+{{#partial write typedef=t}}
 
 {{! read (deserialize) }}
-{{#partial m_typedef_methods.read typedef=typedef:self}}
+{{#partial read typedef=t}}
+{{/let partial}}

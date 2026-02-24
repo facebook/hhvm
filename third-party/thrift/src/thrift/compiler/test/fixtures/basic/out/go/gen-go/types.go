@@ -26,7 +26,7 @@ const (
     MyEnumAlias_MyValue2 MyEnumAlias = MyEnum_MyValue2
 )
 
-// Enum value maps for MyEnum
+// Enum value maps for MyEnumAlias
 var (
     MyEnumAliasToName  = MyEnumToName
     MyEnumAliasToValue = MyEnumToValue

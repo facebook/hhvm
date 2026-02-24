@@ -29,7 +29,7 @@ const (
     MyCompany___FRIEND__FEED MyCompany = Company___FRIEND__FEED
 )
 
-// Enum value maps for Company
+// Enum value maps for MyCompany
 var (
     MyCompanyToName  = CompanyToName
     MyCompanyToValue = CompanyToValue

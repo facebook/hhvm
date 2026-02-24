@@ -774,7 +774,7 @@ const (
     AdaptedEnum_One AdaptedEnum = ThriftAdaptedEnum_One
 )
 
-// Enum value maps for ThriftAdaptedEnum
+// Enum value maps for AdaptedEnum
 var (
     AdaptedEnumToName  = ThriftAdaptedEnumToName
     AdaptedEnumToValue = ThriftAdaptedEnumToValue

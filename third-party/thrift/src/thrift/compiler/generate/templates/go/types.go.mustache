@@ -19,6 +19,7 @@
 {{#import "codec/codec" as codec}}
 {{#import "types/field" as m_field}}
 {{#import "types/struct" as m_struct}}
+{{#import "types/typedef" as m_typedef}}
 {{> common/auto_generated_go}}
 
 package {{program:go_pkg_name}}
@@ -51,7 +52,7 @@ var _ = metadata.GoUnusedProtection__
 
 {{! Typedefs }}
 {{#program:typedefs}}
-{{> types/typedef}}
+{{#partial m_typedef.typedef t=typedef:self}}
 
 {{/program:typedefs}}
 {{! Enums }}

@@ -956,96 +956,6 @@ class t_mstch_rust_generator : public t_mstch_generator {
   void set_mstch_factories();
   rust_codegen_options options_;
   std::unique_ptr<rust_generator_context> rust_context_;
-
-  // Split mode state: per-render split_id set in generate_split_types().
-  // Mutable because Whisker property lambdas capture `this` as const
-  // (make_prototype_for_program is const override), but these are runtime
-  // state set before each render call, not part of the prototype's logical
-  // const-ness.
-  mutable int current_split_id_ = 0;
-  mutable std::map<int, std::vector<t_structured*>> struct_split_assignments_;
-  mutable std::map<int, std::vector<t_typedef*>> typedef_split_assignments_;
-  mutable std::map<int, std::vector<t_enum*>> enum_split_assignments_;
-
-  void initialize_type_splits() {
-    std::set<const t_named*> all_types;
-    std::set<const t_named*> dependent_types;
-    // Collect all types in this program
-    for (const t_enum* enm : program_->enums()) {
-      all_types.insert(enm);
-    }
-    for (const t_typedef* typedf : program_->typedefs()) {
-      all_types.insert(typedf);
-    }
-    for (const t_structured* strct : program_->structured_definitions()) {
-      all_types.insert(strct);
-    }
-
-    // Helper to check if a type is defined within the current crate
-    auto generate_reference_set = [&all_types, &dependent_types](
-                                      auto& self, const t_type* type) -> bool {
-      if (!type) {
-        return false;
-      }
-      bool dependent = false;
-      if (all_types.count(type)) {
-        dependent_types.insert(type);
-        dependent = true;
-      } else if (const t_list* list_type = dynamic_cast<const t_list*>(type)) {
-        dependent = self(self, list_type->elem_type().get_type());
-      } else if (const t_set* set_type = dynamic_cast<const t_set*>(type)) {
-        dependent = self(self, set_type->elem_type().get_type());
-      } else if (const t_map* map_type = dynamic_cast<const t_map*>(type)) {
-        bool key = self(self, &map_type->key_type().deref());
-        bool val = self(self, &map_type->val_type().deref());
-        dependent = key || val;
-      }
-      return dependent;
-    };
-
-    // Identify dependencies within types
-    for (t_typedef* typedf : program_->typedefs()) {
-      if (generate_reference_set(
-              generate_reference_set, &typedf->type().deref()) ||
-          (typedef_has_constructor_expression(typedf))) {
-        dependent_types.insert(typedf);
-      }
-    }
-    for (t_structured* strct : program_->structured_definitions()) {
-      for (const t_field& field : strct->fields()) {
-        if (generate_reference_set(
-                generate_reference_set, field.type().get_type())) {
-          dependent_types.insert(strct);
-        }
-      }
-    }
-
-    // Generate split assignments
-    auto next = [counter = 0, this]() mutable {
-      return ((counter++) % options_.types_split_count) + 1;
-    };
-    for (t_typedef* typedf : program_->typedefs()) {
-      if (dependent_types.count(typedf)) {
-        typedef_split_assignments_[0].emplace_back(typedf);
-      } else {
-        typedef_split_assignments_[next()].emplace_back(typedf);
-      }
-    }
-    for (t_structured* strct : program_->structured_definitions()) {
-      if (dependent_types.count(strct)) {
-        struct_split_assignments_[0].emplace_back(strct);
-      } else {
-        struct_split_assignments_[next()].emplace_back(strct);
-      }
-    }
-    for (t_enum* enm : program_->enums()) {
-      if (dependent_types.count(enm)) {
-        enum_split_assignments_[0].emplace_back(enm);
-      } else {
-        enum_split_assignments_[next()].emplace_back(enm);
-      }
-    }
-  }
   whisker::map::raw globals(prototype_database& proto) const override {
     whisker::map::raw globals = t_mstch_generator::globals(proto);
     globals["rust_annotation_name"] = whisker::dsl::make_function(
@@ -1451,50 +1361,15 @@ class t_mstch_rust_generator : public t_mstch_generator {
       return type_has_transitive_adapter(curr_type, false);
     });
     def.property("adapter_name", [this](const t_type& self) {
-      auto adapter_annotation = find_structured_adapter_annotation(self);
-      if (auto* td = self.try_as<t_typedef>()) {
-        return compute_adapter_name(
-            adapter_annotation, &td->type().deref(), false, options_);
-      }
-      bool ignore_transitive = self.is<t_structured>();
-      return compute_adapter_name(
-          adapter_annotation, &self, ignore_transitive, options_);
+      return compute_adapter_name(nullptr, &self, false, options_);
     });
     def.property("adapter_qualified", [this](const t_type& self) {
       return compute_adapter_qualified(nullptr, &self, false, options_);
     });
-    // Type sub-object accessors (migrated from mstch_type)
+    // Type sub-object accessor (migrated from mstch_type)
     def.property("typedef", [&proto](const t_type& self) -> whisker::object {
       if (auto* td = self.try_as<t_typedef>()) {
         return resolve_derived_t_type(proto, *td);
-      }
-      return whisker::make::null;
-    });
-    // These accessors follow typedefs (get_true_type) to match the mstch
-    // behavior of mstch_type, which stores resolved_type_ = get_true_type().
-    def.property(
-        "list_elem_type", [&proto](const t_type& self) -> whisker::object {
-          if (auto* list = self.get_true_type()->try_as<t_list>()) {
-            return resolve_derived_t_type(proto, list->elem_type().deref());
-          }
-          return whisker::make::null;
-        });
-    def.property(
-        "set_elem_type", [&proto](const t_type& self) -> whisker::object {
-          if (auto* set = self.get_true_type()->try_as<t_set>()) {
-            return resolve_derived_t_type(proto, set->elem_type().deref());
-          }
-          return whisker::make::null;
-        });
-    def.property("key_type", [&proto](const t_type& self) -> whisker::object {
-      if (auto* map = self.get_true_type()->try_as<t_map>()) {
-        return resolve_derived_t_type(proto, map->key_type().deref());
-      }
-      return whisker::make::null;
-    });
-    def.property("value_type", [&proto](const t_type& self) -> whisker::object {
-      if (auto* map = self.get_true_type()->try_as<t_map>()) {
-        return resolve_derived_t_type(proto, map->val_type().deref());
       }
       return whisker::make::null;
     });
@@ -1505,9 +1380,6 @@ class t_mstch_rust_generator : public t_mstch_generator {
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_typedef(proto);
     auto def = whisker::dsl::prototype_builder<h_typedef>::extends(base);
-    def.property("type", [&proto](const t_typedef& self) {
-      return resolve_derived_t_type(proto, self.type().deref());
-    });
     def.property("newtype?", [](const t_typedef& self) {
       return has_newtype_annotation(&self);
     });
@@ -1799,101 +1671,6 @@ class t_mstch_rust_generator : public t_mstch_generator {
     def.property("requestContext?", [](const t_service& self) {
       return self.has_structured_annotation(kRustRequestContextUri);
     });
-    def.property("extendedClients", [this, &proto](const t_service& self) {
-      whisker::array::raw extended_services;
-      const t_service* service = &self;
-      std::string as_ref_impl = "&self.parent";
-      while (const t_service* parent_service = service->extends()) {
-        whisker::map::raw node;
-        node["extendedService:packagePrefix"] = whisker::make::string(
-            get_client_import_name(parent_service->program(), options_));
-        node["extendedService:asRefImpl"] = whisker::make::string(as_ref_impl);
-        node["extendedService:service"] =
-            whisker::object(proto.create<t_service>(*parent_service));
-        extended_services.emplace_back(whisker::make::map(std::move(node)));
-        as_ref_impl = "self.parent.as_ref()";
-        service = parent_service;
-      }
-      return whisker::make::array(std::move(extended_services));
-    });
-    def.property("rust_exceptions", [&proto](const t_service& self) {
-      struct name_less {
-        bool operator()(const t_type* lhs, const t_type* rhs) const {
-          return lhs->get_scoped_name() < rhs->get_scoped_name();
-        }
-      };
-      enum exception_source_enum {
-        FUNCTION = 1,
-        SINK = 2,
-        STREAM = 3,
-      };
-      struct exception_source {
-        exception_source_enum source_enum;
-        const t_function* function;
-        const t_field* field;
-      };
-      using sources_t = std::vector<exception_source>;
-      using source_map_t = std::map<const t_type*, sources_t, name_less>;
-
-      source_map_t source_map;
-
-      for (const auto& fun : self.functions()) {
-        for (const t_field& fld : get_elems(fun.exceptions())) {
-          source_map[&fld.type().deref()].push_back(
-              exception_source{
-                  .source_enum = FUNCTION, .function = &fun, .field = &fld});
-        }
-        if (fun.stream()) {
-          for (const t_field& fld : get_elems(fun.stream()->exceptions())) {
-            source_map[&fld.type().deref()].push_back(
-                exception_source{
-                    .source_enum = STREAM, .function = &fun, .field = &fld});
-          }
-        }
-        if (fun.sink()) {
-          for (const t_field& fld : get_elems(fun.sink()->sink_exceptions())) {
-            source_map[&fld.type().deref()].push_back(
-                exception_source{
-                    .source_enum = SINK, .function = &fun, .field = &fld});
-          }
-        }
-      }
-
-      whisker::array::raw output;
-      for (const auto& sources : source_map) {
-        whisker::array::raw function_data;
-        whisker::array::raw stream_data;
-        whisker::array::raw sink_data;
-        for (const auto& source : sources.second) {
-          whisker::map::raw inner;
-          inner["rust_exception_function:function"] =
-              whisker::object(proto.create<t_function>(*source.function));
-          inner["rust_exception_function:field"] =
-              whisker::object(proto.create<t_field>(*source.field));
-          auto entry = whisker::make::map(std::move(inner));
-          if (source.source_enum == FUNCTION) {
-            function_data.emplace_back(std::move(entry));
-          } else if (source.source_enum == STREAM) {
-            stream_data.emplace_back(std::move(entry));
-          } else if (source.source_enum == SINK) {
-            sink_data.emplace_back(std::move(entry));
-          }
-        }
-
-        whisker::map::raw data;
-        data["rust_exception:type"] =
-            resolve_derived_t_type(proto, *sources.first);
-        data["rust_exception:functions"] =
-            whisker::make::array(std::move(function_data));
-        data["rust_exception:streams"] =
-            whisker::make::array(std::move(stream_data));
-        data["rust_exception:sinks"] =
-            whisker::make::array(std::move(sink_data));
-        output.emplace_back(whisker::make::map(std::move(data)));
-      }
-
-      return whisker::make::array(std::move(output));
-    });
     return std::move(def).make();
   }
 
@@ -2028,57 +1805,6 @@ class t_mstch_rust_generator : public t_mstch_generator {
       }
       return upcamel_name;
     });
-    // Helper for unique exception field filtering — finds exceptions whose
-    // type appears exactly once (used for From<> impls where duplicate types
-    // would conflict).
-    auto make_unique = [&proto](const t_structured* s) {
-      std::vector<const t_field*> unique_exceptions;
-      if (s) {
-        const auto& exceptions = s->fields();
-        std::map<const t_type*, unsigned> type_count;
-        for (const auto& x : exceptions) {
-          type_count[x.type().get_type()] += 1;
-        }
-        for (const auto& x : exceptions) {
-          if (type_count.at(x.type().get_type()) == 1) {
-            unique_exceptions.emplace_back(&x);
-          }
-        }
-      }
-      return to_array(unique_exceptions, proto.of<t_field>());
-    };
-    def.property("index", [this](const t_function& self) {
-      const t_interface* parent = context().get_function_parent(&self);
-      if (!parent) {
-        return whisker::i64(0);
-      }
-      whisker::i64 idx = 0;
-      for (const auto& f : parent->functions()) {
-        if (&f == &self) {
-          return idx;
-        }
-        ++idx;
-      }
-      return whisker::i64(0);
-    });
-    def.property("uniqueExceptions", [make_unique](const t_function& self) {
-      return make_unique(self.exceptions());
-    });
-    def.property(
-        "uniqueStreamExceptions", [make_unique](const t_function& self) {
-          const t_stream* stream = self.stream();
-          return make_unique(stream ? stream->exceptions() : nullptr);
-        });
-    def.property("uniqueSinkExceptions", [make_unique](const t_function& self) {
-      const t_sink* sink = self.sink();
-      return make_unique(sink ? sink->sink_exceptions() : nullptr);
-    });
-    def.property(
-        "uniqueSinkFinalExceptions", [make_unique](const t_function& self) {
-          const t_sink* sink = self.sink();
-          return make_unique(
-              sink ? sink->final_response_exceptions() : nullptr);
-        });
     return std::move(def).make();
   }
 
@@ -2237,203 +1963,381 @@ class t_mstch_rust_generator : public t_mstch_generator {
       }
       return to_array(structs, proto.of<t_structured>());
     });
-    def.property("adapters", [&proto](const t_program& self) {
-      whisker::array::raw result;
-      for (const t_structured* strct : self.structs_and_unions()) {
-        if (node_has_adapter(*strct)) {
-          result.emplace_back(resolve_derived_t_type(proto, *strct));
-        }
-      }
-      for (const t_typedef* t : self.typedefs()) {
-        if (node_has_adapter(*t)) {
-          result.emplace_back(resolve_derived_t_type(proto, *t));
-        }
-      }
-      return whisker::make::array(std::move(result));
-    });
-    def.property("adapted_structs", [&proto](const t_program& self) {
-      std::vector<const t_structured*> structs;
-      for (const t_structured* strct : self.structs_and_unions()) {
-        if (node_has_adapter(*strct)) {
-          structs.push_back(strct);
-        }
-      }
-      return to_array(structs, proto.of<t_structured>());
-    });
-    def.property("nonstandardTypes", [&proto](const t_program& self) {
-      // Collect types with nonstandard type annotations (annotation contains
-      // "::"), sorted by annotation then resolved name for deterministic
-      // output.
-      struct type_less {
-        bool operator()(const t_type* lhs, const t_type* rhs) const {
-          std::string la = get_type_annotation(lhs);
-          std::string ra = get_type_annotation(rhs);
-          if (la != ra) {
-            return la < ra;
-          }
-          return get_resolved_name(lhs) < get_resolved_name(rhs);
-        }
-      };
-      std::set<const t_type*, type_less> types;
-      // Struct field types
-      for (const t_structured* strct : self.structs_and_unions()) {
-        for (const auto& field : strct->fields()) {
-          const t_type* type = field.type().get_type();
-          if (has_nonstandard_type_annotation(type)) {
-            types.insert(type);
-          }
-        }
-      }
-      // Service function param/return types
-      for (const auto* service : self.services()) {
-        for (const auto& function : service->functions()) {
-          for (const auto& param : function.params().fields()) {
-            const t_type* type = param.type().get_type();
-            if (has_nonstandard_type_annotation(type)) {
-              types.insert(type);
-            }
-          }
-          const t_type* ret = function.return_type().get_type();
-          if (has_nonstandard_type_annotation(ret)) {
-            types.insert(ret);
-          }
-        }
-      }
-      // Typedefs
-      for (const t_typedef* t : self.typedefs()) {
-        if (has_nonstandard_type_annotation(t)) {
-          types.insert(t);
-        }
-      }
-      whisker::array::raw result;
-      for (const t_type* type : types) {
-        result.emplace_back(resolve_derived_t_type(proto, *type));
-      }
-      return whisker::make::array(std::move(result));
-    });
-    def.property("nonstandardFields", [&proto](const t_program& self) {
-      // Collect fields with nonstandard type annotations whose resolved
-      // type name is not already covered by nonstandardTypes.
-      struct type_less_t {
-        bool operator()(const t_type* lhs, const t_type* rhs) const {
-          std::string la = get_type_annotation(lhs);
-          std::string ra = get_type_annotation(rhs);
-          if (la != ra) {
-            return la < ra;
-          }
-          return get_resolved_name(lhs) < get_resolved_name(rhs);
-        }
-      };
-      struct field_less {
-        bool operator()(const t_field* lhs, const t_field* rhs) const {
-          std::string la = get_type_annotation(lhs);
-          std::string ra = get_type_annotation(rhs);
-          if (la != ra) {
-            return la < ra;
-          }
-          return get_resolved_name(lhs) < get_resolved_name(rhs);
-        }
-      };
-      // First, compute the set of resolved names from nonstandardTypes.
-      std::set<const t_type*, type_less_t> types;
-      for (const t_structured* strct : self.structs_and_unions()) {
-        for (const auto& field : strct->fields()) {
-          const t_type* type = field.type().get_type();
-          if (has_nonstandard_type_annotation(type)) {
-            types.insert(type);
-          }
-        }
-      }
-      for (const auto* service : self.services()) {
-        for (const auto& function : service->functions()) {
-          for (const auto& param : function.params().fields()) {
-            const t_type* type = param.type().get_type();
-            if (has_nonstandard_type_annotation(type)) {
-              types.insert(type);
-            }
-          }
-          const t_type* ret = function.return_type().get_type();
-          if (has_nonstandard_type_annotation(ret)) {
-            types.insert(ret);
-          }
-        }
-      }
-      for (const t_typedef* t : self.typedefs()) {
-        if (has_nonstandard_type_annotation(t)) {
-          types.insert(t);
-        }
-      }
-      std::set<std::string> names;
-      std::transform(
-          types.begin(),
-          types.end(),
-          std::inserter(names, names.end()),
-          [](const t_type* t) { return get_resolved_name(t); });
-      // Now collect fields not covered by those names.
-      std::set<const t_field*, field_less> fields;
-      for (const t_structured* strct : self.structs_and_unions()) {
-        for (const auto& field : strct->fields()) {
-          if (has_nonstandard_type_annotation(&field)) {
-            if (names.find(get_resolved_name(&field.type().deref())) ==
-                names.end()) {
-              fields.insert(&field);
-            }
-          }
-        }
-      }
-      std::vector<const t_field*> result(fields.begin(), fields.end());
-      return to_array(result, proto.of<t_field>());
-    });
-    def.property("type_splits", [this](const t_program&) {
-      whisker::array::raw splits;
-      for (int i = 0; i <= options_.types_split_count; i++) {
-        splits.emplace_back(whisker::i64(i));
-      }
-      return whisker::make::array(std::move(splits));
-    });
-    def.property("types_with_constructors", [this](const t_program& self) {
-      std::set<std::string> types;
-      std::vector<t_enum*> enums;
-      std::vector<t_typedef*> typedefs;
-      if (options_.types_split_count > 0) {
-        enums = enum_split_assignments_[current_split_id_];
-        typedefs = typedef_split_assignments_[current_split_id_];
-      } else {
-        enums = self.enums();
-        typedefs = self.typedefs();
-      }
-      for (const t_enum* t : enums) {
-        types.insert(type_rust_name(t));
-      }
-      for (const t_typedef* t : typedefs) {
-        if (typedef_has_constructor_expression(t)) {
-          types.insert(type_rust_name(t));
-        }
-      }
-      whisker::array::raw result;
-      for (const auto& name : types) {
-        result.emplace_back(whisker::make::string(name));
-      }
-      return whisker::make::array(std::move(result));
-    });
-    def.property("current_split_structs", [this, &proto](const t_program&) {
-      return to_array(
-          struct_split_assignments_[current_split_id_],
-          proto.of<t_structured>());
-    });
-    def.property("current_split_typedefs", [this, &proto](const t_program&) {
-      return to_array(
-          typedef_split_assignments_[current_split_id_], proto.of<t_typedef>());
-    });
-    def.property("current_split_enums", [this, &proto](const t_program&) {
-      return to_array(
-          enum_split_assignments_[current_split_id_], proto.of<t_enum>());
-    });
     return std::move(def).make();
   }
 };
 
-class rust_mstch_interaction : public mstch_service {
+class rust_mstch_program : public mstch_program {
+ public:
+  rust_mstch_program(
+      const t_program* program,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const rust_codegen_options* options,
+      const int split_id = 0)
+      : mstch_program(program, ctx, pos),
+        options_(*options),
+        split_id_(split_id) {
+    register_methods(
+        this,
+        {
+            {"program:nonstandardTypes",
+             &rust_mstch_program::rust_nonstandard_types},
+            {"program:nonstandardFields",
+             &rust_mstch_program::rust_nonstandard_fields},
+            {"program:adapted_structs",
+             &rust_mstch_program::rust_adapted_structs},
+            {"program:adapters", &rust_mstch_program::rust_adapters},
+            {"program:types_with_constructors",
+             &rust_mstch_program::rust_types_with_constructors},
+            {"program:current_split_structs",
+             &rust_mstch_program::current_split_structs},
+            {"program:current_split_typedefs",
+             &rust_mstch_program::current_split_typedefs},
+            {"program:current_split_enums",
+             &rust_mstch_program::current_split_enums},
+            {"program:type_splits", &rust_mstch_program::type_splits},
+        });
+
+    // Generate type split data if split count option is provided.
+    if (options_.types_split_count) {
+      initialize_type_split();
+      generate_split_data();
+    }
+  }
+
+  template <typename F>
+  void foreach_field(F&& f) const {
+    for (const t_structured* strct : program_->structs_and_unions()) {
+      for (const auto& field : strct->fields()) {
+        f(&field);
+      }
+    }
+  }
+  template <typename F>
+  void foreach_type(F&& f) const {
+    for (const t_structured* strct : program_->structs_and_unions()) {
+      for (const auto& field : strct->fields()) {
+        f(field.type().get_type());
+      }
+    }
+    for (const auto* service : program_->services()) {
+      for (const auto& function : service->functions()) {
+        for (const auto& param : function.params().fields()) {
+          f(param.type().get_type());
+        }
+        f(function.return_type().get_type());
+      }
+    }
+    for (auto typedf : program_->typedefs()) {
+      f(typedf);
+    }
+  }
+  mstch::node rust_nonstandard_types() {
+    types_set_t types = nonstandard_types();
+    return make_mstch_types(
+        std::vector<const t_type*>(types.begin(), types.end()));
+  }
+  mstch::node rust_nonstandard_fields() {
+    fields_set_t fields = nonstandard_fields();
+    return make_mstch_fields(
+        std::vector<const t_field*>(fields.begin(), fields.end()));
+  }
+  mstch::node rust_adapted_structs() {
+    mstch::array strcts;
+
+    for (const t_structured* strct : program_->structs_and_unions()) {
+      if (node_has_adapter(*strct)) {
+        strcts.emplace_back(
+            context_.struct_factory->make_mstch_object(strct, context_, pos_));
+      }
+    }
+
+    return strcts;
+  }
+
+  mstch::node rust_adapters() {
+    mstch::array types_with_direct_adapters;
+
+    for (const t_structured* strct : program_->structs_and_unions()) {
+      if (node_has_adapter(*strct)) {
+        types_with_direct_adapters.emplace_back(
+            context_.type_factory->make_mstch_object(strct, context_, pos_));
+      }
+    }
+
+    for (const t_typedef* t : program_->typedefs()) {
+      if (node_has_adapter(*t)) {
+        types_with_direct_adapters.emplace_back(
+            context_.type_factory->make_mstch_object(t, context_, pos_));
+      }
+    }
+
+    return types_with_direct_adapters;
+  }
+
+  mstch::node rust_types_with_constructors() {
+    // Names that this Thrift crate defines in both the type namespace and value
+    // namespace. This is the case for enums, where `E` is a type and `E(0)` is
+    // an expression, and for newtype typedefs, where `T` is a type and
+    // `T(inner)` is an expression, and also for non-newtype typedefs referring
+    // to these.
+    std::set<std::string> types;
+    std::vector<t_enum*> enums;
+    std::vector<t_typedef*> typedefs;
+    if (options_.types_split_count > 0) {
+      enums = enum_split_assignments_[split_id_];
+      typedefs = typedef_split_assignments_[split_id_];
+    } else {
+      enums = program_->enums();
+      typedefs = program_->typedefs();
+    }
+
+    for (const t_enum* t : enums) {
+      types.insert(type_rust_name(t));
+    }
+    for (const t_typedef* t : typedefs) {
+      if (typedef_has_constructor_expression(t)) {
+        types.insert(type_rust_name(t));
+      }
+    }
+    return mstch::array(types.begin(), types.end());
+  }
+
+  mstch::node current_split_structs() {
+    std::string id =
+        program_cache_id(program_, get_program_namespace(program_));
+    return make_mstch_array_cached(
+        struct_split_assignments_[split_id_],
+        *context_.struct_factory,
+        context_.struct_cache,
+        id);
+  }
+
+  mstch::node current_split_typedefs() {
+    return make_mstch_typedefs(typedef_split_assignments_[split_id_]);
+  }
+
+  mstch::node current_split_enums() {
+    std::string id =
+        program_cache_id(program_, get_program_namespace(program_));
+    return make_mstch_array_cached(
+        enum_split_assignments_[split_id_],
+        *context_.enum_factory,
+        context_.enum_cache,
+        id);
+  }
+
+  mstch::node type_splits() {
+    mstch::array split_indices(options_.types_split_count + 1);
+    for (int i = 0; i < options_.types_split_count + 1; i++) {
+      split_indices[i] = i;
+    }
+    return split_indices;
+  }
+
+ private:
+  const rust_codegen_options& options_;
+  const int split_id_;
+  std::map<int, std::vector<t_structured*>> struct_split_assignments_;
+  std::map<int, std::vector<t_typedef*>> typedef_split_assignments_;
+  std::map<int, std::vector<t_enum*>> enum_split_assignments_;
+  std::set<const t_named*> all_types;
+  std::set<const t_named*> dependent_types;
+
+  void initialize_type_split() {
+    // Collect all types in this program
+    for (const t_enum* enm : program_->enums()) {
+      all_types.insert(enm);
+    }
+    for (const t_typedef* typedf : program_->typedefs()) {
+      all_types.insert(typedf);
+    }
+    for (const t_structured* strct : program_->structured_definitions()) {
+      all_types.insert(strct);
+    }
+
+    // Identify dependencies within types
+    for (t_typedef* typedf : program_->typedefs()) {
+      if (generate_reference_set(&typedf->type().deref()) ||
+          (typedef_has_constructor_expression(typedf))) {
+        dependent_types.insert(typedf);
+      }
+    }
+    for (t_structured* strct : program_->structured_definitions()) {
+      for (const t_field& field : strct->fields()) {
+        if (generate_reference_set(field.type().get_type())) {
+          dependent_types.insert(strct);
+        }
+      }
+    }
+  }
+
+  void generate_split_data() {
+    auto next = [counter = 0, this]() mutable {
+      return ((counter++) % options_.types_split_count) + 1;
+    };
+    for (t_typedef* typedf : program_->typedefs()) {
+      if (dependent_types.count(typedf)) {
+        // place all dependent types in the first chunk
+        typedef_split_assignments_[0].emplace_back(typedf);
+      } else {
+        // place independent type in a shard that isn't zero
+        typedef_split_assignments_[next()].emplace_back(typedf);
+      }
+    }
+
+    for (t_structured* strct : program_->structured_definitions()) {
+      if (dependent_types.count(strct)) {
+        // place all dependent types in the first chunk
+        struct_split_assignments_[0].emplace_back(strct);
+      } else {
+        // place independent type in a shard that isn't zero
+        struct_split_assignments_[next()].emplace_back(strct);
+      }
+    }
+
+    for (t_enum* enm : program_->enums()) {
+      if (dependent_types.count(enm)) {
+        // place all dependent types in the first chunk
+        enum_split_assignments_[0].emplace_back(enm);
+      } else {
+        // place independent type in a shard that isn't zero
+        enum_split_assignments_[next()].emplace_back(enm);
+      }
+    }
+  }
+
+  // This function checks to see if a type is defined within the current crate
+  // by checking the `all_types` set for membership. If the type is within the
+  // `all_types` set, it adds the type to the `dependent_types` set and returns
+  // true. This function's return value is used to determine if the parent type
+  // needs to be added to the `dependent_types` set
+  bool generate_reference_set(const t_type* type) {
+    if (!type) {
+      return false;
+    }
+
+    bool dependent = false;
+
+    // Check if the type is defined within the current crate. If it is, add the
+    // type to the dependent type set.
+    if (all_types.count(type)) {
+      dependent_types.insert(type);
+      dependent = true;
+    }
+    // Recursively check container types
+    else if (const t_list* list_type = dynamic_cast<const t_list*>(type)) {
+      dependent = generate_reference_set(list_type->elem_type().get_type());
+    } else if (const t_set* set_type = dynamic_cast<const t_set*>(type)) {
+      dependent = generate_reference_set(set_type->elem_type().get_type());
+    } else if (const t_map* map_type = dynamic_cast<const t_map*>(type)) {
+      bool dependent_map_key =
+          generate_reference_set(&map_type->key_type().deref());
+      bool dependent_map_val =
+          generate_reference_set(&map_type->val_type().deref());
+      dependent = dependent_map_key || dependent_map_val;
+    }
+    return dependent;
+  }
+
+ private:
+  template <class T>
+  struct rust_type_less {
+    bool operator()(const T* lhs, const T* rhs) const {
+      std::string lhs_annotation = get_type_annotation(lhs);
+      std::string rhs_annotation = get_type_annotation(rhs);
+      if (lhs_annotation != rhs_annotation) {
+        return lhs_annotation < rhs_annotation;
+      }
+      return get_resolved_name(lhs) < get_resolved_name(rhs);
+    }
+  };
+  using strings_set_t = std::set<std::string>;
+  using types_set_t = std::set<const t_type*, rust_type_less<t_type>>;
+  using fields_set_t = std::set<const t_field*, rust_type_less<t_field>>;
+
+ private:
+  types_set_t nonstandard_types() {
+    types_set_t types;
+    foreach_type([&](const t_type* type) {
+      if (has_nonstandard_type_annotation(type)) {
+        types.insert(type);
+      }
+    });
+    return types;
+  }
+  // Collect fields with nonstandard types not contained by
+  // `nonstandard_types()` (avoid generating multiple definitions for the same
+  // type).
+  fields_set_t nonstandard_fields() {
+    fields_set_t fields;
+    strings_set_t names;
+    types_set_t types = nonstandard_types();
+    std::transform(
+        types.begin(),
+        types.end(),
+        std::inserter(names, names.end()),
+        [](const t_type* t) { return get_resolved_name(t); });
+    foreach_field([&](const t_field* field) {
+      if (has_nonstandard_type_annotation(field)) {
+        if (names.find(get_resolved_name(&field->type().deref())) ==
+            names.end()) {
+          fields.insert(field);
+        }
+      }
+    });
+    return fields;
+  }
+};
+
+class rust_mstch_service : public mstch_service {
+ public:
+  rust_mstch_service(
+      const t_service* service,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const rust_codegen_options* options,
+      const t_service* containing_service = nullptr)
+      : mstch_service(service, ctx, pos, containing_service),
+        options_(*options) {
+    for (const auto& function : service->functions()) {
+      function_upcamel_names_.insert(camelcase(function.name()));
+    }
+    register_methods(
+        this,
+        {{"service:rustFunctions", &rust_mstch_service::rust_functions},
+         {"service:rust_exceptions", &rust_mstch_service::rust_all_exceptions},
+         {"service:extendedClients",
+          &rust_mstch_service::rust_extended_clients}});
+  }
+  mstch::node rust_functions();
+  mstch::node rust_extended_clients() {
+    mstch::array extended_services;
+    const t_service* service = service_;
+    std::string as_ref_impl = "&self.parent";
+    while (const t_service* parent_service = service->extends()) {
+      mstch::map node;
+      node["extendedService:packagePrefix"] =
+          get_client_import_name(parent_service->program(), options_);
+      node["extendedService:asRefImpl"] = as_ref_impl;
+      node["extendedService:service"] =
+          make_mstch_extended_service_cached(parent_service);
+      extended_services.emplace_back(node);
+      as_ref_impl = "self.parent.as_ref()";
+      service = parent_service;
+    }
+    return extended_services;
+  }
+
+  mstch::node rust_all_exceptions();
+
+ private:
+  std::unordered_multiset<std::string> function_upcamel_names_;
+  const rust_codegen_options& options_;
+};
+
+class rust_mstch_interaction : public rust_mstch_service {
  public:
   using ast_type = t_interaction;
 
@@ -2441,9 +2345,178 @@ class rust_mstch_interaction : public mstch_service {
       const t_interaction* interaction,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_service* containing_service)
-      : mstch_service(interaction, ctx, pos, containing_service) {}
+      const t_service* containing_service,
+      const rust_codegen_options* options)
+      : rust_mstch_service(interaction, ctx, pos, options, containing_service) {
+  }
 };
+
+class rust_mstch_function : public mstch_function {
+ public:
+  rust_mstch_function(
+      const t_function* function,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const std::unordered_multiset<std::string>& /*function_upcamel_names*/)
+      : mstch_function(function, ctx, pos) {
+    register_methods(
+        this,
+        {{"function:index", &rust_mstch_function::rust_index},
+         {"function:uniqueExceptions",
+          &rust_mstch_function::rust_unique_exceptions},
+         {"function:uniqueStreamExceptions",
+          &rust_mstch_function::rust_unique_stream_exceptions},
+         {"function:uniqueSinkExceptions",
+          &rust_mstch_function::rust_unique_sink_exceptions},
+         {"function:uniqueSinkFinalExceptions",
+          &rust_mstch_function::rust_unique_sink_final_exceptions}});
+  }
+  mstch::node rust_index() { return pos_.index; }
+  mstch::node rust_unique_exceptions() {
+    return rust_make_unique_exceptions(function_->exceptions());
+  }
+  mstch::node rust_unique_stream_exceptions() {
+    const t_stream* stream = function_->stream();
+    return rust_make_unique_exceptions(stream ? stream->exceptions() : nullptr);
+  }
+  mstch::node rust_unique_sink_exceptions() {
+    const t_sink* sink = function_->sink();
+    return rust_make_unique_exceptions(
+        sink ? sink->sink_exceptions() : nullptr);
+  }
+  mstch::node rust_unique_sink_final_exceptions() {
+    const t_sink* sink = function_->sink();
+    return rust_make_unique_exceptions(
+        sink ? sink->final_response_exceptions() : nullptr);
+  }
+  mstch::node rust_make_unique_exceptions(const t_structured* s) {
+    // When generating From<> impls for an error type, we must not generate
+    // one where more than one variant contains the same type of exception.
+    // Find only those exceptions that map uniquely to a variant.
+
+    std::vector<const t_field*> unique_exceptions;
+    if (s) {
+      const auto& exceptions = s->fields();
+      std::map<const t_type*, unsigned> type_count;
+      for (const auto& x : exceptions) {
+        type_count[x.type().get_type()] += 1;
+      }
+
+      for (const auto& x : exceptions) {
+        if (type_count.at(x.type().get_type()) == 1) {
+          unique_exceptions.emplace_back(&x);
+        }
+      }
+    }
+
+    return make_mstch_fields(unique_exceptions);
+  }
+};
+
+class rust_mstch_function_factory {
+ public:
+  std::shared_ptr<mstch_base> make_mstch_object(
+      const t_function* function,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const std::unordered_multiset<std::string>& function_upcamel_names)
+      const {
+    return std::make_shared<rust_mstch_function>(
+        function, ctx, pos, function_upcamel_names);
+  }
+};
+
+mstch::node rust_mstch_service::rust_functions() {
+  return make_mstch_array(
+      service_->functions().copy(),
+      rust_mstch_function_factory(),
+      function_upcamel_names_);
+}
+
+mstch::node rust_mstch_service::rust_all_exceptions() {
+  struct name_less {
+    bool operator()(const t_type* lhs, const t_type* rhs) const {
+      return lhs->get_scoped_name() < rhs->get_scoped_name();
+    }
+  };
+  enum exception_source_enum {
+    FUNCTION = 1,
+    SINK = 2,
+    STREAM = 3,
+  };
+  struct exception_source {
+    exception_source_enum source_enum;
+    const t_function* function;
+    const t_field* field;
+  };
+  using sources_t = std::vector<exception_source>;
+  using source_map_t = std::map<const t_type*, sources_t, name_less>;
+
+  source_map_t source_map;
+
+  for (const auto& fun : service_->functions()) {
+    for (const t_field& fld : get_elems(fun.exceptions())) {
+      source_map[&fld.type().deref()].push_back(
+          exception_source{
+              .source_enum = exception_source_enum::FUNCTION,
+              .function = &fun,
+              .field = &fld});
+    }
+    if (fun.stream()) {
+      for (const t_field& fld : get_elems(fun.stream()->exceptions())) {
+        source_map[&fld.type().deref()].push_back(
+            exception_source{
+                .source_enum = exception_source_enum::STREAM,
+                .function = &fun,
+                .field = &fld});
+      }
+    }
+    if (fun.sink()) {
+      for (const t_field& fld : get_elems(fun.sink()->sink_exceptions())) {
+        source_map[&fld.type().deref()].push_back(
+            exception_source{
+                .source_enum = exception_source_enum::SINK,
+                .function = &fun,
+                .field = &fld});
+      }
+    }
+  }
+
+  auto functionFactory = rust_mstch_function_factory();
+  mstch::array output;
+  for (const auto& sources : source_map) {
+    mstch::map data;
+    data["rust_exception:type"] =
+        context_.type_factory->make_mstch_object(sources.first, context_, {});
+
+    mstch::array function_data;
+    mstch::array stream_data;
+    mstch::array sink_data;
+    for (const auto& source : sources.second) {
+      mstch::map inner;
+      inner["rust_exception_function:function"] =
+          functionFactory.make_mstch_object(
+              source.function, context_, {}, function_upcamel_names_);
+      inner["rust_exception_function:field"] =
+          context_.field_factory->make_mstch_object(source.field, context_);
+
+      if (source.source_enum == exception_source_enum::FUNCTION) {
+        function_data.emplace_back(std::move(inner));
+      } else if (source.source_enum == exception_source_enum::STREAM) {
+        stream_data.emplace_back(std::move(inner));
+      } else if (source.source_enum == exception_source_enum::SINK) {
+        sink_data.emplace_back(std::move(inner));
+      }
+    }
+
+    data["rust_exception:functions"] = std::move(function_data);
+    data["rust_exception:streams"] = std::move(stream_data);
+    data["rust_exception:sinks"] = std::move(sink_data);
+    output.emplace_back(data);
+  }
+
+  return output;
+}
 
 void t_mstch_rust_generator::generate_program() {
   if (auto types_crate_flag = get_option("types_crate")) {
@@ -2570,17 +2643,26 @@ void t_mstch_rust_generator::generate_program() {
 }
 
 void t_mstch_rust_generator::generate_split_types() {
-  initialize_type_splits();
+  // Generate individual split files
   for (int split_id = 0; split_id <= options_.types_split_count; ++split_id) {
-    current_split_id_ = split_id;
-    const auto& prog = cached_program(program_);
+    auto split_program = std::make_shared<rust_mstch_program>(
+        program_,
+        mstch_context_,
+        mstch_element_position(),
+        &options_,
+        split_id);
+
     render_to_file(
-        prog, "lib/types_split", fmt::format("types_{}.rs", split_id));
+        std::shared_ptr<mstch_base>(split_program),
+        "lib/types_split",
+        fmt::format("types_{}.rs", split_id));
   }
 }
 
 void t_mstch_rust_generator::set_mstch_factories() {
-  mstch_context_.add<rust_mstch_interaction>();
+  mstch_context_.add<rust_mstch_program>(&options_);
+  mstch_context_.add<rust_mstch_service>(&options_);
+  mstch_context_.add<rust_mstch_interaction>(&options_);
 }
 
 void validate_struct_annotations(

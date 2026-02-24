@@ -22,4 +22,4 @@ newtype = { version = "0.0.0", path = "../../../../utils/newtype" }
 rayon = "1.11.0"
 smallvec = { version = "1.15", features = ["impl_bincode", "serde", "specialization", "union"] }
 vint64 = "1.0.1"
-zstd = { version = "0.13", features = ["experimental", "zstdmt"] }
+zstd = { version = "0.13.3", features = ["experimental", "zstdmt"] }

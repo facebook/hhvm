@@ -178,22 +178,22 @@ impl<'mock> {{program:clients}}::{{service:rust_name}} for {{service:rust_name}}
     ) -> {{> lib/client_return_type}} {
         let mut closure = self.{{function:rust_name}}.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut({{!
-            }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-            }}{{#field.type}}{{> lib/type}}{{/field.type}}{{!
+            }}{{#function:args}}{{!
+            }}{{#field:type}}{{> lib/type}}{{/field:type}}{{!
             }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-            }}{{/each}}{{!
+            }}{{/function:args}}{{!
         }}) -> _ = &mut **closure;
         ::std::boxed::Box::pin(::futures::future::ready(closure({{!
-            }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-            }}arg_{{field.name}}{{#field.type}}{{!
+            }}{{#function:args}}{{!
+            }}arg_{{field:name}}{{#field:type}}{{!
                 }}{{#if type:string?}}.to_owned(){{/if type:string?}}{{!
                 }}{{#if type:list?}}.to_owned(){{/if type:list?}}{{!
                 }}{{#if (not type:string?)}}{{#if (not type:list?)}}{{!
                     }}.clone(){{!
                 }}{{/if (not type:list?)}}{{/if (not type:string?)}}{{!
-            }}{{/field.type}}{{!
+            }}{{/field:type}}{{!
             }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-            }}{{/each}}{{!
+            }}{{/function:args}}{{!
         }})))
     }{{!
     }}{{#else}}
@@ -298,10 +298,10 @@ pub mod r#impl {{> lib/block}}{{!
         pub struct {{function:rust_name}}<'mock> {
             pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
                 dyn ::std::ops::FnMut({{!
-                    }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-                    }}{{#field.type}}{{> lib/type}}{{/field.type}}{{!
+                    }}{{#function:args}}{{!
+                    }}{{#field:type}}{{> lib/type}}{{/field:type}}{{!
                     }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-                    }}{{/each}}{{!
+                    }}{{/function:args}}{{!
                 }}) -> ::std::result::Result<
                     {{#function:return_type}}{{> lib/return_type}}{{/function:return_type}},
                     {{program:clients}}::errors::{{service:snake}}::{{function:upcamel}}Error,
@@ -314,10 +314,10 @@ pub mod r#impl {{> lib/block}}{{!
             pub(crate) fn unimplemented() -> Self {
                 Self {
                     closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|{{!
-                        }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-                        }}_: {{#field.type}}{{> lib/type}}{{/field.type}}{{!
+                        }}{{#function:args}}{{!
+                        }}_: {{#field:type}}{{> lib/type}}{{/field:type}}{{!
                         }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-                        }}{{/each}}{{!
+                        }}{{/function:args}}{{!
                     }}| panic!(
                         "{}::{} is not mocked",
                         "{{service:rust_name}}",
@@ -338,41 +338,41 @@ pub mod r#impl {{> lib/block}}{{!
                 unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable");
                 {{#else}}
                 self.mock(move |{{!
-                    }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-                    }}_: {{#field.type}}{{> lib/type}}{{/field.type}}{{!
+                    }}{{#function:args}}{{!
+                    }}_: {{#field:type}}{{> lib/type}}{{/field:type}}{{!
                     }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-                    }}{{/each}}{{!
+                    }}{{/function:args}}{{!
                 }}| value.clone());
                 {{/if function:sink?}}{{/if function:stream?}}{{/if function:bidirectional_stream?}}
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut({{!
-                }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-                }}{{#field.type}}{{> lib/type}}{{/field.type}}{{!
+                }}{{#function:args}}{{!
+                }}{{#field:type}}{{> lib/type}}{{/field:type}}{{!
                 }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-                }}{{/each}}{{!
+                }}{{/function:args}}{{!
             }}) -> {{#function:return_type}}{{> lib/return_type}}{{/function:return_type}}{{!
                 }} + ::std::marker::Send + ::std::marker::Sync + 'mock) {{!
             }}{
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move |{{!
-                    }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-                    }}{{field.rust_name}}{{!
+                    }}{{#function:args}}{{!
+                    }}{{field:rust_name}}{{!
                     }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-                    }}{{/each}}{{!
+                    }}{{/function:args}}{{!
                 }}| ::std::result::Result::Ok(mock({{!
-                    }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-                    }}{{field.rust_name}}{{!
+                    }}{{#function:args}}{{!
+                    }}{{field:rust_name}}{{!
                     }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-                    }}{{/each}}{{!
+                    }}{{/function:args}}{{!
                 }})));
             }
 
             pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut({{!
-                }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-                }}{{#field.type}}{{> lib/type}}{{/field.type}}{{!
+                }}{{#function:args}}{{!
+                }}{{#field:type}}{{> lib/type}}{{/field:type}}{{!
                 }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-                }}{{/each}}{{!
+                }}{{/function:args}}{{!
             }}) -> ::std::result::Result<{{!
                     }}{{#function:return_type}}{{> lib/return_type}}{{/function:return_type}}, {{!
                     }}{{program:clients}}::errors::{{service:snake}}::{{function:upcamel}}Error>{{!
@@ -380,15 +380,15 @@ pub mod r#impl {{> lib/block}}{{!
             }}{
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move |{{!
-                    }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-                    }}{{field.rust_name}}{{!
+                    }}{{#function:args}}{{!
+                    }}{{field:rust_name}}{{!
                     }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-                    }}{{/each}}{{!
+                    }}{{/function:args}}{{!
                 }}| mock({{!
-                    }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-                    }}{{field.rust_name}}{{!
+                    }}{{#function:args}}{{!
+                    }}{{field:rust_name}}{{!
                     }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-                    }}{{/each}}{{!
+                    }}{{/function:args}}{{!
                 }}));
             }
 
@@ -399,10 +399,10 @@ pub mod r#impl {{> lib/block}}{{!
             {
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move |{{!
-                    }}{{#each (array.enumerate function:args with_last=true) as |_i field last?|}}{{!
-                    }}_: {{#field.type}}{{> lib/type}}{{/field.type}}{{!
+                    }}{{#function:args}}{{!
+                    }}_: {{#field:type}}{{> lib/type}}{{/field:type}}{{!
                     }}{{#if (not last?)}}, {{/if (not last?)}}{{!
-                    }}{{/each}}{{!
+                    }}{{/function:args}}{{!
                 }}| ::std::result::Result::Err(exception.clone().into()));
             }
         }{{!

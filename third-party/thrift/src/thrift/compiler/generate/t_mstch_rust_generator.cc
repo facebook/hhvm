@@ -30,10 +30,10 @@
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/cpp/name_resolver.h>
+#include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/rust/uri.h>
 #include <thrift/compiler/generate/rust/util.h>
-#include <thrift/compiler/generate/t_whisker_generator.h>
-#include <thrift/compiler/generate/templates.h>
+#include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/sema/ast_validator.h>
 #include <thrift/compiler/sema/sema_context.h>
 
@@ -325,16 +325,16 @@ int checked_stoi(const std::string& s, const std::string& msg) {
 
 void parse_include_srcs(
     std::vector<std::string>& elements,
-    std::optional<std::string_view> include_srcs) {
+    std::optional<std::string> const& include_srcs) {
   if (!include_srcs) {
     return;
   }
   const auto& paths = *include_srcs;
-  std::string_view::size_type pos = 0;
-  while (pos != std::string_view::npos && pos < paths.size()) {
-    std::string_view::size_type next_pos = paths.find(':', pos);
+  std::string::size_type pos = 0;
+  while (pos != std::string::npos && pos < paths.size()) {
+    std::string::size_type next_pos = paths.find(':', pos);
     elements.emplace_back(paths.substr(pos, next_pos - pos));
-    pos = ((next_pos == std::string_view::npos) ? next_pos : next_pos + 1);
+    pos = ((next_pos == std::string::npos) ? next_pos : next_pos + 1);
   }
 }
 
@@ -928,63 +928,34 @@ class rust_generator_context {
   }
 };
 
-class t_mstch_rust_generator : public t_whisker_generator {
+class t_mstch_rust_generator : public t_mstch_generator {
  public:
-  using t_whisker_generator::t_whisker_generator;
+  using t_mstch_generator::t_mstch_generator;
+
+  whisker_options render_options() const override {
+    whisker_options opts;
+    opts.allowed_undefined_variables = {
+        "typedef:newtype?",
+        "function:name",
+    };
+    return opts;
+  }
 
   std::string template_prefix() const override { return "rust"; }
 
-  whisker::source_manager template_source_manager() const final {
-    return whisker::source_manager{
-        std::make_unique<in_memory_source_manager_backend>(
-            create_templates_by_path())};
-  }
-
-  // t_whisker_generator defaults all strict; we relax for migration.
-  strictness_options strictness() const override {
-    strictness_options strict;
-    strict.boolean_conditional = false;
-    strict.printable_types = false;
-    strict.undefined_variables = true;
-    return strict;
-  }
-
-  void process_options(
-      const std::map<std::string, std::string>& options) override;
   void generate_program() override;
   void generate_split_types();
   void fill_validator_visitors(ast_validator&) const override;
 
- protected:
   void initialize_context(context_visitor& visitor) override {
     rust_context_ = std::make_unique<rust_generator_context>();
     rust_context_->register_visitors(visitor);
-    visitor.add_interface_visitor(
-        [this](
-            const whisker_generator_visitor_context& ctx,
-            const t_interface& node) {
-          // Only track interaction containers from the root program
-          // being generated. Interactions shared across programs need
-          // different parent_service_name depending on the program context.
-          if (&ctx.program() != program_) {
-            return;
-          }
-          if (auto* service = node.try_as<t_service>();
-              service && !service->is<t_interaction>()) {
-            for (const auto& function : service->functions()) {
-              if (const auto& interaction = function.interaction()) {
-                interaction_containers_[&interaction->as<t_interaction>()] =
-                    service;
-              }
-            }
-          }
-        });
   }
 
  private:
+  void set_mstch_factories();
   rust_codegen_options options_;
   std::unique_ptr<rust_generator_context> rust_context_;
-  std::map<const t_interaction*, const t_service*> interaction_containers_;
 
   // Split mode state: per-render split_id set in generate_split_types().
   // Mutable because Whisker property lambdas capture `this` as const
@@ -1076,14 +1047,7 @@ class t_mstch_rust_generator : public t_whisker_generator {
     }
   }
   whisker::map::raw globals(prototype_database& proto) const override {
-    whisker::map::raw globals = t_whisker_generator::globals(proto);
-    // These variables are accessed inside {{> partial}} includes where the
-    // enclosing scope's prototype chain may not include the typedef or
-    // function handle. Setting them to null at the global level prevents
-    // undefined variable errors when templates are rendered outside their
-    // natural iteration context (e.g., in partials shared across contexts).
-    globals.insert({"typedef:newtype?", whisker::make::null});
-    globals.insert({"function:name", whisker::make::null});
+    whisker::map::raw globals = t_mstch_generator::globals(proto);
     globals["rust_annotation_name"] = whisker::dsl::make_function(
         "rust_annotation_name",
         [](whisker::dsl::function::context ctx) -> whisker::object {
@@ -1107,205 +1071,6 @@ class t_mstch_rust_generator : public t_whisker_generator {
               escape_backslashes.value_or(false)));
         });
     return globals;
-  }
-
-  // Override interface prototype to add shared properties used by both
-  // services and interactions. Both h_service and h_interaction extend
-  // h_interface in their prototype chains, so properties defined here
-  // are inherited by both.
-  prototype<t_interface>::ptr make_prototype_for_interface(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_interface(proto);
-    auto def = whisker::dsl::prototype_builder<h_interface>::extends(base);
-    def.property("client_package", [this](const t_interface& self) {
-      return get_client_import_name(self.program(), options_);
-    });
-    def.property("server_package", [this](const t_interface& self) {
-      return get_server_import_name(self.program(), options_);
-    });
-    def.property("mock_package", [this](const t_interface& self) {
-      return get_mock_import_name(self.program(), options_);
-    });
-    def.property("mock_crate", [this](const t_interface& self) {
-      return get_mock_crate(self.program(), options_);
-    });
-    def.property("snake", [](const t_interface& self) {
-      if (const t_const* annot_mod =
-              self.find_structured_annotation_or_null(kRustModUri)) {
-        return get_annotation_property_string(annot_mod, "name");
-      } else if (
-          const t_const* annot_name =
-              self.find_structured_annotation_or_null(kRustNameUri)) {
-        return snakecase(get_annotation_property_string(annot_name, "name"));
-      } else {
-        return mangle_type(snakecase(self.name()));
-      }
-    });
-    def.property("requestContext?", [](const t_interface& self) {
-      return self.has_structured_annotation(kRustRequestContextUri);
-    });
-    def.property("rust_exceptions", [&proto](const t_interface& self) {
-      struct name_less {
-        bool operator()(const t_type* lhs, const t_type* rhs) const {
-          return lhs->get_scoped_name() < rhs->get_scoped_name();
-        }
-      };
-      enum exception_source_enum {
-        FUNCTION = 1,
-        SINK = 2,
-        STREAM = 3,
-      };
-      struct exception_source {
-        exception_source_enum source_enum;
-        const t_function* function;
-        const t_field* field;
-      };
-      using sources_t = std::vector<exception_source>;
-      using source_map_t = std::map<const t_type*, sources_t, name_less>;
-
-      source_map_t source_map;
-
-      for (const auto& fun : self.functions()) {
-        for (const t_field& fld : get_elems(fun.exceptions())) {
-          source_map[&fld.type().deref()].push_back(
-              exception_source{
-                  .source_enum = FUNCTION, .function = &fun, .field = &fld});
-        }
-        if (fun.stream()) {
-          for (const t_field& fld : get_elems(fun.stream()->exceptions())) {
-            source_map[&fld.type().deref()].push_back(
-                exception_source{
-                    .source_enum = STREAM, .function = &fun, .field = &fld});
-          }
-        }
-        if (fun.sink()) {
-          for (const t_field& fld : get_elems(fun.sink()->sink_exceptions())) {
-            source_map[&fld.type().deref()].push_back(
-                exception_source{
-                    .source_enum = SINK, .function = &fun, .field = &fld});
-          }
-        }
-      }
-
-      whisker::array::raw output;
-      for (const auto& sources : source_map) {
-        whisker::array::raw function_data;
-        whisker::array::raw stream_data;
-        whisker::array::raw sink_data;
-        for (const auto& source : sources.second) {
-          whisker::map::raw inner;
-          inner["rust_exception_function:function"] =
-              whisker::object(proto.create<t_function>(*source.function));
-          inner["rust_exception_function:field"] =
-              whisker::object(proto.create<t_field>(*source.field));
-          auto entry = whisker::make::map(std::move(inner));
-          if (source.source_enum == FUNCTION) {
-            function_data.emplace_back(std::move(entry));
-          } else if (source.source_enum == STREAM) {
-            stream_data.emplace_back(std::move(entry));
-          } else if (source.source_enum == SINK) {
-            sink_data.emplace_back(std::move(entry));
-          }
-        }
-
-        whisker::map::raw data;
-        data["rust_exception:type"] =
-            resolve_derived_t_type(proto, *sources.first);
-        data["rust_exception:functions"] =
-            whisker::make::array(std::move(function_data));
-        data["rust_exception:streams"] =
-            whisker::make::array(std::move(stream_data));
-        data["rust_exception:sinks"] =
-            whisker::make::array(std::move(sink_data));
-        output.emplace_back(whisker::make::map(std::move(data)));
-      }
-
-      return whisker::make::array(std::move(output));
-    });
-    return std::move(def).make();
-  }
-
-  // Override interaction prototype to add interaction-specific properties
-  // and a "service" qualifier level so that service:* lookups resolve
-  // correctly on interactions. Most shared properties (client_package,
-  // server_package, mock_package, mock_crate, snake, requestContext?,
-  // rust_exceptions) are inherited from make_prototype_for_interface.
-  //
-  // The templates (lib/service.mustache) use `service:` qualified lookups
-  // (e.g., service:rust_name, service:snake) on both services and
-  // interactions. For services, the "service" qualifier is on h_service.
-  // For interactions, we need to insert a prototype level with qualifier
-  // "service" in the chain so these lookups resolve correctly.
-  //
-  // Chain: h_interaction("interaction") [0 own props]
-  //          → basic_prototype("service") [0 own props, just qualifier]
-  //            → prototype("interaction") [interaction-specific properties]
-  //              → base interaction [0 props]
-  //                → h_interface("") [shared props] → h_type("type") →
-  //                h_named("") → ...
-  prototype<t_interaction>::ptr make_prototype_for_interaction(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_interaction(proto);
-    // Build our custom service properties on an "interaction" qualified
-    // prototype (the builder forces qualifier from the handle type).
-    auto inner_def =
-        whisker::dsl::prototype_builder<h_interaction>::extends(base);
-    inner_def.property("extends?", [](const t_interaction&) {
-      // Interactions don't extend other services
-      return false;
-    });
-    inner_def.property("extends", [](const t_interaction&) {
-      // Interactions don't extend other services
-      return whisker::make::null;
-    });
-    inner_def.property("interactions?", [](const t_interaction&) {
-      // Interactions don't have sub-interactions
-      return false;
-    });
-    inner_def.property("interactions", [](const t_interaction&) {
-      // Interactions don't have sub-interactions
-      return whisker::make::array(whisker::array::raw{});
-    });
-    inner_def.property(
-        "has_bidirectional_streams?", [](const t_interaction& self) {
-          return std::any_of(
-              self.functions().begin(),
-              self.functions().end(),
-              [](const t_function& function) {
-                return function.is_bidirectional_stream();
-              });
-        });
-    inner_def.property(
-        "parent_service_name", [this](const t_interaction& self) {
-          auto it = interaction_containers_.find(&self);
-          if (it != interaction_containers_.end()) {
-            return std::string(it->second->name());
-          }
-          return std::string(self.name());
-        });
-    inner_def.property("extendedClients", [](const t_interaction&) {
-      // Interactions don't have extended clients
-      return whisker::make::array(whisker::array::raw{});
-    });
-    auto inner_proto = std::move(inner_def).make();
-
-    // Wrap with a "service" qualified prototype level so that
-    // service:* lookups (e.g., service:rust_name, service:snake)
-    // resolve correctly on interactions. The "service" qualifier
-    // matches, then properties are inherited from the inner prototype
-    // via the parent chain with empty qualifier.
-    static const std::string_view service_qualifier = "service";
-    whisker::prototype_ptr<t_interaction> service_alias =
-        std::make_shared<whisker::basic_prototype<t_interaction>>(
-            whisker::prototype<>::descriptors_map{},
-            std::move(inner_proto),
-            service_qualifier);
-
-    // Final h_interaction prototype with qualifier "interaction" and
-    // no own properties — it inherits everything from the chain.
-    auto def = whisker::dsl::prototype_builder<h_interaction>::extends(
-        std::move(service_alias));
-    return std::move(def).make();
   }
 
   prototype<t_enum>::ptr make_prototype_for_enum(
@@ -1740,6 +1505,9 @@ class t_mstch_rust_generator : public t_whisker_generator {
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_typedef(proto);
     auto def = whisker::dsl::prototype_builder<h_typedef>::extends(base);
+    def.property("type", [&proto](const t_typedef& self) {
+      return resolve_derived_t_type(proto, self.type().deref());
+    });
     def.property("newtype?", [](const t_typedef& self) {
       return has_newtype_annotation(&self);
     });
@@ -1816,13 +1584,6 @@ class t_mstch_rust_generator : public t_whisker_generator {
       auto type = &self.type().deref();
       const t_type* curr_type = step_through_typedefs(type, true);
       return type_has_transitive_adapter(curr_type, false);
-    });
-    // mstch "type" = resolved (context-switch to resolved type).
-    // Use proto.create<t_type> instead of resolve_derived_t_type to avoid
-    // the resolved type having a "typedef" qualifier, which would shadow
-    // the outer typedef's properties (e.g., typedef:rust_name) in templates.
-    def.property("type", [&proto](const t_typedef& self) {
-      return whisker::object(proto.create<t_type>(self.type().deref()));
     });
     return std::move(def).make();
   }
@@ -2133,75 +1894,6 @@ class t_mstch_rust_generator : public t_whisker_generator {
 
       return whisker::make::array(std::move(output));
     });
-    def.property("extends?", [](const t_service& self) {
-      return self.extends() != nullptr;
-    });
-    def.property("interactions?", [](const t_service& self) {
-      for (const auto& function : self.functions()) {
-        if (function.interaction()) {
-          return true;
-        }
-      }
-      return false;
-    });
-    // parent_service_name: own name for services (interactions have their
-    // own override in make_prototype_for_interaction)
-    def.property("parent_service_name", [](const t_service& self) {
-      return std::string(self.name());
-    });
-    // Override base service:interactions to wrap each interaction with a
-    // per-service parent_service_name. This is needed because the same
-    // interaction can be performed by multiple services, and the template
-    // uses service:parent_service_name inside {{#service:interactions}} to
-    // get the ENCLOSING service's name, not the interaction's global owner.
-    def.property("interactions", [&proto](const t_service& self) {
-      std::vector<const t_interaction*> interactions;
-      interactions.reserve(self.functions().size());
-      for (const auto& function : self.functions()) {
-        if (const auto& interaction = function.interaction()) {
-          auto* ptr = &interaction->as<t_interaction>();
-          if (std::find(interactions.begin(), interactions.end(), ptr) !=
-              interactions.end()) {
-            continue;
-          }
-          interactions.push_back(ptr);
-        }
-      }
-
-      // Create per-service interaction handles with a custom prototype
-      // that overrides parent_service_name to return this service's name.
-      std::string service_name(self.name());
-      auto base_interaction_proto = proto.of<t_interaction>();
-
-      // Create an override prototype with parent_service_name
-      whisker::prototype<>::descriptors_map overrides;
-      overrides.emplace(
-          "parent_service_name",
-          whisker::prototype<>::property(
-              whisker::dsl::make_function(
-                  [service_name](
-                      whisker::dsl::function::context) -> whisker::object {
-                    return whisker::make::string(service_name);
-                  })));
-
-      // Build chain: override("service") → base interaction proto → ...
-      // The "service" qualifier ensures service:parent_service_name
-      // finds the override before falling through to the inner prototype.
-      static const std::string_view svc_qual = "service";
-      auto override_proto =
-          std::make_shared<whisker::basic_prototype<t_interaction>>(
-              std::move(overrides), base_interaction_proto, svc_qual);
-
-      whisker::array::raw result;
-      result.reserve(interactions.size());
-      for (const t_interaction* interaction : interactions) {
-        result.emplace_back(
-            whisker::object(
-                whisker::native_handle<t_interaction>(
-                    whisker::manage_as_static(*interaction), override_proto)));
-      }
-      return whisker::make::array(std::move(result));
-    });
     return std::move(def).make();
   }
 
@@ -2387,79 +2079,6 @@ class t_mstch_rust_generator : public t_whisker_generator {
           return make_unique(
               sink ? sink->final_response_exceptions() : nullptr);
         });
-    def.property("args", [&proto](const t_function& self) {
-      return to_array(self.params().fields().copy(), proto.of<t_field>());
-    });
-    // Exception arrays for streams and sinks (mstch provides these; whisker
-    // base only has boolean *_exceptions? properties)
-    auto make_exception_fields = [&proto](const t_throws* exceptions) {
-      if (exceptions) {
-        return to_array(exceptions->fields().copy(), proto.of<t_field>());
-      }
-      return whisker::make::array(whisker::array::raw{});
-    };
-    def.property(
-        "stream_exceptions",
-        [make_exception_fields](const t_function& self) -> whisker::object {
-          const t_stream* stream = self.stream();
-          return stream ? make_exception_fields(stream->exceptions())
-                        : whisker::make::null;
-        });
-    def.property(
-        "sink_exceptions",
-        [make_exception_fields](const t_function& self) -> whisker::object {
-          const t_sink* sink = self.sink();
-          return sink ? make_exception_fields(sink->sink_exceptions())
-                      : whisker::make::null;
-        });
-    def.property(
-        "sink_final_response_exceptions",
-        [make_exception_fields](const t_function& self) -> whisker::object {
-          const t_sink* sink = self.sink();
-          return sink ? make_exception_fields(sink->final_response_exceptions())
-                      : whisker::make::null;
-        });
-    // Element/response type context-switch properties for streams and sinks
-    def.property(
-        "stream_elem_type",
-        [&proto](const t_function& self) -> whisker::object {
-          const t_stream* stream = self.stream();
-          return stream
-              ? resolve_derived_t_type(proto, stream->elem_type().deref())
-              : whisker::make::null;
-        });
-    def.property(
-        "stream_first_response_type",
-        [&proto](const t_function& self) -> whisker::object {
-          const t_stream* stream = self.stream();
-          if (stream && !self.has_void_initial_response()) {
-            return resolve_derived_t_type(proto, self.return_type().deref());
-          }
-          return whisker::make::null;
-        });
-    def.property(
-        "sink_elem_type", [&proto](const t_function& self) -> whisker::object {
-          const t_sink* sink = self.sink();
-          return sink ? resolve_derived_t_type(proto, sink->elem_type().deref())
-                      : whisker::make::null;
-        });
-    def.property(
-        "sink_first_response_type",
-        [&proto](const t_function& self) -> whisker::object {
-          const t_sink* sink = self.sink();
-          if (sink && !self.has_void_initial_response()) {
-            return resolve_derived_t_type(proto, self.return_type().deref());
-          }
-          return whisker::make::null;
-        });
-    def.property(
-        "sink_final_response_type",
-        [&proto](const t_function& self) -> whisker::object {
-          const t_sink* sink = self.sink();
-          return sink ? resolve_derived_t_type(
-                            proto, sink->final_response_type().deref())
-                      : whisker::make::null;
-        });
     return std::move(def).make();
   }
 
@@ -2467,19 +2086,6 @@ class t_mstch_rust_generator : public t_whisker_generator {
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
     auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
-    // mstch "structs" = structured_definitions (structs, unions, and
-    // exceptions)
-    def.property("structs", [&proto](const t_program& self) {
-      whisker::array::raw result;
-      for (const t_structured* s : self.structured_definitions()) {
-        result.emplace_back(resolve_derived_t_type(proto, *s));
-      }
-      return whisker::make::array(std::move(result));
-    });
-    // mstch "constants" = consts
-    def.property("constants", [&proto](const t_program& self) {
-      return to_array(self.consts(), proto.of<t_const>());
-    });
     def.property("has_const_tests?", [](const t_program& self) {
       for (const t_const* c : self.consts()) {
         if (type_has_transitive_adapter(c->type(), true)) {
@@ -2827,56 +2433,63 @@ class t_mstch_rust_generator : public t_whisker_generator {
   }
 };
 
-void t_mstch_rust_generator::process_options(
-    const std::map<std::string, std::string>& options) {
-  t_whisker_generator::process_options(options);
+class rust_mstch_interaction : public mstch_service {
+ public:
+  using ast_type = t_interaction;
 
-  if (auto types_crate_flag = get_compiler_option("types_crate")) {
-    options_.types_crate = boost::algorithm::replace_all_copy(
-        std::string{*types_crate_flag}, "-", "_");
+  rust_mstch_interaction(
+      const t_interaction* interaction,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_service* containing_service)
+      : mstch_service(interaction, ctx, pos, containing_service) {}
+};
+
+void t_mstch_rust_generator::generate_program() {
+  if (auto types_crate_flag = get_option("types_crate")) {
+    options_.types_crate =
+        boost::algorithm::replace_all_copy(*types_crate_flag, "-", "_");
   }
 
-  if (auto clients_crate_flag = get_compiler_option("clients_crate")) {
-    options_.clients_crate = boost::algorithm::replace_all_copy(
-        std::string{*clients_crate_flag}, "-", "_");
+  if (auto clients_crate_flag = get_option("clients_crate")) {
+    options_.clients_crate =
+        boost::algorithm::replace_all_copy(*clients_crate_flag, "-", "_");
   }
 
-  if (auto cratemap_flag = get_compiler_option("cratemap")) {
-    auto cratemap = load_crate_map(std::string{*cratemap_flag});
+  if (auto cratemap_flag = get_option("cratemap")) {
+    auto cratemap = load_crate_map(*cratemap_flag);
     options_.multifile_mode = cratemap.multifile_mode;
     options_.label = std::move(cratemap.label);
     options_.crate_index =
         rust_crate_index{program_, std::move(cratemap.cratemap)};
   }
 
-  options_.serde = has_compiler_option("serde");
-  options_.skip_none_serialization =
-      has_compiler_option("skip_none_serialization");
+  options_.serde = has_option("serde");
+  options_.skip_none_serialization = has_option("skip_none_serialization");
   if (options_.skip_none_serialization) {
     assert(options_.serde);
   }
 
-  options_.valuable = has_compiler_option("valuable");
+  options_.valuable = has_option("valuable");
 
-  options_.any_registry_initialization_enabled = has_compiler_option("any");
+  options_.any_registry_initialization_enabled = has_option("any");
 
-  if (auto maybe_number = get_compiler_option("types_split_count")) {
-    std::string number{*maybe_number};
-    options_.types_split_count =
-        checked_stoi(number, "Invalid types_split_count '" + number + "'");
+  std::optional<std::string> maybe_number = get_option("types_split_count");
+  if (maybe_number) {
+    options_.types_split_count = checked_stoi(
+        maybe_number.value(),
+        "Invalid types_split_count '" + maybe_number.value() + "'");
   }
 
   parse_include_srcs(
-      options_.types_include_srcs, get_compiler_option("types_include_srcs"));
+      options_.types_include_srcs, get_option("types_include_srcs"));
   parse_include_srcs(
-      options_.clients_include_srcs,
-      get_compiler_option("clients_include_srcs"));
+      options_.clients_include_srcs, get_option("clients_include_srcs"));
   parse_include_srcs(
-      options_.services_include_srcs,
-      get_compiler_option("services_include_srcs"));
+      options_.services_include_srcs, get_option("services_include_srcs"));
 
-  if (auto include_docs = get_compiler_option("include_docs")) {
-    options_.include_docs = std::string{*include_docs};
+  if (auto include_docs = get_option("include_docs")) {
+    options_.include_docs = include_docs.value();
   }
 
   if (options_.multifile_mode) {
@@ -2888,18 +2501,11 @@ void t_mstch_rust_generator::process_options(
   options_.current_program = program_;
   out_dir_base_ = "gen-rust";
 
-  if (auto gen_metadata = get_compiler_option("gen_metadata")) {
-    options_.gen_metadata = *gen_metadata == "true";
+  if (auto gen_metadata = get_option("gen_metadata")) {
+    options_.gen_metadata = gen_metadata.value() == "true";
   }
-}
 
-void t_mstch_rust_generator::generate_program() {
-  std::string crate_name_option;
-  bool has_crate_name = false;
-  if (auto opt = get_compiler_option("crate_name")) {
-    crate_name_option = std::string{*opt};
-    has_crate_name = true;
-  }
+  std::optional<std::string> crate_name_option = get_option("crate_name");
   std::string namespace_rust = program_->get_namespace("rust");
   if (!namespace_rust.empty()) {
     std::vector<std::string> pieces;
@@ -2919,18 +2525,20 @@ void t_mstch_rust_generator::generate_program() {
                 namespace_rust));
       }
     }
-    if (has_crate_name && !pieces.empty() && pieces[0] != crate_name_option) {
+    if (crate_name_option && !pieces.empty() &&
+        pieces[0] != *crate_name_option) {
       throw std::runtime_error(
           fmt::format(
               R"(`namespace rust` disagrees with rust_crate_name option: "{}" vs "{}")",
               pieces[0],
-              crate_name_option));
+              *crate_name_option));
     }
-  } else if (has_crate_name) {
-    namespace_rust = crate_name_option;
+  } else if (crate_name_option) {
+    namespace_rust = *crate_name_option;
   } else if (
-      auto default_crate_name = get_compiler_option("default_crate_name")) {
-    namespace_rust = std::string{*default_crate_name};
+      std::optional<std::string> default_crate_name_option =
+          get_option("default_crate_name")) {
+    namespace_rust = *default_crate_name_option;
   } else {
     namespace_rust = program_->name();
   }
@@ -2943,34 +2551,36 @@ void t_mstch_rust_generator::generate_program() {
     service_names += '\n';
   }
 
+  set_mstch_factories();
+
   if (options_.types_split_count > 0) {
     generate_split_types();
   }
-
-  auto& proto = *render_state().prototypes;
-  whisker::object prog{proto.create<t_program>(*program_)};
-
-  render_to_file("types.rs", "types.rs", prog);
-  render_to_file("services.rs", "services.rs", prog);
-  render_to_file("errors.rs", "errors.rs", prog);
-  render_to_file("consts.rs", "consts.rs", prog);
-  render_to_file("client.rs", "client.rs", prog);
-  render_to_file("server.rs", "server.rs", prog);
-  render_to_file("mock.rs", "mock.rs", prog);
-  write_to_file("namespace-rust", namespace_rust + '\n');
-  write_to_file("namespace-cpp2", namespace_cpp2 + '\n');
-  write_to_file("service-names", service_names);
+  const auto& prog = cached_program(program_);
+  render_to_file(prog, "types.rs", "types.rs");
+  render_to_file(prog, "services.rs", "services.rs");
+  render_to_file(prog, "errors.rs", "errors.rs");
+  render_to_file(prog, "consts.rs", "consts.rs");
+  render_to_file(prog, "client.rs", "client.rs");
+  render_to_file(prog, "server.rs", "server.rs");
+  render_to_file(prog, "mock.rs", "mock.rs");
+  write_output("namespace-rust", namespace_rust + '\n');
+  write_output("namespace-cpp2", namespace_cpp2 + '\n');
+  write_output("service-names", service_names);
 }
 
 void t_mstch_rust_generator::generate_split_types() {
   initialize_type_splits();
-  auto& proto = *render_state().prototypes;
-  whisker::object prog{proto.create<t_program>(*program_)};
   for (int split_id = 0; split_id <= options_.types_split_count; ++split_id) {
     current_split_id_ = split_id;
+    const auto& prog = cached_program(program_);
     render_to_file(
-        fmt::format("types_{}.rs", split_id), "lib/types_split", prog);
+        prog, "lib/types_split", fmt::format("types_{}.rs", split_id));
   }
+}
+
+void t_mstch_rust_generator::set_mstch_factories() {
+  mstch_context_.add<rust_mstch_interaction>();
 }
 
 void validate_struct_annotations(

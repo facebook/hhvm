@@ -641,7 +641,7 @@ unsigned localRangeImmIdx(Op op) {
     case Op::MemoGetEager:
       return 2;
     default:
-      always_assert_flog("op {} doesn't have LocalRange!\n", opcodeToName(op));
+      always_assert_flog(false, "op {} doesn't have LocalRange!\n", opcodeToName(op));
       return -1;
   }
 }

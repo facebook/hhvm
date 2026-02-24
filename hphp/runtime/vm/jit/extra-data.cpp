@@ -147,7 +147,7 @@ std::enable_if_t<
 size_t hashExtraImpl(IRExtraData*) {
   // This probably means we tried to hash an IRInstruction with extra data that
   // had no hash function.
-  always_assert(!"attempted to hash extra data that didn't "
+  always_assert(false && "attempted to hash extra data that didn't "
     "provide a hash function");
 }
 
@@ -159,7 +159,7 @@ std::enable_if_t<
 size_t stableHashExtraImpl(IRExtraData*) {
   // This probably means we tried to hash an IRInstruction with extra data that
   // had no hash function.
-  always_assert(!"attempted to hash extra data that didn't "
+  always_assert(false && "attempted to hash extra data that didn't "
     "provide a hash function");
 }
 
@@ -173,7 +173,7 @@ std::enable_if_t<
 bool equalsExtraImpl(IRExtraData*, IRExtraData*) {
   // This probably means we tried to compare IRInstructions with extra data that
   // had no equals function.
-  always_assert(!"attempted to compare extra data that didn't "
+  always_assert(false && "attempted to compare extra data that didn't "
                  "provide an equals function");
 }
 

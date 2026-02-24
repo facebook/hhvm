@@ -421,6 +421,7 @@ struct Writer {
     if (::rename(sourceFilename.c_str(), destFilename.c_str()) < 0) {
       auto const error = folly::errnoStr(errno);
       always_assert_flog(
+        false,
         "Unable to rename {} to {}: {}",
         sourceFilename, destFilename, error
       );

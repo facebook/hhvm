@@ -17,7 +17,7 @@
 }}
             // From {{service:program.name}}.{{service:name}}:
 {{#if (not service:interaction?)}}
-{{#service:rustFunctions}}{{#if (not function:starts_interaction?)}}
+{{#service:functions}}{{#if (not function:starts_interaction?)}}
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
               {{#if function:bidirectional_stream?}}
@@ -35,8 +35,8 @@
               starts_interaction: {{#if function:creates_interaction?}}true{{#else}}false{{/if function:creates_interaction?}},
               interaction_name: {{#if function:creates_interaction?}}Some("{{function:interaction_name}}"){{#else}}None{{/if function:creates_interaction?}},
             },
-{{/if (not function:starts_interaction?)}}{{/service:rustFunctions}}
-{{#service:interactions}}{{#service:rustFunctions}}
+{{/if (not function:starts_interaction?)}}{{/service:functions}}
+{{#service:interactions}}{{#service:functions}}
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
               {{#if function:bidirectional_stream?}}
@@ -54,7 +54,7 @@
               starts_interaction: false,
               interaction_name: Some("{{service:name}}"),
             },
-{{/service:rustFunctions}}{{/service:interactions}}
+{{/service:functions}}{{/service:interactions}}
 {{/if (not service:interaction?)}}
 {{#if service:interaction?}}
             // Interaction's method names are never queried directly.

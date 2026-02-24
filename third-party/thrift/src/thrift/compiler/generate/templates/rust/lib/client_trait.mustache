@@ -22,7 +22,7 @@ pub trait {{service:rust_name}}: {{!
     }}{{#service:extends}}{{service:client_package}}::{{service:rust_name}} + {{/service:extends}}{{!
     }}::std::marker::Send {{> lib/block}}{{!
 
-    }}{{#service:rustFunctions}}
+    }}{{#service:functions}}
     {{#if function:docs?}}
     #[doc = {{function:docs}}]
     {{/if function:docs?}}
@@ -39,7 +39,7 @@ pub trait {{service:rust_name}}: {{!
     ) -> ::std::result::Result<{{!
     }}{{program:crate}}::client::{{function:interaction_name}}Client, {{!
     }}::anyhow::Error>;
-    {{/if function:starts_interaction?}}{{/service:rustFunctions}}
+    {{/if function:starts_interaction?}}{{/service:functions}}
 }
 
 pub trait {{service:rust_name}}Ext<T>: {{service:rust_name}}{{!
@@ -48,7 +48,7 @@ where
     T: ::fbthrift::Transport,
 {{> lib/block}}
 
-    {{#service:rustFunctions}}
+    {{#service:functions}}
     {{#if function:docs?}}
     #[doc = {{function:docs}}]
     {{/if function:docs?}}
@@ -61,7 +61,7 @@ where
         rpc_options: T::RpcOptions,
     ) -> {{> lib/client_return_type}};
     {{/if (not function:starts_interaction?)}}
-    {{/service:rustFunctions}}
+    {{/service:functions}}
     {{#if (not service:extendedClients)}}
 
     fn transport(&self) -> &T;
@@ -79,7 +79,7 @@ where
     {{/service:extendedClients}}
     S: ::std::marker::Send,
 {
-    {{#service:rustFunctions}}
+    {{#service:functions}}
     {{#if (not function:starts_interaction?)}}
     fn {{function:rust_name}}(
         &self,{{!
@@ -101,7 +101,7 @@ where
     }}::anyhow::Error> {
         self.as_ref().{{function:rust_name}}()
     }
-    {{/if function:starts_interaction?}}{{/service:rustFunctions}}
+    {{/if function:starts_interaction?}}{{/service:functions}}
 }
 
 #[allow(deprecated)]{{! `dependencies` modules are deprecated other than for packagePrefix to use }}
@@ -116,7 +116,7 @@ where
     S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
     T: ::fbthrift::Transport,
 {
-    {{#service:rustFunctions}}
+    {{#service:functions}}
     {{#if (not function:starts_interaction?)}}
     fn {{function:rust_name}}_with_rpc_opts(
         &self,{{!
@@ -133,7 +133,7 @@ where
         )
     }
     {{/if (not function:starts_interaction?)}}
-    {{/service:rustFunctions}}
+    {{/service:functions}}
     {{#if (not service:extendedClients)}}
 
     fn transport(&self) -> &T {

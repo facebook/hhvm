@@ -2433,128 +2433,7 @@ class t_mstch_rust_generator : public t_mstch_generator {
   }
 };
 
-class rust_mstch_service : public mstch_service {
- public:
-  rust_mstch_service(
-      const t_service* service,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const rust_codegen_options* options,
-      const t_service* containing_service = nullptr)
-      : mstch_service(service, ctx, pos, containing_service),
-        options_(*options) {
-    for (const auto& function : service->functions()) {
-      function_upcamel_names_.insert(camelcase(function.name()));
-    }
-    register_methods(
-        this,
-        {{"service:rustFunctions", &rust_mstch_service::rust_functions},
-         {"service:rust_exceptions", &rust_mstch_service::rust_all_exceptions},
-         {"service:extendedClients",
-          &rust_mstch_service::rust_extended_clients}});
-  }
-  mstch::node rust_functions();
-  mstch::node rust_extended_clients() {
-    mstch::array extended_services;
-    const t_service* service = service_;
-    std::string as_ref_impl = "&self.parent";
-    while (const t_service* parent_service = service->extends()) {
-      mstch::map node;
-      node["extendedService:packagePrefix"] =
-          get_client_import_name(parent_service->program(), options_);
-      node["extendedService:asRefImpl"] = as_ref_impl;
-      node["extendedService:service"] =
-          make_mstch_extended_service_cached(parent_service);
-      extended_services.emplace_back(node);
-      as_ref_impl = "self.parent.as_ref()";
-      service = parent_service;
-    }
-    return extended_services;
-  }
-
-  mstch::node rust_all_exceptions();
-
- private:
-  std::unordered_multiset<std::string> function_upcamel_names_;
-  const rust_codegen_options& options_;
-};
-
-class rust_mstch_function : public mstch_function {
- public:
-  rust_mstch_function(
-      const t_function* function,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const std::unordered_multiset<std::string>& /*function_upcamel_names*/)
-      : mstch_function(function, ctx, pos) {
-    register_methods(
-        this,
-        {{"function:index", &rust_mstch_function::rust_index},
-         {"function:uniqueExceptions",
-          &rust_mstch_function::rust_unique_exceptions},
-         {"function:uniqueStreamExceptions",
-          &rust_mstch_function::rust_unique_stream_exceptions},
-         {"function:uniqueSinkExceptions",
-          &rust_mstch_function::rust_unique_sink_exceptions},
-         {"function:uniqueSinkFinalExceptions",
-          &rust_mstch_function::rust_unique_sink_final_exceptions}});
-  }
-  mstch::node rust_index() { return pos_.index; }
-  mstch::node rust_unique_exceptions() {
-    return rust_make_unique_exceptions(function_->exceptions());
-  }
-  mstch::node rust_unique_stream_exceptions() {
-    const t_stream* stream = function_->stream();
-    return rust_make_unique_exceptions(stream ? stream->exceptions() : nullptr);
-  }
-  mstch::node rust_unique_sink_exceptions() {
-    const t_sink* sink = function_->sink();
-    return rust_make_unique_exceptions(
-        sink ? sink->sink_exceptions() : nullptr);
-  }
-  mstch::node rust_unique_sink_final_exceptions() {
-    const t_sink* sink = function_->sink();
-    return rust_make_unique_exceptions(
-        sink ? sink->final_response_exceptions() : nullptr);
-  }
-  mstch::node rust_make_unique_exceptions(const t_structured* s) {
-    // When generating From<> impls for an error type, we must not generate
-    // one where more than one variant contains the same type of exception.
-    // Find only those exceptions that map uniquely to a variant.
-
-    std::vector<const t_field*> unique_exceptions;
-    if (s) {
-      const auto& exceptions = s->fields();
-      std::map<const t_type*, unsigned> type_count;
-      for (const auto& x : exceptions) {
-        type_count[x.type().get_type()] += 1;
-      }
-
-      for (const auto& x : exceptions) {
-        if (type_count.at(x.type().get_type()) == 1) {
-          unique_exceptions.emplace_back(&x);
-        }
-      }
-    }
-
-    return make_mstch_fields(unique_exceptions);
-  }
-};
-
-class rust_mstch_function_factory {
- public:
-  std::shared_ptr<mstch_base> make_mstch_object(
-      const t_function* function,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const std::unordered_multiset<std::string>& function_upcamel_names)
-      const {
-    return std::make_shared<rust_mstch_function>(
-        function, ctx, pos, function_upcamel_names);
-  }
-};
-
-class rust_mstch_interaction : public rust_mstch_service {
+class rust_mstch_interaction : public mstch_service {
  public:
   using ast_type = t_interaction;
 
@@ -2562,103 +2441,9 @@ class rust_mstch_interaction : public rust_mstch_service {
       const t_interaction* interaction,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_service* containing_service,
-      const rust_codegen_options* options)
-      : rust_mstch_service(interaction, ctx, pos, options, containing_service) {
-  }
+      const t_service* containing_service)
+      : mstch_service(interaction, ctx, pos, containing_service) {}
 };
-
-mstch::node rust_mstch_service::rust_functions() {
-  return make_mstch_array(
-      service_->functions().copy(),
-      rust_mstch_function_factory(),
-      function_upcamel_names_);
-}
-
-mstch::node rust_mstch_service::rust_all_exceptions() {
-  struct name_less {
-    bool operator()(const t_type* lhs, const t_type* rhs) const {
-      return lhs->get_scoped_name() < rhs->get_scoped_name();
-    }
-  };
-  enum exception_source_enum {
-    FUNCTION = 1,
-    SINK = 2,
-    STREAM = 3,
-  };
-  struct exception_source {
-    exception_source_enum source_enum;
-    const t_function* function;
-    const t_field* field;
-  };
-  using sources_t = std::vector<exception_source>;
-  using source_map_t = std::map<const t_type*, sources_t, name_less>;
-
-  source_map_t source_map;
-
-  for (const auto& fun : service_->functions()) {
-    for (const t_field& fld : get_elems(fun.exceptions())) {
-      source_map[&fld.type().deref()].push_back(
-          exception_source{
-              .source_enum = exception_source_enum::FUNCTION,
-              .function = &fun,
-              .field = &fld});
-    }
-    if (fun.stream()) {
-      for (const t_field& fld : get_elems(fun.stream()->exceptions())) {
-        source_map[&fld.type().deref()].push_back(
-            exception_source{
-                .source_enum = exception_source_enum::STREAM,
-                .function = &fun,
-                .field = &fld});
-      }
-    }
-    if (fun.sink()) {
-      for (const t_field& fld : get_elems(fun.sink()->sink_exceptions())) {
-        source_map[&fld.type().deref()].push_back(
-            exception_source{
-                .source_enum = exception_source_enum::SINK,
-                .function = &fun,
-                .field = &fld});
-      }
-    }
-  }
-
-  auto functionFactory = rust_mstch_function_factory();
-  mstch::array output;
-  for (const auto& sources : source_map) {
-    mstch::map data;
-    data["rust_exception:type"] =
-        context_.type_factory->make_mstch_object(sources.first, context_, {});
-
-    mstch::array function_data;
-    mstch::array stream_data;
-    mstch::array sink_data;
-    for (const auto& source : sources.second) {
-      mstch::map inner;
-      inner["rust_exception_function:function"] =
-          functionFactory.make_mstch_object(
-              source.function, context_, {}, function_upcamel_names_);
-      inner["rust_exception_function:field"] =
-          context_.field_factory->make_mstch_object(source.field, context_);
-
-      if (source.source_enum == exception_source_enum::FUNCTION) {
-        function_data.emplace_back(std::move(inner));
-      } else if (source.source_enum == exception_source_enum::STREAM) {
-        stream_data.emplace_back(std::move(inner));
-      } else if (source.source_enum == exception_source_enum::SINK) {
-        sink_data.emplace_back(std::move(inner));
-      }
-    }
-
-    data["rust_exception:functions"] = std::move(function_data);
-    data["rust_exception:streams"] = std::move(stream_data);
-    data["rust_exception:sinks"] = std::move(sink_data);
-    output.emplace_back(data);
-  }
-
-  return output;
-}
 
 void t_mstch_rust_generator::generate_program() {
   if (auto types_crate_flag = get_option("types_crate")) {
@@ -2795,8 +2580,7 @@ void t_mstch_rust_generator::generate_split_types() {
 }
 
 void t_mstch_rust_generator::set_mstch_factories() {
-  mstch_context_.add<rust_mstch_service>(&options_);
-  mstch_context_.add<rust_mstch_interaction>(&options_);
+  mstch_context_.add<rust_mstch_interaction>();
 }
 
 void validate_struct_annotations(

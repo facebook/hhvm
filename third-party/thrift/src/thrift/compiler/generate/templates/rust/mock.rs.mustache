@@ -141,11 +141,11 @@ pub struct {{service:rust_name}}<'mock> {{> lib/block}}
     {{#service:extends}}
     pub parent: {{service:mock_package}}::{{service:rust_name}}<'mock>,
     {{/service:extends}}
-    {{#service:rustFunctions}}
+    {{#service:functions}}
     {{#if (not function:starts_interaction?)}}
     pub {{function:rust_name}}: r#impl::{{service:snake}}::{{function:rust_name}}<'mock>,
     {{/if (not function:starts_interaction?)}}
-    {{/service:rustFunctions}}
+    {{/service:functions}}
     _marker: ::std::marker::PhantomData<&'mock ()>,
 }
 
@@ -156,19 +156,19 @@ impl crate::DynClient for dyn {{program:clients}}::{{service:rust_name}} {
             {{#service:extends}}
             parent: {{service:mock_crate}}::new::<dyn {{service:client_package}}::{{service:rust_name}}>(),
             {{/service:extends}}
-            {{#service:rustFunctions}}
+            {{#service:functions}}
             {{#if (not function:starts_interaction?)}}
             {{function:rust_name}}: {{!
                 }}r#impl::{{service:snake}}::{{function:rust_name}}::unimplemented(),
             {{/if (not function:starts_interaction?)}}
-            {{/service:rustFunctions}}
+            {{/service:functions}}
             _marker: ::std::marker::PhantomData,
         }
     }
 }
 
 impl<'mock> {{program:clients}}::{{service:rust_name}} for {{service:rust_name}}<'mock> {{> lib/block}}{{!
-    }}{{#service:rustFunctions}}
+    }}{{#service:functions}}
     {{#if (not function:starts_interaction?)}}{{#if (not function:creates_interaction?)}}
     fn {{function:rust_name}}(
         &self,{{!
@@ -213,14 +213,14 @@ impl<'mock> {{program:clients}}::{{service:rust_name}} for {{service:rust_name}}
     }}::anyhow::Error> {
         unimplemented!("Mocking interactions is not yet implemented");
     }{{!
-    }}{{/if (not function:starts_interaction?)}}{{/service:rustFunctions}}
+    }}{{/if (not function:starts_interaction?)}}{{/service:functions}}
 }
 
 impl<'mock, T> {{program:clients}}::{{service:rust_name}}Ext<T> for {{service:rust_name}}<'mock>
 where
     T: ::fbthrift::Transport,
 {{> lib/block}}{{!
-    }}{{#service:rustFunctions}}
+    }}{{#service:functions}}
     {{#if (not function:starts_interaction?)}}
     fn {{function:rust_name}}_with_rpc_opts(
         &self,{{!
@@ -237,7 +237,7 @@ where
         )
     }
     {{/if (not function:starts_interaction?)}}
-    {{/service:rustFunctions}}
+    {{/service:functions}}
     {{#if (not service:extendedClients)}}
 
     fn transport(&self) -> &T {
@@ -292,7 +292,7 @@ pub mod r#impl {{> lib/block}}{{!
 }}{{#program:services}}
     pub mod {{service:snake}} {{> lib/block}}{{!
 
-        }}{{#service:rustFunctions}}
+        }}{{#service:functions}}
         {{#if (not function:starts_interaction?)}}
 
         pub struct {{function:rust_name}}<'mock> {
@@ -407,7 +407,7 @@ pub mod r#impl {{> lib/block}}{{!
             }
         }{{!
         }}{{/if (not function:starts_interaction?)}}{{!
-        }}{{/service:rustFunctions}}
+        }}{{/service:functions}}
     }{{!
 }}{{/program:services}}
 }

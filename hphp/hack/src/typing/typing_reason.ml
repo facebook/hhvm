@@ -3323,7 +3323,8 @@ let string_of_ureason = function
   | URdynamic_prop -> "Dynamic access of property"
   | URlabel ->
     "This label is not a valid reference to a member of the given enum class"
-  | URcondition -> "Only bool values can be used as a condition"
+  | URcondition ->
+    "Only bool values can be used as a condition. Use a type-specific test instead."
 
 (* ~~ Extended reasons rendering ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 

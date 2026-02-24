@@ -773,7 +773,8 @@ module Expect_bool_for_condition = struct
   let code _ = code
 
   let claim { Typing_warning.Expect_bool_for_condition.ty } =
-    "Only bool values can be used as a condition. This is " ^ ty
+    "Only bool values can be used as a condition. Use a type-specific test instead. This is "
+    ^ ty
 
   let reasons _ = []
 

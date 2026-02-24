@@ -606,7 +606,16 @@ template <typename T>
 struct Encode<type::enum_t<T>> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const T& s) const {
-    return prot.writeI32(static_cast<int32_t>(s));
+    const auto value = static_cast<std::int32_t>(s);
+    if constexpr (requires {
+                    prot.writeEnum(std::string_view{}, std::int32_t{});
+                  }) {
+      const char* name = util::enumName(s);
+      return prot.writeEnum(name ? name : "", value);
+    } else {
+      // TODO: add writeEnum to all protocols and delete this branch
+      return prot.writeI32(value);
+    }
   }
 };
 

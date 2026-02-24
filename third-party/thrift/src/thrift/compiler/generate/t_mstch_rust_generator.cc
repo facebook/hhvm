@@ -39,8 +39,6 @@
 
 namespace apache::thrift::compiler::rust {
 
-namespace {
-
 struct rust_codegen_options {
   // Crate names used for referring to sibling crates within the same Thrift
   // library.
@@ -96,6 +94,10 @@ struct rust_codegen_options {
 };
 
 enum class FieldKind { Box, Arc, Inline };
+
+class mstch_rust_value;
+
+namespace {
 
 const std::string_view kRustCratePrefix = "crate::";
 const std::string_view kRustCrateTypesPrefix = "crate::types::";
@@ -761,6 +763,36 @@ std::string compute_adapter_struct_qualified(
   return "<" + name + " as ::fbthrift::adapter::ThriftAdapter>";
 }
 
+mstch::node structured_annotations_node(
+    const t_named& named,
+    unsigned depth,
+    mstch_context& context,
+    mstch_element_position pos,
+    const rust_codegen_options& options) {
+  std::vector<mstch::node> annotations;
+
+  // Note, duplicate annotations are not allowed per the Thrift spec.
+  for (const t_const& annotation : named.structured_annotations()) {
+    auto direct_annotation = mstch::make_shared_node<mstch_rust_value>(
+        annotation.value(), annotation.type(), depth, context, pos, options);
+
+    mstch::node transitive;
+    const t_type* annotation_type = annotation.type();
+    if (annotation_type->has_structured_annotation(kTransitiveUri)) {
+      transitive = context.type_factory->make_mstch_object(
+          annotation_type, context, pos);
+    }
+
+    annotations.emplace_back(
+        mstch::map{
+            {"structured_annotation:direct", direct_annotation},
+            {"structured_annotation:transitive?", transitive},
+        });
+  }
+
+  return annotations;
+}
+
 std::string get_resolved_name(const t_type* t) {
   t = t->get_true_type();
   if (auto c = dynamic_cast<const t_list*>(t)) {
@@ -928,6 +960,8 @@ class rust_generator_context {
   }
 };
 
+} // namespace
+
 class t_mstch_rust_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -1039,26 +1073,6 @@ class t_mstch_rust_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_const_value(proto);
     auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
 
-    def.property(
-        "underlying_type",
-        [this, &proto](const t_const_value& self) -> whisker::object {
-          auto* info = rust_context_->get_info(&self);
-          if (!info) {
-            return whisker::make::null;
-          }
-          return resolve_derived_t_type(proto, *info->underlying_type);
-        });
-
-    def.property(
-        "local_type",
-        [this, &proto](const t_const_value& self) -> whisker::object {
-          auto* info = rust_context_->get_info(&self);
-          if (!info) {
-            return whisker::make::null;
-          }
-          return resolve_derived_t_type(proto, *info->local_type);
-        });
-
     def.property("newtype?", [this](const t_const_value& self) {
       auto* info = rust_context_->get_info(&self);
       if (!info) {
@@ -1132,76 +1146,6 @@ class t_mstch_rust_generator : public t_mstch_generator {
       return whisker::make::string(quote(self.get_string(), false));
     });
 
-    def.property(
-        "structFields",
-        [this, &proto](const t_const_value& self) -> whisker::object {
-          auto* info = rust_context_->get_info(&self);
-          if (!info) {
-            return whisker::make::null;
-          }
-          auto struct_type =
-              dynamic_cast<const t_structured*>(info->underlying_type);
-          if (!struct_type) {
-            return whisker::make::null;
-          }
-          std::map<std::string, const t_const_value*> map_entries;
-          for (auto entry : self.get_map()) {
-            auto key = entry.first;
-            if (key->kind() == value_type::CV_STRING) {
-              map_entries[key->get_string()] = entry.second;
-            }
-          }
-          whisker::array::raw fields;
-          for (auto&& field : struct_type->fields()) {
-            auto explicit_value = map_entries[field.name()];
-            whisker::object explicit_value_obj = whisker::make::null;
-            if (explicit_value) {
-              explicit_value_obj = whisker::make::native_handle(
-                  proto.create<t_const_value>(*explicit_value));
-            }
-            whisker::object default_value_obj = whisker::make::null;
-            if (auto default_val = field.default_value()) {
-              default_value_obj = whisker::make::native_handle(
-                  proto.create<t_const_value>(*default_val));
-            }
-            auto adapter_annotation = find_structured_adapter_annotation(field);
-            fields.emplace_back(
-                whisker::make::map(
-                    whisker::map::raw{
-                        {"field:rust_name",
-                         whisker::make::string(named_rust_name(&field))},
-                        {"field:id", whisker::make::i64(field.id())},
-                        {"field:optional?",
-                         whisker::make::boolean(
-                             field.qualifier() == t_field_qualifier::optional)},
-                        {"field:box?",
-                         whisker::make::boolean(
-                             field_kind(field) == FieldKind::Box)},
-                        {"field:arc?",
-                         whisker::make::boolean(
-                             field_kind(field) == FieldKind::Arc)},
-                        {"field:has_adapter?",
-                         whisker::make::boolean(
-                             adapter_annotation != nullptr ||
-                             type_has_transitive_adapter(
-                                 step_through_typedefs(
-                                     field.type().get_type(), true),
-                                 false))},
-                        {"field:adapter_qualified",
-                         whisker::make::string(compute_adapter_qualified(
-                             adapter_annotation,
-                             field.type().get_type(),
-                             false,
-                             options_))},
-                        {"field:docs?",
-                         whisker::make::boolean(field.has_doc())},
-                        {"field:explicit_value", std::move(explicit_value_obj)},
-                        {"field:default_value", std::move(default_value_obj)},
-                    }));
-          }
-          return whisker::make::array(std::move(fields));
-        });
-
     def.property("exhaustive?", [this](const t_const_value& self) {
       auto* info = rust_context_->get_info(&self);
       if (!info) {
@@ -1235,30 +1179,6 @@ class t_mstch_rust_generator : public t_mstch_generator {
               } else {
                 return whisker::make::string(std::string(variant));
               }
-            }
-          }
-          return whisker::make::null;
-        });
-
-    def.property(
-        "unionValue",
-        [this, &proto](const t_const_value& self) -> whisker::object {
-          auto* info = rust_context_->get_info(&self);
-          if (!info) {
-            return whisker::make::null;
-          }
-          auto struct_type =
-              dynamic_cast<const t_structured*>(info->underlying_type);
-          if (!struct_type) {
-            return whisker::make::null;
-          }
-          const auto& entry = self.get_map().at(0);
-          const auto& variant = entry.first->get_string();
-          const auto* content = entry.second;
-          for (auto&& field : struct_type->fields()) {
-            if (field.name() == variant) {
-              return whisker::make::native_handle(
-                  proto.create<t_const_value>(*content));
             }
           }
           return whisker::make::null;
@@ -1366,13 +1286,6 @@ class t_mstch_rust_generator : public t_mstch_generator {
     def.property("adapter_qualified", [this](const t_type& self) {
       return compute_adapter_qualified(nullptr, &self, false, options_);
     });
-    // Type sub-object accessor (migrated from mstch_type)
-    def.property("typedef", [&proto](const t_type& self) -> whisker::object {
-      if (auto* td = self.try_as<t_typedef>()) {
-        return resolve_derived_t_type(proto, *td);
-      }
-      return whisker::make::null;
-    });
     return std::move(def).make();
   }
 
@@ -1410,7 +1323,7 @@ class t_mstch_rust_generator : public t_mstch_generator {
         rust_type = get_annotation_property_string(annot, "name");
       }
       if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
-        rust_type = std::string("fbthrift::builtin_types::") + rust_type;
+        rust_type = fmt::format("fbthrift::builtin_types::{}", rust_type);
       }
       return rust_type;
     });
@@ -1486,7 +1399,7 @@ class t_mstch_rust_generator : public t_mstch_generator {
     def.property("type_rust", [](const t_field& self) {
       auto rust_type = get_type_annotation(&self);
       if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
-        rust_type = std::string("fbthrift::builtin_types::") + rust_type;
+        rust_type = fmt::format("fbthrift::builtin_types::{}", rust_type);
       }
       return rust_type;
     });
@@ -1511,25 +1424,6 @@ class t_mstch_rust_generator : public t_mstch_generator {
       auto adapter_annotation = find_structured_adapter_annotation(self);
       return compute_adapter_struct_qualified(
           adapter_annotation, self.type().get_type(), options_, &self);
-    });
-    def.property("rust_structured_annotations", [&proto](const t_field& self) {
-      whisker::array::raw annotations;
-      for (const t_const& ann : self.structured_annotations()) {
-        whisker::object direct = whisker::make::native_handle(
-            proto.create<t_const_value>(*ann.value()));
-        whisker::object transitive = whisker::make::null;
-        if (ann.type()->has_structured_annotation(kTransitiveUri)) {
-          transitive = resolve_derived_t_type(proto, *ann.type());
-        }
-        annotations.emplace_back(
-            whisker::make::map(
-                whisker::map::raw{
-                    {"structured_annotation:direct", std::move(direct)},
-                    {"structured_annotation:transitive?",
-                     std::move(transitive)},
-                }));
-      }
-      return whisker::make::array(std::move(annotations));
     });
     return std::move(def).make();
   }
@@ -1617,26 +1511,6 @@ class t_mstch_rust_generator : public t_mstch_generator {
       });
       return to_array(fields, proto.of<t_field>());
     });
-    def.property(
-        "rust_structured_annotations", [&proto](const t_structured& self) {
-          whisker::array::raw annotations;
-          for (const t_const& ann : self.structured_annotations()) {
-            whisker::object direct = whisker::make::native_handle(
-                proto.create<t_const_value>(*ann.value()));
-            whisker::object transitive = whisker::make::null;
-            if (ann.type()->has_structured_annotation(kTransitiveUri)) {
-              transitive = resolve_derived_t_type(proto, *ann.type());
-            }
-            annotations.emplace_back(
-                whisker::make::map(
-                    whisker::map::raw{
-                        {"structured_annotation:direct", std::move(direct)},
-                        {"structured_annotation:transitive?",
-                         std::move(transitive)},
-                    }));
-          }
-          return whisker::make::array(std::move(annotations));
-        });
     return std::move(def).make();
   }
 
@@ -1710,8 +1584,6 @@ class t_mstch_rust_generator : public t_mstch_generator {
               return "String";
             case t_primitive_type::type::t_binary:
               return "String";
-            default:
-              break;
           }
         } else if (true_type->is<t_list>()) {
           return "List";
@@ -2426,6 +2298,408 @@ class rust_mstch_function_factory {
   }
 };
 
+class rust_mstch_struct : public mstch_struct {
+ public:
+  rust_mstch_struct(
+      const t_structured* s,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const rust_codegen_options* options)
+      : mstch_struct(s, ctx, pos), options_(*options) {
+    register_methods(
+        this,
+        {
+            {"struct:rust_structured_annotations",
+             &rust_mstch_struct::rust_structured_annotations},
+        });
+  }
+  mstch::node rust_structured_annotations() {
+    return structured_annotations_node(*struct_, 1, context_, pos_, options_);
+  }
+
+ private:
+  const rust_codegen_options& options_;
+};
+
+class mstch_rust_value : public mstch_base {
+ public:
+  using value_type = t_const_value::t_const_value_kind;
+  mstch_rust_value(
+      const t_const_value* const_value,
+      const t_type* type,
+      unsigned depth,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const rust_codegen_options& options)
+      : mstch_base(ctx, pos),
+        const_value_(const_value),
+        local_type_(type),
+        underlying_type_(type->get_true_type()),
+        depth_(depth),
+        options_(options) {
+    register_methods(
+        this,
+        {
+            {"value:underlying_type", &mstch_rust_value::underlying_type},
+            {"value:local_type", &mstch_rust_value::local_type},
+            {"value:bool?", &mstch_rust_value::is_bool},
+            {"value:integer?", &mstch_rust_value::is_integer},
+            {"value:string?", &mstch_rust_value::is_string},
+            {"value:binary?", &mstch_rust_value::is_binary},
+            {"value:list?", &mstch_rust_value::is_list},
+            {"value:list_elements", &mstch_rust_value::list_elements},
+            {"value:set?", &mstch_rust_value::is_set},
+            {"value:setMembers", &mstch_rust_value::set_members},
+            {"value:map?", &mstch_rust_value::is_map},
+            {"value:mapEntries", &mstch_rust_value::map_entries},
+            {"value:struct?", &mstch_rust_value::is_struct},
+            {"value:structFields", &mstch_rust_value::struct_fields},
+            {"value:union?", &mstch_rust_value::is_union},
+            {"value:unionValue", &mstch_rust_value::union_value},
+            {"value:enum?", &mstch_rust_value::is_enum},
+            {"value:self", &mstch_rust_value::self},
+        });
+  }
+  whisker::object self() { return make_self(*const_value_); }
+  mstch::node underlying_type() {
+    return context_.type_factory->make_mstch_object(
+        underlying_type_, context_, pos_);
+  }
+  mstch::node local_type() {
+    return context_.type_factory->make_mstch_object(
+        local_type_, context_, pos_);
+  }
+  mstch::node is_bool() { return underlying_type_->is_bool(); }
+  mstch::node is_integer() {
+    return underlying_type_->is_byte() || underlying_type_->is_i16() ||
+        underlying_type_->is_i32() || underlying_type_->is_i64();
+  }
+  mstch::node is_string() { return underlying_type_->is_string(); }
+  mstch::node is_binary() { return underlying_type_->is_binary(); }
+  mstch::node is_list() {
+    return underlying_type_->is<t_list>() &&
+        (const_value_->kind() == value_type::CV_LIST ||
+         (const_value_->kind() == value_type::CV_MAP &&
+          const_value_->get_map().empty()));
+  }
+  mstch::node list_elements() {
+    const t_type* elem_type;
+    if (const t_set* set_type = underlying_type_->try_as<t_set>()) {
+      elem_type = set_type->elem_type().get_type();
+    } else if (const t_list* list_type = underlying_type_->try_as<t_list>()) {
+      elem_type = list_type->elem_type().get_type();
+    } else {
+      return mstch::node();
+    }
+
+    mstch::array elements;
+    for (auto elem : const_value_->get_list()) {
+      elements.emplace_back(
+          std::make_shared<mstch_rust_value>(
+              elem, elem_type, depth_ + 3, context_, pos_, options_));
+    }
+    return elements;
+  }
+  mstch::node is_set() {
+    return underlying_type_->is<t_set>() &&
+        (const_value_->kind() == value_type::CV_LIST ||
+         (const_value_->kind() == value_type::CV_MAP &&
+          const_value_->get_map().empty()));
+  }
+  mstch::node set_members() { return list_elements(); }
+  mstch::node is_map() {
+    return underlying_type_->is<t_map>() &&
+        (const_value_->kind() == value_type::CV_MAP ||
+         (const_value_->kind() == value_type::CV_LIST &&
+          const_value_->get_list().empty()));
+  }
+  mstch::node map_entries();
+  mstch::node is_struct() {
+    return underlying_type_->is<t_structured>() &&
+        !underlying_type_->is<t_union>() &&
+        const_value_->kind() == value_type::CV_MAP;
+  }
+  mstch::node struct_fields();
+  mstch::node is_union() {
+    if (!underlying_type_->is<t_union>() ||
+        const_value_->kind() != value_type::CV_MAP) {
+      return false;
+    }
+    if (const_value_->get_map().empty()) {
+      // value will be the union's Default
+      return true;
+    }
+    return const_value_->get_map().size() == 1 &&
+        const_value_->get_map().at(0).first->kind() == value_type::CV_STRING;
+  }
+  mstch::node union_value() {
+    auto struct_type = dynamic_cast<const t_structured*>(underlying_type_);
+    if (!struct_type) {
+      return mstch::node();
+    }
+
+    const auto& entry = const_value_->get_map().at(0);
+    const auto& variant = entry.first->get_string();
+    const auto* content = entry.second;
+
+    for (auto&& field : struct_type->fields()) {
+      if (field.name() == variant) {
+        return std::make_shared<mstch_rust_value>(
+            content,
+            field.type().get_type(),
+            depth_ + 1,
+            context_,
+            pos_,
+            options_);
+      }
+    }
+    return mstch::node();
+  }
+  mstch::node is_enum() { return underlying_type_->is<t_enum>(); }
+
+ private:
+  const t_const_value* const_value_;
+
+  // The type (potentially a typedef) by which the value's type is known to
+  // the current crate.
+  const t_type* local_type_;
+
+  // The underlying type of the value after stepping through any non-newtype
+  // typedefs.
+  const t_type* underlying_type_;
+
+  unsigned depth_;
+  const rust_codegen_options& options_;
+};
+
+class mstch_rust_map_entry : public mstch_base {
+ public:
+  mstch_rust_map_entry(
+      const t_const_value* key,
+      const t_type* key_type,
+      const t_const_value* value,
+      const t_type* value_type,
+      unsigned depth,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const rust_codegen_options& options)
+      : mstch_base(ctx, pos),
+        key_(key),
+        key_type_(key_type),
+        value_(value),
+        value_type_(value_type),
+        depth_(depth),
+        options_(options) {
+    register_methods(
+        this,
+        {
+            {"entry:key", &mstch_rust_map_entry::key},
+            {"entry:value", &mstch_rust_map_entry::value},
+        });
+  }
+  mstch::node key() {
+    return std::make_shared<mstch_rust_value>(
+        key_, key_type_, depth_, context_, pos_, options_);
+  }
+  mstch::node value() {
+    return std::make_shared<mstch_rust_value>(
+        value_, value_type_, depth_, context_, pos_, options_);
+  }
+
+ private:
+  const t_const_value* key_;
+  const t_type* key_type_;
+  const t_const_value* value_;
+  const t_type* value_type_;
+  unsigned depth_;
+  const rust_codegen_options& options_;
+};
+
+class mstch_rust_struct_field : public mstch_base {
+ public:
+  mstch_rust_struct_field(
+      const t_field* field,
+      const t_const_value* explicit_value,
+      unsigned depth,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const rust_codegen_options& options)
+      : mstch_base(ctx, pos),
+        field_(field),
+        explicit_value_(explicit_value),
+        depth_(depth),
+        options_(options),
+        adapter_annotation_(find_structured_adapter_annotation(*field)) {
+    register_methods(
+        this,
+        {
+            {"field:self", &mstch_rust_struct_field::self},
+            {"field:explicit_value", &mstch_rust_struct_field::explicit_value},
+            {"field:default_value", &mstch_rust_struct_field::rust_default},
+            {"field:type", &mstch_rust_struct_field::type},
+            {"field:box?", &mstch_rust_struct_field::is_boxed},
+            {"field:arc?", &mstch_rust_struct_field::is_arc},
+            {"field:docs?", &mstch_rust_struct_field::rust_has_docs},
+            {"field:has_adapter?", &mstch_rust_struct_field::has_adapter},
+            {"field:adapter_qualified",
+             &mstch_rust_struct_field::rust_adapter_qualified},
+        });
+  }
+  whisker::object self() { return make_self(*field_); }
+  mstch::node explicit_value() {
+    if (explicit_value_) {
+      auto type = field_->type().get_type();
+      return std::make_shared<mstch_rust_value>(
+          explicit_value_, type, depth_, context_, pos_, options_);
+    }
+    return mstch::node();
+  }
+  mstch::node rust_default() {
+    if (auto default_value = field_->default_value()) {
+      return std::make_shared<mstch_rust_value>(
+          default_value,
+          field_->type().get_type(),
+          depth_,
+          context_,
+          pos_,
+          options_);
+    }
+    return mstch::node();
+  }
+  mstch::node type() {
+    auto type = field_->type().get_type();
+    return context_.type_factory->make_mstch_object(type, context_, pos_);
+  }
+  mstch::node is_boxed() { return field_kind(*field_) == FieldKind::Box; }
+  mstch::node is_arc() { return field_kind(*field_) == FieldKind::Arc; }
+  mstch::node rust_has_docs() { return field_->has_doc(); }
+  mstch::node has_adapter() {
+    auto type = field_->type().get_type();
+    const t_type* curr_type = step_through_typedefs(type, true);
+    return adapter_annotation_ != nullptr ||
+        type_has_transitive_adapter(curr_type, false);
+  }
+  mstch::node rust_adapter_qualified() {
+    return compute_adapter_qualified(
+        adapter_annotation_, field_->type().get_type(), false, options_);
+  }
+
+ private:
+  const t_field* field_;
+  const t_const_value* explicit_value_;
+  unsigned depth_;
+  const rust_codegen_options& options_;
+  const t_const* adapter_annotation_;
+};
+
+mstch::node mstch_rust_value::map_entries() {
+  auto map_type = dynamic_cast<const t_map*>(underlying_type_);
+  if (!map_type) {
+    return mstch::node();
+  }
+  auto key_type = &map_type->key_type().deref();
+  auto value_type = &map_type->val_type().deref();
+
+  mstch::array entries;
+  for (auto entry : const_value_->get_map()) {
+    entries.emplace_back(
+        std::make_shared<mstch_rust_map_entry>(
+            entry.first,
+            key_type,
+            entry.second,
+            value_type,
+            depth_ + 3,
+            context_,
+            pos_,
+            options_));
+  }
+  return entries;
+}
+
+mstch::node mstch_rust_value::struct_fields() {
+  auto struct_type = dynamic_cast<const t_structured*>(underlying_type_);
+  if (!struct_type) {
+    return mstch::node();
+  }
+
+  std::map<std::string, const t_const_value*> map_entries;
+  for (auto entry : const_value_->get_map()) {
+    auto key = entry.first;
+    if (key->kind() == value_type::CV_STRING) {
+      map_entries[key->get_string()] = entry.second;
+    }
+  }
+
+  mstch::array fields;
+  for (auto&& field : struct_type->fields()) {
+    auto explicit_value = map_entries[field.name()];
+    fields.emplace_back(
+        std::make_shared<mstch_rust_struct_field>(
+            &field, explicit_value, depth_ + 1, context_, pos_, options_));
+  }
+  return fields;
+}
+
+class rust_mstch_const : public mstch_const {
+ public:
+  rust_mstch_const(
+      const t_const* c,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_const* current_const,
+      const t_field* field,
+      const rust_codegen_options* options)
+      : mstch_const(c, ctx, pos, current_const, field), options_(*options) {
+    register_methods(
+        this,
+        {
+            {"constant:value", &rust_mstch_const::rust_typed_value},
+        });
+  }
+  mstch::node rust_typed_value() {
+    unsigned depth = 0;
+    return std::make_shared<mstch_rust_value>(
+        const_->value(), const_->type(), depth, context_, pos_, options_);
+  }
+
+ private:
+  const rust_codegen_options& options_;
+};
+
+class rust_mstch_field : public mstch_field {
+ public:
+  rust_mstch_field(
+      const t_field* field,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const rust_codegen_options* options)
+      : mstch_field(field, ctx, pos), options_(*options) {
+    register_methods(
+        this,
+        {
+            {"field:default_value", &rust_mstch_field::rust_default},
+            {"field:rust_structured_annotations",
+             &rust_mstch_field::rust_structured_annotations},
+        });
+  }
+  mstch::node rust_default() {
+    auto value = field_->default_value();
+    if (value) {
+      unsigned depth = 2; // impl Default + fn default
+      auto type = field_->type().get_type();
+      return std::make_shared<mstch_rust_value>(
+          value, type, depth, context_, pos_, options_);
+    }
+    return mstch::node();
+  }
+  mstch::node rust_structured_annotations() {
+    return structured_annotations_node(*field_, 3, context_, pos_, options_);
+  }
+
+ private:
+  const rust_codegen_options& options_;
+};
+
 mstch::node rust_mstch_service::rust_functions() {
   return make_mstch_array(
       service_->functions().copy(),
@@ -2598,8 +2872,7 @@ void t_mstch_rust_generator::generate_program() {
                 namespace_rust));
       }
     }
-    if (crate_name_option && !pieces.empty() &&
-        pieces[0] != *crate_name_option) {
+    if (crate_name_option && pieces[0] != *crate_name_option) {
       throw std::runtime_error(
           fmt::format(
               R"(`namespace rust` disagrees with rust_crate_name option: "{}" vs "{}")",
@@ -2663,7 +2936,12 @@ void t_mstch_rust_generator::set_mstch_factories() {
   mstch_context_.add<rust_mstch_program>(&options_);
   mstch_context_.add<rust_mstch_service>(&options_);
   mstch_context_.add<rust_mstch_interaction>(&options_);
+  mstch_context_.add<rust_mstch_struct>(&options_);
+  mstch_context_.add<rust_mstch_field>(&options_);
+  mstch_context_.add<rust_mstch_const>(&options_);
 }
+
+namespace {
 
 void validate_struct_annotations(
     sema_context& ctx,
@@ -2740,6 +3018,8 @@ bool validate_program_annotations(sema_context& ctx, const t_program& program) {
   return true;
 }
 
+} // namespace
+
 void t_mstch_rust_generator::fill_validator_visitors(
     ast_validator& validator) const {
   validator.add_structured_definition_visitor(
@@ -2768,7 +3048,4 @@ THRIFT_REGISTER_GENERATOR(
     "    cratemap=map:    Mapping file from services to crate names\n"
     "    types_crate=:    Name that the main crate uses to refer to its dependency on the types crate\n"
     "    types_split_count=:    Number of compilation units to split the independent types into\n");
-
-} // namespace
-
 } // namespace apache::thrift::compiler::rust

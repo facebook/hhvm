@@ -22,20 +22,20 @@
         }}{{/if typedef:has_adapter?}}{{!
 }}{{/value:newtype_chain}}{{!
 }}{{#value:underlying_type}}{{!
-}}{{#if type:bool?}}{{value:bool_value}}{{/if type:bool?}}{{!
-}}{{#if (or type:byte? type:any_int?)}}{{value:integer_value}}{{/if (or type:byte? type:any_int?)}}{{!
-}}{{#if type:floating_point?}}{{value:floatingPointValue}}{{/if type:floating_point?}}{{!
-}}{{#if type:string?}}{{!
+}}{{#if value:bool?}}{{value:bool_value}}{{/if value:bool?}}{{!
+}}{{#if value:integer?}}{{value:integer_value}}{{/if value:integer?}}{{!
+}}{{#if value:floatingPoint?}}{{value:floatingPointValue}}{{/if value:floatingPoint?}}{{!
+}}{{#if value:string?}}{{!
     }}{{#if value:empty?}}::std::string::String::new(){{!
     }}{{#else}}{{value:quoted}}.to_owned(){{/if value:empty?}}{{!
-}}{{/if type:string?}}{{!
-}}{{#if type:binary?}}{{!
+}}{{/if value:string?}}{{!
+}}{{#if value:binary?}}{{!
     }}{{#if value:empty?}}{{!
         }}{{#if (not (string.empty? type:rust))}}<::{{type:rust}}>::new(){{!
         }}{{#else}}::std::vec::Vec::new(){{/if (not (string.empty? type:rust))}}{{!
     }}{{#else}}{{value:quoted}}.as_bytes().into(){{/if value:empty?}}{{!
-}}{{/if type:binary?}}{{!
-}}{{#if type:list?}}{{!
+}}{{/if value:binary?}}{{!
+}}{{#if value:list?}}{{!
     }}{{#if value:empty?}}::std::vec::Vec::new(){{/if value:empty?}}{{!
     }}{{#if (not value:empty?)}}{{!
         }}{
@@ -55,8 +55,8 @@
             {{value:indent}}list
         {{value:indent}}}{{!
     }}{{/if (not value:empty?)}}{{!
-}}{{/if type:list?}}{{!
-}}{{#if type:set?}}{{!
+}}{{/if value:list?}}{{!
+}}{{#if value:set?}}{{!
     }}{{#if value:empty?}}{{!
         }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
         }}{{#else}}::std::collections::BTreeSet{{/if (not (string.empty? type:rust))}}{{!
@@ -67,7 +67,7 @@
                 }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
                 }}{{#else}}::std::collections::BTreeSet{{/if (not (string.empty? type:rust))}}{{!
             }}::new();
-            {{#value:list_elements}}
+            {{#value:setMembers}}
 {{value:indent}}{
     {{value:indent}}#[inline(never)]
     {{value:indent}}fn __do_insert(set: &mut {{!
@@ -82,12 +82,12 @@
     {{value:indent}}}
     {{value:indent}}__do_insert(&mut set);
 {{value:indent}}}
-            {{/value:list_elements}}
+            {{/value:setMembers}}
             {{value:indent}}set
         {{value:indent}}}{{!
     }}{{/if value:empty?}}{{!
-}}{{/if type:set?}}{{!
-}}{{#if type:map?}}{{!
+}}{{/if value:set?}}{{!
+}}{{#if value:map?}}{{!
     }}{{#if value:empty?}}{{!
         }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
         }}{{#else}}::std::collections::BTreeMap{{/if (not (string.empty? type:rust))}}{{!
@@ -98,7 +98,7 @@
                 }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
                 }}{{#else}}::std::collections::BTreeMap{{/if (not (string.empty? type:rust))}}{{!
             }}::new();{{!
-            }}{{#value:map_elements}}
+            }}{{#value:mapEntries}}
             {{value:indent}}{
                 {{value:indent}}#[inline(never)]
                 {{value:indent}}fn __do_insert(map: &mut {{!
@@ -106,22 +106,22 @@
                     }}{{#if (not type:has_adapter?)}}{{>lib/type}}{{/if (not type:has_adapter?)}}{{!
                 }}) {
                     {{value:indent}}map.insert({{!
-                        }}{{#key}}{{!
+                        }}{{#entry:key}}{{!
                             }}{{#if value:floatingPoint?}}{{!
                                 }}::fbthrift::export::OrderedFloat({{> lib/value}}){{!
                             }}{{#else}}{{> lib/value}}{{/if value:floatingPoint?}}{{!
-                        }}{{/key}}, {{!
-                        }}{{#value}}{{> lib/value}}{{/value}}{{!
+                        }}{{/entry:key}}, {{!
+                        }}{{#entry:value}}{{> lib/value}}{{/entry:value}}{{!
                     }});
                 {{value:indent}}}
                 {{value:indent}}__do_insert(&mut map);
             {{value:indent}}}{{!
-            }}{{/value:map_elements}}
+            }}{{/value:mapEntries}}
             {{value:indent}}map
         {{value:indent}}}{{!
     }}{{/if value:empty?}}{{!
-}}{{/if type:map?}}{{!
-}}{{#if (and type:structured? (not type:union?))}}{{!
+}}{{/if value:map?}}{{!
+}}{{#if value:struct?}}{{!
     }}{{> lib/type}} {{> lib/block}}{{!
         }}{{#value:structFields}}
             {{value:indent}}{{field:rust_name}}: {{!
@@ -160,8 +160,8 @@
             {{value:indent}}..::std::default::Default::default(){{!
         }}{{/if (not value:exhaustive?)}}
         {{value:indent}}}{{!
-}}{{/if (and type:structured? (not type:union?))}}{{!
-}}{{#if type:union?}}{{!
+}}{{/if value:struct?}}{{!
+}}{{#if value:union?}}{{!
     }}{{#value:unionVariant}}{{!
         }}{{> lib/type}}::{{value:unionVariant}}({{!
             }}{{#value:unionValue}}{{> lib/value}}{{/value:unionValue}}{{!
@@ -170,12 +170,12 @@
     }}{{^value:unionVariant}}{{!
         }}{{> lib/type}}::default(){{!
     }}{{/value:unionVariant}}{{!
-}}{{/if type:union?}}{{!
-}}{{#if type:enum?}}{{!
+}}{{/if value:union?}}{{!
+}}{{#if value:enum?}}{{!
     }}{{#value:local_type}}{{type:package}}::{{type:rust_name}}{{/value:local_type}}{{!
     }}{{#value:enumVariant}}::{{value:enumVariant}}{{/value:enumVariant}}{{!
     }}{{^value:enumVariant}}({{value:integer_value}}){{/value:enumVariant}}{{!
-}}{{/if type:enum?}}{{!
+}}{{/if value:enum?}}{{!
 }}{{/value:underlying_type}}{{!
 }}{{#value:newtype_chain_reversed}}{{!
         }}{{#if typedef:has_adapter?}}{{!

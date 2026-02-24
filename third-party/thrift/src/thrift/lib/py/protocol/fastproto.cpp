@@ -54,16 +54,16 @@ static PyObject* ExceptionsModule;
 #if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
 /* The structure changes in https://hg.python.org/cpython/rev/2e29d54843a4.
  * The first affected Python version is 3.5.0a1. */
-typedef struct {
+struct IOobject {
   PyObject_HEAD PyObject* buf;
   Py_ssize_t pos, string_size;
-} IOobject;
+};
 #define IOBUF(O) PyBytes_AS_STRING((O)->buf)
 #else
-typedef struct {
+struct IOobject {
   PyObject_HEAD char* buf;
   Py_ssize_t pos, string_size;
-} IOobject;
+};
 #define IOBUF(O) ((O)->buf)
 #endif
 
@@ -77,10 +77,10 @@ static PyObject* INTERN_STRING(cstringio_refill);
 static PyObject* INTERN_STRING(to_thrift);
 static PyObject* INTERN_STRING(from_thrift);
 
-typedef struct {
+struct DecodeBuffer {
   PyObject* stringiobuf;
   PyObject* refill_callable;
-} DecodeBuffer;
+};
 
 static void free_decodebuf(DecodeBuffer* d) {
   Py_XDECREF(d->stringiobuf);
@@ -122,32 +122,32 @@ static bool decode_buffer_from_obj(DecodeBuffer* dest, PyObject* obj) {
 #define INT_CONV_ERROR_OCCURRED(v) (((v) == -1) && PyErr_Occurred())
 #define CHECK_RANGE(v, min, max) (((v) <= (max)) && ((v) >= (min)))
 
-typedef struct {
+struct SetListTypeArgs {
   TType element_type;
   PyObject* typeargs;
-} SetListTypeArgs;
+};
 
-typedef struct {
+struct MapTypeArgs {
   TType ktype;
   TType vtype;
   PyObject* ktypeargs;
   PyObject* vtypeargs;
-} MapTypeArgs;
+};
 
-typedef struct {
+struct StructTypeArgs {
   PyObject* klass;
   PyObject* spec;
   bool isunion;
   PyObject* adapter;
-} StructTypeArgs;
+};
 
-typedef struct {
+struct StructItemSpec {
   int tag;
   TType type;
   PyObject* attrname;
   PyObject* typeargs;
   PyObject* defval;
-} StructItemSpec;
+};
 
 static bool parse_set_list_args(SetListTypeArgs* dest, PyObject* typeargs) {
   long element_type;

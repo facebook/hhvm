@@ -45,10 +45,10 @@ inline void reset_field<{{#program:cppNamespaces}}::{{value}}{{/program:cppNames
     {{#struct:py3_fields}}
     case {{field:index}}:
       {{^field:reference?}}
-      obj.{{field:cppName}}_ref().copy_from(default_inst<{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{struct:name}}>().{{field:cppName}}_ref());
+      obj.{{field:cpp_name}}_ref().copy_from(default_inst<{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{struct:name}}>().{{field:cpp_name}}_ref());
       {{/field:reference?}}
       {{#field:reference?}}
-      obj.{{field:cppName}}_ref(){{^field:iobuf_ref?}}.{{/field:iobuf_ref?}}{{#field:iobuf_ref?}}->{{/field:iobuf_ref?}}reset();
+      obj.{{field:cpp_name}}_ref(){{^field:iobuf_ref?}}.{{/field:iobuf_ref?}}{{#field:iobuf_ref?}}->{{/field:iobuf_ref?}}reset();
       {{/field:reference?}}
       return;
     {{/struct:py3_fields}}

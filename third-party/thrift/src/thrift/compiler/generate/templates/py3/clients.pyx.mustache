@@ -181,7 +181,7 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
         __userdata = (self, __future, rpc_options)
         bridgeFutureWith[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}](
             self._executor,
-            down_cast_ptr[c{{service:name}}ClientWrapper, cClientWrapper](self._client.get()).{{function:cppName}}(rpc_options._cpp_obj, {{#function:args}}
+            down_cast_ptr[c{{service:name}}ClientWrapper, cClientWrapper](self._client.get()).{{function:cpp_name}}(rpc_options._cpp_obj, {{#function:args}}
                 {{#field:type}}{{> clients/cython_python_to_cpp_arg}}{{/field:type}},{{/function:args}}
             ),
             {{service:name}}_{{function:name}}_callback,
@@ -262,7 +262,7 @@ cdef class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}
         bridgeFutureWith[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}](
             self._executor,
             down_cast_ptr[c{{service:parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper, {{!
-            }}cClientWrapper](self._client.get()).{{function:cppName}}(rpc_options._cpp_obj, {{#function:args}}
+            }}cClientWrapper](self._client.get()).{{function:cpp_name}}(rpc_options._cpp_obj, {{#function:args}}
                 {{#field:type}}{{> clients/cython_python_to_cpp_arg}}{{/field:type}},{{/function:args}}
             ),
             {{service:parent_service_name}}_{{service:name}}_{{function:name}}_callback,

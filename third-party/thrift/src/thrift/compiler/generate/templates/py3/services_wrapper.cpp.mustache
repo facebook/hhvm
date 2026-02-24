@@ -53,12 +53,12 @@ defined in ServicesCallbacks, along with appropriate arguments.
 {{/service:extends?}}
 
 {{#service:supportedFunctions}}
-void {{service:name}}Wrapper::async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cppName}}(
+void {{service:name}}Wrapper::async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(
   {{> services/cpp_handler_callback_type}} callback{{#function:args}}
     , {{#field:type}}{{!
             }}{{^function:stack_arguments?}}{{> types/cpp_arg_type}}{{/function:stack_arguments?}}{{!
             }}{{#function:stack_arguments?}}{{> types/cpp_stack_arg_type}}{{/function:stack_arguments?}}{{!
-        }}{{/field:type}} {{field:cppName}}{{#last?}}
+        }}{{/field:type}} {{field:cpp_name}}{{#last?}}
 {{/last?}}{{/function:args}}) {
   auto ctx = callback->getRequestContext();
   folly::via(
@@ -93,9 +93,9 @@ std::shared_ptr<apache::thrift::ServerInterface> {{service:name}}Interface(PyObj
   return std::make_shared<{{service:name}}Wrapper>(if_object, exc);
 }
 {{#service:lifecycleFunctions}}
-folly::SemiFuture<folly::Unit> {{service:name}}Wrapper::semifuture_{{function:cppName}}() {
+folly::SemiFuture<folly::Unit> {{service:name}}Wrapper::semifuture_{{function:cpp_name}}() {
   auto [promise, future] = folly::makePromiseContract<folly::Unit>();
-  call_cy_{{service:name}}_{{function:cppName}}(
+  call_cy_{{service:name}}_{{function:cpp_name}}(
       this->if_object,
       std::move(promise)
   );

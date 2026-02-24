@@ -100,7 +100,7 @@ cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/clients_wra
     {{/service:extends?}}
 
     {{#service:supportedFunctions}}
-    cFollyFuture[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}] {{function:cppName}}(cRpcOptions, {{#function:args}}
+    cFollyFuture[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}] {{function:cpp_name}}(cRpcOptions, {{#function:args}}
       {{#field:type}}{{> types/cython_cpp_type}}{{/field:type}} arg_{{field:py_name}},{{/function:args}})
     {{/service:supportedFunctions}}
     {{!
@@ -127,7 +127,7 @@ cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/clients_wra
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
     {{#service:supportedFunctions}}
-    cFollyFuture[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}] {{function:cppName}}(cRpcOptions, {{#function:args}}
+    cFollyFuture[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}] {{function:cpp_name}}(cRpcOptions, {{#function:args}}
       {{#field:type}}{{> types/cython_cpp_type}}{{/field:type}} arg_{{field:py_name}},{{/function:args}})
     {{/service:supportedFunctions}}
     {{!

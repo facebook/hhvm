@@ -57,18 +57,18 @@ class {{service:name}}Wrapper : {{!
   public:
     explicit {{service:name}}Wrapper(PyObject *if_object, folly::Executor *exc);
 {{#service:supportedFunctions}}
-    void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cppName}}({{> services/cpp_handler_callback_type}} callback{{#function:args}}
+    void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}({{> services/cpp_handler_callback_type}} callback{{#function:args}}
         , {{#field:type}}{{!
                 }}{{^function:stack_arguments?}}{{> types/cpp_arg_type}}{{/function:stack_arguments?}}{{!
                 }}{{#function:stack_arguments?}}{{> types/cpp_stack_arg_type}}{{/function:stack_arguments?}}{{!
-            }}{{/field:type}} {{field:cppName}}{{#last?}}
+            }}{{/field:type}} {{field:cpp_name}}{{#last?}}
     {{/last?}}{{/function:args}}) override;
 {{/service:supportedFunctions}}
 {{#service:supportedInteractions}}
     std::unique_ptr<{{service:name}}If> create{{service:name}}() override;
 {{/service:supportedInteractions}}
 {{#service:lifecycleFunctions}}
-folly::SemiFuture<folly::Unit> semifuture_{{function:cppName}}() override;
+folly::SemiFuture<folly::Unit> semifuture_{{function:cpp_name}}() override;
 {{/service:lifecycleFunctions}}
 };
 

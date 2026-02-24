@@ -489,7 +489,6 @@ class py3_mstch_service : public mstch_service {
             {"service:py3Namespaces", &py3_mstch_service::py3Namespaces},
             {"service:programName", &py3_mstch_service::programName},
             {"service:includePrefix", &py3_mstch_service::includePrefix},
-            {"service:cpp_name", &py3_mstch_service::cpp_name},
             {"service:qualified_name", &py3_mstch_service::qualified_name},
             {"service:supportedFunctions",
              &py3_mstch_service::get_supported_functions},
@@ -524,8 +523,6 @@ class py3_mstch_service : public mstch_service {
   mstch::node programName() { return service_->program()->name(); }
 
   mstch::node includePrefix() { return service_->program()->include_prefix(); }
-
-  mstch::node cpp_name() { return cpp2::get_name(service_); }
 
   mstch::node qualified_name() {
     return cpp2::get_gen_namespace(*service_->program()) +
@@ -1069,21 +1066,6 @@ class py3_mstch_field : public mstch_field {
   bool ref_type_cached_ = false;
 };
 
-class py3_mstch_enum : public mstch_enum {
- public:
-  py3_mstch_enum(
-      const t_enum* e, mstch_context& ctx, mstch_element_position pos)
-      : mstch_enum(e, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"enum:cpp_name", &py3_mstch_enum::cpp_name},
-        });
-  }
-
-  mstch::node cpp_name() { return cpp2::get_name(enum_); }
-};
-
 std::string py3_mstch_program::visit_type_impl(
     const t_type* orig_type, bool fromTypeDef) {
   bool hasPy3EnableCppAdapterAnnot =
@@ -1355,7 +1337,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
       return python::get_py3_name(self) != self.name();
     });
     def.property(
-        "cppName", [](const t_named& self) { return cpp2::get_name(&self); });
+        "cpp_name", [](const t_named& self) { return cpp2::get_name(&self); });
     def.property("modulePath", [this](const t_named& self) {
       const t_program* program =
           self.program() == nullptr ? get_program() : self.program();
@@ -1398,7 +1380,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
       const t_type* true_type = self.get_true_type();
       return python::get_py3_name(*true_type) != true_type->name();
     });
-    def.property("cppName", [](const t_type& self) {
+    def.property("cpp_name", [](const t_type& self) {
       return cpp2::get_name(self.get_true_type());
     });
     def.property("modulePath", [this](const t_type& self) {
@@ -1482,7 +1464,6 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_typedef>();
   mstch_context_.add<py3_mstch_struct>();
   mstch_context_.add<py3_mstch_field>();
-  mstch_context_.add<py3_mstch_enum>();
 }
 
 void t_mstch_py3_generator::generate_init_files() {

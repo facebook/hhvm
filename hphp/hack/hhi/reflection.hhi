@@ -282,21 +282,21 @@ class ReflectionParameter implements Reflector {
   )[];
   public function __toString()[]: string;
   public function getName()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isPassedByReference()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function isPassedByReference()[]: bool;
   public function isInOut()[]: bool;
   public function isReadonly()[]: bool;
-  public function canBePassedByValue()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function canBePassedByValue()[]: bool;
   public function getDeclaringFunction()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function getDeclaringClass()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function getClass()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isArray()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isCallable()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function allowsNull()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function getDeclaringClass()[]: ?ReflectionClass;
+  public function getClass()[]: ?ReflectionClass;
+  public function isArray()[]: bool;
+  public function isCallable()[]: bool;
+  public function allowsNull()[]: bool;
   public function getPosition()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isOptional()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isDefaultValueAvailable()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function isOptional()[]: bool;
+  public function isDefaultValueAvailable()[]: bool;
   public function getDefaultValue()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isDefaultValueConstant()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function isDefaultValueConstant()[]: ?bool;
   public function getDefaultValueConstantName()[]: HH\FIXME\MISSING_RETURN_TYPE;
   /**
    * This is the "type constraint" that is used for enforcement. For example,

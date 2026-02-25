@@ -130,7 +130,7 @@ let can_access_by_package_rules
         when package_includes current_pkg target_pkg ->
         let target_package_before_override =
           Option.map
-            (PackageInfo.get_package_for_file
+            (Package_info.get_package_for_file
                (Env.get_tcopt env |> TypecheckerOptions.package_info)
                (Relative_path.suffix target_file))
             ~f:Package.get_package_name

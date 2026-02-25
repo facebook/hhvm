@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/dynamic/SerializableTypeSystemBuilder.h>
 
+#include <thrift/lib/cpp2/dynamic/detail/TypeSystemUtils.h>
+
 namespace apache::thrift::type_system {
 
 std::unique_ptr<SerializableTypeSystem>
@@ -24,26 +26,9 @@ SerializableTypeSystemBuilder::build() && {
       std::move(serializableTypeSystem_));
 }
 
-void SerializableTypeSystemBuilder::addType(TypeRef ref) {
-  ref.visit(
-      [&](const StructNode& structDef) { addDefinition(structDef.uri()); },
-      [&](const UnionNode& unionDef) { addDefinition(unionDef.uri()); },
-      [&](const EnumNode& enumDef) { addDefinition(enumDef.uri()); },
-      [&](const OpaqueAliasNode& opaqueAliasDef) {
-        addType(opaqueAliasDef.targetType());
-      },
-      [&](const TypeRef::List& list) { addType(list.elementType()); },
-      [&](const TypeRef::Set& set) { addType(set.elementType()); },
-      [&](const TypeRef::Map& map) {
-        addType(map.keyType());
-        addType(map.valueType());
-      },
-      [](const auto&) {});
-}
-
 std::vector<SerializableFieldDefinition>
 SerializableTypeSystemBuilder::toSerializableField(
-    folly::span<const FieldDefinition> fields) {
+    std::span<const FieldDefinition> fields) {
   std::vector<SerializableFieldDefinition> result;
   result.reserve(fields.size());
   for (const auto& field : fields) {
@@ -56,9 +41,6 @@ SerializableTypeSystemBuilder::toSerializableField(
           SerializableRecord::toThrift(*customDefault);
     }
     fieldDef.annotations() = detail::toRawAnnotations(field.annotations());
-
-    // Add dependent definitions.
-    addType(field.type());
   }
   return result;
 }
@@ -75,13 +57,15 @@ void SerializableTypeSystemBuilder::addDefinition(UriView uri) {
         fmt::format(
             "Type with URI '{}' is not defined in this TypeSystem.", uri));
   }
-  addDefinition(*type);
+  forEachTransitiveDependency(*typeSystem_, *type, [&](DefinitionRef ref) {
+    return serializeDefinition(ref);
+  });
 }
 
-void SerializableTypeSystemBuilder::addDefinition(DefinitionRef ref) {
+bool SerializableTypeSystemBuilder::serializeDefinition(DefinitionRef ref) {
   auto ret = serializableTypeSystem_.types()->try_emplace(ref.uri());
   if (!ret.second) {
-    return;
+    return false;
   }
   auto& entry = ret.first->second;
   entry.definition() = ref.visit(
@@ -91,7 +75,6 @@ void SerializableTypeSystemBuilder::addDefinition(DefinitionRef ref) {
         structDef.fields() = toSerializableField(node.fields());
         structDef.isSealed() = node.isSealed();
         structDef.annotations() = detail::toRawAnnotations(node.annotations());
-        addAnnotations(*structDef.annotations());
         return result;
       },
       [&](const UnionNode& node) {
@@ -100,7 +83,6 @@ void SerializableTypeSystemBuilder::addDefinition(DefinitionRef ref) {
         unionDef.fields() = toSerializableField(node.fields());
         unionDef.isSealed() = node.isSealed();
         unionDef.annotations() = detail::toRawAnnotations(node.annotations());
-        addAnnotations(*unionDef.annotations());
         return result;
       },
       [&](const EnumNode& node) {
@@ -112,10 +94,8 @@ void SerializableTypeSystemBuilder::addDefinition(DefinitionRef ref) {
           enumValue.name() = v.name;
           enumValue.datum() = v.i32;
           enumValue.annotations() = detail::toRawAnnotations(v.annotations());
-          addAnnotations(*enumValue.annotations());
         }
         enumDef.annotations() = detail::toRawAnnotations(node.annotations());
-        addAnnotations(*enumDef.annotations());
         return result;
       },
       [&](const OpaqueAliasNode& node) {
@@ -124,7 +104,6 @@ void SerializableTypeSystemBuilder::addDefinition(DefinitionRef ref) {
         opaqueAliasDef.targetType() = node.targetType().id();
         opaqueAliasDef.annotations() =
             detail::toRawAnnotations(node.annotations());
-        addAnnotations(*opaqueAliasDef.annotations());
         return result;
       });
 
@@ -137,18 +116,33 @@ void SerializableTypeSystemBuilder::addDefinition(DefinitionRef ref) {
       s.name() = sourceInfoView->name;
     };
   }
+  return true;
 }
 
-void SerializableTypeSystemBuilder::addAnnotations(
-    const detail::RawAnnotations& annotations) {
-  for (const auto& [uri, _] : annotations) {
-    // Standard annotations are not currently bundled due to circular dependency
-    // concerns. Skip it for now.
-    if (uri.starts_with("facebook.com/thrift/annotation/")) {
-      continue;
-    }
-    addDefinition(uri);
+/* static */ std::unique_ptr<SerializableTypeSystem>
+SerializableTypeSystemBuilder::buildPrunedFrom(
+    const TypeSystem& source,
+    std::span<const UriView> rootUris,
+    PruneOptions options) {
+  auto builder = options.includeSourceInfo ? withSourceInfo(source)
+                                           : withoutSourceInfo(source);
+  for (const auto& uri : rootUris) {
+    builder.addDefinition(uri);
   }
+  return std::move(builder).build();
+}
+
+/* static */ std::unique_ptr<SerializableTypeSystem>
+SerializableTypeSystemBuilder::buildPrunedFrom(
+    const TypeSystem& source,
+    std::span<const DefinitionRef> rootDefs,
+    PruneOptions options) {
+  std::vector<UriView> uris;
+  uris.reserve(rootDefs.size());
+  for (const auto& ref : rootDefs) {
+    uris.push_back(ref.uri());
+  }
+  return buildPrunedFrom(source, uris, options);
 }
 
 } // namespace apache::thrift::type_system

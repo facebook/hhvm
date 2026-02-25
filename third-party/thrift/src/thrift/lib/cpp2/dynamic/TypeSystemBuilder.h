@@ -16,11 +16,13 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/dynamic/PruneOptions.h>
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/thrift/gen-cpp2/type_system_types.h>
 
 #include <folly/container/F14Map.h>
+#include <folly/container/span.h>
 
 #include <cstdint>
 #include <memory>
@@ -164,6 +166,33 @@ class TypeSystemBuilder {
    */
   std::unique_ptr<TypeSystem> buildDerivedFrom(
       std::shared_ptr<const TypeSystem> base) &&;
+
+  /**
+   * Builds a new standalone TypeSystem containing only the specified root
+   * types and their transitive dependencies from the source TypeSystem.
+   *
+   * Transitive dependencies include: field types, container element/key/value
+   * types, opaque alias targets, and annotation types.
+   *
+   * The resulting TypeSystem is fully self-contained and independent of the
+   * source.
+   *
+   * Throws:
+   *   - InvalidTypeError if any root URI is not defined in the source
+   *     TypeSystem.
+   */
+  static std::unique_ptr<TypeSystem> buildPrunedFrom(
+      const TypeSystem& source,
+      std::span<const UriView> rootUris,
+      PruneOptions options = {});
+
+  /**
+   * Overload accepting DefinitionRef objects as roots.
+   */
+  static std::unique_ptr<TypeSystem> buildPrunedFrom(
+      const TypeSystem& source,
+      std::span<const DefinitionRef> rootDefs,
+      PruneOptions options = {});
 
   /**
    * A helper class that provides a more declarative experience when defining a

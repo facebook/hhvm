@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/dynamic/detail/TypeSystem.h>
+#include <thrift/lib/cpp2/dynamic/detail/TypeSystemUtils.h>
 
 #include <folly/Overload.h>
 #include <folly/container/F14Set.h>
@@ -197,6 +198,31 @@ class TypeSystemImpl final : public TypeSystem {
 
  private:
   std::shared_ptr<const TypeSystem> baseTypeSystem_;
+};
+
+// A helper to collect all URIs that are transitively referenced by a set of
+// root URIs.
+class TypeSystemURICollector {
+ public:
+  explicit TypeSystemURICollector(const TypeSystem& source) : source_(source) {}
+
+  void addRoot(UriView uri) {
+    auto def = source_.getUserDefinedType(uri);
+    if (!def.has_value()) {
+      throw InvalidTypeError(
+          fmt::format(
+              "Type with URI '{}' is not defined in this TypeSystem.", uri));
+    }
+    forEachTransitiveDependency(source_, *def, [&](DefinitionRef ref) {
+      return visitedUris_.insert(std::string(ref.uri())).second;
+    });
+  }
+
+  const folly::F14FastSet<Uri>& uris() const { return visitedUris_; }
+
+ private:
+  const TypeSystem& source_;
+  folly::F14FastSet<Uri> visitedUris_;
 };
 
 } // namespace
@@ -381,13 +407,180 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
   return typeSystem;
 }
 
+/* static */ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildPrunedFrom(
+    const TypeSystem& source,
+    std::span<const UriView> rootUris,
+    PruneOptions options) {
+  TypeSystemURICollector uriCollector(source);
+  for (const auto& uri : rootUris) {
+    uriCollector.addRoot(uri);
+  }
+
+  const auto& uris = uriCollector.uris();
+
+  // Create a TypeSystem with stub nodes for each required URI.
+  // This is needed to address circular dependencies.
+  auto typeSystem = std::make_unique<TypeSystemImpl>(nullptr);
+
+  for (const auto& uri : uris) {
+    auto sourceDef = source.getUserDefinedType(uri);
+    auto stubDef = sourceDef->visit(
+        [&](const StructNode&) -> TSDefinition {
+          return StructNode{uri, {}, false, {}};
+        },
+        [&](const UnionNode&) -> TSDefinition {
+          return UnionNode{uri, {}, false, {}};
+        },
+        [&](const EnumNode&) -> TSDefinition { return EnumNode{uri, {}, {}}; },
+        [&](const OpaqueAliasNode&) -> TSDefinition {
+          return OpaqueAliasNode{uri, TypeRef{TypeRef::Bool{}}, {}};
+        });
+    typeSystem->definitions.emplace(uri, std::move(stubDef));
+  }
+
+  // Remap a source TypeRef to point at the new TypeSystem's nodes.
+  const auto remapType = [&](const TypeRef& sourceRef) -> TypeRef {
+    return typeSystem->typeOf(sourceRef.id());
+  };
+
+  // Copy annotations, remapping annotation structs.
+  const auto copyAnnotations =
+      [&](const AnnotationsMap& sourceAnnots) -> AnnotationsMap {
+    AnnotationsMap result;
+    result.reserve(sourceAnnots.size());
+    for (const auto& [uri, record] : sourceAnnots) {
+      result.emplace(uri, record);
+    }
+    return result;
+  };
+
+  // Copy fields from source, remapping TypeRefs.
+  const auto copyFields = [&](std::span<const FieldDefinition> sourceFields)
+      -> std::vector<FieldDefinition> {
+    std::vector<FieldDefinition> result;
+    result.reserve(sourceFields.size());
+    for (const auto& field : sourceFields) {
+      result.emplace_back(
+          field.identity(),
+          field.presence(),
+          remapType(field.type()),
+          field.customDefault()
+              ? std::optional<SerializableRecord>{*field.customDefault()}
+              : std::nullopt,
+          copyAnnotations(field.annotations()));
+    }
+    return result;
+  };
+
+  // Fill in nodes from source definitions
+  for (const auto& uri : uris) {
+    auto sourceDef = source.getUserDefinedType(uri);
+    TSDefinition& stubDef = typeSystem->definitions.find(uri)->second;
+
+    sourceDef->visit(
+        [&](const StructNode& node) {
+          auto& structNode = std::get<StructNode>(stubDef);
+          structNode = StructNode(
+              uri,
+              copyFields(node.fields()),
+              node.isSealed(),
+              copyAnnotations(node.annotations()));
+          if (options.includeSourceInfo) {
+            auto sourceInfo =
+                source.getSourceIdentiferForUserDefinedType(*sourceDef);
+            if (sourceInfo.has_value()) {
+              typeSystem->tryAddToSourceIndex(
+                  SourceIdentifier{
+                      std::string(sourceInfo->location),
+                      std::string(sourceInfo->name)},
+                  DefinitionRef(&structNode));
+            }
+          }
+        },
+        [&](const UnionNode& node) {
+          auto& unionNode = std::get<UnionNode>(stubDef);
+          unionNode = UnionNode(
+              uri,
+              copyFields(node.fields()),
+              node.isSealed(),
+              copyAnnotations(node.annotations()));
+          if (options.includeSourceInfo) {
+            auto sourceInfo =
+                source.getSourceIdentiferForUserDefinedType(*sourceDef);
+            if (sourceInfo.has_value()) {
+              typeSystem->tryAddToSourceIndex(
+                  SourceIdentifier{
+                      std::string(sourceInfo->location),
+                      std::string(sourceInfo->name)},
+                  DefinitionRef(&unionNode));
+            }
+          }
+        },
+        [&](const EnumNode& node) {
+          std::vector<EnumNode::Value> values;
+          values.reserve(node.values().size());
+          for (const auto& v : node.values()) {
+            values.push_back(
+                EnumNode::Value{
+                    v.name, v.i32, copyAnnotations(v.annotations())});
+          }
+          auto& enumNode = std::get<EnumNode>(stubDef);
+          enumNode = EnumNode(
+              uri, std::move(values), copyAnnotations(node.annotations()));
+          if (options.includeSourceInfo) {
+            auto sourceInfo =
+                source.getSourceIdentiferForUserDefinedType(*sourceDef);
+            if (sourceInfo.has_value()) {
+              typeSystem->tryAddToSourceIndex(
+                  SourceIdentifier{
+                      std::string(sourceInfo->location),
+                      std::string(sourceInfo->name)},
+                  DefinitionRef(&enumNode));
+            }
+          }
+        },
+        [&](const OpaqueAliasNode& node) {
+          auto& opaqueAliasNode = std::get<OpaqueAliasNode>(stubDef);
+          opaqueAliasNode = OpaqueAliasNode(
+              uri,
+              remapType(node.targetType()),
+              copyAnnotations(node.annotations()));
+          if (options.includeSourceInfo) {
+            auto sourceInfo =
+                source.getSourceIdentiferForUserDefinedType(*sourceDef);
+            if (sourceInfo.has_value()) {
+              typeSystem->tryAddToSourceIndex(
+                  SourceIdentifier{
+                      std::string(sourceInfo->location),
+                      std::string(sourceInfo->name)},
+                  DefinitionRef(&opaqueAliasNode));
+            }
+          }
+        });
+  }
+
+  return typeSystem;
+}
+
+/* static */ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildPrunedFrom(
+    const TypeSystem& source,
+    std::span<const DefinitionRef> rootDefs,
+    PruneOptions options) {
+  std::vector<UriView> uris;
+  uris.reserve(rootDefs.size());
+  for (const auto& ref : rootDefs) {
+    uris.push_back(ref.uri());
+  }
+  return buildPrunedFrom(source, uris, options);
+}
+
 namespace {
 
 /**
  * For structured types, both field ids AND names must be unique.
  */
 void validateIdentitiesAreUnique(
-    UriView uri, folly::span<const SerializableFieldDefinition> fields) {
+    UriView uri, std::span<const SerializableFieldDefinition> fields) {
   folly::F14FastSet<FieldId> seenIds;
   folly::F14FastSet<FieldName> seenNames;
 

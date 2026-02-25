@@ -20,6 +20,7 @@
 
 #include <folly/memory/not_null.h>
 
+#include <thrift/lib/cpp2/dynamic/PruneOptions.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/thrift/gen-cpp2/type_system_types.h>
 
@@ -67,11 +68,35 @@ class SerializableTypeSystemBuilder {
    * Add a definition to the type system.
    *
    * Throws:
-   *   - InvalidTypeError if the type or dependent types are not defined in the
-   *     type system.
+   *   - InvalidTypeError if the type or dependent types are not defined in
+   * the type system.
    */
   void addDefinition(UriView uri);
   std::unique_ptr<SerializableTypeSystem> build() &&;
+
+  /**
+   * Builds a SerializableTypeSystem containing only the specified root types
+   * and their transitive dependencies from the source TypeSystem.
+   *
+   * This is a convenience wrapper that creates a TypeSystemBuilder, adds all
+   * root definitions, and builds the result in a single call.
+   */
+  static std::unique_ptr<SerializableTypeSystem> buildPrunedFrom(
+      const TypeSystem& source,
+      std::span<const UriView> rootUris,
+      PruneOptions options = {});
+
+  /**
+   * Builds a SerializableTypeSystem containing only the specified root types
+   * and their transitive dependencies from the provided TypeSystem.
+   *
+   * Note: See the URI-based `buildPrunedFrom` overload for more details.
+   * This version takes in DefinitionRef objects instead of URIs.
+   */
+  static std::unique_ptr<SerializableTypeSystem> buildPrunedFrom(
+      const TypeSystem& source,
+      std::span<const DefinitionRef> rootDefs,
+      PruneOptions options = {});
 
  private:
   SerializableTypeSystemBuilder(
@@ -79,11 +104,9 @@ class SerializableTypeSystemBuilder {
       : typeSystem_(&typeSystem), withSourceInfo_(withSourceInfo) {}
 
   std::vector<SerializableFieldDefinition> toSerializableField(
-      folly::span<const FieldDefinition> fields);
+      std::span<const FieldDefinition> fields);
 
-  void addDefinition(DefinitionRef ref);
-  void addType(TypeRef ref);
-  void addAnnotations(const detail::RawAnnotations& annotations);
+  bool serializeDefinition(DefinitionRef ref);
 
   folly::not_null<const TypeSystem*> typeSystem_;
   bool withSourceInfo_;

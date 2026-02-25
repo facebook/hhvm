@@ -20,6 +20,10 @@
 #include <thrift/lib/cpp2/Adapter.h>
 #include <thrift/lib/cpp2/type/Any.h>
 
+namespace apache::thrift::ident {
+struct assign;
+}
+
 namespace apache::thrift::op::detail {
 
 template <class>
@@ -199,4 +203,8 @@ int32_t calculateMinSafePatchVersion(const Patch& patch) {
   }
 }
 
+template <class Patch>
+struct PatchedTypeTag {
+  using type = op::get_type_tag<typename Patch::underlying_type, ident::assign>;
+};
 } // namespace apache::thrift::op::detail

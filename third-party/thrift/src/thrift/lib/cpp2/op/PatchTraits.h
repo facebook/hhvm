@@ -31,4 +31,6 @@ inline constexpr bool
     is_patch_v<T, folly::void_t<typename T::underlying_type>> =
         std::is_base_of_v<detail::BasePatch<typename T::underlying_type, T>, T>;
 
+template <typename Patch>
+using patched_type_tag_t = detail::PatchedTypeTag<Patch>::type;
 } // namespace apache::thrift::op

@@ -88,7 +88,7 @@
 (library
  (name decl_fold_options)
  (wrapped false)
- (modules declFoldOptions)
+ (modules decl_fold_options)
  (libraries
    global_options)
  (preprocess

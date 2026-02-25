@@ -14,7 +14,7 @@ external make_ffi :
   root:string ->
   hhi_root:string ->
   tmp:string ->
-  DeclFoldOptions.t ->
+  Decl_fold_options.t ->
   DeclParserOptions.t ->
   Rust_provider_backend.t = "hh_server_provider_backend_make"
 

@@ -58,7 +58,7 @@ let init root tcopt ~rust_provider_backend : Provider_context.t =
   if rust_provider_backend then
     let backend =
       Hh_server_provider_backend.make
-        (DeclFoldOptions.from_global_options tcopt)
+        (Decl_fold_options.from_global_options tcopt)
         (DeclParserOptions.from_parser_options popt)
     in
     Provider_backend.set_rust_backend backend

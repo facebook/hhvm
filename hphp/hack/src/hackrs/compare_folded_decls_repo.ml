@@ -287,7 +287,7 @@ let () =
   let rust_decl_map =
     Decl_folded_class_rupro.partition_and_fold_dir
       ~www_root:(Path.to_string www_root)
-      DeclFoldOptions.
+      Decl_fold_options.
         {
           everything_sdt = popt.ParserOptions.everything_sdt;
           implicit_inherit_sdt = GlobalOptions.(tcopt.tco_implicit_inherit_sdt);

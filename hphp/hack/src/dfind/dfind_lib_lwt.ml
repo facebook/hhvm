@@ -8,7 +8,7 @@
  *)
 
 module MarshalToolsLwt :
-  DfindLib.MARSHAL_TOOLS
+  Dfind_lib.MARSHAL_TOOLS
     with type 'a result = 'a Lwt.t
      and type fd = Lwt_unix.file_descr = struct
   type 'a result = 'a Lwt.t
@@ -37,6 +37,6 @@ module MarshalToolsLwt :
   let from_fd_with_preamble fd = Marshal_tools_lwt.from_fd_with_preamble fd
 end
 
-include DfindLib.DFindLibFunctor (MarshalToolsLwt)
+include Dfind_lib.DFindLibFunctor (MarshalToolsLwt)
 
 let get_changes handle = get_changes handle

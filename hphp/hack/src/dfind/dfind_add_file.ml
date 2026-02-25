@@ -12,8 +12,8 @@
 (*****************************************************************************)
 open Hh_prelude
 module Set = Stdlib.Set
-open DfindEnv
-open DfindMaybe
+open Dfind_env
+open Dfind_maybe
 
 (*****************************************************************************)
 (* helpers *)

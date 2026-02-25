@@ -45,7 +45,7 @@ type t =
   | Dfind of {
       root: Path.t;
       ready: bool ref;
-      dfind: DfindLib.t;
+      dfind: Dfind_lib.t;
     }
   | Watchman of {
       wenv: Watchman.env;
@@ -118,7 +118,7 @@ let init
     let log_file = Sys_utils.make_link_of_timestamped log_link in
     let log_fd = Daemon.fd_of_path log_file in
     let dfind =
-      DfindLib.init
+      Dfind_lib.init
         (in_fd, log_fd, log_fd)
         (GlobalConfig.scuba_table_name, [root])
     in
@@ -338,7 +338,7 @@ let wait_until_ready (t : t) : unit =
     if !ready then
       ()
     else begin
-      DfindLib.wait_until_ready dfind;
+      Dfind_lib.wait_until_ready dfind;
       ready := true
     end
   | IndexOnly _ -> ()
@@ -460,7 +460,7 @@ let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
             ~timeout:120
             ~on_timeout:(fun (_ : Timeout.timings) ->
               Exit.exit Exit_status.Dfind_unresponsive)
-            ~do_:(fun _timeout -> DfindLib.get_changes dfind)
+            ~do_:(fun _timeout -> Dfind_lib.get_changes dfind)
         with
         | _ -> Exit.exit Exit_status.Dfind_died
       in

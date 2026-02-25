@@ -47,7 +47,7 @@ end = struct
   type t = {
     infd: Marshal_tools.fd;
     outfd: Marshal_tools.fd;
-    daemon_handle: (DfindServer.msg, unit) Daemon.handle;
+    daemon_handle: (Dfind_server.msg, unit) Daemon.handle;
   }
 
   let init log_fds (scuba_table, roots) =
@@ -55,7 +55,7 @@ end = struct
       Printf.sprintf "file watching process for server %d" (Unix.getpid ())
     in
     let ({ Daemon.channels = (ic, oc); _ } as daemon_handle) =
-      Daemon.spawn ~name log_fds DfindServer.entry_point (scuba_table, roots)
+      Daemon.spawn ~name log_fds Dfind_server.entry_point (scuba_table, roots)
     in
     {
       infd = Marshal_tools.descr_of_in_channel ic;
@@ -67,7 +67,7 @@ end = struct
 
   let wait_until_ready handle =
     Marshal_tools.from_fd_with_preamble handle.infd >>= fun msg ->
-    assert (msg = DfindServer.Ready);
+    assert (msg = Dfind_server.Ready);
     Marshal_tools.return ()
 
   let request_changes handle =
@@ -77,8 +77,8 @@ end = struct
   let get_changes daemon =
     let rec loop acc =
       (request_changes daemon >>= function
-       | DfindServer.Updates s -> Marshal_tools.return s
-       | DfindServer.Ready -> assert false)
+       | Dfind_server.Updates s -> Marshal_tools.return s
+       | Dfind_server.Ready -> assert false)
       >>= fun diff ->
       if SSet.is_empty diff then
         Marshal_tools.return acc

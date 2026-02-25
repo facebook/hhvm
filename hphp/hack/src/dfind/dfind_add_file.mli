@@ -11,7 +11,7 @@
 (* Adds a new file or directory to the environment *)
 (*****************************************************************************)
 
-val path : DfindEnv.t -> string -> unit
+val path : Dfind_env.t -> string -> unit
 
 (*****************************************************************************)
 (* Find all the files in a directory *)

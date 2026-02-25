@@ -12,7 +12,7 @@
 (*****************************************************************************)
 
 open Hh_prelude
-open DfindEnv
+open Dfind_env
 
 type msg =
   | Ready
@@ -22,7 +22,7 @@ type msg =
 (* Processing an fsnotify event *)
 (*****************************************************************************)
 
-let (process_fsnotify_event : DfindEnv.t -> SSet.t -> Fsnotify.event -> SSet.t)
+let (process_fsnotify_event : Dfind_env.t -> SSet.t -> Fsnotify.event -> SSet.t)
     =
  fun env dirty event ->
   let { Fsnotify.path; wpath } = event in
@@ -46,7 +46,7 @@ let (process_fsnotify_event : DfindEnv.t -> SSet.t -> Fsnotify.event -> SSet.t)
   env.new_files <- SSet.empty;
 
   (* Add the file, plus all of the sub elements if it is a directory *)
-  DfindAddFile.path env path;
+  Dfind_add_file.path env path;
 
   (* Add everything new we found in this directory
      * (empty when it's a regular file)
@@ -60,8 +60,8 @@ let run_daemon (scuba_table, roots) (ic, oc) =
   let infd = Daemon.descr_of_in_channel ic in
   let outfd = Daemon.descr_of_out_channel oc in
   let roots = List.map roots ~f:Path.to_string in
-  let env = DfindEnv.make roots in
-  List.iter roots ~f:(DfindAddFile.path env);
+  let env = Dfind_env.make roots in
+  List.iter roots ~f:(Dfind_add_file.path env);
   EventLogger.dfind_ready scuba_table t;
   Marshal_tools.to_fd_with_preamble outfd Ready |> ignore;
   ignore @@ Hh_logger.log_duration "Initialization" t;

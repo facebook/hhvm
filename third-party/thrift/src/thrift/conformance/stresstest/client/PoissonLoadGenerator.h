@@ -31,25 +31,7 @@ class PoissonLoadGenerator : public BaseLoadGenerator {
   explicit PoissonLoadGenerator(
       uint32_t targetQps, std::chrono::duration<int64_t, std::milli> interval)
       : interval_(interval),
-        startMeanRequestsPerBucket_(targetQps * interval_.count() / 1000),
-        targetMeanRequestsPerBucket_(targetQps * interval_.count() / 1000),
-        currentMeanRequestsPerBucket_(startMeanRequestsPerBucket_),
-        stepInterval_(0),
-        stepMeanRequestsPerBucket_(0),
-        gen_(std::random_device{}()) {}
-
-  explicit PoissonLoadGenerator(
-      uint32_t startQps,
-      uint32_t targetQps,
-      std::chrono::duration<int64_t, std::milli> interval,
-      uint32_t stepQps = 0,
-      std::chrono::duration<int64_t> stepInterval = std::chrono::seconds(0))
-      : interval_(interval),
-        startMeanRequestsPerBucket_(startQps * interval_.count() / 1000),
-        targetMeanRequestsPerBucket_(targetQps * interval_.count() / 1000),
-        currentMeanRequestsPerBucket_(startMeanRequestsPerBucket_),
-        stepInterval_(stepInterval),
-        stepMeanRequestsPerBucket_(stepQps * interval_.count() / 1000),
+        meanRequestsPerBucket_(targetQps * interval_.count() / 1000),
         gen_(std::random_device{}()) {}
 
   ~PoissonLoadGenerator() override;
@@ -59,11 +41,7 @@ class PoissonLoadGenerator : public BaseLoadGenerator {
 
  private:
   const std::chrono::duration<int64_t, std::milli> interval_;
-  const uint32_t startMeanRequestsPerBucket_;
-  const uint32_t targetMeanRequestsPerBucket_;
-  std::atomic<uint32_t> currentMeanRequestsPerBucket_;
-  const std::chrono::duration<int64_t> stepInterval_;
-  const uint32_t stepMeanRequestsPerBucket_;
+  const uint32_t meanRequestsPerBucket_;
   std::atomic<bool> running_{true};
   std::atomic<bool> started_{false};
   folly::coro::SmallUnboundedQueue<Count> queue_;
@@ -71,7 +49,6 @@ class PoissonLoadGenerator : public BaseLoadGenerator {
   folly::FunctionScheduler scheduler_;
 
   void generateRequestSignal();
-  void stepUpLoad();
 };
 
 } // namespace apache::thrift::stress

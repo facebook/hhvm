@@ -27,19 +27,10 @@ PoissonLoadGenerator::getRequestCount() {
 }
 
 void PoissonLoadGenerator::generateRequestSignal() {
-  uint32_t currentMean = currentMeanRequestsPerBucket_.load();
-  std::poisson_distribution<int32_t> poissonDistribution(currentMean);
+  std::poisson_distribution<int32_t> poissonDistribution(
+      meanRequestsPerBucket_);
   uint32_t intervalQps = static_cast<int32_t>(poissonDistribution(gen_));
   queue_.enqueue(intervalQps);
-}
-
-void PoissonLoadGenerator::stepUpLoad() {
-  // We are already at the target QPS.
-  if (currentMeanRequestsPerBucket_ == targetMeanRequestsPerBucket_) {
-    return;
-  }
-
-  currentMeanRequestsPerBucket_ += stepMeanRequestsPerBucket_;
 }
 
 void PoissonLoadGenerator::start() {
@@ -50,18 +41,6 @@ void PoissonLoadGenerator::start() {
         std::chrono::duration_cast<std::chrono::microseconds>(interval_);
     LOG(INFO) << "Setting interval to " << interval.count() << " microseconds";
     scheduler_.addFunction([&]() { generateRequestSignal(); }, interval);
-
-    // Do we need to step up the load?
-    if (stepMeanRequestsPerBucket_ > 0) {
-      auto stepIntervalUs =
-          std::chrono::duration_cast<std::chrono::microseconds>(stepInterval_);
-      scheduler_.addFunction(
-          [&]() { stepUpLoad(); },
-          stepIntervalUs,
-          "stepUpLoad",
-          stepIntervalUs /* start delay */);
-    }
-
     scheduler_.start();
   } else {
     LOG(INFO) << "Poisson Load Generator already started";

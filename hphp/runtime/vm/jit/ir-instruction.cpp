@@ -661,6 +661,11 @@ Type structDictTypeBoundCheckReturn(const IRInstruction* inst) {
     assertx(layout.is_struct());
     return layout.getTypeBound(inst->src(2)->type());
   }();
+  // When the slot is non-const, getTypeBound returns getUnionTypeBound() which
+  // may be a multi-DataType union (e.g. TInt | TStr). Type::operator& calls
+  // operator<= which asserts !rhs.isUnion() for non-union types. Return the
+  // value type unrefined when we can't narrow to a single DataType.
+  if (!type.isKnownDataType()) return inst->src(0)->type();
   return inst->src(0)->type() & type;
 }
 

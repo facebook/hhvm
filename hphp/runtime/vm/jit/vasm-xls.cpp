@@ -69,6 +69,7 @@ Constraint constraint(const Vreg8&) { return Constraint::Gpr; }
 Constraint constraint(const VregDbl&) { return Constraint::Simd; }
 Constraint constraint(const Vreg128&) { return Constraint::Simd; }
 Constraint constraint(const VregSF&) { return Constraint::Sf; }
+Constraint constraint(const VregShiftExtend&) { return Constraint::Gpr; }
 
 bool is_wide(const Vreg128&) { return true; }
 template<class T> bool is_wide(const T&) { return false; }
@@ -951,6 +952,13 @@ private:
       }
       var->ivl()->uses.push_back({kind, m_range.end, hint});
     }
+  }
+  void use(VregShiftExtend se,
+           Constraint kind,
+           unsigned end,
+           Vreg hint = Vreg{}) {
+    if (!se.reg.isValid()) return;
+    use(Vreg{se.reg}, kind, end, hint);
   }
 
 private:
@@ -2293,6 +2301,9 @@ struct Renamer {
     if (m.base.isValid()) rename(m.base);
     if (m.index.isValid()) rename(m.index);
   }
+  void across(VregShiftExtend& se) {
+    if (se.reg.isValid()) rename(se.reg);
+  }
   template<Width w> void across(Vp<w>& m) { across(static_cast<Vptr&>(m)); }
 
   void def(RegSet) {}
@@ -2300,6 +2311,9 @@ struct Renamer {
   void use(Vptr& m) {
     if (m.base.isValid()) rename(m.base);
     if (m.index.isValid()) rename(m.index);
+  }
+  void use(VregShiftExtend& se) {
+    if (se.reg.isValid()) rename(se.reg);
   }
   template<Width w> void use(Vp<w>& m) { use(static_cast<Vptr&>(m)); }
 

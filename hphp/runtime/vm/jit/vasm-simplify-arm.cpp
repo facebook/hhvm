@@ -101,6 +101,185 @@ static bool get_const_int(Env& env, reg_type op, uint64_t &Val) {
   Val = op_const.val;
   return true;
 }
+struct OperandMatch {
+  VregShiftExtend operand;
+  size_t startIndex;
+  size_t len;
+};
+
+struct ExtendInfo {
+  Vreg reg;
+  vixl::Extend kind;
+};
+
+Optional<ExtendInfo> match_extend_inst(const Vinstr& inst,
+                                       Width width,
+                                       Vreg dst) {
+  switch (inst.op) {
+    case Vinstr::movzbl: {
+      if (width != Width::Long) return {};
+      auto const& mov = inst.movzbl_;
+      if (mov.d != dst) return {};
+      return ExtendInfo{mov.s, vixl::UXTB};
+    }
+    case Vinstr::movzwl: {
+      if (width != Width::Long) return {};
+      auto const& mov = inst.movzwl_;
+      if (mov.d != dst) return {};
+      return ExtendInfo{mov.s, vixl::UXTH};
+    }
+    case Vinstr::movsbl: {
+      if (width != Width::Long) return {};
+      auto const& mov = inst.movsbl_;
+      if (mov.d != dst) return {};
+      return ExtendInfo{mov.s, vixl::SXTB};
+    }
+    case Vinstr::movswl: {
+      if (width != Width::Long) return {};
+      auto const& mov = inst.movswl_;
+      if (mov.d != dst) return {};
+      return ExtendInfo{mov.s, vixl::SXTH};
+    }
+    case Vinstr::movzbq: {
+      if (width != Width::Quad) return {};
+      auto const& mov = inst.movzbq_;
+      if (mov.d != dst) return {};
+      return ExtendInfo{mov.s, vixl::UXTB};
+    }
+    case Vinstr::movzwq: {
+      if (width != Width::Quad) return {};
+      auto const& mov = inst.movzwq_;
+      if (mov.d != dst) return {};
+      return ExtendInfo{mov.s, vixl::UXTH};
+    }
+    case Vinstr::movzlq: {
+      if (width != Width::Quad) return {};
+      auto const& mov = inst.movzlq_;
+      if (mov.d != dst) return {};
+      return ExtendInfo{mov.s, vixl::UXTW};
+    }
+    case Vinstr::movsbq: {
+      if (width != Width::Quad) return {};
+      auto const& mov = inst.movsbq_;
+      if (mov.d != dst) return {};
+      return ExtendInfo{mov.s, vixl::SXTB};
+    }
+    case Vinstr::movswq: {
+      if (width != Width::Quad) return {};
+      auto const& mov = inst.movswq_;
+      if (mov.d != dst) return {};
+      return ExtendInfo{mov.s, vixl::SXTH};
+    }
+    case Vinstr::movslq: {
+      if (width != Width::Quad) return {};
+      auto const& mov = inst.movslq_;
+      if (mov.d != dst) return {};
+      return ExtendInfo{mov.s, vixl::SXTW};
+    }
+    default:
+      break;
+  }
+  return {};
+}
+
+template<class Reg>
+Optional<OperandMatch> match_operand_fold(Env& env,
+                                          Vlabel b,
+                                          size_t i,
+                                          Reg operand,
+                                          Width width,
+                                          bool allowExtend) {
+  if (i == 0) return {};
+
+  auto& code = env.unit.blocks[b].code;
+  auto const idx1 = i - 1;
+  auto const& inst1 = code[idx1];
+
+  auto const single_use = [&] (Vreg r) {
+    return env.use_counts[r] == 1;
+  };
+
+  auto const maybe_extend_before_shift =
+    [&] (auto const& shl, uint8_t amount, Width w) -> Optional<OperandMatch> {
+      if (!allowExtend) return {};
+      if (idx1 == 0) return {};
+      if (shl.d != operand) return {};
+      auto const idx0 = idx1 - 1;
+      auto const& inst0 = code[idx0];
+      auto const extend = match_extend_inst(inst0, w, shl.s1);
+      if (!extend) return {};
+      if (!single_use(shl.s1)) return {};
+      if (!single_use(shl.d) || env.use_counts[shl.sf] != 0) return {};
+      if (amount > 4) return {};
+      return OperandMatch{VregExtend(extend->reg, extend->kind, amount), idx0, 3};
+    };
+
+  if (width == Width::Long && inst1.op == Vinstr::shlli) {
+    auto const& shl = inst1.shlli_;
+    auto const amount64 = shl.s0.l();
+    always_assert_flog(amount64 >= 0 && amount64 <= 31,
+                       "bad shift amount {} for shlli", amount64);
+    auto const amount = static_cast<uint8_t>(amount64);
+    if (auto match = maybe_extend_before_shift(shl, amount, width)) {
+      return match;
+    }
+    if (shl.d == operand && single_use(shl.d) && env.use_counts[shl.sf] == 0) {
+      return OperandMatch{VregShift(shl.s1, vixl::LSL, amount), idx1, 2};
+    }
+  } else if (width == Width::Quad && inst1.op == Vinstr::shlqi) {
+    auto const& shl = inst1.shlqi_;
+    auto const amount64 = shl.s0.q();
+    always_assert_flog(amount64 >= 0 && amount64 <= 63,
+                       "bad shift amount {} for shlqi", amount64);
+    auto const amount = static_cast<uint8_t>(amount64);
+    if (auto match = maybe_extend_before_shift(shl, amount, width)) {
+      return match;
+    }
+    if (shl.d == operand && single_use(shl.d) && env.use_counts[shl.sf] == 0) {
+      return OperandMatch{VregShift(shl.s1, vixl::LSL, amount), idx1, 2};
+    }
+  }
+
+  if (allowExtend) {
+    if (auto extend = match_extend_inst(inst1, width, operand)) {
+      if (!single_use(operand)) return {};
+      return OperandMatch{VregExtend(extend->reg, extend->kind, 0), idx1, 2};
+    }
+  }
+
+  return {};
+}
+
+template<class Reg, class Emit>
+bool fold_shift_operand(Env& env,
+                        Vlabel b,
+                        size_t i,
+                        Width width,
+                        Reg primary,
+                        Reg secondary,
+                        bool commutative,
+                        bool allowExtend,
+                        Emit emit) {
+  if (auto match = match_operand_fold(env, b, i, primary, width, allowExtend)) {
+    return simplify_impl(env, b, match->startIndex, [&] (Vout& v) {
+      emit(v, match->operand, secondary);
+      return match->len;
+    });
+  }
+
+  if (commutative) {
+    if (auto match = match_operand_fold(env, b, i, secondary, width, allowExtend)) {
+      return simplify_impl(env, b, match->startIndex, [&] (Vout& v) {
+        emit(v, match->operand, primary);
+        return match->len;
+      });
+    }
+  }
+
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 bool simplify(Env& env, const shrqi& inst, Vlabel b, size_t i) {
   if (env.use_counts[inst.d] != 1 || env.use_counts[inst.sf] ||
@@ -124,22 +303,29 @@ bool simplify(Env& env, const shrqi& inst, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
-  if (env.use_counts[inst.sf] != 1) return false;
-
-  uint64_t Val;
-  if (!get_const_int(env, inst.s0, Val) || Val != 0x8000000000000000ull) {
-    return false;
+  if (env.use_counts[inst.sf] == 1) {
+    uint64_t Val;
+    if (get_const_int(env, inst.s0, Val) &&
+        Val == 0x8000000000000000ull) {
+      if (auto const matched = if_inst<Vinstr::jcc>(env, b, i + 1,
+            [&] (const jcc& jcci) {
+              if (jcci.sf != inst.sf || jcci.cc != CC_E) return false;
+              return simplify_impl(env, b, i, [&] (Vout& v) {
+                auto const sf = v.makeReg();
+                v << cmpqi{0, inst.s1, sf, inst.fl};
+                v << jcc{CC_GE, sf, {jcci.targets[0], jcci.targets[1]}, jcci.tag};
+                return 2;
+              });
+            })) {
+        return matched;
+      }
+    }
   }
 
-  return if_inst<Vinstr::jcc>(env, b, i + 1, [&] (const jcc& jcci) {
-    if (jcci.sf != inst.sf || jcci.cc != CC_E) return false;
-    return simplify_impl(env, b, i, [&] (Vout& v) {
-      auto const sf = v.makeReg();
-      v << cmpqi{0, inst.s1, sf, inst.fl};
-      v << jcc{CC_GE, sf, {jcci.targets[0], jcci.targets[1]}, jcci.tag};
-      return 2;
+  return fold_shift_operand(env, b, i, Width::Quad, inst.s0, inst.s1, true, false,
+    [&](Vout& v, VregShiftExtend operand, Vreg64 other) {
+      v << testshiftq{operand, other, inst.sf, inst.fl};
     });
-  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -170,6 +356,121 @@ bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
     return true;
   }
   return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool simplify(Env& env, const addl& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Long, inst.s0, inst.s1, true, true,
+    [&](Vout& v, VregShiftExtend operand, Vreg32 other) {
+      v << addshiftl{operand, other, inst.d, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const addq& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Quad, inst.s0, inst.s1, true, true,
+    [&](Vout& v, VregShiftExtend operand, Vreg64 other) {
+      v << addshiftq{operand, other, inst.d, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const andl& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Long, inst.s0, inst.s1, true, false,
+    [&](Vout& v, VregShiftExtend operand, Vreg32 other) {
+      v << andshiftl{operand, other, inst.d, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const andq& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Quad, inst.s0, inst.s1, true, false,
+    [&](Vout& v, VregShiftExtend operand, Vreg64 other) {
+      v << andshiftq{operand, other, inst.d, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const orq& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Quad, inst.s0, inst.s1, true, false,
+    [&](Vout& v, VregShiftExtend operand, Vreg64 other) {
+      v << orshiftq{operand, other, inst.d, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const subl& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Long, inst.s0, inst.s1, false, true,
+    [&](Vout& v, VregShiftExtend operand, Vreg32 other) {
+      v << subshiftl{operand, other, inst.d, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const subq& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Quad, inst.s0, inst.s1, false, true,
+    [&](Vout& v, VregShiftExtend operand, Vreg64 other) {
+      v << subshiftq{operand, other, inst.d, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const cmpl& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Long, inst.s0, inst.s1, false, true,
+    [&](Vout& v, VregShiftExtend operand, Vreg32 other) {
+      v << cmpshiftl{operand, other, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const cmpq& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Quad, inst.s0, inst.s1, false, true,
+    [&](Vout& v, VregShiftExtend operand, Vreg64 other) {
+      v << cmpshiftq{operand, other, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const testl& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Long, inst.s0, inst.s1, true, false,
+    [&](Vout& v, VregShiftExtend operand, Vreg32 other) {
+      v << testshiftl{operand, other, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const xorl& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Long, inst.s0, inst.s1, true, false,
+    [&](Vout& v, VregShiftExtend operand, Vreg32 other) {
+      v << xorshiftl{operand, other, inst.d, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const xorq& inst, Vlabel b, size_t i) {
+  return fold_shift_operand(env, b, i, Width::Quad, inst.s0, inst.s1, true, false,
+    [&](Vout& v, VregShiftExtend operand, Vreg64 other) {
+      v << xorshiftq{operand, other, inst.d, inst.sf, inst.fl};
+    });
+}
+
+bool simplify(Env& env, const lea& inst, Vlabel b, size_t i) {
+  auto const ptr = inst.s;
+  if (!ptr.index.isValid()) return false;
+
+  auto const tryMatch = match_operand_fold(env, b, i,
+    Vreg64{ptr.index}, Width::Quad, false);
+  if (!tryMatch) return false;
+
+  auto const operand = tryMatch->operand;
+  if (!operand.isShift() || operand.shiftKind() != vixl::LSL) return false;
+
+  auto const amount = operand.amount;
+  auto const newScale = static_cast<uint32_t>(ptr.scale) << amount;
+  if (newScale == 0 || newScale > 8 || (newScale & (newScale - 1))) return false;
+
+  auto const emission = simplify_impl(env, b, tryMatch->startIndex,
+    [&] (Vout& v) {
+      auto newPtr = ptr;
+      newPtr.index = Vreg64{operand.reg};
+      newPtr.scale = static_cast<uint8_t>(newScale);
+      auto newLea = inst;
+      newLea.s = newPtr;
+      v << newLea;
+      return tryMatch->len;
+    });
+
+  return emission;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

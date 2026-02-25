@@ -124,6 +124,11 @@ struct FpVisit {
   >::type use(T& reg) {
     if (reg == livefp) reg = rvmfp();
   }
+
+  void use(VregShiftExtend& se) {
+    if (!se.reg.isValid()) return;
+    use<Vreg>(se.reg);
+  }
 };
 
 void fixupVmfpUses(Vunit& unit) {

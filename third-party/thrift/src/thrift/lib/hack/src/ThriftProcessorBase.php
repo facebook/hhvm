@@ -397,7 +397,7 @@ trait GetThriftServiceMetadata {
   require extends ThriftProcessorBase;
   require implements IThriftProcessor;
 
-  private function process_getThriftServiceMetadataHelper(
+  protected function process_getThriftServiceMetadataHelper(
     int $seqid,
     TProtocol $input,
     TProtocol $output,

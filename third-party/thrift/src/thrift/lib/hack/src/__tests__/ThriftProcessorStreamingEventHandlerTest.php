@@ -1,4 +1,5 @@
 <?hh
+// (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 /*
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -47,7 +48,7 @@ final class ThriftProcessorStreamingEventHandlerTest extends WWWTest {
     // Create input for the test
     $args =
       meta\thrift\example\ExampleStreamingService_testStream_args::withDefaultValues();
-    $input_buffer = new \TMemoryBuffer();
+    $input_buffer = new TMemoryBuffer();
     $temp_protocol = new \TBinaryProtocol($input_buffer);
     $args->write($temp_protocol);
     $temp_protocol->writeMessageEnd();
@@ -57,8 +58,8 @@ final class ThriftProcessorStreamingEventHandlerTest extends WWWTest {
     $output_transport->mockReturn('getBuffer', '');
     $output_transport->mockReturn('resetBuffer', null);
 
-    $input_protocol = new \TBinaryProtocol($input_buffer);
-    $output_protocol = new \TBinaryProtocol($output_transport);
+    $input_protocol = new TBinaryProtocol($input_buffer);
+    $output_protocol = new TBinaryProtocol($output_transport);
 
     return shape(
       'input' => $input_protocol,
@@ -66,6 +67,11 @@ final class ThriftProcessorStreamingEventHandlerTest extends WWWTest {
     );
   }
 
+  /**
+   * Test streaming event handler hooks with both JK enabled and disabled.
+   * Uses JKBoolDataProvider to run with both old (process_) and new (getMethodMetadata) paths.
+   */
+  <<JKBoolDataProvider('thrift/hack:thrift_use_method_metadata_processor')>>
   public async function testStreamingEventHandlerHooks(): Awaitable<void> {
     $mock_server_stream = $this->mockServerStream();
     $protocols = $this->mockProtocols($mock_server_stream);
@@ -89,6 +95,11 @@ final class ThriftProcessorStreamingEventHandlerTest extends WWWTest {
     );
   }
 
+  /**
+   * Test streaming event handler hooks with undeclared exception.
+   * Uses JKBoolDataProvider to run with both old and new code paths.
+   */
+  <<JKBoolDataProvider('thrift/hack:thrift_use_method_metadata_processor')>>
   public async function testStreamingEventHandlerHooksWithUndeclaredException(
   ): Awaitable<void> {
     $mock_server_stream = $this->mockServerStream();
@@ -111,6 +122,11 @@ final class ThriftProcessorStreamingEventHandlerTest extends WWWTest {
     expect($event_handler->postStreamPayloadExceptionCalled)->toBeFalse();
   }
 
+  /**
+   * Test streaming event handler hooks with defined exception.
+   * Uses JKBoolDataProvider to run with both old and new code paths.
+   */
+  <<JKBoolDataProvider('thrift/hack:thrift_use_method_metadata_processor')>>
   public async function testStreamingEventHandlerHooksWithDefinedException(
   ): Awaitable<void> {
     $mock_server_stream = $this->mockServerStream();
@@ -194,11 +210,11 @@ final class TestStreamingApplicationEventHandler
 }
 
 class TestStreamingServiceAsyncIf
-  implements \meta\thrift\example\ExampleStreamingServiceAsyncIf {
+  implements meta\thrift\example\ExampleStreamingServiceAsyncIf {
 
   public async function testStream(
-    ?\meta\thrift\example\RequestStruct $request,
-  ): Awaitable<ResponseAndStream<\meta\thrift\example\ResponseStruct, string>> {
+    ?meta\thrift\example\RequestStruct $request,
+  ): Awaitable<ResponseAndStream<meta\thrift\example\ResponseStruct, string>> {
     return new ResponseAndStream(
       meta\thrift\example\ResponseStruct::fromShape(shape('text' => 'test')),
       $this->emptyStream(),
@@ -232,8 +248,8 @@ final class TestStreamingExampleThriftHandler
 
   <<__Override>>
   public async function testStream(
-    ?\meta\thrift\example\RequestStruct $request,
-  ): Awaitable<ResponseAndStream<\meta\thrift\example\ResponseStruct, string>> {
+    ?meta\thrift\example\RequestStruct $request,
+  ): Awaitable<ResponseAndStream<meta\thrift\example\ResponseStruct, string>> {
     return new ResponseAndStream(
       meta\thrift\example\ResponseStruct::fromShape(shape('text' => 'test')),
       $this->genStream(),
@@ -252,8 +268,8 @@ final class TestStreamingErrorThriftHandler
 
   <<__Override>>
   public async function testStream(
-    ?\meta\thrift\example\RequestStruct $request,
-  ): Awaitable<ResponseAndStream<\meta\thrift\example\ResponseStruct, string>> {
+    ?meta\thrift\example\RequestStruct $request,
+  ): Awaitable<ResponseAndStream<meta\thrift\example\ResponseStruct, string>> {
     return new ResponseAndStream(
       meta\thrift\example\ResponseStruct::fromShape(shape('text' => 'test')),
       $this->genStreamWithError(),
@@ -272,8 +288,8 @@ final class TestStreamingExceptionHandler extends TestStreamingServiceAsyncIf {
 
   <<__Override>>
   public async function testStream(
-    ?\meta\thrift\example\RequestStruct $request,
-  ): Awaitable<ResponseAndStream<\meta\thrift\example\ResponseStruct, string>> {
+    ?meta\thrift\example\RequestStruct $request,
+  ): Awaitable<ResponseAndStream<meta\thrift\example\ResponseStruct, string>> {
     return new ResponseAndStream(
       meta\thrift\example\ResponseStruct::fromShape(shape('text' => 'test')),
       $this->genStreamWithException(),
@@ -291,6 +307,6 @@ final class TestStreamingExceptionHandler extends TestStreamingServiceAsyncIf {
 }
 
 final class TestStreamingApplicationProcessor
-  extends \meta\thrift\example\ExampleStreamingServiceAsyncProcessorBase {
+  extends meta\thrift\example\ExampleStreamingServiceAsyncProcessorBase {
   const type TThriftIf = TestStreamingServiceAsyncIf;
 }

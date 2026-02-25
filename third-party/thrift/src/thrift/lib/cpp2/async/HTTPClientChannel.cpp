@@ -458,16 +458,46 @@ void HTTPClientChannel::setRequestHeaderOptions(THeader* header) {
   header->forceClientType(true);
 }
 
+namespace {
+std::pair<std::string, std::string> encodeHeader(
+    const std::string& header, const std::string& value) {
+  static constexpr std::string_view kHeaderPrefix{"encode_"};
+  std::string encodedHeader;
+  {
+    folly::resizeWithoutInitialization(
+        encodedHeader,
+        kHeaderPrefix.size() + folly::base64URLEncodedSize(header.size()));
+    auto out = std::copy(
+        kHeaderPrefix.begin(), kHeaderPrefix.end(), encodedHeader.begin());
+    folly::base64URLEncodeRuntime(
+        header.data(), header.data() + header.size(), std::to_address(out));
+  }
+  std::string encodedValue;
+  {
+    const std::string_view encodedName{
+        encodedHeader.begin() + kHeaderPrefix.size(),
+        encodedHeader.end(),
+    };
+    folly::resizeWithoutInitialization(
+        encodedValue,
+        encodedName.size() + 1 + folly::base64URLEncodedSize(value.size()));
+    auto out =
+        std::copy(encodedName.begin(), encodedName.end(), encodedValue.begin());
+    *out++ = '_';
+    folly::base64URLEncodeRuntime(
+        value.data(), value.data() + value.size(), std::to_address(out));
+  }
+  return {std::move(encodedHeader), std::move(encodedValue)};
+}
+} // namespace
+
 void HTTPClientChannel::setHeaders(
     proxygen::HTTPHeaders& dstHeaders,
     transport::THeader::StringToStringMap&& srcHeaders) {
   for (auto&& [header, value] : srcHeaders) {
     if (header.find(':') != std::string::npos) {
-      const auto encodedHeader = folly::base64URLEncode(header);
-      const auto encodedValue = folly::base64URLEncode(value);
-      dstHeaders.add(
-          folly::to<std::string>("encode_", encodedHeader),
-          folly::to<std::string>(encodedHeader, '_', encodedValue));
+      auto&& [encodedHeader, encodedValue] = encodeHeader(header, value);
+      dstHeaders.add(std::move(encodedHeader), std::move(encodedValue));
     } else {
       dstHeaders.add(header, std::move(value));
     }

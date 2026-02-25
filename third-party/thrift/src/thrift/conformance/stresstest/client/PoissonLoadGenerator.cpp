@@ -36,14 +36,10 @@ void PoissonLoadGenerator::generateRequestSignal() {
 void PoissonLoadGenerator::start() {
   bool f = false;
   if (started_.compare_exchange_strong(f, true)) {
-    LOG(INFO) << "starting Poisson Load Generator";
     auto interval =
         std::chrono::duration_cast<std::chrono::microseconds>(interval_);
-    LOG(INFO) << "Setting interval to " << interval.count() << " microseconds";
     scheduler_.addFunction([&]() { generateRequestSignal(); }, interval);
     scheduler_.start();
-  } else {
-    LOG(INFO) << "Poisson Load Generator already started";
   }
 }
 

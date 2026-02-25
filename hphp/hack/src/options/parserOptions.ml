@@ -40,7 +40,7 @@ type t = {
   use_legacy_experimental_feature_config: bool;
   experimental_features: Experimental_features.feature_status SMap.t;
   consider_unspecified_experimental_features_released: bool;
-  package_info: PackageInfo.t;
+  package_info: Package_info.t;
   package_support_multifile_tests: bool;
   enable_class_pointer_hint: bool;
   disallow_non_annotated_memoize: bool;
@@ -83,7 +83,7 @@ let default =
     use_legacy_experimental_feature_config = true;
     experimental_features = SMap.empty;
     consider_unspecified_experimental_features_released = true;
-    package_info = PackageInfo.empty;
+    package_info = Package_info.empty;
     package_support_multifile_tests = false;
     enable_class_pointer_hint = true;
     disallow_non_annotated_memoize = false;

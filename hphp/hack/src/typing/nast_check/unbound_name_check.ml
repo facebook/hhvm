@@ -127,7 +127,7 @@ let check_module_if_present env custom_err_config id_opt =
 
 let check_package_name env custom_err_config (pos, name) =
   if
-    PackageInfo.package_exists (Provider_context.get_package_info env.ctx) name
+    Package_info.package_exists (Provider_context.get_package_info env.ctx) name
     || not
          (TypecheckerOptions.check_packages
             (Provider_context.get_tcopt env.ctx))

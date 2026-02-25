@@ -232,6 +232,6 @@ val implicit_sdt_for_fun : t -> Shallow_decl_defs.fun_decl -> bool
 
 val no_auto_likes_for_fun : Shallow_decl_defs.fun_decl -> bool
 
-val get_package_info : t -> PackageInfo.t
+val get_package_info : t -> Package_info.t
 
 val with_tcopt_for_autocomplete : t -> t

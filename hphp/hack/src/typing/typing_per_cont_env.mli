@@ -82,7 +82,7 @@ val drop_conts : C.t list -> t -> t
 val replace_cont : C.t -> per_cont_entry option -> t -> t
 
 val assert_package_loaded_in_cont :
-  package_info:PackageInfo.t ->
+  package_info:Package_info.t ->
   C.t ->
   Pos.t ->
   string ->

@@ -18,7 +18,7 @@ type t = {
   include_assignment_values: bool;
   stack_size: int;
   deregister_php_stdlib: bool;
-  package_info: PackageInfo.t;
+  package_info: Package_info.t;
   package_support_multifile_tests: bool;
   enable_class_pointer_hint: bool;
   disallow_non_annotated_memoize: bool;

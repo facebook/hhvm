@@ -2402,9 +2402,9 @@ let decl_and_run_mode
   let (package_config_errors, package_info) =
     Diagnostics.do_ @@ fun () ->
     match packages_config_path with
-    | None -> PackageInfo.empty
+    | None -> Package_info.empty
     | Some pkgs_config_relpath ->
-      PackageConfig.load_and_parse
+      Package_config.load_and_parse
         ~strict:false
         ~disable_transitivity_check:false
         ~pkgs_config_abs_path:

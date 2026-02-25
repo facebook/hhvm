@@ -23,7 +23,7 @@ let get_package ctx path text =
   | None ->
     let package_name =
       match
-        PackageInfo.get_package_for_file
+        Package_info.get_package_for_file
           (Provider_context.get_package_info ctx)
           path
       with

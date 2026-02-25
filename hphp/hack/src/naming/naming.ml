@@ -334,7 +334,7 @@ let fun_def_of_stmts ctx stmts : Nast.fun_def option =
      *)
     let fd_package =
       let pos_suffix = Relative_path.suffix (Pos.filename pos) in
-      PackageInfo.get_package_for_file
+      Package_info.get_package_for_file
         popt.ParserOptions.package_info
         pos_suffix
       |> Option.map ~f:(fun pkg ->

@@ -681,14 +681,14 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
   in
   Hh_logger.log "Parsing and loading packages config at %s" pkgs_config_abs_path;
   let package_info =
-    PackageConfig.load_and_parse
+    Package_config.load_and_parse
       ~strict:local_config.ServerLocalConfig.package_config_strict_validation
       ~disable_transitivity_check:
         global_opts_without_package_info
           .tco_package_config_disable_transitivity_check
       ~pkgs_config_abs_path
   in
-  PackageInfo.log_package_info package_info;
+  Package_info.log_package_info package_info;
   let global_opts =
     GlobalOptions.set
       ~po:

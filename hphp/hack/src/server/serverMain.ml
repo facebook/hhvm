@@ -103,12 +103,12 @@ module Program = struct
     let package_config_in_updates =
       SSet.mem
         raw_updates
-        (Relative_path.to_absolute PackageConfig.repo_config_path)
+        (Relative_path.to_absolute Package_config.repo_config_path)
     in
     if package_config_in_updates then begin
       Hh_logger.log
         "%s changed; please restart %s.\n"
-        (Relative_path.suffix PackageConfig.repo_config_path)
+        (Relative_path.suffix Package_config.repo_config_path)
         GlobalConfig.program_name;
       Exit.exit Exit_status.Package_config_changed
     end

@@ -26,7 +26,7 @@
  (wrapped false)
  (modules
   package
-  packageInfo)
+  package_info)
  (libraries
   pos
   utils_multifile)
@@ -36,7 +36,7 @@
 (library
  (name package_config)
  (wrapped false)
- (modules packageConfig)
+ (modules package_config)
  (libraries
   errors
   parsing_error

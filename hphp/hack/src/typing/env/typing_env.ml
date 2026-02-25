@@ -638,7 +638,7 @@ module M = struct
       Option.map env.genv.current_package ~f:Aast_utils.get_package_name
     in
     let info = get_tcopt env |> TypecheckerOptions.package_info in
-    Option.bind current_pkg_name ~f:(PackageInfo.get_package info)
+    Option.bind current_pkg_name ~f:(Package_info.get_package info)
 
   let get_current_package_def_pos env =
     let current_pkg_name =
@@ -646,7 +646,7 @@ module M = struct
     in
     let info = get_tcopt env |> TypecheckerOptions.package_info in
     Option.bind current_pkg_name ~f:(fun p ->
-        PackageInfo.get_package info p |> Option.map ~f:Package.get_package_pos)
+        Package_info.get_package info p |> Option.map ~f:Package.get_package_pos)
 
   let get_current_package_membership env = env.genv.current_package
 
@@ -667,7 +667,7 @@ module M = struct
 
   let get_package_by_name env pkg_name =
     let info = get_tcopt env |> TypecheckerOptions.package_info in
-    PackageInfo.get_package info pkg_name
+    Package_info.get_package info pkg_name
 
   let is_package_loaded env package =
     let open Typing_local_packages in

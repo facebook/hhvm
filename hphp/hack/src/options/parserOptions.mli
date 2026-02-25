@@ -67,7 +67,7 @@ type t = {
           default to OngoingRelease if this is true. Otherwise they will default to Unstable. This should be true for
           testing and tools that don't read .hhconfig (e.g., like hh_single_type_check and hh_parse). It should
           be false for hh_server. *)
-  package_info: PackageInfo.t;
+  package_info: Package_info.t;
       (** Information used to determine which package a file belongs to during typechecking. *)
   package_support_multifile_tests: bool;
       (** Option to strip the multifile filename mangling used in Hack tests.  Used in Packages tests.

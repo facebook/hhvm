@@ -14,7 +14,7 @@ let lookup_package env p =
     Provider_context.get_tcopt env.Nast_check_env.ctx
     |> TypecheckerOptions.package_info
   in
-  PackageInfo.get_package info p
+  Package_info.get_package info p
 
 let require_package_strict_inclusion env attr =
   if

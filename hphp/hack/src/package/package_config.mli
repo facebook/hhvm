@@ -18,6 +18,6 @@ val load_and_parse :
   strict:bool ->
   disable_transitivity_check:bool ->
   pkgs_config_abs_path:string ->
-  PackageInfo.t
+  Package_info.t
 
 val repo_config_path : Relative_path.t

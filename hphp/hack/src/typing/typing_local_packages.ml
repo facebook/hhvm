@@ -88,7 +88,7 @@ let join lp1 lp2 =
 let update_unsatisfiable_packages package_info pkg pos lp =
   SMap.mapi
     (fun pkg_name info ->
-      match PackageInfo.get_package package_info pkg_name with
+      match Package_info.get_package package_info pkg_name with
       | None -> info
       | Some package ->
         let includes = List.map ~f:snd package.Package.includes in
@@ -123,7 +123,7 @@ let add ~package_info pos pkg status lp =
   match status with
   | Exists_in_deployment ->
     let pkgs_included_by_pkg =
-      match PackageInfo.get_package package_info pkg with
+      match Package_info.get_package package_info pkg with
       | None -> []
       | Some pkg -> List.map ~f:snd pkg.Package.includes
     in

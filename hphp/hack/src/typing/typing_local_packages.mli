@@ -32,7 +32,7 @@ val empty : t
 val join : t -> t -> t
 
 val add :
-  package_info:PackageInfo.t ->
+  package_info:Package_info.t ->
   Pos.t ->
   SMap.key ->
   local_package_requirement ->

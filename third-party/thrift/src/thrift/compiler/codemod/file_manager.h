@@ -212,7 +212,7 @@ class file_manager {
    */
   std::optional<size_t> get_first_namespace_offset() const;
 
-  void remove_namespace(std::string language);
+  void remove_namespace(const std::string& language);
 
  private:
   // Expands backwards begin_offset and forwards end_offset for all whitespaces

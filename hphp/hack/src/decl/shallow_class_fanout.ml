@@ -8,13 +8,13 @@
  *)
 
 open Hh_prelude
-open ClassDiff
+open Class_diff
 open Reordered_argument_collections
 open Typing_deps
 
 type changed_class = {
   name: string;
-  diff: ClassDiff.t;
+  diff: Class_diff.t;
   dep: Dep.t;
   descendant_deps: Typing_deps.DepSet.t;
 }
@@ -49,7 +49,7 @@ let include_fanout_of_dep (mode : Mode.t) (dep : Dep.t) (deps : DepSet.t) :
 let get_minor_change_fanout
     ~(ctx : Provider_context.t)
     (changed_class : changed_class)
-    (member_diff : ClassDiff.member_diff) : Fanout.t =
+    (member_diff : Class_diff.member_diff) : Fanout.t =
   let mode = Provider_context.get_deps_mode ctx in
   let acc = DepSet.singleton changed_class.dep in
   let { consts; typeconsts; props; sprops; methods; smethods; constructor } =
@@ -85,7 +85,8 @@ let get_minor_change_fanout
        origin in this way, we must always take the more expensive path for
        consts. *)
     if
-      is_const || ClassDiff.method_or_property_change_affects_descendants change
+      is_const
+      || Class_diff.method_or_property_change_affects_descendants change
     then
       recheck_descendants_and_their_member_dependents acc member
     else
@@ -190,9 +191,9 @@ end = struct
       let mode = Provider_context.get_deps_mode ctx in
       HackEventLogger.Fanouts.log_class
         ~class_name:name
-        ~class_diff:(ClassDiff.show diff)
+        ~class_diff:(Class_diff.show diff)
         ~fanout_cardinal
-        ~class_diff_category:(ClassDiff.to_category_json diff)
+        ~class_diff_category:(Class_diff.to_category_json diff)
         ~direct_references_cardinal:(direct_references_cardinal mode dep)
         ~descendants_cardinal:(descendants_cardinal descendant_deps)
         ~children_cardinal:(children_cardinal mode name)

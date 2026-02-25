@@ -8,7 +8,7 @@
  *)
 
 open Hh_prelude
-open ClassDiff
+open Class_diff
 open Reordered_argument_collections
 open Shallow_decl_defs
 module VersionedSSet = Decl_compare.VersionedSSet
@@ -17,7 +17,7 @@ module Dep = Typing_deps.Dep
 let diff_class_in_changed_file
     (old_classes : shallow_class option SMap.t)
     (new_classes : shallow_class option SMap.t)
-    (class_name : string) : ClassDiff.t option =
+    (class_name : string) : Class_diff.t option =
   let old_class_opt = SMap.find old_classes class_name in
   let new_class_opt = SMap.find new_classes class_name in
   match (old_class_opt, new_class_opt) with
@@ -31,7 +31,7 @@ let diff_class_in_changed_file
 
 let compute_class_diffs
     (ctx : Provider_context.t) ~during_init ~(class_names : VersionedSSet.diff)
-    : (string * ClassDiff.t) list =
+    : (string * Class_diff.t) list =
   let { VersionedSSet.added; kept; removed } = class_names in
   let acc = [] in
   let acc =
@@ -55,7 +55,7 @@ let compute_class_diffs
       | Some diff -> (cid, diff) :: acc
       | None -> acc)
 
-let log_changes (changes : (string * ClassDiff.t) list) : unit =
+let log_changes (changes : (string * Class_diff.t) list) : unit =
   let change_count = List.length changes in
   if List.is_empty changes then
     Hh_logger.log "No class changes detected"
@@ -74,7 +74,7 @@ let log_changes (changes : (string * ClassDiff.t) list) : unit =
                     |> List.map
                          ~f:
                            (Tuple2.map_snd ~f:(fun diff ->
-                                string_ @@ ClassDiff.show diff))) );
+                                string_ @@ Class_diff.show diff))) );
                 ("truncated", bool_ (change_count > max));
               ]);
   ()

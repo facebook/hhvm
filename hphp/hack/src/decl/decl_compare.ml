@@ -154,7 +154,7 @@ end
  * to be rechecked
  *)
 (*****************************************************************************)
-module ClassDiff = struct
+module Class_diff = struct
   let smap_left s1 s2 =
     SMap.fold
       begin
@@ -204,7 +204,7 @@ end
  * to be rechecked because the type of their member changed
  *)
 (*****************************************************************************)
-module ClassEltDiff = struct
+module Class_elt_diff = struct
   open Decl_heap
 
   let acc_diff is_unchanged xmap =

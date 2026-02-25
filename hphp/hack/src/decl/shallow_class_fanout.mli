@@ -9,7 +9,7 @@
 
 type changed_class = {
   name: string;
-  diff: ClassDiff.t;
+  diff: Class_diff.t;
   dep: Typing_deps.Dep.t;
   descendant_deps: Typing_deps.DepSet.t;
 }

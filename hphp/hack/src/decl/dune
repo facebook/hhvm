@@ -24,8 +24,8 @@
    rust_decl_ffi)))
 
 (library
- (name classDiff)
- (modules classDiff)
+ (name class_diff)
+ (modules class_diff)
  (libraries
   decl_defs
   typing_defs
@@ -39,7 +39,7 @@
  (name decl)
  (modules decl)
  (libraries
-  classDiff
+  class_diff
   ast_provider
   decl_class
   decl_class_elements
@@ -339,7 +339,7 @@
  (name shallow_class_diff)
  (modules shallow_class_diff)
  (libraries
-  classDiff
+  class_diff
   decl_defs
   decl_pos_utils
   decl_utils
@@ -360,7 +360,7 @@
  (name shallow_class_fanout)
  (modules shallow_class_fanout)
  (libraries
-  classDiff
+  class_diff
   decl_defs
   decl_provider
   fanout
@@ -388,7 +388,7 @@
  (name shallow_decl_compare)
  (modules shallow_decl_compare)
  (libraries
-  classDiff
+  class_diff
   decl_compare
   decl_defs
   package_info

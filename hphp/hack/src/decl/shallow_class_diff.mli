@@ -9,4 +9,4 @@
 
 open Shallow_decl_defs
 
-val diff_class : shallow_class -> shallow_class -> ClassDiff.t option
+val diff_class : shallow_class -> shallow_class -> Class_diff.t option

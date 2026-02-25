@@ -60,11 +60,11 @@ module VersionedFileInfo : sig
   val diff_names : VersionedNames.t -> Diff.t
 end
 
-module ClassDiff : sig
+module Class_diff : sig
   val compare : Class.t -> Class.t -> bool
 end
 
-module ClassEltDiff : sig
+module Class_elt_diff : sig
   val compare : Class.t -> Class.t -> [> `Changed | `Unchanged ]
 end
 

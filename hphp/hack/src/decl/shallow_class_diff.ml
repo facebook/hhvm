@@ -8,7 +8,7 @@
  *)
 
 open Hh_prelude
-open ClassDiff
+open Class_diff
 open Reordered_argument_collections
 open Shallow_decl_defs
 module SN = Naming_special_names
@@ -305,8 +305,8 @@ let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =
     | (Some old_method, Some new_method) -> Method.diff old_method new_method
 
 let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
-    ClassDiff.member_diff =
-  let diff = ClassDiff.empty_member_diff in
+    Class_diff.member_diff =
+  let diff = Class_diff.empty_member_diff in
   let kind = c2.sc_kind in
   let module_changed =
     match (c1.sc_module, c2.sc_module) with
@@ -789,7 +789,7 @@ let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
     enum_type_change = diff_enum_type_options c1.sc_enum_type c2.sc_enum_type;
   }
 
-let diff_class (c1 : shallow_class) (c2 : shallow_class) : ClassDiff.t option =
+let diff_class (c1 : shallow_class) (c2 : shallow_class) : Class_diff.t option =
   let class_shell1 = normalize c1 and class_shell2 = normalize c2 in
   let member_diff = diff_class_members c1 c2 in
   if not (equal_shallow_class class_shell1 class_shell2) then
@@ -799,7 +799,7 @@ let diff_class (c1 : shallow_class) (c2 : shallow_class) : ClassDiff.t option =
             (diff_class_shells class_shell1 class_shell2, member_diff)))
   else
     let mro_inputs_equal = mro_inputs_equal c1 c2 in
-    if mro_inputs_equal && ClassDiff.is_empty_member_diff member_diff then
+    if mro_inputs_equal && Class_diff.is_empty_member_diff member_diff then
       None
     else
       Some (Minor_change member_diff)

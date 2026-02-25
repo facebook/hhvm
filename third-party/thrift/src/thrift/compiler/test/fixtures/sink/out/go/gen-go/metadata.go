@@ -220,6 +220,94 @@ var serviceMetadatas = func() []*metadata.ThriftService {
         &metadata.ThriftService{
             Name:      "module.SinkService",
             Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "method",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TSink: &metadata.ThriftSinkType{
+                            ElemType: premadeThriftType_module_SinkPayload,
+                            FinalResponseType: premadeThriftType_module_FinalResponse,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "methodAndReponse",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TSink: &metadata.ThriftSinkType{
+                            ElemType: premadeThriftType_module_SinkPayload,
+                            FinalResponseType: premadeThriftType_module_FinalResponse,
+                            InitialResponseType: premadeThriftType_module_InitialResponse,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "methodThrow",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TSink: &metadata.ThriftSinkType{
+                            ElemType: premadeThriftType_module_SinkPayload,
+                            FinalResponseType: premadeThriftType_module_FinalResponse,
+                        },
+                    },
+                    Exceptions: []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "ex",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_InitialException,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "methodSinkThrow",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TSink: &metadata.ThriftSinkType{
+                            ElemType: premadeThriftType_module_SinkPayload,
+                            FinalResponseType: premadeThriftType_module_FinalResponse,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "methodFinalThrow",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TSink: &metadata.ThriftSinkType{
+                            ElemType: premadeThriftType_module_SinkPayload,
+                            FinalResponseType: premadeThriftType_module_FinalResponse,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "methodBothThrow",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TSink: &metadata.ThriftSinkType{
+                            ElemType: premadeThriftType_module_SinkPayload,
+                            FinalResponseType: premadeThriftType_module_FinalResponse,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "methodFast",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TSink: &metadata.ThriftSinkType{
+                            ElemType: premadeThriftType_module_SinkPayload,
+                            FinalResponseType: premadeThriftType_module_FinalResponse,
+                        },
+                    },
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "cpp.ProcessInEbThreadUnsafe",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
+                },
             },
         },
     )

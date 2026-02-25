@@ -31,6 +31,13 @@ var _ = metadata.GoUnusedProtection__
 
 
 type SinkService interface {
+    Method(ctx context.Context) (func(context.Context, iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodAndReponse(ctx context.Context) (*InitialResponse, func(context.Context, iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodThrow(ctx context.Context) (func(context.Context, iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodSinkThrow(ctx context.Context) (func(context.Context, iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodFinalThrow(ctx context.Context) (func(context.Context, iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodBothThrow(ctx context.Context) (func(context.Context, iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
+    MethodFast(ctx context.Context) (func(context.Context, iter.Seq2[*SinkPayload, error]) (*FinalResponse, error), error)
 }
 
 type SinkServiceClient interface {
@@ -398,6 +405,20 @@ func NewSinkServiceProcessor(handler SinkService) *SinkServiceProcessor {
         processorFunctionMap: make(map[string]thrift.ProcessorFunction),
         functionServiceMap:   make(map[string]string),
     }
+    p.AddToProcessorFunctionMap("method", &procFuncSinkServiceMethod{handler: handler})
+    p.AddToProcessorFunctionMap("methodAndReponse", &procFuncSinkServiceMethodAndReponse{handler: handler})
+    p.AddToProcessorFunctionMap("methodThrow", &procFuncSinkServiceMethodThrow{handler: handler})
+    p.AddToProcessorFunctionMap("methodSinkThrow", &procFuncSinkServiceMethodSinkThrow{handler: handler})
+    p.AddToProcessorFunctionMap("methodFinalThrow", &procFuncSinkServiceMethodFinalThrow{handler: handler})
+    p.AddToProcessorFunctionMap("methodBothThrow", &procFuncSinkServiceMethodBothThrow{handler: handler})
+    p.AddToProcessorFunctionMap("methodFast", &procFuncSinkServiceMethodFast{handler: handler})
+    p.AddToFunctionServiceMap("method", "SinkService")
+    p.AddToFunctionServiceMap("methodAndReponse", "SinkService")
+    p.AddToFunctionServiceMap("methodThrow", "SinkService")
+    p.AddToFunctionServiceMap("methodSinkThrow", "SinkService")
+    p.AddToFunctionServiceMap("methodFinalThrow", "SinkService")
+    p.AddToFunctionServiceMap("methodBothThrow", "SinkService")
+    p.AddToFunctionServiceMap("methodFast", "SinkService")
 
     return p
 }
@@ -434,4 +455,130 @@ func (p *SinkServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.SinkService")
 }
 
+
+type procFuncSinkServiceMethod struct {
+    handler SinkService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncSinkServiceMethod)(nil)
+
+func (p *procFuncSinkServiceMethod) NewReqArgs() thrift.ReadableStruct {
+    return newReqSinkServiceMethod()
+}
+
+func (p *procFuncSinkServiceMethod) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncSinkServiceMethod) RunStreamContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}
+
+type procFuncSinkServiceMethodAndReponse struct {
+    handler SinkService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncSinkServiceMethodAndReponse)(nil)
+
+func (p *procFuncSinkServiceMethodAndReponse) NewReqArgs() thrift.ReadableStruct {
+    return newReqSinkServiceMethodAndReponse()
+}
+
+func (p *procFuncSinkServiceMethodAndReponse) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncSinkServiceMethodAndReponse) RunStreamContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}
+
+type procFuncSinkServiceMethodThrow struct {
+    handler SinkService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncSinkServiceMethodThrow)(nil)
+
+func (p *procFuncSinkServiceMethodThrow) NewReqArgs() thrift.ReadableStruct {
+    return newReqSinkServiceMethodThrow()
+}
+
+func (p *procFuncSinkServiceMethodThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncSinkServiceMethodThrow) RunStreamContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}
+
+type procFuncSinkServiceMethodSinkThrow struct {
+    handler SinkService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncSinkServiceMethodSinkThrow)(nil)
+
+func (p *procFuncSinkServiceMethodSinkThrow) NewReqArgs() thrift.ReadableStruct {
+    return newReqSinkServiceMethodSinkThrow()
+}
+
+func (p *procFuncSinkServiceMethodSinkThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncSinkServiceMethodSinkThrow) RunStreamContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}
+
+type procFuncSinkServiceMethodFinalThrow struct {
+    handler SinkService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncSinkServiceMethodFinalThrow)(nil)
+
+func (p *procFuncSinkServiceMethodFinalThrow) NewReqArgs() thrift.ReadableStruct {
+    return newReqSinkServiceMethodFinalThrow()
+}
+
+func (p *procFuncSinkServiceMethodFinalThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncSinkServiceMethodFinalThrow) RunStreamContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}
+
+type procFuncSinkServiceMethodBothThrow struct {
+    handler SinkService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncSinkServiceMethodBothThrow)(nil)
+
+func (p *procFuncSinkServiceMethodBothThrow) NewReqArgs() thrift.ReadableStruct {
+    return newReqSinkServiceMethodBothThrow()
+}
+
+func (p *procFuncSinkServiceMethodBothThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncSinkServiceMethodBothThrow) RunStreamContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}
+
+type procFuncSinkServiceMethodFast struct {
+    handler SinkService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncSinkServiceMethodFast)(nil)
+
+func (p *procFuncSinkServiceMethodFast) NewReqArgs() thrift.ReadableStruct {
+    return newReqSinkServiceMethodFast()
+}
+
+func (p *procFuncSinkServiceMethodFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncSinkServiceMethodFast) RunStreamContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}
 

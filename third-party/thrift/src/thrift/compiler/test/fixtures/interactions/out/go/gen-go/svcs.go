@@ -35,6 +35,7 @@ type MyInteraction interface {
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
     Truthify(ctx context.Context) (func(context.Context, chan<- bool) error, error)
+    Encode(ctx context.Context) ([]int32, func(context.Context, iter.Seq2[string, error]) ([]byte, error), error)
 }
 
 type MyInteractionClient interface {
@@ -192,9 +193,11 @@ func NewMyInteractionProcessor(handler MyInteraction) *MyInteractionProcessor {
     p.AddToProcessorFunctionMap("MyInteraction.frobnicate", &procFuncMyInteractionFrobnicate{handler: handler})
     p.AddToProcessorFunctionMap("MyInteraction.ping", &procFuncMyInteractionPing{handler: handler})
     p.AddToProcessorFunctionMap("MyInteraction.truthify", &procFuncMyInteractionTruthify{handler: handler})
+    p.AddToProcessorFunctionMap("MyInteraction.encode", &procFuncMyInteractionEncode{handler: handler})
     p.AddToFunctionServiceMap("MyInteraction.frobnicate", "MyInteraction")
     p.AddToFunctionServiceMap("MyInteraction.ping", "MyInteraction")
     p.AddToFunctionServiceMap("MyInteraction.truthify", "MyInteraction")
+    p.AddToFunctionServiceMap("MyInteraction.encode", "MyInteraction")
 
     return p
 }
@@ -340,6 +343,24 @@ func (p *procFuncMyInteractionTruthify) RunStreamContext(
     onStreamComplete()
 }
 
+type procFuncMyInteractionEncode struct {
+    handler MyInteraction
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncMyInteractionEncode)(nil)
+
+func (p *procFuncMyInteractionEncode) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyInteractionEncode()
+}
+
+func (p *procFuncMyInteractionEncode) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncMyInteractionEncode) RunStreamContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}
+
 func (p *MyInteractionProcessor) OnTermination() {
     // If the underlying handler implements OnTermination()
     if terminable, ok := p.handler.(thrift.Terminable); ok {
@@ -351,6 +372,7 @@ type MyInteractionFast interface {
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
     Truthify(ctx context.Context) (func(context.Context, chan<- bool) error, error)
+    Encode(ctx context.Context) ([]int32, func(context.Context, iter.Seq2[string, error]) ([]byte, error), error)
 }
 
 type MyInteractionFastClient interface {
@@ -508,9 +530,11 @@ func NewMyInteractionFastProcessor(handler MyInteractionFast) *MyInteractionFast
     p.AddToProcessorFunctionMap("MyInteractionFast.frobnicate", &procFuncMyInteractionFastFrobnicate{handler: handler})
     p.AddToProcessorFunctionMap("MyInteractionFast.ping", &procFuncMyInteractionFastPing{handler: handler})
     p.AddToProcessorFunctionMap("MyInteractionFast.truthify", &procFuncMyInteractionFastTruthify{handler: handler})
+    p.AddToProcessorFunctionMap("MyInteractionFast.encode", &procFuncMyInteractionFastEncode{handler: handler})
     p.AddToFunctionServiceMap("MyInteractionFast.frobnicate", "MyInteractionFast")
     p.AddToFunctionServiceMap("MyInteractionFast.ping", "MyInteractionFast")
     p.AddToFunctionServiceMap("MyInteractionFast.truthify", "MyInteractionFast")
+    p.AddToFunctionServiceMap("MyInteractionFast.encode", "MyInteractionFast")
 
     return p
 }
@@ -648,6 +672,24 @@ func (p *procFuncMyInteractionFastTruthify) RunStreamContext(
         onStreamNext(x)
     }
     onStreamComplete()
+}
+
+type procFuncMyInteractionFastEncode struct {
+    handler MyInteractionFast
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncMyInteractionFastEncode)(nil)
+
+func (p *procFuncMyInteractionFastEncode) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyInteractionFastEncode()
+}
+
+func (p *procFuncMyInteractionFastEncode) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncMyInteractionFastEncode) RunStreamContext(ctx context.Context) {
+    // NOT IMPLEMENTED
 }
 
 func (p *MyInteractionFastProcessor) OnTermination() {

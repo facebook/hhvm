@@ -30,7 +30,7 @@
 {{#if (not last?)}}, {{/if}}
 {{/each}}) {{!}}
 {{#if func.oneway?}}(error)
-{{#else if func.sink?}}NOT_IMPLEMENTED
+{{#else if func.sink?}}({{#if func.creates_interaction?}}*{{func.created_interaction.go_name}}Processor, {{/if}}{{#if func.sink_has_first_response?}}{{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}, {{/if}}func(context.Context, iter.Seq2[{{#if func.sink.elem_type.structured?}}*{{/if}}{{#partial types.go_type type=func.sink.elem_type}}, error]) ({{#if func.sink.final_response_type.structured?}}*{{/if}}{{#partial types.go_type type=func.sink.final_response_type}}, error), error)
 {{#else if func.stream?}}({{#if func.creates_interaction?}}*{{func.created_interaction.go_name}}Processor, {{/if}}{{#if func.stream_has_first_response?}}{{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}, {{/if}}func(context.Context, chan<- {{#if func.stream.elem_type.structured?}}*{{/if}}{{#partial types.go_type type=func.stream.elem_type}}) error, error)
 {{#else}}({{#if func.creates_interaction?}}*{{func.created_interaction.go_name}}Processor, {{/if}}{{#if (not func.return_type.void?)}}{{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}, {{/if}}error)
 {{/if func.oneway?}}

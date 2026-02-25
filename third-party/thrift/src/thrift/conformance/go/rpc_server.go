@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"iter"
 	"net"
 	"os"
 	"os/signal"
@@ -193,6 +194,110 @@ func (h *rpcConformanceServiceHandler) StreamCreditTimeout(ctx context.Context, 
 }
 
 func (h *rpcConformanceServiceHandler) StreamInitialTimeout(ctx context.Context, request *rpc.Request) (func(context.Context, chan<- *rpc.Response) error, error) {
+	return nil, errors.New("not supported")
+}
+
+func (h *rpcConformanceServiceHandler) SinkBasic(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) (*rpc.Response, error), error) {
+	requestValue := rpc.NewSinkBasicServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetSinkBasic(requestValue)
+
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[*rpc.Request, error]) (*rpc.Response, error) {
+		for elem, err := range seq {
+			if err != nil {
+				return nil, err
+			}
+			requestValue.SinkPayloads = append(requestValue.SinkPayloads, elem)
+		}
+		return h.instruction.SinkBasic.FinalResponse, nil
+	}
+	return elemConsumerFunc, nil
+}
+
+func (h *rpcConformanceServiceHandler) SinkInitialResponse(ctx context.Context, request *rpc.Request) (*rpc.Response, func(context.Context, iter.Seq2[*rpc.Request, error]) (*rpc.Response, error), error) {
+	requestValue := rpc.NewSinkInitialResponseServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetSinkInitialResponse(requestValue)
+
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[*rpc.Request, error]) (*rpc.Response, error) {
+		for elem, err := range seq {
+			if err != nil {
+				return nil, err
+			}
+			requestValue.SinkPayloads = append(requestValue.SinkPayloads, elem)
+		}
+		return h.instruction.SinkInitialResponse.FinalResponse, nil
+	}
+	return h.instruction.SinkInitialResponse.InitialResponse, elemConsumerFunc, nil
+}
+
+func (h *rpcConformanceServiceHandler) SinkDeclaredException(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) (*rpc.Response, error), error) {
+	requestValue := rpc.NewSinkDeclaredExceptionServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetSinkDeclaredException(requestValue)
+
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[*rpc.Request, error]) (*rpc.Response, error) {
+		for _, err := range seq {
+			if err != nil {
+				requestValue.UserException = err.(*rpc.UserException)
+				return nil, err
+			}
+		}
+		return nil, nil
+	}
+	return elemConsumerFunc, nil
+}
+
+func (h *rpcConformanceServiceHandler) SinkUndeclaredException(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) (*rpc.Response, error), error) {
+	requestValue := rpc.NewSinkUndeclaredExceptionServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetSinkUndeclaredException(requestValue)
+
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[*rpc.Request, error]) (*rpc.Response, error) {
+		for _, err := range seq {
+			if err != nil {
+				requestValue.ExceptionMessage = thrift.Pointerize(err.Error())
+				return nil, err
+			}
+		}
+		return nil, nil
+	}
+	return elemConsumerFunc, nil
+}
+
+func (h *rpcConformanceServiceHandler) SinkInitialDeclaredException(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) (*rpc.Response, error), error) {
+	requestValue := rpc.NewSinkInitialDeclaredExceptionServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetSinkInitialDeclaredException(requestValue)
+
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[*rpc.Request, error]) (*rpc.Response, error) {
+		return nil, nil
+	}
+	return elemConsumerFunc, rpc.NewUserException().SetMsg("test")
+}
+
+func (h *rpcConformanceServiceHandler) SinkServerDeclaredException(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) (*rpc.Response, error), error) {
+	requestValue := rpc.NewSinkServerDeclaredExceptionServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetSinkServerDeclaredException(requestValue)
+
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[*rpc.Request, error]) (*rpc.Response, error) {
+		for _, err := range seq {
+			if err != nil {
+				return nil, err
+			}
+		}
+		requestValue.ExceptionMessage = thrift.Pointerize("test")
+		return nil, rpc.NewUserException().SetMsg("test")
+	}
+	return elemConsumerFunc, nil
+}
+
+func (h *rpcConformanceServiceHandler) SinkSubsequestCredits(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) (*rpc.Response, error), error) {
+	return nil, errors.New("not supported")
+}
+
+func (h *rpcConformanceServiceHandler) SinkChunkTimeout(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) (*rpc.Response, error), error) {
 	return nil, errors.New("not supported")
 }
 

@@ -1295,7 +1295,6 @@ module Fun_id : sig
       provided but some are expected, a polymorphic function type will be
       generated.  *)
   val synth :
-    ?is_function_pointer:bool ->
     Pos.t * string ->
     unit Aast_defs.targ list ->
     env ->
@@ -1317,7 +1316,6 @@ module Fun_id : sig
     env * locl_ty * locl_ty Aast_defs.targ list
 end = struct
   let validate
-      ?(is_function_pointer = false)
       (use_pos, name)
       {
         fe_pos = def_pos;
@@ -1341,14 +1339,7 @@ end = struct
         ]
     and (access_errs, access_linter_errors) =
       TVis.check_top_level_access
-        ~should_check_package_boundary:
-          (if
-           is_function_pointer
-           && Env.package_allow_function_pointers_violations env
-          then
-            `No
-          else
-            `Yes "function")
+        ~should_check_package_boundary:(`Yes "function")
         ~in_signature:false
         ~use_pos
         ~def_pos
@@ -1485,16 +1476,8 @@ end = struct
             });
     }
 
-  let synth_help
-      ~is_function_pointer
-      localize_with
-      reason
-      fun_ty
-      ty_args
-      fun_id
-      decl_entry
-      env =
-    let () = validate ~is_function_pointer fun_id decl_entry env in
+  let synth_help localize_with reason fun_ty ty_args fun_id decl_entry env =
+    let () = validate fun_id decl_entry env in
     let { fe_pos; fe_support_dynamic_type; _ } = decl_entry in
     let fun_ty =
       Typing_enforceability.compute_enforced_and_pessimize_fun_type
@@ -1524,7 +1507,7 @@ end = struct
     in
     (env, ty, ty_args)
 
-  let synth ?(is_function_pointer = false) fun_id ty_args env =
+  let synth fun_id ty_args env =
     let lookup_id =
       let (_, name) = fun_id in
       if String.equal name SN.PreNamespacedFunctions.echo then
@@ -1540,15 +1523,7 @@ end = struct
     | Decl_entry.Found decl_entry -> begin
       match deref decl_entry.fe_type with
       | (reason, Tfun fun_ty) ->
-        synth_help
-          ~is_function_pointer
-          localize
-          reason
-          fun_ty
-          ty_args
-          fun_id
-          decl_entry
-          env
+        synth_help localize reason fun_ty ty_args fun_id decl_entry env
       | _ -> failwith "Expected function type"
     end
 
@@ -1634,7 +1609,6 @@ end = struct
             fun_ty
         in
         synth_help
-          ~is_function_pointer:false
           localize_instantiated
           reason
           fun_ty
@@ -8992,9 +8966,7 @@ end = struct
       (env, ty)
 
   let synth_static_method pos class_id method_name ty_args source env =
-    let (env, _, tclass_id, class_ty) =
-      Class_id.class_expr ~is_function_pointer:true env [] class_id
-    in
+    let (env, _, tclass_id, class_ty) = Class_id.class_expr env [] class_id in
     let (env, (method_ty, ty_args)) =
       match ty_args with
       | [] ->
@@ -9035,9 +9007,7 @@ end = struct
   (** Synthesize a (possibly polymorphic) function type based on the declared
          function signature of a top-level function *)
   let synth_top_level pos fun_id ty_args source env =
-    let (env, ty, ty_args) =
-      Fun_id.synth ~is_function_pointer:true fun_id ty_args env
-    in
+    let (env, ty, ty_args) = Fun_id.synth fun_id ty_args env in
     (* Modify the function type to indicate this is a function pointer *)
     let (env, ty) = set_function_pointer env ty in
     (* All function pointers are readonly since they capture no values *)
@@ -9057,9 +9027,7 @@ end = struct
   let synth_mono pos (fpid, args, source) env =
     match (fpid, args) with
     | (FP_class_const (cid, meth), targs) ->
-      let (env, _, ce, cty) =
-        Class_id.class_expr ~is_function_pointer:true env [] cid
-      in
+      let (env, _, ce, cty) = Class_id.class_expr env [] cid in
       let (env, (fpty, tal)) =
         Class_get_expr.class_get
           ~is_method:true
@@ -9091,9 +9059,7 @@ end = struct
         (Aast.FunctionPointer (FP_class_const (ce, meth), tal, source))
         fpty
     | (FP_id fun_id, ty_args) ->
-      let (env, ty, ty_args) =
-        Fun_id.synth ~is_function_pointer:true fun_id ty_args env
-      in
+      let (env, ty, ty_args) = Fun_id.synth fun_id ty_args env in
       let (env, ty) = set_function_pointer env ty in
       (* All function pointers are readonly since they capture no values *)
       let (env, ty) = set_capture_only_readonly env ty in
@@ -11528,7 +11494,6 @@ and Class_id : sig
     ?is_const:bool ->
     ?is_attribute:bool ->
     ?is_catch:bool ->
-    ?is_function_pointer:bool ->
     ?require_class_ptr:classname_expr_error ->
     env ->
     Nast.targ list ->
@@ -11618,7 +11583,6 @@ end = struct
       ?(is_const = false)
       ?(is_attribute = false)
       ?(is_catch = false)
-      ?(is_function_pointer = false)
       ?(require_class_ptr = Class_id.Pass)
       (env : env)
       (tal : Nast.targ list)
@@ -11752,12 +11716,7 @@ end = struct
             let should_check_package_boundary =
               if inside_nameof || is_attribute || is_catch then
                 `No
-              else if is_function_pointer then begin
-                if Env.package_allow_function_pointers_violations env then
-                  `No
-                else
-                  `Yes "class"
-              end else if is_const then begin
+              else if is_const then begin
                 if Env.package_allow_classconst_violations env then
                   `No
                 else

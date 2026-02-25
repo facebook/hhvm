@@ -186,7 +186,6 @@ type t = {
   tco_package_allow_all_tconst_violations: bool;
   tco_package_allow_reified_generics_violations: bool;
   tco_package_allow_all_generics_violations: bool;
-  tco_package_allow_function_pointers_violations: bool;
   re_no_cache: bool;
   hh_distc_should_disable_trace_store: bool;
   hh_distc_exponential_backoff_num_retries: int;
@@ -308,7 +307,6 @@ let default =
     tco_package_allow_all_tconst_violations = true;
     tco_package_allow_reified_generics_violations = true;
     tco_package_allow_all_generics_violations = true;
-    tco_package_allow_function_pointers_violations = true;
     re_no_cache = false;
     hh_distc_should_disable_trace_store = false;
     hh_distc_exponential_backoff_num_retries = 10;
@@ -427,7 +425,6 @@ let set
     ?tco_package_allow_all_tconst_violations
     ?tco_package_allow_reified_generics_violations
     ?tco_package_allow_all_generics_violations
-    ?tco_package_allow_function_pointers_violations
     ?re_no_cache
     ?hh_distc_should_disable_trace_store
     ?hh_distc_exponential_backoff_num_retries
@@ -715,10 +712,6 @@ let set
       setting
         tco_package_allow_all_generics_violations
         options.tco_package_allow_all_generics_violations;
-    tco_package_allow_function_pointers_violations =
-      setting
-        tco_package_allow_function_pointers_violations
-        options.tco_package_allow_function_pointers_violations;
     re_no_cache = setting re_no_cache options.re_no_cache;
     hh_distc_should_disable_trace_store =
       setting

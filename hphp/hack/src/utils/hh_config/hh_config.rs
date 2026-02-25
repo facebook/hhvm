@@ -585,10 +585,6 @@ impl HhConfig {
                 "package_allow_all_generics_violations",
                 default.tco_package_allow_all_generics_violations,
             )?,
-            tco_package_allow_function_pointers_violations: hhconfig.get_bool_or(
-                "package_allow_function_pointers_violations",
-                default.tco_package_allow_function_pointers_violations,
-            )?,
             tco_package_exclude_patterns: hhconfig
                 .get_str("package_exclude_patterns")
                 .map_or(default.tco_package_exclude_patterns, parse_svec),

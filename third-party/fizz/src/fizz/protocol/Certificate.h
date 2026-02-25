@@ -9,16 +9,15 @@
 #pragma once
 
 #include <fizz/fizz-config.h>
+#include <fizz/protocol/CertificateBase.h>
 #include <fizz/record/Types.h>
 
 #include <map>
 
 #if FIZZ_CERTIFICATE_USE_OPENSSL_CERT
-#include <folly/io/async/AsyncTransportCertificate.h>
 #include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
 
 namespace fizz {
-using Cert = folly::AsyncTransportCertificate;
 using SelfCertBase = folly::OpenSSLTransportCertificate;
 using PeerCertBase = folly::OpenSSLTransportCertificate;
 using IdentityCertBase = Cert;
@@ -26,13 +25,6 @@ using IdentityCertBase = Cert;
 
 #else
 namespace fizz {
-class Cert {
- public:
-  virtual ~Cert() = default;
-  virtual std::string getIdentity() const = 0;
-  virtual std::optional<std::string> getDER() const = 0;
-};
-
 using SelfCertBase = Cert;
 using PeerCertBase = Cert;
 using IdentityCertBase = Cert;

@@ -133,7 +133,7 @@ let default =
 let system_config_path =
   let dir =
     try Sys.getenv "HH_LOCALCONF_PATH" with
-    | _ -> BuildOptions.system_config_path
+    | _ -> Build_options.system_config_path
   in
   Filename.concat dir "hh.conf"
 

@@ -1,7 +1,7 @@
 module C = Configurator.V1
 
 let () =
-  let filename = "buildOptions.generated.ml" in
+  let filename = "build_options.generated.ml" in
   C.main ~name:"build_options" (fun (_ : C.t) ->
       try
         let sysconfdir = Sys.getenv "CMAKE_INSTALL_FULL_SYSCONFDIR"

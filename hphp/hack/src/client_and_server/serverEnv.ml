@@ -286,8 +286,8 @@ type env = {
   deps_mode: Typing_deps_mode.t; [@opaque]
   tcopt: TypecheckerOptions.t;
   popt: ParserOptions.t;
-  gleanopt: GleanOptions.t;
-  swriteopt: SymbolWriteOptions.t;
+  gleanopt: Glean_options.t;
+  swriteopt: Symbol_write_options.t;
   diagnostics: Diagnostics.t; [@opaque]
       (** Diagnostics are indexed by files that were known to GENERATE diagnostics in
           corresponding phases. Note that this is different from HAVING diagnostics -

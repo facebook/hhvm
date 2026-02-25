@@ -9,7 +9,7 @@
 
 (** Get or set the currently selected search provider *)
 val initialize :
-  gleanopt:GleanOptions.t ->
+  gleanopt:Glean_options.t ->
   namespace_map:(string * string) list ->
   provider_name:string ->
   quiet:bool ->

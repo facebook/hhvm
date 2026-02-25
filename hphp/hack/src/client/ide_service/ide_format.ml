@@ -61,7 +61,7 @@ let go_hackfmt ?filename_for_logging ~content args :
     | None -> args
   in
   Hh_logger.log "%s" (String.concat ~sep:" " args);
-  let paths = [Path.to_string (Path.make BuildOptions.default_hackfmt_path)] in
+  let paths = [Path.to_string (Path.make Build_options.default_hackfmt_path)] in
   let paths =
     match Sys.getenv_opt "HACKFMT_TEST_PATH" with
     | Some p -> [p] @ paths

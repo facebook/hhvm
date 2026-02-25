@@ -96,7 +96,7 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   (* Scan the repo folder *)
   let sienv =
     SymbolIndex.initialize
-      ~gleanopt:GleanOptions.default
+      ~gleanopt:Glean_options.default
       ~namespace_map:[]
       ~provider_name:"CustomIndex"
       ~quiet:true

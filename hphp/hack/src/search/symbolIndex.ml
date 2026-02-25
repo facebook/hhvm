@@ -13,7 +13,7 @@ open SearchTypes
 
 (* Set the currently selected search provider *)
 let initialize
-    ~(gleanopt : GleanOptions.t)
+    ~(gleanopt : Glean_options.t)
     ~(namespace_map : (string * string) list)
     ~(provider_name : string)
     ~(quiet : bool) : si_env =
@@ -24,7 +24,7 @@ let initialize
       sie_provider = SearchUtils.provider_of_string provider_name;
       sie_quiet_mode = quiet;
       sie_namespace_map = namespace_map;
-      glean_reponame = GleanOptions.reponame gleanopt;
+      glean_reponame = Glean_options.reponame gleanopt;
     }
   in
   (* Basic initialization *)

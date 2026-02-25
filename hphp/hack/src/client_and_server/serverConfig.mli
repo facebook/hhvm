@@ -18,7 +18,7 @@ type t [@@deriving show]
   Also calls into `ServerLocalConfigLoad.load`.
 
   Those two configs get mingled to make a `TypecheckerOptions.t`,
-  `ParserOptions.t` and `GleanOptions.t` which can
+  `ParserOptions.t` and `Glean_options.t` which can
   then be retrieved using the `typechecker_options`,  `parser_options`,
   `glean_options` helpers. *)
 val load :
@@ -33,9 +33,9 @@ val set_parser_options : t -> ParserOptions.t -> t
 
 val set_tc_options : t -> TypecheckerOptions.t -> t
 
-val set_glean_options : t -> GleanOptions.t -> t
+val set_glean_options : t -> Glean_options.t -> t
 
-val set_symbol_write_options : t -> SymbolWriteOptions.t -> t
+val set_symbol_write_options : t -> Symbol_write_options.t -> t
 
 val repo_config_path : Relative_path.t
 
@@ -55,9 +55,9 @@ val typechecker_options : t -> TypecheckerOptions.t
 
 val parser_options : t -> ParserOptions.t
 
-val glean_options : t -> GleanOptions.t
+val glean_options : t -> Glean_options.t
 
-val symbol_write_options : t -> SymbolWriteOptions.t
+val symbol_write_options : t -> Symbol_write_options.t
 
 val formatter_override : t -> Path.t option
 

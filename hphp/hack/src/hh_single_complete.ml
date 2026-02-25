@@ -902,7 +902,7 @@ let decl_and_run_mode
   in
 
   (* SYMBOL INDEX PHASE 1: initialize *)
-  let glean_reponame = GleanOptions.reponame tcopt in
+  let glean_reponame = Glean_options.reponame tcopt in
   let namespace_map = popt.ParserOptions.auto_namespace_map in
   let sienv =
     SymbolIndex.initialize

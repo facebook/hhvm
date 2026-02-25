@@ -26,8 +26,8 @@ type t = {
   sharedmem_config: SharedMem.config;
   tc_options: TypecheckerOptions.t;
   parser_options: ParserOptions.t;
-  glean_options: GleanOptions.t;
-  symbol_write_options: SymbolWriteOptions.t;
+  glean_options: Glean_options.t;
+  symbol_write_options: Symbol_write_options.t;
   formatter_override: Path.t option;
   config_hash: string option;
   (* A list of regexps for paths to ignore *)
@@ -740,8 +740,8 @@ let default_config =
     gc_control = GlobalConfig.gc_control;
     sharedmem_config = SharedMem.default_config;
     tc_options = TypecheckerOptions.default;
-    glean_options = GleanOptions.default;
-    symbol_write_options = SymbolWriteOptions.default;
+    glean_options = Glean_options.default;
+    symbol_write_options = Symbol_write_options.default;
     parser_options = ParserOptions.default;
     formatter_override = None;
     config_hash = None;

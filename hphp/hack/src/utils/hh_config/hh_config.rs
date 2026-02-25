@@ -758,7 +758,7 @@ fn system_config_path() -> PathBuf {
     const HH_CONF: &str = "hh.conf";
     match std::env::var_os("HH_LOCALCONF_PATH") {
         Some(path) => Path::new(&path).join(HH_CONF),
-        None => Path::new("/etc").join(HH_CONF), // TODO see options/buildOptions.ml for mac cfg
+        None => Path::new("/etc").join(HH_CONF), // TODO see options/build_options.ml for mac cfg
     }
 }
 

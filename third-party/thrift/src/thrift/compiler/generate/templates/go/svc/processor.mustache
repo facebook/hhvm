@@ -25,10 +25,6 @@
 }}{{#if svc.interaction?}}{{svc.name}}.{{/if svc.interaction?}}{{func.name}}{{!
 }}{{/let partial}}
 
-{{#let export partial proc_func_name |func svc|}}{{!
-}}procFunc{{svc.go_name}}{{func.go_name}}{{!
-}}{{/let partial}}
-
 {{#let export partial server_func_stream |func svc| captures |types|}}{{!
 }}func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
     ctx context.Context,
@@ -204,7 +200,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context
 {{/if func.stream?}}{{!
 }}{{/let partial}}
 
-{{#let export partial processor |svc| captures |func_rpc_name proc_func_name processor_function|}}{{!
+{{#let export partial processor |svc| captures |func_rpc_name processor_function|}}{{!
 }}type {{svc.go_name}}Processor struct {
     {{#if (and (not svc.interaction?) svc.extends)}}
     // Inherited/extended processor
@@ -228,7 +224,7 @@ func New{{svc.go_name}}Processor(handler {{svc.go_name}}) *{{svc.go_name}}Proces
     }
     {{#each svc.functions as |func|}}
     {{#if func.go_server_supported?}}
-    p.AddToProcessorFunctionMap("{{#partial func_rpc_name func=func svc=svc}}", &{{#partial proc_func_name func=func svc=svc}}{handler: handler})
+    p.AddToProcessorFunctionMap("{{#partial func_rpc_name func=func svc=svc}}", &procFunc{{svc.go_name}}{{func.go_name}}{handler: handler})
     {{/if func.go_server_supported?}}
     {{/each}}
     {{#each svc.functions as |func|}}

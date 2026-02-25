@@ -41,6 +41,17 @@ using CarbonTestDataMedium = benchmark::thrift::CarbonTestDataMedium;
 using CarbonTestDataLarge = benchmark::thrift::CarbonTestDataLarge;
 } // namespace benchmark
 
+namespace carbon {
+template <>
+struct IsCarbonStruct<::benchmark::CarbonTestDataSmall> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::benchmark::CarbonTestDataMedium> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::benchmark::CarbonTestDataLarge> : std::true_type {};
+} // namespace carbon
+
 namespace benchmark {
 namespace thrift {
 

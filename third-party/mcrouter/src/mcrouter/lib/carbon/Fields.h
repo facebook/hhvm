@@ -35,17 +35,7 @@ enum class FieldType : uint8_t {
 };
 
 template <class T>
-class IsCarbonStruct {
-  template <class C>
-  static constexpr decltype(std::declval<C>().serialize(std::declval<CarbonProtocolWriter&>()), std::true_type())
-  check(int);
-
-  template <class C>
-  static constexpr std::false_type check(...);
-
- public:
-  static constexpr bool value{decltype(check<T>(0))::value};
-};
+struct IsCarbonStruct : std::false_type {};
 
 template <class T>
 class IsThriftWrapperStruct {

@@ -130,6 +130,20 @@ class GoodbyeReply : public carbon::ReplyCommon, public hellogoodbye::thrift::Go
 
 } // namespace hellogoodbye
 
+namespace carbon {
+template <>
+struct IsCarbonStruct<::hellogoodbye::HelloRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::hellogoodbye::HelloReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::hellogoodbye::GoodbyeRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::hellogoodbye::GoodbyeReply> : std::true_type {};
+} // namespace carbon
+
 namespace hellogoodbye {
 namespace thrift {
 

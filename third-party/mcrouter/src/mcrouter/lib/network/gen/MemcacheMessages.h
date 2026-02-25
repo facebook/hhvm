@@ -880,6 +880,128 @@ class McGatsReply : public carbon::ReplyCommon, public facebook::memcache::thrif
 } // namespace memcache
 } // namespace facebook
 
+namespace carbon {
+template <>
+struct IsCarbonStruct<::facebook::memcache::MemcacheRequestCommon> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::MemcacheReplyCommon> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McGetRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McGetReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McSetRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McSetReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McDeleteRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McDeleteReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McLeaseGetRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McLeaseGetReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McLeaseSetRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McLeaseSetReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McAddRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McAddReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McReplaceRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McReplaceReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McGetsRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McGetsReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McCasRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McCasReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McIncrRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McIncrReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McDecrRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McDecrReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McMetagetRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McMetagetReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McAppendRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McAppendReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McPrependRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McPrependReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McTouchRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McTouchReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McFlushReRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McFlushReReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McFlushAllRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McFlushAllReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McGatRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McGatReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McGatsRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McGatsReply> : std::true_type {};
+} // namespace carbon
+
 namespace facebook {
 namespace memcache {
 namespace thrift {

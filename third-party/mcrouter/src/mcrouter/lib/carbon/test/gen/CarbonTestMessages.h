@@ -190,6 +190,68 @@ using StructWithOptionalEnumInt8 = carbon::test::thrift::StructWithOptionalEnumI
 } // namespace carbon
 
 namespace carbon {
+template <>
+struct IsCarbonStruct<::carbon::test::TestRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::TestReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::TestRequestStringKey> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::TestReplyStringKey> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::TestOptionalBool> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::TestUnion> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::TestF14Containers> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::TestStdContainers> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithEnumUInt32> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithEnumUInt16> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithEnumUInt8> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithEnumInt32> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithEnumInt16> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithEnumInt8> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithOptionalEnumUInt32> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithOptionalEnumUInt16> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithOptionalEnumUInt8> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithOptionalEnumInt32> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithOptionalEnumInt16> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::StructWithOptionalEnumInt8> : std::true_type {};
+} // namespace carbon
+
+namespace carbon {
 namespace test {
 namespace thrift {
 

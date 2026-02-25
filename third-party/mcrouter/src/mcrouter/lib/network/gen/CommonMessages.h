@@ -296,6 +296,44 @@ class GoAwayRequest : public carbon::ReplyCommon, public facebook::memcache::thr
 } // namespace memcache
 } // namespace facebook
 
+namespace carbon {
+template <>
+struct IsCarbonStruct<::facebook::memcache::McVersionRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McVersionReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McStatsRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McStatsReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McShutdownRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McShutdownReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McQuitRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McQuitReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McExecRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::McExecReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::GoAwayAcknowledgement> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::GoAwayRequest> : std::true_type {};
+} // namespace carbon
+
 namespace facebook {
 namespace memcache {
 namespace thrift {

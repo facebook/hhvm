@@ -88,6 +88,14 @@ class TestAReply : public carbon::ReplyCommon, public carbon::test::A::thrift::T
 } // namespace carbon
 
 namespace carbon {
+template <>
+struct IsCarbonStruct<::carbon::test::A::TestARequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::A::TestAReply> : std::true_type {};
+} // namespace carbon
+
+namespace carbon {
 namespace test {
 namespace A {
 namespace thrift {

@@ -43,6 +43,14 @@ using McExpTestRequest = facebook::memcache::test::thrift::McExpTestRequest;
 } // namespace memcache
 } // namespace facebook
 
+namespace carbon {
+template <>
+struct IsCarbonStruct<::facebook::memcache::test::ManyFields> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::facebook::memcache::test::McExpTestRequest> : std::true_type {};
+} // namespace carbon
+
 namespace facebook {
 namespace memcache {
 namespace test {

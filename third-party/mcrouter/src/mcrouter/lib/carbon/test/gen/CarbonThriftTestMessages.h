@@ -185,6 +185,38 @@ class CustomReply : public carbon::ReplyCommon, public carbon::test::thrift::Cus
 } // namespace carbon
 
 namespace carbon {
+template <>
+struct IsCarbonStruct<::carbon::test::TestUnionThrift> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::TinyStruct> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::MyBaseStruct> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::MySimpleStruct> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::ThriftTestRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::ThriftTestReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::DummyThriftRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::DummyThriftReply> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::CustomRequest> : std::true_type {};
+
+template <>
+struct IsCarbonStruct<::carbon::test::CustomReply> : std::true_type {};
+} // namespace carbon
+
+namespace carbon {
 namespace test {
 namespace thrift {
 

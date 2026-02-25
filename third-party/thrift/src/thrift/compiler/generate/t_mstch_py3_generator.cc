@@ -140,24 +140,26 @@ std::vector<std::string> get_type_py3_namespace(
 
 enum class FileType { CBindingsFile, TypesFile, NotTypesFile };
 
-class py3_type_context {
+class py3_generator_context {
  public:
-  using cached_properties = apache::thrift::compiler::python::cached_properties;
+  using cached_type_properties =
+      apache::thrift::compiler::python::cached_properties;
 
-  py3_type_context(const t_program* program, const FileType* file_type)
+  py3_generator_context(const t_program* program, const FileType* file_type)
       : program_(program), file_type_(file_type) {}
 
-  cached_properties& get_cached_props(const t_type* type) const;
+  cached_type_properties& get_cached_type_props(const t_type* type) const;
   const t_program* program() const { return program_; }
   const FileType* file_type() const { return file_type_; }
 
  private:
   const t_program* program_;
   const FileType* file_type_;
-  // These two properties are mutable as they are (or contain) caches which
-  // must be accessed from a const method context
-  mutable cpp_name_resolver name_resolver_{};
-  mutable std::unordered_map<const t_type*, cached_properties> cache_{};
+  // These properties are mutable as they are (or contain) caches which must be
+  // accessed from a const method context
+  mutable cpp_name_resolver name_resolver_;
+  mutable std::unordered_map<const t_type*, cached_type_properties>
+      type_properties_;
 };
 
 class py3_mstch_program : public mstch_program {
@@ -166,8 +168,8 @@ class py3_mstch_program : public mstch_program {
       const t_program* p,
       mstch_context& ctx,
       mstch_element_position pos,
-      py3_type_context* type_context)
-      : mstch_program(p, ctx, pos), type_context_(*type_context) {
+      py3_generator_context* context)
+      : mstch_program(p, ctx, pos), generator_context_(*context) {
     register_methods(
         this,
         {
@@ -449,7 +451,7 @@ class py3_mstch_program : public mstch_program {
 
   mstch::node filtered_typedefs() { return make_mstch_typedefs(typedefs_); }
 
-  py3_type_context& type_context_;
+  py3_generator_context& generator_context_;
   std::vector<const t_type*> containers_;
   std::vector<const t_type*> customTemplates_;
   std::vector<const t_type*> customTypes_;
@@ -571,11 +573,11 @@ class py3_mstch_type : public mstch_type {
       const t_type* type,
       mstch_context& ctx,
       mstch_element_position pos,
-      py3_type_context* c)
+      py3_generator_context* c)
       : mstch_type(type, ctx, pos),
         prog_(c->program()),
         file_type_(c->file_type()),
-        cached_props_(c->get_cached_props(type)) {
+        cached_props_(c->get_cached_type_props(type)) {
     register_methods(
         this,
         {
@@ -797,7 +799,7 @@ class py3_mstch_type : public mstch_type {
 
   const t_program* prog_;
   const FileType* file_type_;
-  py3_type_context::cached_properties& cached_props_;
+  py3_generator_context::cached_type_properties& cached_props_;
 };
 
 class py3_mstch_typedef : public mstch_typedef {
@@ -1024,8 +1026,8 @@ std::string py3_mstch_program::visit_type_impl(
   bool hasPy3EnableCppAdapterAnnot =
       orig_type->has_structured_annotation(kPythonPy3EnableCppAdapterUri);
   auto trueType = orig_type->get_true_type();
-  py3_type_context::cached_properties& props =
-      type_context_.get_cached_props(orig_type);
+  py3_generator_context::cached_type_properties& props =
+      generator_context_.get_cached_type_props(orig_type);
   const std::string& flatName = props.flat_name();
   // Import all types either beneath a typedef, even if the current type is
   // not directly a typedef
@@ -1047,7 +1049,7 @@ std::string py3_mstch_program::visit_type_impl(
     } else {
       extra = trueType->name();
     }
-    props.set_flat_name(type_context_.program(), trueType, extra);
+    props.set_flat_name(generator_context_.program(), trueType, extra);
   }
   assert(!flatName.empty());
   // If this type or a parent of this type is a typedef,
@@ -1237,7 +1239,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
 
   std::filesystem::path generateRootPath_;
   FileType file_type_ = FileType::NotTypesFile;
-  py3_type_context type_context_{program_, &file_type_};
+  py3_generator_context context_{program_, &file_type_};
 
   whisker::map::raw globals(prototype_database& proto) const override {
     whisker::map::raw globals = t_mstch_generator::globals(proto);
@@ -1388,41 +1390,41 @@ class t_mstch_py3_generator : public t_mstch_generator {
     });
 
     def.property("iobufWrapper?", [this](const t_type& self) {
-      const py3_type_context::cached_properties& cached_props =
-          type_context_.get_cached_props(&self);
+      const py3_generator_context::cached_type_properties& cached_props =
+          context_.get_cached_type_props(&self);
       return cached_props.cpp_type() == "folly::IOBuf" ||
           cached_props.cpp_type() == "std::unique_ptr<folly::IOBuf>";
     });
 
     def.property("flat_name", [this](const t_type& self) {
-      return type_context_.get_cached_props(&self).flat_name();
+      return context_.get_cached_type_props(&self).flat_name();
     });
 
     return std::move(def).make();
   }
 };
 
-py3_type_context::cached_properties& py3_type_context::get_cached_props(
-    const t_type* type) const {
+py3_generator_context::cached_type_properties&
+py3_generator_context::get_cached_type_props(const t_type* type) const {
   // @python.Py3EnableCppAdapter treats C++ Adapter on typedef as a custom
   // cpp.type.
   auto true_type = type->get_true_type();
   if (type->has_structured_annotation(kPythonPy3EnableCppAdapterUri)) {
-    return cache_
+    return type_properties_
         .emplace(
             type,
-            cached_properties{
+            cached_type_properties{
                 get_cpp_template(*true_type),
                 name_resolver_.get_native_type(*type),
                 {}})
         .first->second;
   }
-  auto it = cache_.find(true_type);
-  if (it == cache_.end()) {
-    it = cache_
+  auto it = type_properties_.find(true_type);
+  if (it == type_properties_.end()) {
+    it = type_properties_
              .emplace(
                  true_type,
-                 cached_properties{
+                 cached_type_properties{
                      get_cpp_template(*true_type),
                      fmt::to_string(cpp2::get_type(true_type)),
                      {}})
@@ -1432,9 +1434,9 @@ py3_type_context::cached_properties& py3_type_context::get_cached_props(
 }
 
 void t_mstch_py3_generator::set_mstch_factories() {
-  mstch_context_.add<py3_mstch_program>(&type_context_);
+  mstch_context_.add<py3_mstch_program>(&context_);
   mstch_context_.add<py3_mstch_service>(program_);
-  mstch_context_.add<py3_mstch_type>(&type_context_);
+  mstch_context_.add<py3_mstch_type>(&context_);
   mstch_context_.add<py3_mstch_typedef>();
   mstch_context_.add<py3_mstch_struct>();
   mstch_context_.add<py3_mstch_field>();

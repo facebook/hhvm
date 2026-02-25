@@ -28,11 +28,11 @@ type parsed_file_with_hashes = {
 }
 
 external parse_decls :
-  DeclParserOptions.t -> Relative_path.t -> string -> parsed_file
+  Decl_parser_options.t -> Relative_path.t -> string -> parsed_file
   = "hh_parse_decls_ffi"
 
 external parse_and_hash_decls :
-  DeclParserOptions.t ->
+  Decl_parser_options.t ->
   bool ->
   Relative_path.t ->
   string ->
@@ -123,7 +123,7 @@ module Concurrent (Metadata : Metadata) = struct
   type content = string option
 
   external start :
-    opts:DeclParserOptions.t ->
+    opts:Decl_parser_options.t ->
     root:Path.t ->
     hhi:Path.t ->
     tmp:Path.t ->

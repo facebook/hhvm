@@ -154,7 +154,7 @@ run_hh_oxidize \
   hphp/hack/src/diagnostics/quickfix.ml                                             \
   hphp/hack/src/naming/naming_phase_error.ml                                  \
   hphp/hack/src/options/decl_fold_options.ml                                    \
-  hphp/hack/src/options/declParserOptions.ml                                  \
+  hphp/hack/src/options/decl_parser_options.ml                                  \
   hphp/hack/src/options/experimental_features.ml                              \
   hphp/hack/src/options/globalOptions.ml                                      \
   hphp/hack/src/options/parserOptions.ml                                      \

@@ -51,7 +51,7 @@ let fetch_old_decls_via_file_hashes
       names
   in
   let popt = Provider_context.get_popt ctx in
-  let opts = DeclParserOptions.from_parser_options popt in
+  let opts = Decl_parser_options.from_parser_options popt in
   match Remote_old_decls_ffi.get_decls_via_file_hashes opts file_hashes with
   | Ok named_old_decls ->
     (* TODO(bobren) do funs typedefs consts and modules *)

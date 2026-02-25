@@ -292,7 +292,7 @@ let () =
           everything_sdt = popt.ParserOptions.everything_sdt;
           implicit_inherit_sdt = GlobalOptions.(tcopt.tco_implicit_inherit_sdt);
         }
-      (DeclParserOptions.from_parser_options popt)
+      (Decl_parser_options.from_parser_options popt)
       !num_partitions
       !partition_index
   in

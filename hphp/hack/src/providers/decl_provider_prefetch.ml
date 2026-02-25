@@ -505,7 +505,7 @@ let rec prefetch_loop
   while [shallow_decl_cache] contains shallow-classes (primitive). *)
 let prefetch_decls ~ctx ~local_memory to_decl =
   let opts =
-    Provider_context.get_popt ctx |> DeclParserOptions.from_parser_options
+    Provider_context.get_popt ctx |> Decl_parser_options.from_parser_options
   in
   let root = Relative_path.path_of_prefix Relative_path.Root |> Path.make in
   let hhi = Relative_path.path_of_prefix Relative_path.Hhi |> Path.make in

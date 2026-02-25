@@ -16,7 +16,7 @@ let should_update_changed_file (path : Relative_path.t) : bool =
   && FindUtils.path_filter path
 
 external batch_index_root_relative_paths_only :
-  DeclParserOptions.t ->
+  Decl_parser_options.t ->
   bool ->
   Path.t ->
   (Relative_path.t * string option option) list ->
@@ -52,7 +52,7 @@ let compute_file_info_batch_root_relative_paths_only
           (path, Some contents))
   in
   batch_index_root_relative_paths_only
-    (DeclParserOptions.from_parser_options popt)
+    (Decl_parser_options.from_parser_options popt)
     popt.ParserOptions.deregister_php_stdlib
     (Relative_path.path_of_prefix Relative_path.Root |> Path.make)
     paths

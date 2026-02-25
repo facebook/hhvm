@@ -2417,7 +2417,7 @@ let decl_and_run_mode
       let backend =
         Hh_server_provider_backend.make
           (Decl_fold_options.from_global_options tcopt)
-          (DeclParserOptions.from_parser_options popt)
+          (Decl_parser_options.from_parser_options popt)
       in
       let () = Provider_backend.set_rust_backend backend in
       Provider_context.empty_for_tool

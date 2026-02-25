@@ -81,7 +81,7 @@ let concurrent_get_pfs ~ctx (paths : Relative_path.t list) :
   end in
   let module Concurrent = Direct_decl_parser.Concurrent (Metadata) in
   let opts =
-    Provider_context.get_popt ctx |> DeclParserOptions.from_parser_options
+    Provider_context.get_popt ctx |> Decl_parser_options.from_parser_options
   in
   let root = Relative_path.path_of_prefix Relative_path.Root |> Path.make in
   let handle = Concurrent.start ~opts ~root ~hhi:root ~tmp:root ~dummy:root in

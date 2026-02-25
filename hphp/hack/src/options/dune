@@ -97,7 +97,7 @@
 (library
  (name decl_parser_options)
  (wrapped false)
- (modules declParserOptions)
+ (modules decl_parser_options)
  (libraries global_options parser_options)
  (preprocess
   (pps ppx_deriving.std)))

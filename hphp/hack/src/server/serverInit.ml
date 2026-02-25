@@ -108,7 +108,7 @@ let possibly_set_rust_provider_backend env genv : unit =
     let backend =
       Hh_server_provider_backend.make
         (Decl_fold_options.from_global_options env.tcopt)
-        (DeclParserOptions.from_parser_options env.tcopt.GlobalOptions.po)
+        (Decl_parser_options.from_parser_options env.tcopt.GlobalOptions.po)
     in
     Provider_backend.set_rust_backend backend
   )

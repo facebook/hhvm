@@ -9,7 +9,7 @@
 external fold_classes_in_files :
   root:string ->
   Decl_fold_options.t ->
-  DeclParserOptions.t ->
+  Decl_parser_options.t ->
   Relative_path.t list ->
   (Decl_defs.decl_class_type list Relative_path.Map.t, string) result
   = "fold_classes_in_files_ffi"
@@ -20,7 +20,7 @@ external show_decl_class_type : Decl_defs.decl_class_type -> string
 external partition_and_fold_dir :
   www_root:string ->
   Decl_fold_options.t ->
-  DeclParserOptions.t ->
+  Decl_parser_options.t ->
   int ->
   int ->
   Decl_defs.decl_class_type SMap.t = "partition_and_fold_dir_ffi"

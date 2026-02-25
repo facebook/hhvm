@@ -59,7 +59,7 @@ let init root tcopt ~rust_provider_backend : Provider_context.t =
     let backend =
       Hh_server_provider_backend.make
         (Decl_fold_options.from_global_options tcopt)
-        (DeclParserOptions.from_parser_options popt)
+        (Decl_parser_options.from_parser_options popt)
     in
     Provider_backend.set_rust_backend backend
   else
@@ -80,7 +80,7 @@ let init root tcopt ~rust_provider_backend : Provider_context.t =
 
 let direct_decl_parse ctx fn text =
   let popt = Provider_context.get_popt ctx in
-  let opts = DeclParserOptions.from_parser_options popt in
+  let opts = Decl_parser_options.from_parser_options popt in
   let parsed_file = parse_decls opts fn text in
   parsed_file.pf_decls
 

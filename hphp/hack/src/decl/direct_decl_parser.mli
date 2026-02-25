@@ -25,11 +25,11 @@ type parsed_file_with_hashes = {
 
 (** NOTE: this doesn't respect deregister_php_lib, and has decls in reverse lexical order. *)
 val parse_decls :
-  DeclParserOptions.t -> Relative_path.t -> string -> parsed_file
+  Decl_parser_options.t -> Relative_path.t -> string -> parsed_file
 
 (** NOTE: this doesn't respect deregister_php_lib, and has decls in reverse lexical order *)
 val parse_and_hash_decls :
-  DeclParserOptions.t ->
+  Decl_parser_options.t ->
   bool ->
   Relative_path.t ->
   string ->
@@ -56,7 +56,7 @@ module Concurrent (Metadata : Metadata) : sig
   (** This does no work, and doesn't spawn any threads. It merely
   stores [opts, root, hhi, ...] in a structure, and allocates a concurrent channel. *)
   val start :
-    opts:DeclParserOptions.t ->
+    opts:Decl_parser_options.t ->
     root:Path.t ->
     hhi:Path.t ->
     tmp:Path.t ->

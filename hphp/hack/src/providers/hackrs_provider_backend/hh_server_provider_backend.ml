@@ -15,7 +15,7 @@ external make_ffi :
   hhi_root:string ->
   tmp:string ->
   Decl_fold_options.t ->
-  DeclParserOptions.t ->
+  Decl_parser_options.t ->
   Rust_provider_backend.t = "hh_server_provider_backend_make"
 
 let make popt =

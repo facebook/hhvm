@@ -20,7 +20,7 @@ ghost = "0.1.20"
 memchr = "2.7.5"
 num-derive = "0.4.2"
 num-traits = { version = "0.2.19", default-features = false }
-ordered-float = { version = "3.7", features = ["serde"] }
+ordered-float = { version = "3.9.2", features = ["serde"] }
 panic-message = "0.3"
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 thiserror = "2.0.18"

@@ -26,6 +26,7 @@
 #include <folly/container/Reserve.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/protocol/TType.h>
+#include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Clear.h>
@@ -610,7 +611,7 @@ struct Encode<type::enum_t<T>> {
     if constexpr (requires {
                     prot.writeEnum(std::string_view{}, std::int32_t{});
                   }) {
-      const char* name = util::enumName(s);
+      const char* name = ::apache::thrift::util::enumName(s);
       return prot.writeEnum(name ? name : "", value);
     } else {
       // TODO: add writeEnum to all protocols and delete this branch

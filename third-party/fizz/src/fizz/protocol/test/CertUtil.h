@@ -41,7 +41,7 @@ struct CreateCertOptions {
   std::optional<std::chrono::system_clock::time_point> notBefore;
   std::optional<std::chrono::system_clock::time_point> notAfter;
   KeyType keyType;
-  std::optional<std::string> extendedKeyUsage;
+  std::vector<std::string> extendedKeyUsage;
 };
 
 inline folly::ssl::ASN1TimeUniquePtr asn1(
@@ -183,15 +183,17 @@ authorityKeyIdentifier  = keyid:always, issuer
     subjectAltNames.push_back(std::move(dnsSan));
   }
   if (!subjectAltNames.empty()) {
-    std::string sansConfigRow =
-        fmt::format("subjectAltName = {}", folly::join(", ", subjectAltNames));
+    std::string sansConfigRow = fmt::format(
+        "subjectAltName = {}\n", folly::join(", ", subjectAltNames));
     configuration.append(sansConfigRow);
   }
-  std::string extendedKeyUsage = "critical, serverAuth, clientAuth\n";
-  if (options.extendedKeyUsage.has_value()) {
-    extendedKeyUsage = *options.extendedKeyUsage;
+  std::vector<std::string> extendedKeyUsage = {
+      "critical", "serverAuth", "clientAuth"};
+  if (!options.extendedKeyUsage.empty()) {
+    extendedKeyUsage = options.extendedKeyUsage;
   }
-  configuration.append("extendedKeyUsage = " + extendedKeyUsage);
+  std::string ekuStr = fmt::format("{}\n", folly::join(", ", extendedKeyUsage));
+  configuration.append("extendedKeyUsage = " + ekuStr);
 
   folly::ssl::BioUniquePtr bio(
       BIO_new_mem_buf(configuration.data(), configuration.size()));
@@ -228,7 +230,7 @@ inline CertAndKey createCert(
     CertAndKey* issuer,
     KeyType keyType,
     std::vector<std::string> sans = {},
-    std::optional<std::string> extendedKeyUsage = std::nullopt) {
+    std::vector<std::string> extendedKeyUsage = {}) {
   auto it = std::find(sans.begin(), sans.end(), cn);
   // add CN into SANs if it is not present
   if (it == sans.end()) {
@@ -242,7 +244,7 @@ inline CertAndKey createCert(
        .notBefore = std::nullopt,
        .notAfter = std::nullopt,
        .keyType = keyType,
-       .extendedKeyUsage = std::exchange(extendedKeyUsage, std::nullopt)});
+       .extendedKeyUsage = std::move(extendedKeyUsage)});
 }
 
 inline std::shared_ptr<PeerCert> getPeerCert(const CertAndKey& cert) {

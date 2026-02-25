@@ -1,75 +1,21 @@
-error: Typing[4472] Cannot access generic TFoo defined in package pkg2 which may not be available [1]
--> TFoo is defined in cross_package_generics.php--foo.php [2]
--> TFoo belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
-
-cross_package_generics.php--bar.php:8:28
-    6 | function bar<T>(): void {}
-    7 | 
-[1] 8 | class Bar1 implements IBar<TFoo> {} // error when package_allow_all_generics_violations is turned off
-    9 | class Bar2 implements IFoo<TBar> {} // error
-   10 | class Bar3<T as TFoo> {} // ok
-
-cross_package_generics.php--foo.php:4:6
-    1 | <?hh
-    2 | // package pkg2
-[3] 3 | <<file: __PackageOverride('pkg2')>>
-[2] 4 | type TFoo = int;
-    5 | interface IFoo<T> {}
-    6 | class Foo {}
-
-PACKAGES.toml:3:11
-    1 | [packages]
-    2 | 
-[4] 3 | [packages.pkg1]
-    4 | include_paths=["//"]
-    5 | 
-
 error: Typing[4472] Cannot access symbol IFoo defined in package pkg2 which may not be available [1]
 -> IFoo is defined in cross_package_generics.php--foo.php [2]
 -> IFoo belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
 
-cross_package_generics.php--bar.php:9:23
-    7 | 
-    8 | class Bar1 implements IBar<TFoo> {} // error when package_allow_all_generics_violations is turned off
-[1] 9 | class Bar2 implements IFoo<TBar> {} // error
-   10 | class Bar3<T as TFoo> {} // ok
-   11 | class Bar4<T as Foo> {} // ok
+cross_package_generics.php--bar.php:53:23
+    51 | 
+    52 | // IFoo is from pkg2, so accessing the symbol itself errors
+[1] 53 | class Bar2 implements IFoo<TBar> {} // error: IFoo is cross-package
+    54 | 
+    55 | // Collection literal explicit targs: should NOT error
 
 cross_package_generics.php--foo.php:5:11
-    1 | <?hh
-    2 | // package pkg2
-[3] 3 | <<file: __PackageOverride('pkg2')>>
-    4 | type TFoo = int;
-[2] 5 | interface IFoo<T> {}
-    6 | class Foo {}
-
-PACKAGES.toml:3:11
-    1 | [packages]
-    2 | 
-[4] 3 | [packages.pkg1]
-    4 | include_paths=["//"]
-    5 | 
-
-error: Typing[4472] Cannot access generic TFoo defined in package pkg2 which may not be available [1]
--> TFoo is defined in cross_package_generics.php--foo.php [2]
--> TFoo belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
-
-cross_package_generics.php--bar.php:15:18
-    13 | function test(mixed $x): void {
-    14 |     // both error when package_allow_all_generics_violations is turned off
-[1] 15 |     $_ = new Bar<TFoo>();
-    16 |     bar<TFoo>();
-    17 | }
-
-cross_package_generics.php--foo.php:4:6
      1 | <?hh
      2 | // package pkg2
 [3]  3 | <<file: __PackageOverride('pkg2')>>
-[2]  4 | type TFoo = int;
-     5 | interface IFoo<T> {}
+     4 | type TFoo = int;
+[2]  5 | interface IFoo<T> {}
      6 | class Foo {}
 
 PACKAGES.toml:3:11
@@ -79,24 +25,25 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-error: Typing[4472] Cannot access generic TFoo defined in package pkg2 which may not be available [1]
--> TFoo is defined in cross_package_generics.php--foo.php [2]
--> TFoo belongs to package pkg2 by this package override [3]
+error: Typing[4472] Cannot access generic Foo defined in package pkg2 which may not be available [1]
+-> Foo is defined in cross_package_generics.php--foo.php [2]
+-> Foo belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
 
-cross_package_generics.php--bar.php:16:9
-    14 |     // both error when package_allow_all_generics_violations is turned off
-    15 |     $_ = new Bar<TFoo>();
-[1] 16 |     bar<TFoo>();
-    17 | }
+cross_package_generics.php--bar.php:65:16
+    63 | 
+    64 | function test(): void {
+[1] 65 |   $_ = new Bar<Foo>(); // error: explicit targ on new
+    66 |   bar<Foo>(); // error: explicit targ on function call
+    67 |   Bar::staticMethod<Foo>(); // error: explicit targ on static method call
 
-cross_package_generics.php--foo.php:4:6
+cross_package_generics.php--foo.php:6:7
      1 | <?hh
      2 | // package pkg2
 [3]  3 | <<file: __PackageOverride('pkg2')>>
-[2]  4 | type TFoo = int;
+     4 | type TFoo = int;
      5 | interface IFoo<T> {}
-     6 | class Foo {}
+[2]  6 | class Foo {}
 
 PACKAGES.toml:3:11
      1 | [packages]
@@ -105,4 +52,84 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-4 errors found
+error: Typing[4472] Cannot access generic Foo defined in package pkg2 which may not be available [1]
+-> Foo is defined in cross_package_generics.php--foo.php [2]
+-> Foo belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_generics.php--bar.php:66:7
+    64 | function test(): void {
+    65 |   $_ = new Bar<Foo>(); // error: explicit targ on new
+[1] 66 |   bar<Foo>(); // error: explicit targ on function call
+    67 |   Bar::staticMethod<Foo>(); // error: explicit targ on static method call
+    68 |   $bar = new Bar();
+
+cross_package_generics.php--foo.php:6:7
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | type TFoo = int;
+     5 | interface IFoo<T> {}
+[2]  6 | class Foo {}
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access generic Foo defined in package pkg2 which may not be available [1]
+-> Foo is defined in cross_package_generics.php--foo.php [2]
+-> Foo belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_generics.php--bar.php:67:21
+    65 |   $_ = new Bar<Foo>(); // error: explicit targ on new
+    66 |   bar<Foo>(); // error: explicit targ on function call
+[1] 67 |   Bar::staticMethod<Foo>(); // error: explicit targ on static method call
+    68 |   $bar = new Bar();
+    69 |   $bar->method<Foo>(); // error: explicit targ on instance method call
+
+cross_package_generics.php--foo.php:6:7
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | type TFoo = int;
+     5 | interface IFoo<T> {}
+[2]  6 | class Foo {}
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access generic Foo defined in package pkg2 which may not be available [1]
+-> Foo is defined in cross_package_generics.php--foo.php [2]
+-> Foo belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_generics.php--bar.php:69:16
+    67 |   Bar::staticMethod<Foo>(); // error: explicit targ on static method call
+    68 |   $bar = new Bar();
+[1] 69 |   $bar->method<Foo>(); // error: explicit targ on instance method call
+    70 | }
+
+cross_package_generics.php--foo.php:6:7
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | type TFoo = int;
+     5 | interface IFoo<T> {}
+[2]  6 | class Foo {}
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+5 errors found

@@ -3,26 +3,26 @@ error: Typing[4472] Cannot access symbol IFoo defined in package pkg2 which may 
 -> IFoo belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
 
-cross_package_generics.php--bar.php:9:23
-    7 | 
-    8 | class Bar1 implements IBar<TFoo> {} // error when package_allow_all_generics_violations is turned off
-[1] 9 | class Bar2 implements IFoo<TBar> {} // error
-   10 | class Bar3<T as TFoo> {} // ok
-   11 | class Bar4<T as Foo> {} // ok
+cross_package_generics.php--bar.php:53:23
+    51 | 
+    52 | // IFoo is from pkg2, so accessing the symbol itself errors
+[1] 53 | class Bar2 implements IFoo<TBar> {} // error: IFoo is cross-package
+    54 | 
+    55 | // Collection literal explicit targs: should NOT error
 
 cross_package_generics.php--foo.php:5:11
-    1 | <?hh
-    2 | // package pkg2
-[3] 3 | <<file: __PackageOverride('pkg2')>>
-    4 | type TFoo = int;
-[2] 5 | interface IFoo<T> {}
-    6 | class Foo {}
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | type TFoo = int;
+[2]  5 | interface IFoo<T> {}
+     6 | class Foo {}
 
 PACKAGES.toml:3:11
-    1 | [packages]
-    2 | 
-[4] 3 | [packages.pkg1]
-    4 | include_paths=["//"]
-    5 | 
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
 
 1 error found

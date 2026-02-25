@@ -190,8 +190,6 @@ and check_targ_well_formed ~in_signature env tyarg (tparam : decl_tparam) =
     if in_reified && not (Env.package_allow_reified_generics_violations env)
     then
       `Yes "reified generic"
-    else if not (Env.package_allow_all_generics_violations env) then
-      `Yes "generic"
     else
       `No
   in

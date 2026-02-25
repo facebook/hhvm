@@ -1266,7 +1266,10 @@ let localize_targ ?tparam ~check_type_integrity env hint =
       if in_reified && not (Env.package_allow_reified_generics_violations env)
       then
         `Yes "reified generic"
-      else if not (Env.package_allow_all_generics_violations env) then
+      else if
+        Option.is_some tparam
+        && not (Env.package_allow_all_generics_violations env)
+      then
         `Yes "generic"
       else
         `No

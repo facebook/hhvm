@@ -223,6 +223,7 @@ class parser {
 
   // namespace: "namespace" identifier (identifier | string_literal) [";"]
   void parse_namespace() {
+    auto range = track_range();
     assert(token_.kind == tok::kw_namespace);
     consume_token();
     auto language = parse_identifier();
@@ -230,7 +231,7 @@ class parser {
         ? lex_string_literal(consume_token())
         : fmt::to_string(parse_identifier().str);
     try_consume_token(';');
-    return actions_.on_namespace(language, ns);
+    return actions_.on_namespace(range, language, ns);
   }
 
   // definition:

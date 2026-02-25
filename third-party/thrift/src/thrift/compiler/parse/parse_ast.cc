@@ -530,8 +530,12 @@ class ast_builder : public parser_actions {
     program_.add_language_include("hs", fmt::to_string(str));
   }
 
-  void on_namespace(const identifier& language, std::string_view ns) override {
-    program_.set_namespace(fmt::to_string(language.str), fmt::to_string(ns));
+  void on_namespace(
+      source_range range,
+      const identifier& language,
+      std::string_view ns) override {
+    program_.set_namespace(
+        fmt::to_string(language.str), fmt::to_string(ns), range);
   }
 
   std::optional<comment> on_doctext() override { return pop_doctext(); }

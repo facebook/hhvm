@@ -98,7 +98,7 @@ class parser_actions {
   virtual void on_hs_include(source_range range, std::string_view str) = 0;
 
   virtual void on_namespace(
-      const identifier& language, std::string_view ns) = 0;
+      source_range range, const identifier& language, std::string_view ns) = 0;
 
   virtual std::optional<comment> on_doctext() = 0;
   virtual void on_program_doctext() = 0;

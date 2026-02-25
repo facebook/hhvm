@@ -72,6 +72,17 @@ service Dummy {
 
   Summer createSummer();
   Waiter createWaiter();
+
+  sink<i32, i32> SinkOnly();
+  i32, sink<i32, i32> ResponseAndSink();
+  sink<i32 throws (1: DummyException ex), i32> SinkWithDeclaredException();
+  sink<i32, i32> SinkWithUndeclaredException();
+  i32, sink<i32, i32> ResponseAndSinkWithDeclaredException() throws (
+    1: DummyException ex,
+  );
+  i32, sink<i32, i32> ResponseAndSinkWithUndeclaredException();
+  sink<i32, i32 throws (1: DummyException ex)> SinkWithDeclaredFinalException();
+  sink<i32, i32> SinkWithUndeclaredFinalException();
 }
 
 service DummyTwo {

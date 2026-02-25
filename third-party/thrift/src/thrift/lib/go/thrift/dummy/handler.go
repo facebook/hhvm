@@ -19,6 +19,7 @@ package dummy
 import (
 	"context"
 	"errors"
+	"iter"
 	"sync/atomic"
 	"time"
 
@@ -158,4 +159,98 @@ type WaiterHandler struct{}
 func (h *WaiterHandler) Wait(_ context.Context, milliseconds int64) error {
 	time.Sleep(time.Duration(milliseconds) * time.Millisecond)
 	return nil
+}
+
+func (h *DummyHandler) SinkOnly(ctx context.Context) (func(context.Context, iter.Seq2[int32, error]) (int32, error), error) {
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[int32, error]) (int32, error) {
+		var sum int32
+		for elem, err := range seq {
+			if err != nil {
+				return sum, err
+			}
+			sum += elem
+		}
+		return sum, nil
+	}
+	return elemConsumerFunc, nil
+}
+
+func (h *DummyHandler) ResponseAndSink(ctx context.Context) (int32, func(context.Context, iter.Seq2[int32, error]) (int32, error), error) {
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[int32, error]) (int32, error) {
+		var sum int32
+		for elem, err := range seq {
+			if err != nil {
+				return sum, err
+			}
+			sum += elem
+		}
+		return sum, nil
+	}
+	return 123245, elemConsumerFunc, nil
+}
+
+func (h *DummyHandler) SinkWithDeclaredException(ctx context.Context) (func(context.Context, iter.Seq2[int32, error]) (int32, error), error) {
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[int32, error]) (int32, error) {
+		var sum int32
+		for elem, err := range seq {
+			if err != nil {
+				return sum, err
+			}
+			sum += elem
+		}
+		return sum, nil
+	}
+	return elemConsumerFunc, nil
+}
+
+func (h *DummyHandler) SinkWithUndeclaredException(ctx context.Context) (func(context.Context, iter.Seq2[int32, error]) (int32, error), error) {
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[int32, error]) (int32, error) {
+		var sum int32
+		for elem, err := range seq {
+			if err != nil {
+				return sum, err
+			}
+			sum += elem
+		}
+		return sum, nil
+	}
+	return elemConsumerFunc, nil
+}
+
+func (h *DummyHandler) ResponseAndSinkWithDeclaredException(ctx context.Context) (int32, func(context.Context, iter.Seq2[int32, error]) (int32, error), error) {
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[int32, error]) (int32, error) {
+		return 0, nil
+	}
+	return 0, elemConsumerFunc, dummy.NewDummyException().SetMessage("hello")
+}
+
+func (h *DummyHandler) ResponseAndSinkWithUndeclaredException(ctx context.Context) (int32, func(context.Context, iter.Seq2[int32, error]) (int32, error), error) {
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[int32, error]) (int32, error) {
+		return 0, nil
+	}
+	return 0, elemConsumerFunc, errors.New("undeclared exception")
+}
+
+func (h *DummyHandler) SinkWithDeclaredFinalException(ctx context.Context) (func(context.Context, iter.Seq2[int32, error]) (int32, error), error) {
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[int32, error]) (int32, error) {
+		for _, err := range seq {
+			if err != nil {
+				return 0, err
+			}
+		}
+		return 0, dummy.NewDummyException().SetMessage("hello")
+	}
+	return elemConsumerFunc, nil
+}
+
+func (h *DummyHandler) SinkWithUndeclaredFinalException(ctx context.Context) (func(context.Context, iter.Seq2[int32, error]) (int32, error), error) {
+	elemConsumerFunc := func(ctx context.Context, seq iter.Seq2[int32, error]) (int32, error) {
+		for _, err := range seq {
+			if err != nil {
+				return 0, err
+			}
+		}
+		return 0, errors.New("undeclared exception")
+	}
+	return elemConsumerFunc, nil
 }

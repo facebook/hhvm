@@ -377,12 +377,12 @@ extern "C" void __gcov_reset() __attribute__((__weak__));
 // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
 extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
 // ROAR API
-extern "C" int  __roar_api_pending_warmups() __attribute__((__weak__));
-extern "C" void __roar_api_trigger_warmup()  __attribute__((__weak__));
-extern "C" bool __roar_api_pgo_enabled()     __attribute__((__weak__));
-extern "C" bool __roar_api_cspgo_enabled()   __attribute__((__weak__));
-extern "C" void __roar_api_wait_for_pgo()    __attribute__((__weak__));
-extern "C" void __roar_api_wait_for_cspgo()  __attribute__((__weak__));
+extern "C" int  __roar_api_pending_warmups()         __attribute__((__weak__));
+extern "C" void __roar_api_trigger_warmup()          __attribute__((__weak__));
+extern "C" bool __roar_api_pgo_enabled()             __attribute__((__weak__));
+extern "C" bool __roar_api_cspgo_enabled()           __attribute__((__weak__));
+extern "C" void __roar_api_wait_for_pgo_profile()    __attribute__((__weak__));
+extern "C" void __roar_api_wait_for_cspgo_profile()  __attribute__((__weak__));
 extern "C" int  __roar_api_finalize_jumpstart_serialization()
                                              __attribute__((__weak__));
 
@@ -926,17 +926,15 @@ void checkSerializeOptProf() {
 
     // When running under ROAR, we trigger ROAR's PGO/CSPGO after
     // retranslate-all, and we want to wait for ROAR to finish generating its
-    // PGO/CSPGO code so that it can serialize that code to the jumpstart file
-    // on disk.
+    // PGO/CSPGO profile so that it can serialize that code to the jumpstart
+    // file on disk.
     if (use_roar) {
-      if (__roar_api_cspgo_enabled && __roar_api_cspgo_enabled()) {
-        __roar_api_wait_for_cspgo();
-      } else if (__roar_api_pgo_enabled && __roar_api_pgo_enabled()) {
-        __roar_api_wait_for_pgo();
+      if (__roar_api_cspgo_enabled()) {
+        __roar_api_wait_for_cspgo_profile();
+      } else if (__roar_api_pgo_enabled()) {
+        __roar_api_wait_for_pgo_profile();
       }
-      if (__roar_api_finalize_jumpstart_serialization) {
-        __roar_api_finalize_jumpstart_serialization();
-      }
+      __roar_api_finalize_jumpstart_serialization();
     }
 
     if (!transdb::enabled()) {

@@ -122,6 +122,9 @@ type refresh_env = {
           should eliminate bogus Tgenerics of the form A::T where T is
           an abstract const type in A
           TODO(T91765587): kill bogus type access generics *)
+  eliminating: SSet.t;
+      (** set of generic names currently being eliminated; used to
+          detect cycles in self-referential type constant bounds *)
 }
 
 (* refresh_ functions will return [Elim ...] when they eliminated a rigid
@@ -268,6 +271,7 @@ and refresh_type renv v ty_orig =
        bounds if the variance of the current occurrence permits it *)
     match renv.remove (Rtv_tparam name) with
     | None -> (renv, ty_orig, Unchanged)
+    | Some _ when SSet.mem name renv.eliminating -> (renv, ty_orig, Unchanged)
     | Some _ when is_bogus_taccess name && not renv.elim_bogus_taccess ->
       (renv, ty_orig, Unchanged)
     | Some { pos; lower_bounds = lbs; upper_bounds = ubs } ->
@@ -277,19 +281,30 @@ and refresh_type renv v ty_orig =
         else
           pos
       in
-      eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
+      (* Keep a copy of the set of type parameters we are eliminating so
+         we can pop the current name after it's been eliminated *)
+      let eliminating = renv.eliminating in
+      let renv = { renv with eliminating = SSet.add name renv.eliminating } in
+      let (renv, ty, ch) = eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v in
+      ({ renv with eliminating }, ty, ch)
   end
   | (r, Tdependent ((DTexpr id as dt), ty1)) -> begin
+    let name = DependentKind.to_string dt in
     match renv.remove (Rtv_dependent id) with
     | None ->
       let (renv, ty1, ch1) = refresh_type renv v ty1 in
       (renv, mk (r, Tdependent (dt, ty1)), ch1)
+    | Some _ when SSet.mem name renv.eliminating -> (renv, ty_orig, Unchanged)
     | Some _ ->
       let lbs = TySet.empty in
       let ubs = TySet.singleton ty1 in
       let rtv_pos = Reason.to_pos r in
-      let name = DependentKind.to_string dt in
-      eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
+      (* Keep a copy of the set of type parameters we are eliminating so
+         we can pop the current name after it's been eliminated *)
+      let eliminating = renv.eliminating in
+      let renv = { renv with eliminating = SSet.add name renv.eliminating } in
+      let (renv, ty, ch) = eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v in
+      ({ renv with eliminating }, ty, ch)
   end
   | (r, Tunion l) ->
     let (renv, l, changed) = refresh_types renv v l in
@@ -574,6 +589,7 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
         on_error;
         scope_kind = (what, pos);
         elim_bogus_taccess = false;
+        eliminating = SSet.empty;
       }
     in
     let renv = refresh_locals renv in

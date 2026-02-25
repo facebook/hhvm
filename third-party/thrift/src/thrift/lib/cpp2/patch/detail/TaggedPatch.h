@@ -66,7 +66,7 @@ class TaggedPatchRef<type::list<Tag>> {
     patch_.get().push_back(asValueStruct<Tag>(v));
   }
 
-  void apply(value_type& v) { apply_impl(v); }
+  void apply(value_type& v) const { apply_impl(v); }
 
   void merge(const TaggedPatchRef& other) {
     patch_.get().merge(badge, other.patch_.get());
@@ -76,7 +76,7 @@ class TaggedPatchRef<type::list<Tag>> {
 
  protected:
   template <class Value>
-  void apply_impl(Value& v) {
+  void apply_impl(Value& v) const {
     auto l = asValueStruct<List>(v);
     patch_.get().apply(badge, l.as_list());
     v = protocol::fromValueStruct<List>(l);
@@ -116,7 +116,7 @@ class TaggedPatchRef<type::set<Tag>> {
     patch_.get().erase(asValueStruct<Tag>(v));
   }
 
-  void apply(value_type& v) { apply_impl(v); }
+  void apply(value_type& v) const { apply_impl(v); }
 
   void merge(const TaggedPatchRef& other) {
     patch_.get().merge(badge, other.patch_.get());
@@ -126,7 +126,7 @@ class TaggedPatchRef<type::set<Tag>> {
 
  protected:
   template <class Value>
-  void apply_impl(Value& v) {
+  void apply_impl(Value& v) const {
     auto l = asValueStruct<Set>(v);
     patch_.get().apply(badge, l.as_set());
     v = protocol::fromValueStruct<Set>(l);
@@ -209,7 +209,7 @@ class TaggedPatchRef<type::map<K, V>> {
     return patchByKey(key);
   }
 
-  void apply(value_type& v) { apply_impl(v); }
+  void apply(value_type& v) const { apply_impl(v); }
 
   void merge(const TaggedPatchRef& other) {
     patch_.get().merge(badge, other.patch_.get());
@@ -219,7 +219,7 @@ class TaggedPatchRef<type::map<K, V>> {
 
  protected:
   template <class Value>
-  void apply_impl(Value& v) {
+  void apply_impl(Value& v) const {
     auto l = asValueStruct<Map>(v);
     patch_.get().apply(badge, l.as_map());
     v = protocol::fromValueStruct<Map>(l);
@@ -289,7 +289,7 @@ class TaggedStructurePatchRef {
     patch_.get().remove(op::get_field_id_v<value_type, Id>);
   }
 
-  void apply(value_type& v) { apply_impl(v); }
+  void apply(value_type& v) const { apply_impl(v); }
 
   void merge(const TaggedStructurePatchRef& other) {
     patch_.get().merge(badge, other.patch_.get());
@@ -314,7 +314,7 @@ class TaggedStructurePatchRef {
 
  protected:
   template <class Value>
-  void apply_impl(Value& v) {
+  void apply_impl(Value& v) const {
     auto obj = asValueStruct<Tag>(v);
     patch_.get().apply(badge, obj.as_object());
     v = protocol::fromValueStruct<Tag>(obj);
@@ -372,7 +372,7 @@ class TaggedPatchRef<type::enum_t<T>> {
 
   void clear() { patch_.get().clear(); }
 
-  void apply(value_type& v) {
+  void apply(value_type& v) const {
     std::int32_t value = folly::to_underlying(v);
     patch_.get().apply(value);
     v = static_cast<value_type>(value);
@@ -394,7 +394,7 @@ class TaggedPatchRef<type::cpp_type<T, Tag>> : public TaggedPatchRef<Tag> {
   using TaggedPatchRef<Tag>::TaggedPatchRef;
   using TaggedPatchRef<Tag>::operator=;
 
-  void apply(T& v) { this->apply_impl(v); }
+  void apply(T& v) const { this->apply_impl(v); }
   void assign(const T& v) { this->assign_impl(v); }
 };
 

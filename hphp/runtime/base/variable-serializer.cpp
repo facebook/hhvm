@@ -200,7 +200,14 @@ String VariableSerializer::serialize(const_variant_ref v, bool ret,
   StringBuffer buf;
   m_buf = &buf;
   if (ret) {
-    buf.setOutputLimit(serializationSizeLimit->value);
+    if (m_ignoreStringSizeLimit) {
+      auto limit = std::min<int64_t>(
+        StringData::MaxSize,
+        tl_heap->getMemoryLimit() - tl_heap->getStats().usage());
+      buf.setOutputLimit(safe_cast<uint32_t>(limit));
+    } else {
+      buf.setOutputLimit(serializationSizeLimit->value);
+    }
   } else {
     buf.setOutputLimit(StringData::MaxSize);
   }

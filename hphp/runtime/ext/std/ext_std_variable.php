@@ -308,6 +308,9 @@ namespace HH {
   *                    option may change between HHVM releases in
   *                    non-backward-compatible manner, so it's not safe for
   *                    serialized data to leave HHVM process.
+  * ignoreStringSizeLimit - If true, ignore the ResourceLimit.SerializationSizeLimit
+  *                    ini setting and serialize to a string of any size that
+  *                    doesn't exceed the request memory limit.
   */
   <<__Native, __IsFoldable>>
   function serialize_with_options(

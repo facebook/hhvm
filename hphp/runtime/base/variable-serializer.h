@@ -133,6 +133,8 @@ struct VariableSerializer {
 
   void setKeepClasses() { m_keepClasses = true; }
 
+  void setIgnoreStringSizeLimit() { m_ignoreStringSizeLimit = true; }
+
   // Should we be calling the pure callbacks
   void setPure() { m_pure = true; }
 
@@ -299,6 +301,7 @@ private:
   bool m_disallowObjects{false};  // throw if serializing non-collection object
   bool m_disallowCollections{false}; // throw if serializing collection object
   bool m_keepClasses{false};     // emit lazy class if serializing class or lazy class
+  bool m_ignoreStringSizeLimit{false}; // ignore limit on string buffer output
   bool m_hasHackWarned{false};   // have we already warned on Hack arrays?
   bool m_hasDictWarned{false};   // have we already warned on dicts?
   bool m_hasKeysetWarned{false};   // have we already warned on dicts?

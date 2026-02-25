@@ -1146,7 +1146,7 @@ dependencies = [
 name = "delta_log"
 version = "0.0.0"
 dependencies = [
- "env_logger 0.11.8",
+ "env_logger 0.11.9",
  "once_cell",
 ]
 
@@ -1530,9 +1530,9 @@ dependencies = [
 
 [[package]]
 name = "env_filter"
-version = "0.1.4"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1bf3c259d255ca70051b30e2e95b5446cdb8949ac4cd22c0d7fd634d89f568e2"
+checksum = "7a1c3cc8e57274ec99de65301228b537f1e4eedc1b8e0f9411c6caac8ae7308f"
 dependencies = [
  "log",
  "regex",
@@ -1550,9 +1550,9 @@ dependencies = [
 
 [[package]]
 name = "env_logger"
-version = "0.11.8"
+version = "0.11.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13c863f0904021b108aa8b2f55046443e6b1ebde8fd4a15c399893aae4fa069f"
+checksum = "b2daee4ea451f429a58296525ddf28b45a3b64f1acf6587e2067437bb11e218d"
 dependencies = [
  "anstream",
  "anstyle",
@@ -2013,7 +2013,7 @@ dependencies = [
  "decl_provider",
  "direct_decl_parser",
  "elab",
- "env_logger 0.11.8",
+ "env_logger 0.11.9",
  "facts",
  "ffi",
  "file_provider",
@@ -2285,7 +2285,7 @@ name = "hh_fanout_build_rust"
 version = "0.0.0"
 dependencies = [
  "delta_log",
- "env_logger 0.11.8",
+ "env_logger 0.11.9",
  "hh_fanout_build",
  "ocamlrep_ocamlpool",
 ]
@@ -2295,7 +2295,7 @@ name = "hh_fanout_dep_graph_is_subgraph_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph_reader",
- "env_logger 0.11.8",
+ "env_logger 0.11.9",
  "log",
  "ocamlrep_ocamlpool",
 ]
@@ -2305,7 +2305,7 @@ name = "hh_fanout_dep_graph_stats_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph_reader",
- "env_logger 0.11.8",
+ "env_logger 0.11.9",
  "json",
  "log",
  "ocamlrep_ocamlpool",

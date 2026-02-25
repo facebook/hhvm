@@ -645,8 +645,6 @@ val package_allow_reifiable_tconst_violations : env -> bool
 
 val package_allow_all_tconst_violations : env -> bool
 
-val package_allow_reified_generics_violations : env -> bool
-
 val package_allow_all_generics_violations : env -> bool
 
 (** Remove solved variable from environment by replacing it by its binding. *)

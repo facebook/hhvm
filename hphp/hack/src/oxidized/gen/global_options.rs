@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e6d160926c04255e90290e8d3487779e>>
+// @generated SignedSource<<2efd559de02c369803a98e8d8e24fc9e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -369,11 +369,6 @@ pub struct GlobalOptions {
     /// superset of violations controlled by `tco_package_allow_reifiable_tconst_violations`
     /// and will be switched off as a step further in tightening the packgage boundary endforcement.
     pub tco_package_allow_all_tconst_violations: bool,
-    /// Option for package support to bypass package boundary violation errors on reified generics
-    /// to unblock V1 of intern-prod separation. This flag controls the
-    /// superset of violations controlled by `tco_package_allow_reified_generics_violations`
-    /// and will be switched off as a step further in tightening the packgage boundary endforcement.
-    pub tco_package_allow_reified_generics_violations: bool,
     /// Option for package support to bypass package boundary violation errors on all generics
     /// to unblock V1 of intern-prod separation.
     pub tco_package_allow_all_generics_violations: bool,

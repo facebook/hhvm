@@ -207,8 +207,6 @@ val package_allow_classconst_violations : string
 
 val package_allow_reifiable_tconst_violations : string
 
-val package_allow_reified_generics_violations : string
-
 val package_allow_all_tconst_violations : string
 
 val package_allow_all_generics_violations : string

@@ -313,9 +313,6 @@ let package_allow_reifiable_tconst_violations t =
 let package_allow_all_tconst_violations t =
   t.GlobalOptions.tco_package_allow_all_tconst_violations
 
-let package_allow_reified_generics_violations t =
-  t.GlobalOptions.tco_package_allow_reified_generics_violations
-
 let package_allow_all_generics_violations t =
   t.GlobalOptions.tco_package_allow_all_generics_violations
 

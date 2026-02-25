@@ -264,11 +264,6 @@ type t = {
           all type constants to unblock V1 of intern-prod separation. This flag controls the
           superset of violations controlled by `tco_package_allow_reifiable_tconst_violations`
           and will be switched off as a step further in tightening the packgage boundary endforcement. *)
-  tco_package_allow_reified_generics_violations: bool;
-      (** Option for package support to bypass package boundary violation errors on reified generics
-          to unblock V1 of intern-prod separation. This flag controls the
-          superset of violations controlled by `tco_package_allow_reified_generics_violations`
-          and will be switched off as a step further in tightening the packgage boundary endforcement. *)
   tco_package_allow_all_generics_violations: bool;
       (** Option for package support to bypass package boundary violation errors on all generics
           to unblock V1 of intern-prod separation.  *)
@@ -405,7 +400,6 @@ val set :
   ?tco_package_allow_classconst_violations:bool ->
   ?tco_package_allow_reifiable_tconst_violations:bool ->
   ?tco_package_allow_all_tconst_violations:bool ->
-  ?tco_package_allow_reified_generics_violations:bool ->
   ?tco_package_allow_all_generics_violations:bool ->
   ?re_no_cache:bool ->
   ?hh_distc_should_disable_trace_store:bool ->

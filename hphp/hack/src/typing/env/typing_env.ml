@@ -743,10 +743,6 @@ module M = struct
   let package_allow_all_tconst_violations env =
     TypecheckerOptions.package_allow_all_tconst_violations @@ get_tcopt env
 
-  let package_allow_reified_generics_violations env =
-    TypecheckerOptions.package_allow_reified_generics_violations
-    @@ get_tcopt env
-
   let package_allow_all_generics_violations env =
     TypecheckerOptions.package_allow_all_generics_violations @@ get_tcopt env
 

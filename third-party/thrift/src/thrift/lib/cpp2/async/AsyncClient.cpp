@@ -62,7 +62,8 @@ GeneratedAsyncClient::GeneratedAsyncClient(
     Options options)
     : TClientBase(options.clientBaseOptions_),
       channel_(std::move(channel)),
-      interceptors_(extractInterceptors(std::move(interceptors))) {}
+      interceptors_(extractInterceptors(std::move(interceptors))),
+      ioBufFactory_(std::move(options.ioBufFactory_)) {}
 
 void GeneratedAsyncClient::setInteraction(
     const InteractionHandle& handle, RpcOptions& rpcOptions) {

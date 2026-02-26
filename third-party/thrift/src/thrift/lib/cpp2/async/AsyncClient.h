@@ -42,12 +42,23 @@ class GeneratedAsyncClient : public TClientBase {
       return *this;
     }
 
+    Options& setIOBufFactory(folly::IOBufFactory factory) {
+      ioBufFactory_ = std::make_shared<folly::IOBufFactory>(std::move(factory));
+      return *this;
+    }
+
+    Options& setIOBufFactory(std::shared_ptr<folly::IOBufFactory> factory) {
+      ioBufFactory_ = std::move(factory);
+      return *this;
+    }
+
     static Options zeroDependency() {
       return Options().includeGlobalLegacyEventHandlers(false);
     }
 
    private:
     TClientBase::Options clientBaseOptions_;
+    std::shared_ptr<folly::IOBufFactory> ioBufFactory_;
 
     friend class GeneratedAsyncClient;
   };
@@ -90,6 +101,10 @@ class GeneratedAsyncClient : public TClientBase {
   static void setInteraction(
       const InteractionHandle& handle, RpcOptions& rpcOptions);
 
+  folly::IOBufFactory* getIOBufFactory() const noexcept {
+    return ioBufFactory_ ? ioBufFactory_.get() : nullptr;
+  }
+
   template <bool IsOneWay>
   std::pair<RequestClientCallback::Ptr, ContextStack*>
   prepareRequestClientCallback(
@@ -109,6 +124,7 @@ class GeneratedAsyncClient : public TClientBase {
 
   std::shared_ptr<RequestChannel> channel_;
   InterceptorList interceptors_;
+  std::shared_ptr<folly::IOBufFactory> ioBufFactory_;
 };
 
 class InteractionHandle : public GeneratedAsyncClient {

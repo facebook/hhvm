@@ -48,6 +48,16 @@ THRIFT_FLAG_DEFINE_int64(thrift_key_update_threshold, 0);
 
 namespace apache::thrift {
 
+namespace detail {
+// Default implementation: just checks if the address is a standard loopback.
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    bool,
+    isEffectivelyLoopbackAddress,
+    const folly::SocketAddress& clientAddr) {
+  return clientAddr.isLoopbackAddress();
+}
+} // namespace detail
+
 namespace {
 folly::LeakySingleton<folly::EventBaseLocal<RequestsRegistry>> registry;
 } // namespace
@@ -425,7 +435,8 @@ bool Cpp2Worker::shouldPerformSSL(
       // loopback clients may still be sending TLS so we need to ensure that
       // it doesn't appear that way in addition to verifying it's loopback.
       return !(
-          clientAddr.isLoopbackAddress() && !TLSHelper::looksLikeTLS(bytes));
+          detail::isEffectivelyLoopbackAddress(clientAddr) &&
+          !TLSHelper::looksLikeTLS(bytes));
     }
     return true;
   } else {

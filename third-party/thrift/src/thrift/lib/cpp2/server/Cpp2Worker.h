@@ -31,6 +31,7 @@
 #include <folly/io/async/EventHandler.h>
 #include <folly/io/async/HHWheelTimer.h>
 #include <folly/net/NetworkSocket.h>
+#include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/security/FizzPeeker.h>
 #include <thrift/lib/cpp2/server/IOWorkerContext.h>
 #include <thrift/lib/cpp2/server/MemoryTracker.h>
@@ -47,6 +48,15 @@ namespace apache::thrift {
 class Cpp2Connection;
 class ThriftServer;
 class ThriftQuicServer;
+
+namespace detail {
+// Pluggable function to check if a socket address should be treated as
+// "effectively loopback" for the purpose of allowing plaintext connections.
+// This allows handling environment-specific cases. For example, if loopback
+// addresses (::1) are redirected to ILA addresses via BPF hooks.
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    bool, isEffectivelyLoopbackAddress, const folly::SocketAddress& clientAddr);
+} // namespace detail
 
 /**
  * Cpp2Worker drives the actual I/O for ThriftServer connections.

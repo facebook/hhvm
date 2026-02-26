@@ -49,6 +49,7 @@ class H3DatagramAsyncSocket
     std::shared_ptr<const fizz::CertificateVerifier> certVerifier_;
     uint16_t maxDatagramSize_{1400};
     std::function<void(H3Capsule&&)> capsuleCallback_;
+    bool rfcMode_{false}; // When true, use RFC 9298 Extended CONNECT
   };
 
  public:

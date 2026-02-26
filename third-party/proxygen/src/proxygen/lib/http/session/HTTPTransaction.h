@@ -1573,6 +1573,10 @@ class HTTPTransaction
     return transport_.supportsWebTransport() && wtConnectStream_;
   }
 
+  bool isConnectUdpStream() const {
+    return connectUdpStream_;
+  }
+
   WebTransportImpl* getWebTransport() {
     if (!isWebTransportConnectStream()) {
       return nullptr;
@@ -1924,6 +1928,7 @@ class HTTPTransaction
   bool headRequest_ : 1;
   bool enableLastByteFlushedTracking_ : 1;
   bool wtConnectStream_ : 1;
+  bool connectUdpStream_ : 1 = false;
 
   // Prevents the application from calling skipBodyTo() before egress
   // headers have been delivered.

@@ -19,7 +19,6 @@ proxygen_add_library(proxygen_http_session_session
     Folly::folly_logging_logging
     Folly::folly_random
     Folly::folly_tracing_scoped_trace_section
-    glog::glog
   EXPORTED_DEPS
     proxygen_http_codec_codec_common
     proxygen_http_codec_compress_hpack
@@ -36,8 +35,7 @@ proxygen_add_library(proxygen_http_session_session
     proxygen_http_session_transaction_byte_events
     proxygen_utils_shared_wheel_timer
     proxygen_utils_time_util
-    wangle::wangle_acceptor_managed
-    wangle::wangle_acceptor_transport_info
+    wangle::wangle_acceptor_acceptor_core
     fizz::fizz
     Folly::folly_container_f14_hash
     Folly::folly_intrusive_list
@@ -83,7 +81,7 @@ proxygen_add_library(proxygen_http_session_http_session_activity_tracker
     proxygen_http_session_http_transaction
     proxygen_http_session_transaction_byte_events
   EXPORTED_DEPS
-    wangle::wangle_acceptor_managed
+    wangle::wangle_acceptor_acceptor_core
 )
 
 proxygen_add_library(proxygen_http_session_byte_events
@@ -128,8 +126,6 @@ proxygen_add_library(proxygen_http_session_http2_priority_queue
 proxygen_add_library(proxygen_http_session_http_event
   SRCS
     HTTPEvent.cpp
-  DEPS
-    glog::glog
   EXPORTED_DEPS
     proxygen_http_codec_codec_common
     proxygen_http_http_utils
@@ -177,7 +173,7 @@ proxygen_add_library(proxygen_http_session_http_transaction
     proxygen_utils_shared_wheel_timer
     proxygen_utils_time_util
     proxygen_utils_trace
-    wangle::wangle_acceptor_transport_info
+    wangle::wangle_acceptor_acceptor_core
     Folly::folly_io_async_async_base
     Folly::folly_io_async_async_transport
     Folly::folly_io_async_delayed_destruction
@@ -192,7 +188,7 @@ proxygen_add_library(proxygen_http_session_http_upstream_session
   DEPS
     proxygen_http_codec_http2_codec
     proxygen_http_session_http_transaction
-    wangle::wangle_acceptor_managed
+    wangle::wangle_acceptor_acceptor_core
     Folly::folly_io_async_async_ssl_socket
   EXPORTED_DEPS
     proxygen_http_codec_compress_header_codec
@@ -248,7 +244,7 @@ proxygen_add_library(proxygen_http_session_hq_session
     proxygen_http_webtransport_httpwebtransport
     mvfst::mvfst_folly_utils
     mvfst::mvfst_logging_qlogger_constants
-    wangle::wangle_acceptor_managed
+    wangle::wangle_acceptor_acceptor_core
     Folly::folly_cpp_attributes
     Folly::folly_io_async_async_transport
     Folly::folly_scope_guard
@@ -285,7 +281,7 @@ proxygen_add_library(proxygen_http_session_hq_upstream_session
   SRCS
     HQUpstreamSession.cpp
   DEPS
-    wangle::wangle_acceptor_managed
+    wangle::wangle_acceptor_acceptor_core
   EXPORTED_DEPS
     proxygen_http_session_hq_session
     mvfst::mvfst_common_events_folly_eventbase
@@ -303,7 +299,7 @@ proxygen_add_library(proxygen_http_session_quic_protocol_info
   EXPORTED_DEPS
     mvfst::mvfst_api_transport
     mvfst::mvfst_common_optional
-    wangle::wangle_acceptor_transport_info
+    wangle::wangle_acceptor_acceptor_core
 )
 
 proxygen_add_library(proxygen_http_session_webtransport_filter

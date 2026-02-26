@@ -11,6 +11,7 @@
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <folly/FileUtil.h>
 #include <proxygen/httpserver/samples/hq/HQParams.h>
+#include <proxygen/lib/transport/ConnectUDPUtils.h>
 #include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
 #include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
 #include <utility>
@@ -83,6 +84,9 @@ void H3DatagramAsyncSocket::connectSuccess() {
     closeWithError({AsyncSocketException::INTERNAL_ERROR, "Transaction Error"});
     return;
   }
+  if (options_.rfcMode_) {
+    options_.httpRequest_->getHeaders().set("Capsule-Protocol", "?1");
+  }
   txn_->sendHeaders(*options_.httpRequest_);
   upstreamSession_->closeWhenIdle();
   transportConnected_ = true;
@@ -124,6 +128,15 @@ void H3DatagramAsyncSocket::onHeadersComplete(
 
 void H3DatagramAsyncSocket::onDatagram(
     std::unique_ptr<folly::IOBuf> datagram) noexcept {
+  if (options_.rfcMode_) {
+    auto stripped = stripContextId(std::move(datagram));
+    if (!stripped.has_value()) {
+      // Non-zero context ID or malformed — silently drop
+      VLOG(4) << "Dropping datagram with non-zero or invalid context ID";
+      return;
+    }
+    datagram = std::move(stripped.value());
+  }
 
   if (!readCallback_) {
     if (readBuf_.size() < rcvBufPkts_) {
@@ -292,7 +305,11 @@ void H3DatagramAsyncSocket::startClient() {
         std::make_shared<quic::DefaultCongestionControllerFactory>());
     transportSettings.datagramConfig.enabled = true;
     client->setTransportSettings(transportSettings);
-    client->setSupportedVersions({quic::QuicVersion::MVFST});
+    if (options_.rfcMode_) {
+      client->setSupportedVersions({quic::QuicVersion::QUIC_V1});
+    } else {
+      client->setSupportedVersions({quic::QuicVersion::MVFST});
+    }
 
     wangle::TransportInfo tinfo;
     upstreamSession_ =
@@ -304,8 +321,14 @@ void H3DatagramAsyncSocket::startClient() {
     upstreamSession_->setSocket(client);
     upstreamSession_->setConnectCallback(this);
     upstreamSession_->setInfoCallback(this);
-    upstreamSession_->setEgressSettings(
-        {{proxygen::SettingsId::_HQ_DATAGRAM, 1}});
+    if (options_.rfcMode_) {
+      upstreamSession_->setEgressSettings(
+          {{proxygen::SettingsId::_HQ_DATAGRAM_RFC, 1},
+           {proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL, 1}});
+    } else {
+      upstreamSession_->setEgressSettings(
+          {{proxygen::SettingsId::_HQ_DATAGRAM, 1}});
+    }
 
     VLOG(4) << "connecting to " << connectAddress_.describe();
     upstreamSession_->startNow();
@@ -358,7 +381,11 @@ ssize_t H3DatagramAsyncSocket::write(const folly::SocketAddress& address,
   if (!transportConnected_) {
     if (writeBuf_.size() < sndBufPkts_) {
       VLOG(10) << "Socket not connected yet. Buffering datagram";
-      writeBuf_.emplace_back(buf->clone());
+      auto bufCopy = buf->clone();
+      if (options_.rfcMode_) {
+        bufCopy = prependContextId(std::move(bufCopy));
+      }
+      writeBuf_.emplace_back(std::move(bufCopy));
       return size;
     }
     LOG(ERROR) << "Socket write buffer is full. Discarding datagram";
@@ -377,7 +404,11 @@ ssize_t H3DatagramAsyncSocket::write(const folly::SocketAddress& address,
     errno = EMSGSIZE;
     return -1;
   }
-  if (!txn_->sendDatagram(buf->clone())) {
+  auto datagramBuf = buf->clone();
+  if (options_.rfcMode_) {
+    datagramBuf = prependContextId(std::move(datagramBuf));
+  }
+  if (!txn_->sendDatagram(std::move(datagramBuf))) {
     LOG(ERROR) << "Transport write buffer is full. Discarding datagram";
     // sendDatagram can only fail for exceeding the maximum size (checked
     // above) and if the write buffer is full

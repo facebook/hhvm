@@ -83,6 +83,16 @@ class H3DatagramAsyncSocketTest : public testing::Test {
     datagramSocket_->onEOM();
   }
 
+  void SetUpRfcMode() {
+    options_.rfcMode_ = true;
+    // Recreate socket with rfcMode
+    datagramSocket_ =
+        std::make_unique<H3DatagramAsyncSocket>(&eventBase_, options_);
+    datagramSocket_->setUpstreamSession(session_);
+    datagramSocket_->setRcvBuf(kMaxDatagramsBufferedRead * kMaxDatagramSize);
+    datagramSocket_->setSndBuf(kMaxDatagramsBufferedWrite * kMaxDatagramSize);
+  }
+
   folly::EventBase eventBase_;
   std::unique_ptr<quic::MockQuicSocketDriver> socketDriver_;
   std::unique_ptr<proxygen::H3DatagramAsyncSocket> datagramSocket_;
@@ -91,4 +101,19 @@ class H3DatagramAsyncSocketTest : public testing::Test {
   proxygen::H3DatagramAsyncSocket::Options options_;
   char buf_[kMaxDatagramSize];
 };
+
+// Parameterized fixture that runs tests in both legacy and RFC modes.
+// GetParam() == true → RFC mode; GetParam() == false → legacy mode.
+class H3DatagramAsyncSocketModeTest
+    : public H3DatagramAsyncSocketTest
+    , public testing::WithParamInterface<bool> {
+ public:
+  void SetUp() override {
+    H3DatagramAsyncSocketTest::SetUp();
+    if (GetParam()) {
+      SetUpRfcMode();
+    }
+  }
+};
+
 }; // namespace proxygen

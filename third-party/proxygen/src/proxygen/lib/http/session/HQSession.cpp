@@ -1569,7 +1569,7 @@ void HQSession::applySettings(const SettingsList& settings) {
           // StreamCodec
           break;
         case hq::SettingId::ENABLE_CONNECT_PROTOCOL:
-          // TODO
+          VLOG(3) << "Peer sent ENABLE_CONNECT_PROTOCOL=" << setting.value;
           break;
         case hq::SettingId::H3_DATAGRAM:
         case hq::SettingId::H3_DATAGRAM_DRAFT_8:
@@ -3671,7 +3671,8 @@ void HQSession::onDatagramsAvailable() noexcept {
     auto streamId = quarterStreamId->first * 4;
     auto stream = findNonDetachedStream(streamId);
     quic::Optional<std::pair<uint64_t, size_t>> ctxId;
-    if (!stream || !stream->txn_.isWebTransportConnectStream()) {
+    if (!stream || (!stream->txn_.isWebTransportConnectStream() &&
+                    !stream->txn_.isConnectUdpStream())) {
       // TODO: draft 8 and rfc don't include context ID
       ctxId = quic::follyutils::decodeQuicInteger(cursor);
       if (!ctxId) {
@@ -3742,7 +3743,7 @@ HQSession::HQStreamTransport::sendDatagram(
   if (streamIdRes.hasError()) {
     return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
-  if (!txn_.isWebTransportConnectStream()) {
+  if (!txn_.isWebTransportConnectStream() && !txn_.isConnectUdpStream()) {
     // Always use context-id = 0 for now
     auto ctxIdRes =
         quic::encodeQuicInteger(0, [&](auto val) { appender.writeBE(val); });

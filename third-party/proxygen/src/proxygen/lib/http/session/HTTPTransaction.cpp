@@ -217,6 +217,9 @@ void HTTPTransaction::onIngressHeadersComplete(
     headRequest_ = (method == HTTPMethod::HEAD);
     upgraded_ = (method == HTTPMethod::CONNECT);
     wtConnectStream_ = HTTPWebTransport::isConnectMessage(*msg);
+    connectUdpStream_ = msg->getMethod() == HTTPMethod::CONNECT &&
+                        msg->getUpgradeProtocol() &&
+                        *msg->getUpgradeProtocol() == "connect-udp";
   }
 
   if ((msg->isRequest() && msg->getMethod() != HTTPMethod::CONNECT) ||
@@ -1026,6 +1029,9 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
   if (headers.isRequest()) {
     headRequest_ = (headers.getMethod() == HTTPMethod::HEAD);
     wtConnectStream_ = HTTPWebTransport::isConnectMessage(headers);
+    connectUdpStream_ = headers.getMethod() == HTTPMethod::CONNECT &&
+                        headers.getUpgradeProtocol() &&
+                        *headers.getUpgradeProtocol() == "connect-udp";
   } else {
     has1xxResponse_ = headers.is1xxResponse();
   }

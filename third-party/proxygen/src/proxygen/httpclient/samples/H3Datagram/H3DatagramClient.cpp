@@ -12,6 +12,7 @@
 #include <folly/portability/GFlags.h>
 #include <proxygen/httpclient/samples/curl/CurlClient.h>
 #include <proxygen/httpserver/samples/hq/InsecureVerifierDangerousDoNotUseInProduction.h>
+#include <proxygen/lib/transport/ConnectUDPUtils.h>
 #include <proxygen/lib/transport/H3DatagramAsyncSocket.h>
 
 using namespace folly;
@@ -27,6 +28,13 @@ DEFINE_string(cert, "", "Certificate file path");
 DEFINE_string(key, "", "Private key file path");
 
 DEFINE_string(headers, "", "List of N=V headers separated by ,");
+
+DEFINE_string(
+    masque_template,
+    "",
+    "URI template for RFC 9298 CONNECT-UDP (e.g., "
+    "https://proxy:4443/masque?h={target_host}&p={target_port}). "
+    "When set, uses RFC 9298 Extended CONNECT instead of legacy CONNECT-UDP.");
 
 constexpr size_t kMaxReadBufferSize{1232};
 
@@ -168,9 +176,26 @@ int main(int argc, char* argv[]) {
   options.txnTimeout_ = std::chrono::milliseconds(10000);
   options.connectTimeout_ = std::chrono::milliseconds(500);
   options.httpRequest_ = std::make_unique<HTTPMessage>();
-  options.httpRequest_->setMethod(proxygen::HTTPMethod::CONNECT_UDP);
-  options.httpRequest_->setURL(fmt::format("{}:{}", FLAGS_host, FLAGS_port));
-  options.httpRequest_->setMasque();
+
+  if (!FLAGS_masque_template.empty()) {
+    // RFC 9298 Extended CONNECT mode
+    auto target = proxygen::expandConnectUDPTemplate(
+        FLAGS_masque_template, FLAGS_host, FLAGS_port);
+    options.httpRequest_->setMethod(proxygen::HTTPMethod::CONNECT);
+    options.httpRequest_->setUpgradeProtocol("connect-udp");
+    options.httpRequest_->setSecure(true);
+    options.httpRequest_->setURL(target.path);
+    options.httpRequest_->getHeaders().set(proxygen::HTTP_HEADER_HOST,
+                                           target.authority);
+    options.httpRequest_->getHeaders().set("Capsule-Protocol", "?1");
+    options.rfcMode_ = true;
+  } else {
+    // Legacy CONNECT-UDP mode
+    options.httpRequest_->setMethod(proxygen::HTTPMethod::CONNECT_UDP);
+    options.httpRequest_->setURL(fmt::format("{}:{}", FLAGS_host, FLAGS_port));
+    options.httpRequest_->setMasque();
+  }
+
   auto parsedHeaders = CurlService::CurlClient::parseHeaders(FLAGS_headers);
   parsedHeaders.forEach(
       [&options](const std::string& name, const std::string& value) {

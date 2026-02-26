@@ -91,11 +91,18 @@ TEST_F(H3DatagramAsyncSocketTest, Connect) {
   datagramSocket_->connect(getRemoteAddress());
 }
 
-TEST_F(H3DatagramAsyncSocketTest, ConnectAndReady) {
+TEST_P(H3DatagramAsyncSocketModeTest, ConnectAndReady) {
   datagramSocket_->connect(getRemoteAddress());
   session_->onTransportReady();
   session_->onReplaySafe();
 }
+
+INSTANTIATE_TEST_SUITE_P(Modes,
+                         H3DatagramAsyncSocketModeTest,
+                         testing::Bool(),
+                         [](const testing::TestParamInfo<bool>& info) {
+                           return info.param ? "Rfc" : "Legacy";
+                         });
 
 TEST_F(H3DatagramAsyncSocketTest, ConnectErrorBeforeReadCallbackSet) {
   datagramSocket_->connect(getRemoteAddress());
@@ -427,4 +434,49 @@ TEST_F(H3DatagramAsyncSocketTest, CloseTwice) {
   session_->onReplaySafe();
   datagramSocket_->close();
   datagramSocket_->close();
+}
+
+TEST_F(H3DatagramAsyncSocketTest, RfcModeDatagramContextIdStrip) {
+  SetUpRfcMode();
+  datagramSocket_->connect(getRemoteAddress());
+  session_->onTransportReady();
+  session_->onReplaySafe();
+  onHeadersComplete(makeResponse(200));
+
+  // Create datagram with context ID 0 + "hello"
+  auto buf = folly::IOBuf::create(6);
+  buf->append(6);
+  buf->writableData()[0] = 0x00;
+  memcpy(buf->writableData() + 1, "hello", 5);
+
+  EXPECT_CALL(readCallbacks_, onDataAvailable_(_, _, _, _))
+      .Times(1)
+      .WillOnce([this](const folly::SocketAddress& client,
+                       size_t len,
+                       bool,
+                       const MockUDPReadCallback::OnDataAvailableParams&) {
+        EXPECT_EQ(client, session_->getPeerAddress());
+        EXPECT_EQ(len, 5);
+        EXPECT_EQ(std::string(buf_, len), "hello");
+      });
+  datagramSocket_->resumeRead(&readCallbacks_);
+  onDatagram(std::move(buf));
+}
+
+TEST_F(H3DatagramAsyncSocketTest, RfcModeDropNonZeroContextId) {
+  SetUpRfcMode();
+  datagramSocket_->connect(getRemoteAddress());
+  session_->onTransportReady();
+  session_->onReplaySafe();
+  onHeadersComplete(makeResponse(200));
+
+  // Create datagram with context ID 1 — should be silently dropped
+  auto buf = folly::IOBuf::create(6);
+  buf->append(6);
+  buf->writableData()[0] = 0x01;
+  memcpy(buf->writableData() + 1, "hello", 5);
+
+  EXPECT_CALL(readCallbacks_, onDataAvailable_(_, _, _, _)).Times(0);
+  datagramSocket_->resumeRead(&readCallbacks_);
+  onDatagram(std::move(buf));
 }

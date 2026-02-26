@@ -233,8 +233,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   void patchIfTypeIs(const VPatch& patch) {
     static_assert(op::is_patch_v<VPatch>);
     tryPatchable<VPatch>();
-    patchIfTypeIsImpl(
-        patch, ensures<type::infer_tag<typename VPatch::value_type>>());
+    patchIfTypeIsImpl(patch, ensures<op::patched_type_tag_t<VPatch>>());
   }
 
   /// Ensures the given value type is set in Thrift Any, and patches the value
@@ -242,7 +241,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   template <typename VPatch>
   void ensureAndPatch(const VPatch& patch) {
     static_assert(op::is_patch_v<VPatch>);
-    using VTag = type::infer_tag<typename VPatch::value_type>;
+    using VTag = op::patched_type_tag_t<VPatch>;
     ensureAny(type::AnyData::toAny<VTag>({}).toThrift());
     patchIfTypeIsImpl(patch, true);
   }
@@ -296,7 +295,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   /// Extracts the patch for the given patch type.
   template <typename VPatch>
   VPatch extractPatchAsIf() const {
-    using VTag = type::infer_tag<typename VPatch::value_type>;
+    using VTag = op::patched_type_tag_t<VPatch>;
     using VPatchTag = type::infer_tag<VPatch>;
     struct AnyPatchExtractionVisitor {
       void assign(const type::AnyStruct& any) {
@@ -379,8 +378,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   // by making it to 'clear' + 'ensureAny' operation.
   template <typename VPatch>
   void tryPatchable() {
-    using VType = typename VPatch::value_type;
-    using VTag = type::infer_tag<VType>;
+    using VTag = patched_type_tag_t<VPatch>;
     tryPatchable(type::Type::get<VTag>());
   }
   void tryPatchable(const type::Type& type) {
@@ -396,7 +394,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   template <typename VPatch>
   void patchIfTypeIsImpl(const VPatch& patch, bool after) {
-    auto type = type::Type::get<type::infer_tag<typename VPatch::value_type>>();
+    auto type = type::Type::get<op::patched_type_tag_t<VPatch>>();
     patchIfTypeIsImpl(
         type, protocol::DynamicPatch::fromStaticPatch(patch), after);
   }

@@ -41,11 +41,8 @@ class {{struct:name}}_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__{{struct:name}}
 
     def __init__(self):
-    {{^struct:py3_fields?}}
-        pass
-    {{/struct:py3_fields?}}
-    {{#struct:py3_fields}}
-        self.{{field:py_name}}: {{#field:type}}{{!
+    {{#each struct:py3_fields as |f|}}
+        self.{{f.field:py_name}}: {{#f.field:type}}{{!
         }}{{#type:list?}}_typing.Optional[list]{{/type:list?}}{{!
         }}{{#type:map?}}_typing.Optional[dict]{{/type:map?}}{{!
         }}{{#type:set?}}_typing.Optional[set]{{/type:set?}}{{!
@@ -55,15 +52,16 @@ class {{struct:name}}_Builder(thrift.py3.builder.StructBuilder):
             }}_typing.Optional[{{> types/pep484_type}}]{{!
         }}{{/type:structured?}}{{/type:cythonTypeNoneable?}}{{!
         }}{{#type:structured?}}_typing.Any{{/type:structured?}}{{!
-        }}{{/field:type}} = None
-    {{/struct:py3_fields}}
+        }}{{/f.field:type}} = None
+    {{#else}}
+        pass
+    {{/each}}
 
     def __iter__(self):
-        {{^struct:py3_fields?}}
+      {{#each struct:py3_fields as |f|}}
+        yield "{{f.field:py_name}}", self.{{f.field:py_name}}
+      {{#else}}
         pass
-        {{/struct:py3_fields?}}
-        {{#struct:py3_fields}}
-        yield "{{field:py_name}}", self.{{field:py_name}}
-        {{/struct:py3_fields}}
+      {{/each}}
 
 {{/program:filtered_structs}}

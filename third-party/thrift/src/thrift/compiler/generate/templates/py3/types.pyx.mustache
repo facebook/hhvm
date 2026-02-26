@@ -178,10 +178,9 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     {{^struct:cpp_noncopyable?}}
 
     def __call__({{struct:name}} self, **kwargs):
-        {{^struct:py3_fields?}}
+      {{#if (array.empty? struct:py3_fields)}}
         return self
-        {{/struct:py3_fields?}}
-        {{#struct:py3_fields?}}
+      {{#else}}
         if not kwargs:
             return self
         cdef {{struct:name}} __fbthrift_inst = {{struct:name}}.__new__({{struct:name}})
@@ -190,7 +189,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
-        {{/struct:py3_fields?}}
+      {{/if (array.empty? struct:py3_fields)}}
     {{/struct:cpp_noncopyable?}}
     {{/struct:exception?}}
 
@@ -501,7 +500,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return {{struct:size}}
+        return {{(array.len struct:py3_fields)}}
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize({{struct:name}} self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data

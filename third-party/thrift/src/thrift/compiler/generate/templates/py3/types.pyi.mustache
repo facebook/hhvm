@@ -69,14 +69,14 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable):
     {{/struct:py3_fields}}
 
     def __init__(
-        self, {{#struct:py3_fields?}}*{{/struct:py3_fields?}}{{#struct:py3_fields}},
+        self, {{#struct:py3_fields}}{{#if first?}}*{{/if}},
         {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=None{{/struct:py3_fields}}
     ) -> None: ...
 
     {{#if struct:struct?}}
     {{! If this structured is specifically a *struct*}}
     def __call__(
-        self, {{#struct:py3_fields?}}*{{/struct:py3_fields?}}{{#struct:py3_fields}},
+        self, {{#struct:py3_fields}}{{#if first?}}*{{/if}},
         {{field:py_name}}: _typing.Union[{{#field:type}}{{> types/pep484_type}}{{/field:type}}, None]=None{{/struct:py3_fields}}
     ) -> {{struct:name}}: ...
 

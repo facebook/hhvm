@@ -278,7 +278,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
 
     @classmethod
     def _fbthrift_get_struct_size(cls) -> int:
-        return {{struct:size}}
+        return {{(array.len struct:py3_fields)}}
 
     def __eq__(self, other):
     {{! when in-place migration complete, we can start ignoring cpp.noncomparable attribute }}

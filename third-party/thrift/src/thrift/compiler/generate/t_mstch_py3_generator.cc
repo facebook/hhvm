@@ -870,13 +870,11 @@ class py3_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
-            {"struct:size", &py3_mstch_struct::getSize},
             {"struct:is_struct_orderable?",
              &py3_mstch_struct::isStructOrderable},
             {"struct:cpp_noncomparable", &py3_mstch_struct::cppNonComparable},
             {"struct:cpp_noncopyable?", &py3_mstch_struct::cppNonCopyable},
             {"struct:py3_fields", &py3_mstch_struct::py3_fields},
-            {"struct:py3_fields?", &py3_mstch_struct::has_py3_fields},
             {"struct:has_hidden_fields?", &py3_mstch_struct::has_hidden_fields},
             {"struct:has_defaulted_field?",
              &py3_mstch_struct::has_defaulted_field},
@@ -895,8 +893,6 @@ class py3_mstch_struct : public mstch_struct {
             }),
         py3_fields_.end());
   }
-
-  mstch::node getSize() { return py3_fields_.size(); }
 
   mstch::node allow_inheritance() {
     return struct_->has_structured_annotation(
@@ -919,8 +915,6 @@ class py3_mstch_struct : public mstch_struct {
   }
 
   mstch::node py3_fields() { return make_mstch_fields(py3_fields_); }
-
-  mstch::node has_py3_fields() { return !py3_fields_.empty(); }
 
   mstch::node has_hidden_fields() { return hidden_fields; }
 

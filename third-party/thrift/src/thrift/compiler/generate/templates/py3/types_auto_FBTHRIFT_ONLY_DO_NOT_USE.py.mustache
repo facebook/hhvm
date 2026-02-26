@@ -35,9 +35,9 @@ want to include.
 {{> common/auto_generated_py}}
 {{#program:auto_migrate?}}
 {{! Note this is needed even if IDL defines no types, in the case where service has arguments that are container<primitive>}}
-_fbthrift__py3_module_name = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
+_fbthrift__py3_module_name = "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types"
 {{#program:has_types?}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types import (
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types import (
     {{#program:structs}}
     {{struct:name}},
     {{/program:structs}}{{#program:enums}}
@@ -52,8 +52,8 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 {{#program:hasContainerTypes}}
 import importlib
 import thrift.python.types as _fbthrift_python_types
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as {{!
-}}_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_types
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as {{!
+}}_{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_types
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}thrift_types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}thrift_types
@@ -67,7 +67,7 @@ py3-container "flat name" name aliases for backwards-compatibility
 {{#program:hasContainerTypes}}
 def get_types_reflection():
     return importlib.import_module(
-        "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
     )
 {{/program:hasContainerTypes}}
 {{#program:containerTypes}}

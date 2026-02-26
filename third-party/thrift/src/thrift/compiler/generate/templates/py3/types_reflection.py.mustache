@@ -59,9 +59,9 @@ except ModuleNotFoundError:
 {{/program:includeNamespaces}}
 
 try:
-    import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
+    import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
 except ModuleNotFoundError:
-    import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
+    import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
 
 
 
@@ -81,7 +81,7 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
     )
 {{#struct:py3_fields}}
   {{#if (and first? struct:has_defaulted_fields?)}}
-    defaults = _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types.{{struct:name}}()
+    defaults = _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types.{{struct:name}}()
   {{/if (and first? struct:has_defaulted_fields?)}}
     spec.add_field(
         __FieldSpec._fbthrift_create(

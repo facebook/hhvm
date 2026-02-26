@@ -25,5 +25,5 @@ from thrift.python.common cimport (
 
 cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/metadata.h"{{!
 }} :
-    cdef cThriftMetadata cGetThriftModuleMetadata "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{program:name}}_getThriftModuleMetadata"()
+    cdef cThriftMetadata cGetThriftModuleMetadata "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}::{{program:name}}_getThriftModuleMetadata"()
 {{/program:auto_migrate?}}

@@ -22,10 +22,10 @@ This is a template for exposing cpp constants in .pxd
 {{#program:constants}}
 {{#first?}}
 cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_constants.h"{{!
-}} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+}} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
 {{/first?}}
     {{#constant:type}}
     cdef {{^type:string?}}{{> types/cython_cpp_type}}{{/type:string?}}{{#type:string?}}const char*{{/type:string?}} {{!
-    }}{{> types/c_constant }} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{program:name}}_constants::{{constant:name}}"{{!
+    }}{{> types/c_constant }} "::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{program:name}}_constants::{{constant:name}}"{{!
     }}{{#type:structured?}}(){{/type:structured?}}{{#type:string?}}(){{/type:string?}}{{#type:binary?}}(){{/type:binary?}}{{#type:container?}}(){{/type:container?}}{{#type:enum?}}(){{/type:enum?}}
 {{/constant:type}}{{/program:constants}}

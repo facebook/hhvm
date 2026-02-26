@@ -44,8 +44,8 @@ cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}cbindings as _{{#inc
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
 
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as {{> types/current_module_cbindings}}
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as {{> types/current_module_cbindings}}
 
 
 {{#program:filtered_structs}}

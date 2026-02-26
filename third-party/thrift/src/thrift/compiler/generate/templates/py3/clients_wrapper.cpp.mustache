@@ -26,7 +26,7 @@ thread that will pass data to the cython callback.
 
 #include <{{program:include_prefix}}gen-py3/{{program:name}}/clients_wrapper.h>
 
-{{#program:cppNamespaces}}namespace {{value}} {
+{{#program:cppNamespaces}}namespace {{.}} {
 {{/program:cppNamespaces}}
 
 
@@ -72,6 +72,6 @@ folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:
 {{/service:supportedFunctions}}
 {{/service:supportedInteractions}}
 {{/program:services}}{{!
-}}{{#program:cppNamespaces}}} // namespace {{value}}
+}}{{#program:cppNamespaces}}} // namespace {{.}}
 {{/program:cppNamespaces}}
 {{/program:auto_migrate?}}

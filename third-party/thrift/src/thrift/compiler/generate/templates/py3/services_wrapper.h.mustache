@@ -41,7 +41,7 @@ created by the thrift compiler for generated cpp2 code.
 
 #include <memory>
 
-{{#program:cppNamespaces}}namespace {{value}} {
+{{#program:cppNamespaces}}namespace {{.}} {
 {{/program:cppNamespaces}}
 
 {{#program:services}}
@@ -79,6 +79,6 @@ std::shared_ptr<apache::thrift::ServerInterface> {{service:name}}Interface(PyObj
 {{/last?}}
 {{/program:services}}{{!
 }}{{#program:cppNamespaces}}
-} // namespace {{value}}
+} // namespace {{.}}
 {{/program:cppNamespaces}}
 {{/program:auto_migrate?}}

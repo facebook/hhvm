@@ -29,10 +29,10 @@ from folly cimport cFollyExecutor
 
 
 cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/services_wrapper.h"{{!
-}} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+}} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
 {{#program:services}}
     shared_ptr[cAsyncProcessorFactory] c{{service:name}}Interface {{!
-      }}"::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{!
+      }}"::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{!
       }}{{service:name}}Interface"(PyObject *if_object, cFollyExecutor* Q) except *
 {{/program:services}}
 {{^program:services}}

@@ -35,7 +35,7 @@ want to include.
 {{> common/auto_generated_py}}
 {{#program:auto_migrate?}}
 {{#program:has_types?}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types import (
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types import (
     {{#program:structs}}
     {{struct:name}},
     {{/program:structs}}{{#program:enums}}
@@ -48,7 +48,7 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 )
 {{/program:has_types?}}
 {{#program:hasContainerTypes}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_auto_FBTHRIFT_ONLY_DO_NOT_USE import (
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_auto_FBTHRIFT_ONLY_DO_NOT_USE import (
 {{#program:containerTypes}}{{#type:container?}}
     {{type:flat_name}},
 {{/type:container?}}{{/program:containerTypes}}

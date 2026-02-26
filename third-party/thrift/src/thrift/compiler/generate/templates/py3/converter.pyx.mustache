@@ -27,14 +27,14 @@ from thrift.py3.types cimport (
     const_pointer_cast,
     deref_const as __deref_const,
 )
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as {{!
-    }}_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as {{!
+    }}_{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
 {{#program:gen_legacy_container_converters?}}
 
 {{#program:inplace_migrate?}}{{^program:auto_migrate?}}
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
 {{/program:auto_migrate?}}{{/program:inplace_migrate?}}
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
@@ -45,7 +45,7 @@ cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}thrift_converter as 
 {{/program:gen_legacy_container_converters?}}
 {{/program:gen_py3_cython?}}
 {{#program:gen_py3_cython?}}
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _fbthrift_ctypes
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _fbthrift_ctypes
 from thrift.py3.serializer cimport (
     cserialize as __cserialize,
     cdeserialize as __cdeserialize,
@@ -55,7 +55,7 @@ cimport folly.iobuf as _folly__iobuf
 {{/program:gen_py3_cython?}}
 {{#program:inplace_migrate?}}
 {{^program:gen_legacy_container_converters?}}
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
 {{/program:gen_legacy_container_converters?}}
 {{/program:inplace_migrate?}}
 
@@ -72,7 +72,7 @@ cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] {{struct:name}}_conve
 
     {{/program:auto_migrate?}}{{/program:inplace_migrate?}}
     return make_shared[_fbthrift_cbindings.{{> types/c_struct }}](
-        _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
+        _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
         }}{{struct:name}}_convert_to_cpp(inst)
     )
 {{/program:gen_py3_cython?}}
@@ -97,7 +97,7 @@ cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] {{struct:name}}_conve
 {{! direct replacement for ._fbthrift_create }}
 cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}]& c_struct):
 {{^program:gen_py3_cython?}}
-    _py_struct = _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
+    _py_struct = _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
             }}{{struct:name}}_from_cpp(deref(const_pointer_cast(c_struct)))
     {{#program:inplace_migrate?}}{{^program:auto_migrate?}}
     _py_struct = {{> types/current_module_types}}.{{struct:name}}.from_python(_py_struct)

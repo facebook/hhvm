@@ -30,17 +30,17 @@ cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::th
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
 cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_types_custom_protocol.h"{{!
-}} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+}} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
 {{/first?}}
     {{#struct:union?}}
-    cdef enum class {{> types/c_struct }}__type "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type":
+    cdef enum class {{> types/c_struct }}__type "::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{struct:name}}::Type":
         __EMPTY__,
     {{#struct:py3_fields}}
         {{field:py_name}},
     {{/struct:py3_fields}}
     {{/struct:union?}}
 
-    cdef cppclass {{> types/c_struct }} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}"{{#struct:exception?}}(cTException){{/struct:exception?}}:
+    cdef cppclass {{> types/c_struct }} "::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{struct:name}}"{{#struct:exception?}}(cTException){{/struct:exception?}}:
         {{> types/c_struct }}() except +
       {{#if (not struct:cpp_noncopyable?)}}
         {{> types/c_struct }}(const {{> types/c_struct }}&) except +

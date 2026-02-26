@@ -78,12 +78,12 @@ import sys
 import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_cbindings
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_cbindings
 {{#program:inplace_migrate?}}
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
 {{/program:inplace_migrate?}}
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
 {{#program:has_stream?}}
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 {{/program:has_stream?}}
@@ -102,13 +102,13 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}clients as _{{#includ
 {{/hasServices?}}
 {{/program:includeNamespaces}}
 
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.services_interface as _fbthrift_services_interface
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.services_interface as _fbthrift_services_interface
 
 {{#program:services}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{service:name}}AsyncClient, c{{service:name}}ClientWrapper
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{service:name}}AsyncClient, c{{service:name}}ClientWrapper
   {{#let parent_service_name=service:name}}
 {{#service:supportedInteractions}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper
 {{/service:supportedInteractions}}
 {{#service:extends}}
 {{#service:externalProgram?}}

@@ -25,4 +25,4 @@ To prevent this, we force import types before anything else.
 }}
 {{> common/auto_generated_py}}
 
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types

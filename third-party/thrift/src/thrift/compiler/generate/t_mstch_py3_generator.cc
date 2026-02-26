@@ -278,8 +278,6 @@ class py3_mstch_program : public mstch_program {
              &py3_mstch_program::unique_functions_by_return_type},
             {"program:needs_container_converters?",
              &py3_mstch_program::needs_container_converters},
-            {"program:cppNamespaces", &py3_mstch_program::getCpp2Namespace},
-            {"program:py3Namespaces", &py3_mstch_program::getPy3Namespace},
             {"program:includeNamespaces",
              &py3_mstch_program::includeNamespaces},
             {"program:containerTypes", &py3_mstch_program::getContainerTypes},
@@ -380,14 +378,6 @@ class py3_mstch_program : public mstch_program {
               {"hasTypes?", kvp.second.hasTypes}});
     }
     return mstch_array;
-  }
-
-  mstch::node getCpp2Namespace() {
-    return create_string_array(cpp2::get_gen_namespace_components(*program_));
-  }
-
-  mstch::node getPy3Namespace() {
-    return create_string_array(get_py3_namespace(program_));
   }
 
   mstch::node hasStream() {
@@ -1275,6 +1265,12 @@ class t_mstch_py3_generator : public t_mstch_generator {
         return to_whisker_string_array(it->second);
       }
       return whisker::make::array();
+    });
+    def.property("cppNamespaces", [](const t_program& self) {
+      return to_whisker_string_array(cpp2::get_gen_namespace_components(self));
+    });
+    def.property("py3Namespaces", [](const t_program& self) {
+      return to_whisker_string_array(get_py3_namespace(&self));
     });
 
     return std::move(def).make();

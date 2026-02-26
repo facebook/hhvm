@@ -49,7 +49,7 @@ Header file for ClientsWrapper.cpp for cython to import in CythonClients.pxd.
 #include <set>
 #include <vector>
 
-{{#program:cppNamespaces}}namespace {{value}} {
+{{#program:cppNamespaces}}namespace {{.}} {
 {{/program:cppNamespaces}}
 
 {{#program:services}}
@@ -93,6 +93,6 @@ class {{service:name}}ClientWrapper : {{!
 
 {{/program:services}}{{!
 }}{{#program:cppNamespaces}}
-} // namespace {{value}}
+} // namespace {{.}}
 {{/program:cppNamespaces}}
 {{/program:auto_migrate?}}

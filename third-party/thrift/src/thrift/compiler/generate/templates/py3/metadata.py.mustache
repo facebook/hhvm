@@ -34,5 +34,5 @@ want to include.
 }}
 {{> common/auto_generated_py}}
 {{#program:auto_migrate?}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_metadata import *
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_metadata import *
 {{/program:auto_migrate?}}

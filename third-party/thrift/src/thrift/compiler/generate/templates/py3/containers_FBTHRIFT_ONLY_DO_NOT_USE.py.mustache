@@ -47,9 +47,9 @@ from collections.abc import Mapping, Sequence, Set
     If you `import` them directly from here, you will get nasty import errors.
 """
 
-_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
+_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types"
 
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
@@ -59,7 +59,7 @@ from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():
     return importlib.import_module(
-        "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
     )
 
 __all__ = []
@@ -73,7 +73,7 @@ __all__.append('{{type:flat_name}}')
 {{/program:gen_py3_cython?}}
 {{^program:gen_py3_cython?}}
 {{#program:hasContainerTypes}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.{{!
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.{{!
 }}{{#program:auto_migrate?}}{{!
     }}types_auto_FBTHRIFT_ONLY_DO_NOT_USE{{!
 }}{{/program:auto_migrate?}}{{^program:auto_migrate?}}{{#program:inplace_migrate?}}{{!

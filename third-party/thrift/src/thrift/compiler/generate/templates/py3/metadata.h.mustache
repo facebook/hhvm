@@ -25,10 +25,10 @@
 
 #include "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_types.h"
 
-{{#program:cppNamespaces}}namespace {{value}} {
+{{#program:cppNamespaces}}namespace {{.}} {
 {{/program:cppNamespaces}}
 ::apache::thrift::metadata::ThriftMetadata {{program:name}}_getThriftModuleMetadata();
 {{#program:cppNamespaces}}
-} // namespace {{value}}
+} // namespace {{.}}
 {{/program:cppNamespaces}}
 {{/program:auto_migrate?}}

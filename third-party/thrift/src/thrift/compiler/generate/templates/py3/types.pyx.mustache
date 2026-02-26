@@ -93,7 +93,7 @@ import asyncio
 from folly.coro cimport bridgeCoroTaskWith
 {{/program:has_stream?}}
 {{#program:inplace_migrate?}}{{#program:needs_container_converters?}}
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
 {{/program:needs_container_converters?}}{{/program:inplace_migrate?}}
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
@@ -108,16 +108,16 @@ cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}thrift_converter as 
 {{/program:includeNamespaces}}
 
 {{^program:inplace_migrate?}}
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
   {{#if program:enums?}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_enums import (
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_enums import (
 {{#program:enums}}
     {{enum:name}},
 {{/program:enums}}
 )
   {{/if program:enums?}}
 {{#program:hasUnionTypes}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
 {{#program:filtered_structs}}{{#struct:union?}}
     __{{struct:name}}Type,
 {{/struct:union?}}{{/program:filtered_structs}}
@@ -125,7 +125,7 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 {{/program:hasUnionTypes}}
 
 {{#program:hasContainerTypes}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 {{#program:containerTypes}}
     {{type:flat_name}},
 {{/program:containerTypes}}
@@ -135,10 +135,10 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 {{#program:inplace_migrate?}}
 
 {{#program:has_stream?}}
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
 {{/program:has_stream?}}
 
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _fbthrift_types_inplace
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _fbthrift_types_inplace
 {{#program:filtered_structs}}
 {{struct:name}} = _fbthrift_types_inplace.{{struct:name}}
 {{/program:filtered_structs}}
@@ -154,11 +154,11 @@ import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:n
 {{/program:inplace_migrate?}}
 
 {{^program:inplace_migrate?}}
-_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
+_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
-        "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
     )
 
 {{#program:filtered_structs}}

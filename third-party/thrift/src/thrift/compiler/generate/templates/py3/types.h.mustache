@@ -39,13 +39,13 @@ namespace py3 {
 {{^struct:union?}}
 
 template<>
-inline void reset_field<{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{struct:name}}>(
-    {{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{struct:name}}& obj, uint16_t index) {
+inline void reset_field<{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}::{{struct:name}}>(
+    {{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}::{{struct:name}}& obj, uint16_t index) {
   switch (index) {
     {{#struct:py3_fields}}
     case {{field:index}}:
       {{^field:reference?}}
-      obj.{{field:cpp_name}}_ref().copy_from(default_inst<{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{struct:name}}>().{{field:cpp_name}}_ref());
+      obj.{{field:cpp_name}}_ref().copy_from(default_inst<{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}::{{struct:name}}>().{{field:cpp_name}}_ref());
       {{/field:reference?}}
       {{#field:reference?}}
       obj.{{field:cpp_name}}_ref(){{^field:iobuf_ref?}}.{{/field:iobuf_ref?}}{{#field:iobuf_ref?}}->{{/field:iobuf_ref?}}reset();
@@ -60,7 +60,7 @@ inline void reset_field<{{#program:cppNamespaces}}::{{value}}{{/program:cppNames
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    {{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}::{{struct:name}}>::namesmap() {
+    {{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}::{{struct:name}}>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
       {{#struct:py3_fields}}{{#field:hasPyName?}}

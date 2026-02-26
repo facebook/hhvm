@@ -31,12 +31,12 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeN
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
 
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.{{> common/auto_migrate_import_prefix }}types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.{{> common/auto_migrate_import_prefix }}types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
 
 
 {{#program:filtered_structs}}
 {{! This is a dumb hack to handle leading-__ name classes
-}}_fbthrift_struct_type__{{struct:name}} = _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types.{{struct:name}}
+}}_fbthrift_struct_type__{{struct:name}} = _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types.{{struct:name}}
 class {{struct:name}}_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__{{struct:name}}
 

@@ -50,9 +50,9 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeN
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
 
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
 {{#program:hasContainerTypes}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 {{#program:containerTypes}}
     {{type:flat_name}},
 {{/program:containerTypes}}

@@ -25,9 +25,9 @@ Reflection functions for clients and services
 {{#program:services}}
 
 cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_handlers.h"{{!
-    }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+    }} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
     cdef cppclass c{{service:cpp_name}}SvIf {{!
-      }}"::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{!
+      }}"::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{!
       }}{{service:cpp_name}}SvIf":
         pass
 {{/program:services}}

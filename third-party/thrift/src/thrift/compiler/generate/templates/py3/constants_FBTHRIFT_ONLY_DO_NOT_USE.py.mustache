@@ -28,7 +28,7 @@ Since this file will eventually be removed, do not import from here, use
     {{#if first?}}
 import thrift.py3.types
 
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types
@@ -36,7 +36,7 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types
 {{/program:includeNamespaces}}
 
 {{#program:hasContainerTypes}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 {{#program:containerTypes}}
     {{type:flat_name}},
 {{/program:containerTypes}}

@@ -41,8 +41,8 @@ cimport folly.iobuf as _fbthrift_iobuf
 from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_cbindings
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_cbindings
 {{#program:has_stream?}}
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 {{/program:has_stream?}}
@@ -59,18 +59,18 @@ cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}clients_wrapper as _
 
 {{#program:services}}
 cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
-    }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+    }} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
   cdef cppclass c{{service:name}}AsyncClient {{!
-    }}"::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{!
+    }}"::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{!
     }}{{service:cpp_name}}AsyncClient":
       pass
 
   {{#let parent_service_name=service:name}}
 {{#service:supportedInteractions}}
 cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
-    }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
+    }} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
   cdef cppclass c{{parent_service_name}}AsyncClient_{{service:name}} {{!
-    }}"::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{!
+    }}"::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{!
     }}{{parent_service_name}}AsyncClient::{{service:name}}":
       pass
 
@@ -84,11 +84,11 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
     pass
 
 cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/clients_wrapper.h"{{!
-    }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":{{!
+    }} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":{{!
     }}{{^program:services}}
   pass{{/program:services}}{{#program:services}}
   cdef cppclass c{{service:name}}ClientWrapper "{{!
-  }}::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{service:name}}ClientWrapper"{{!
+  }}::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{service:name}}ClientWrapper"{{!
   }}{{#service:extends}}({{!
     }}{{#service:externalProgram?}}{{!
     }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
@@ -123,7 +123,7 @@ cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/clients_wra
   {{#let parent_service_name=service:name}}
   {{#service:supportedInteractions}}
   cdef cppclass c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper "{{!
-  }}::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{parent_service_name}}ClientWrapper{{!
+  }}::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{parent_service_name}}ClientWrapper{{!
   }}::{{service:name}}InteractionWrapper"(cClientWrapper):
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

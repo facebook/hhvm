@@ -42,9 +42,9 @@ from thrift.py3.types import (
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
 {{! must import thrift_types before thrift_enums due to enum dependence on metadata.thrift_types}}
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_enums as _fbthrift_python_enums
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_enums as _fbthrift_python_enums
 
 
 {{#program:includeNamespaces}}
@@ -58,14 +58,14 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types
 
 def get_types_reflection():
     return importlib.import_module(
-        "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
     )
 
 def _get_py_deprecated_module():
     import thrift.util.converter # needed by _to_py_deprecated() call
     return importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
 
-_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
+_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types"
 
 __all__ = []
 

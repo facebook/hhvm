@@ -31,10 +31,10 @@ anywhere else the type is used as a value directly.
 }}{{#type:string?}}std::string{{/type:string?}}{{!
 }}{{#type:binary?}}std::string{{/type:binary?}}{{!
 }}{{#type:enum}}{{!
-  }}::{{#type:cppNamespaces}}{{value}}::{{/type:cppNamespaces}}{{enum:cpp_name}}{{!
+  }}::{{#each enum:program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{enum:cpp_name}}{{!
   }}{{/type:enum}}{{!
 }}{{#type:structured}}{{!
-  }}::{{#type:cppNamespaces}}{{value}}::{{/type:cppNamespaces}}{{struct:name}}{{!
+  }}::{{#each struct:program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{struct:cpp_name}}{{!
   }}{{/type:structured}}{{!
 }}{{#type:list?}}{{!
   }}{{type:cppTemplate}}<{{!

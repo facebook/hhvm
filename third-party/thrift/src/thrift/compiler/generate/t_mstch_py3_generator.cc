@@ -584,7 +584,6 @@ class py3_mstch_type : public mstch_type {
              &py3_mstch_type::moduleAutoMigratePath},
             {"type:cbinding_path", &py3_mstch_type::cbinding_path},
             {"type:capi_converter_path", &py3_mstch_type::capi_converter_path},
-            {"type:cppNamespaces", &py3_mstch_type::cppNamespaces},
             {"type:cppTemplate", &py3_mstch_type::cppTemplate},
             {"type:cythonTemplate", &py3_mstch_type::cythonTemplate},
             {"type:defaultTemplate?", &py3_mstch_type::isDefaultTemplate},
@@ -643,10 +642,6 @@ class py3_mstch_type : public mstch_type {
         "_{}",
         fmt::join(
             get_type_py3_namespace(get_type_program(), "thrift_types"), "_"));
-  }
-
-  mstch::node cppNamespaces() {
-    return create_string_array(get_type_cpp2_namespace());
   }
 
   mstch::node cppTemplate() { return cached_props_.cpp_template(); }
@@ -736,10 +731,6 @@ class py3_mstch_type : public mstch_type {
       return p;
     }
     return prog_;
-  }
-
-  std::vector<std::string> get_type_cpp2_namespace() const {
-    return cpp2::get_gen_namespace_components(*get_type_program());
   }
 
   std::string to_cython_template() const {

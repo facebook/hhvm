@@ -2110,6 +2110,7 @@ module M = struct
           on_error = _;
           wildcard_action = _;
           ish_weakening;
+          under_type_constructor = _;
         } =
       if Typing_env_types.get_log_level env "expand_env" |> Int.( = ) 0 then
         []

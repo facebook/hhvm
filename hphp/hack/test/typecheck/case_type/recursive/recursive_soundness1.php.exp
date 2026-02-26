@@ -1,0 +1,24 @@
+ERROR: File "recursive_soundness1.php", line 21, characters 13-20:
+Invalid argument (Typing[4110])
+  File "recursive_soundness1.php", line 8, characters 20-21:
+  Expected `CT`
+  File "recursive_soundness1.php", line 11, characters 3-10:
+  But got `vec<Bar>`
+ERROR: File "recursive_soundness1.php", line 23, characters 13-20:
+Invalid argument (Typing[4110])
+  File "recursive_soundness1.php", line 8, characters 20-21:
+  Expected `CT`
+  File "recursive_soundness1.php", line 13, characters 3-13:
+  But got `vec<string>`
+ERROR: File "recursive_soundness1.php", line 25, characters 13-22:
+Invalid argument (Typing[4110])
+  File "recursive_soundness1.php", line 8, characters 20-21:
+  Expected `CT`
+  File "recursive_soundness1.php", line 15, characters 3-15:
+  But got `vec<vec<Bar>>`
+ERROR: File "recursive_soundness1.php", line 27, characters 13-16:
+Invalid argument (Typing[4110])
+  File "recursive_soundness1.php", line 8, characters 20-21:
+  Expected `CT`
+  File "recursive_soundness1.php", line 17, characters 3-5:
+  But got `Bar`

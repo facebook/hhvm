@@ -238,6 +238,13 @@ type expand_env = {
       (** If true, for refinement hints (is/as), approximate E by ~E & arraykey to account
        * for intish and stringish casts
        *)
+  under_type_constructor: bool;
+      (** True when localizing a type that appears under a type constructor
+          (e.g. the T in vec<T>, (T, int), shape('a' => T)). Recursive case
+          type references in these positions are "guarded" by the constructor,
+          so on cycle we preserve the Tnewtype identity instead of collapsing
+          to mixed — this prevents unsound subtyping through the constructor's
+          type parameters. *)
 }
 
 val empty_expand_env : expand_env

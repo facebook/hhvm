@@ -312,6 +312,7 @@ type expand_env = {
   on_error: Typing_error.Reasons_callback.t option;
   wildcard_action: wildcard_action;
   ish_weakening: bool;
+  under_type_constructor: bool;
 }
 
 let empty_expand_env =
@@ -325,6 +326,7 @@ let empty_expand_env =
     on_error = None;
     wildcard_action = Wildcard_fresh_tyvar;
     ish_weakening = false;
+    under_type_constructor = false;
   }
 
 let empty_expand_env_with_on_error on_error =

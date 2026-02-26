@@ -372,8 +372,9 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     in
     ((env, None, []), ty)
   | Tvec_or_dict (tk, tv) ->
-    let ((env, e1, cycles1), tk) = localize ~ety_env env tk in
-    let ((env, e2, cycles2), tv) = localize ~ety_env env tv in
+    let ety_env_targ = { ety_env with under_type_constructor = true } in
+    let ((env, e1, cycles1), tk) = localize ~ety_env:ety_env_targ env tk in
+    let ((env, e2, cycles2), tv) = localize ~ety_env:ety_env_targ env tv in
     let ty = Tvec_or_dict (tk, tv) in
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
     ((env, ty_err_opt, cycles1 @ cycles2), mk (r, ty))
@@ -419,7 +420,13 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     ((env, ty_err_opt, cycles), lty)
   | Tfun ft ->
     let pos = Reason.to_pos r in
-    let (env, ft) = localize_ft ~ety_env ~def_pos:pos env ft in
+    let (env, ft) =
+      localize_ft
+        ~ety_env:{ ety_env with under_type_constructor = true }
+        ~def_pos:pos
+        env
+        ft
+    in
     (env, mk (r, Tfun ft))
   | Tapply ((_, x), [arg]) when String.equal x SN.HH.FIXME.tPoisonMarker ->
     let decl_ty = mk (get_reason dty, Tlike arg) in
@@ -529,22 +536,23 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
     in
     (env_err, lty)
   | Ttuple { t_required; t_optional; t_extra } ->
+    let ety_env_targ = { ety_env with under_type_constructor = true } in
     let ((env, ty_err_opt1, cycles1), t_required) =
       list_map_env_err_cycles
         env
         t_required
-        ~f:(localize ~ety_env)
+        ~f:(localize ~ety_env:ety_env_targ)
         ~combine_ty_errs:Typing_error.multiple_opt
     in
     let ((env, ty_err_opt2, cycles2), t_optional) =
       list_map_env_err_cycles
         env
         t_optional
-        ~f:(localize ~ety_env)
+        ~f:(localize ~ety_env:ety_env_targ)
         ~combine_ty_errs:Typing_error.multiple_opt
     in
     let ((env, ty_err_opt3, cycles3), t_extra) =
-      localize_tuple_extra ~ety_env env t_extra
+      localize_tuple_extra ~ety_env:ety_env_targ env t_extra
     in
     let ty_err_opt =
       Option.merge
@@ -637,17 +645,20 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
       let ty = map_reason ty ~f:elaborate_reason in
       ((env, ty_err_opt, cycles_root @ cycles_tconst), ty))
   | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = tym } ->
+    let ety_env_targ = { ety_env with under_type_constructor = true } in
     let (((env, cycles_shape), ty_err_opt1), tym) =
       ShapeFieldMap.map_env_ty_err_opt
         (fun (env, cycles_acc) ty ->
-          let ((env, err, cycles), ty) = localize ~ety_env env ty in
+          let ((env, err, cycles), ty) =
+            localize ~ety_env:ety_env_targ env ty
+          in
           (((env, cycles @ cycles_acc), err), ty))
         (env, [])
         tym
         ~combine_ty_errs:Typing_error.multiple_opt
     in
     let ((env, ty_err_opt2, cycles_unknown_value), shape_kind) =
-      localize ~ety_env env shape_kind
+      localize ~ety_env:ety_env_targ env shape_kind
     in
     let ty_err_opt =
       Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both
@@ -662,7 +673,9 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
               s_fields = tym;
             } ) )
   | Tclass_ptr ty ->
-    let ((env, ty_err_opt, cycles), ty) = localize ~ety_env env ty in
+    let ((env, ty_err_opt, cycles), ty) =
+      localize ~ety_env:{ ety_env with under_type_constructor = true } env ty
+    in
     ((env, ty_err_opt, cycles), mk (r, Tclass_ptr ty))
 
 and localize_tuple_extra ~ety_env env e =
@@ -831,7 +844,11 @@ and localize_class_instantiation
     else
       let tparams = Cls.tparams class_info in
       let ((env, err, cycles), tyl) =
-        localize_targs_constrain_wildcards ~ety_env env tyargs tparams
+        localize_targs_constrain_wildcards
+          ~ety_env:{ ety_env with under_type_constructor = true }
+          env
+          tyargs
+          tparams
       in
       (* Hide the class type if its internal and outside of the module *)
       if
@@ -869,7 +886,11 @@ and localize_typedef_instantiation
     let ((env, e1, cycles_tyargs), tyargs) =
       localize_targs_constrain_wildcards
         ~ety_env:
-          { ety_env with visibility_behavior = default_visibility_behaviour }
+          {
+            ety_env with
+            visibility_behavior = default_visibility_behaviour;
+            under_type_constructor = true;
+          }
         env
         tyargs
         tparams

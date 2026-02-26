@@ -107,16 +107,21 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
       | _ -> MakeType.mixed r
     in
     let ty =
-      (* For regular typechecking, we localize to mixed to prevent various unsoundness,
-         when localizing recursive bounds. Other cycle-related wellformedness checks
-         using Always_expand_newtype require to localize as an the opaque newtype to be
-         able to make proper conclusions about the cycle. *)
-      match ety_env.visibility_behavior with
-      | Always_expand_newtype -> mk (r, Tnewtype (x, argl, mixed))
-      | Resolve_type_structure _
-      | Never_expand_newtype
-      | Expand_visible_newtype_only ->
-        mixed
+      if ety_env.under_type_constructor then
+        match td.td_type_assignment with
+        | CaseType _ -> mk (r, Tnewtype (x, argl, mixed))
+        | SimpleTypeDef _ -> mixed
+      else
+        (* For regular typechecking, we localize to mixed to prevent various unsoundness,
+           when localizing recursive bounds. Other cycle-related wellformedness checks
+           using Always_expand_newtype require to localize as an the opaque newtype to be
+           able to make proper conclusions about the cycle. *)
+        match ety_env.visibility_behavior with
+        | Always_expand_newtype -> mk (r, Tnewtype (x, argl, mixed))
+        | Resolve_type_structure _
+        | Never_expand_newtype
+        | Expand_visible_newtype_only ->
+          mixed
     in
     ( Typing_utils.
         { env; ty_err_opt = None; cycles = [cycle]; ty; bound = mixed },
@@ -147,19 +152,20 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
     else
       let substs = Subst.make_locl tparams argl in
       let ety_env = { ety_env with substs } in
+      let ety_env_inner = { ety_env with under_type_constructor = false } in
       let ((env, cstr_err, cstr_cycles), cstr) =
         (* Special case for supportdyn<T> defined with "as T" in order to
          * avoid supportdynamic.hhi appearing in reason *)
         if String.equal x SN.Classes.cSupportDyn then
           ((env, None, []), List.hd_exn argl)
         else
-          Phase.localize_rec ~ety_env env cstr
+          Phase.localize_rec ~ety_env:ety_env_inner env cstr
       in
       let ((env, err, cycles), expanded_ty, bound) =
         match expansion with
         | Rhs ty ->
           let ((env, rhs_err, rhs_cycles), ty) =
-            Phase.localize_rec ~ety_env env ty
+            Phase.localize_rec ~ety_env:ety_env_inner env ty
           in
           let err = Option.merge cstr_err rhs_err ~f:Typing_error.both in
           ((env, err, rhs_cycles @ cstr_cycles), ty, ty)

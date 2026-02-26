@@ -50,8 +50,11 @@ FOLLY_ATTR_WEAK int resolve_napi_callback(
 FOLLY_ATTR_WEAK int src_port_callback(
     const folly::IPAddress& /*destAddr*/,
     uint16_t /*destPort*/,
-    int /*targetNapiId*/,
-    const char* /*ifname*/);
+    int /*targetQueueId*/,
+    const char* /*ifname*/,
+    uint16_t /*startPort*/,
+    uint16_t /*minPort*/,
+    uint16_t /*maxPort*/);
 #else
 static int resolve_napi_callback(int /*ifindex*/, uint32_t /*queueId*/) {
   return -1;
@@ -59,8 +62,11 @@ static int resolve_napi_callback(int /*ifindex*/, uint32_t /*queueId*/) {
 static int src_port_callback(
     const folly::IPAddress& /*destAddr*/,
     uint16_t /*destPort*/,
-    int /*targetNapiId*/,
-    const char* /*ifname*/) {
+    int /*targetQueueId*/,
+    const char* /*ifname*/,
+    uint16_t /*startPort*/,
+    uint16_t /*minPort*/,
+    uint16_t /*maxPort*/) {
   return -1;
 }
 #endif

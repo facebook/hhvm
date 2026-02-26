@@ -17,7 +17,6 @@
 #include <thrift/conformance/stresstest/client/ClientRunner.h>
 
 #include <folly/coro/BlockingWait.h>
-#include <folly/io/async/AsyncIoUringSocketFactory.h>
 #include <thrift/conformance/stresstest/common/TimeoutCallbacks.h>
 #include <thrift/conformance/stresstest/util/Util.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
@@ -170,27 +169,6 @@ class ClientThread : public folly::HHWheelTimer::Callback {
 
   void addClient(std::unique_ptr<StressTestClient> client) {
     clients_.push_back(std::move(client));
-  }
-
-  void bindSocketsForZcRx(const folly::IPAddress& destAddr, uint16_t destPort) {
-    for (auto& client : clients_) {
-      auto* socketTransport =
-          client->getTransport()
-              ->getUnderlyingTransport<folly::AsyncSocketTransport>();
-      if (socketTransport == nullptr) {
-        LOG(ERROR) << "Failed to get AsyncSocketTransport for client: "
-                   << client->getTransport()->getLocalAddress();
-        continue;
-      }
-      bool bindRes = folly::AsyncIoUringSocketFactory::bindSocketForZcRx(
-          *socketTransport, destAddr, destPort);
-      if (!bindRes) {
-        LOG(ERROR) << "Failed to find src port to bind with for dest addr: "
-                   << destAddr << ", dest port: " << destPort
-                   << ", and client: "
-                   << client->getTransport()->getLocalAddress();
-      }
-    }
   }
 
   std::vector<std::unique_ptr<StressTestClient>> removeClients(

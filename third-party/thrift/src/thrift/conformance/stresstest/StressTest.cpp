@@ -56,10 +56,19 @@ int resolve_napi_callback(int ifindex, uint32_t queueId) {
 int src_port_callback(
     const folly::IPAddress& destAddr,
     uint16_t destPort,
-    int targetNapiId,
-    const char* ifname) {
+    int targetQueueId,
+    const char* ifname,
+    uint16_t startPort,
+    uint16_t minPort,
+    uint16_t maxPort) {
   return facebook::network::findSrcPortForQueueId(
-      destAddr, destPort, static_cast<uint32_t>(targetNapiId), ifname);
+      destAddr,
+      destPort,
+      static_cast<uint32_t>(targetQueueId),
+      ifname,
+      startPort,
+      minPort,
+      maxPort);
 }
 #endif
 

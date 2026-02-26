@@ -131,6 +131,22 @@ bool is_func_supported(bool no_stream, const t_function* func) {
       !func->is_interaction_constructor();
 }
 
+enum class field_cpp_kind : uint8_t {
+  /** Plain value or boxed ref with no special handling */
+  value,
+  unique_ptr,
+  shared_ptr_mutable,
+  shared_ptr_const,
+  iobuf,
+};
+
+bool field_has_default_value(
+    const t_field& field, const field_cpp_kind cpp_kind) {
+  return cpp_kind == field_cpp_kind::value &&
+      (field.default_value() != nullptr ||
+       field.qualifier() != t_field_qualifier::optional);
+}
+
 std::vector<std::string> get_type_py3_namespace(
     const t_program* prog, const std::string& suffix) {
   auto ns = get_py3_namespace_with_name(prog);
@@ -149,12 +165,56 @@ class py3_generator_context {
       : program_(program), file_type_(file_type) {}
 
   cached_type_properties& get_cached_type_props(const t_type* type) const;
+
+  field_cpp_kind get_field_cpp_kind(const t_field& field) const {
+    assert(find_cpp_kinds_.contains(&field));
+    return find_cpp_kinds_.at(&field);
+  }
+
   const t_program* program() const { return program_; }
   const FileType* file_type() const { return file_type_; }
+
+  void register_visitors(t_whisker_generator::context_visitor& visitor) {
+    using context = t_whisker_generator::whisker_generator_visitor_context;
+    visitor.add_field_visitor([this](const context&, const t_field& field) {
+      switch (gen::cpp::find_ref_type(field)) {
+        case gen::cpp::reference_type::unique: {
+          find_cpp_kinds_[&field] = field_cpp_kind::unique_ptr;
+          return;
+        }
+        case gen::cpp::reference_type::shared_const: {
+          find_cpp_kinds_[&field] = field_cpp_kind::shared_ptr_const;
+          return;
+        }
+        case gen::cpp::reference_type::shared_mutable: {
+          find_cpp_kinds_[&field] = field_cpp_kind::shared_ptr_mutable;
+          return;
+        }
+        case gen::cpp::reference_type::boxed_intern:
+        case gen::cpp::reference_type::boxed: {
+          find_cpp_kinds_[&field] = field_cpp_kind::value;
+          return;
+        }
+        case gen::cpp::reference_type::none: {
+          const t_type* resolved_type = field.type()->get_true_type();
+          find_cpp_kinds_[&field] =
+              cpp2::get_type(resolved_type) == "std::unique_ptr<folly::IOBuf>"
+              ? field_cpp_kind::iobuf
+              : field_cpp_kind::value;
+          return;
+        }
+        default:
+          throw std::logic_error{"Unhandled ref_type"};
+      }
+    });
+  }
 
  private:
   const t_program* program_;
   const FileType* file_type_;
+
+  std::unordered_map<const t_field*, field_cpp_kind> find_cpp_kinds_;
+
   // These properties are mutable as they are (or contain) caches which must be
   // accessed from a const method context
   mutable cpp_name_resolver name_resolver_;
@@ -911,116 +971,6 @@ class py3_mstch_struct : public mstch_struct {
   bool hidden_fields = false;
 };
 
-class py3_mstch_field : public mstch_field {
- public:
-  enum class RefType : uint8_t {
-    NotRef,
-    Unique,
-    Shared,
-    SharedConst,
-    IOBuf,
-  };
-  py3_mstch_field(
-      const t_field* field, mstch_context& ctx, mstch_element_position pos)
-      : mstch_field(field, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"field:reference?", &py3_mstch_field::isRef},
-            {"field:unique_ref?", &py3_mstch_field::isUniqueRef},
-            {"field:shared_ref?", &py3_mstch_field::isSharedRef},
-            {"field:shared_const_ref?", &py3_mstch_field::isSharedConstRef},
-            {"field:iobuf_ref?", &py3_mstch_field::isIOBufRef},
-            {"field:has_ref_accessor?", &py3_mstch_field::hasRefAccessor},
-            {"field:hasDefaultValue?", &py3_mstch_field::hasDefaultValue},
-            {"field:optional_default?",
-             &py3_mstch_field::has_optional_default_value},
-            {"field:PEP484Optional?", &py3_mstch_field::isPEP484Optional},
-            {"field:isset?", &py3_mstch_field::isSet},
-            {"field:boxed_ref?", &py3_mstch_field::boxed_ref},
-        });
-  }
-
-  mstch::node isRef() { return is_ref(); }
-
-  mstch::node isUniqueRef() { return get_ref_type() == RefType::Unique; }
-
-  mstch::node isSharedRef() { return get_ref_type() == RefType::Shared; }
-
-  mstch::node isSharedConstRef() {
-    return get_ref_type() == RefType::SharedConst;
-  }
-
-  mstch::node isIOBufRef() { return get_ref_type() == RefType::IOBuf; }
-
-  mstch::node hasRefAccessor() {
-    auto ref_type = get_ref_type();
-    return (ref_type == RefType::NotRef || ref_type == RefType::IOBuf);
-  }
-
-  mstch::node hasDefaultValue() { return has_default_value(); }
-
-  mstch::node isPEP484Optional() { return !has_default_value(); }
-
-  mstch::node isSet() {
-    auto ref_type = get_ref_type();
-    return (ref_type == RefType::NotRef || ref_type == RefType::IOBuf) &&
-        field_->qualifier() != t_field_qualifier::required;
-  }
-
-  bool has_default_value() {
-    return !is_ref() &&
-        (field_->default_value() != nullptr ||
-         field_->qualifier() != t_field_qualifier::optional);
-  }
-
-  bool has_optional_default_value() {
-    return field_->qualifier() == t_field_qualifier::optional &&
-        field_->default_value() != nullptr;
-  }
-
-  mstch::node boxed_ref() {
-    return gen::cpp::find_ref_type(*field_) == gen::cpp::reference_type::boxed;
-  }
-
- protected:
-  RefType get_ref_type() {
-    if (ref_type_cached_) {
-      return ref_type_;
-    }
-    ref_type_cached_ = true;
-    switch (gen::cpp::find_ref_type(*field_)) {
-      case gen::cpp::reference_type::unique: {
-        return ref_type_ = RefType::Unique;
-      }
-      case gen::cpp::reference_type::shared_const: {
-        return ref_type_ = RefType::SharedConst;
-      }
-      case gen::cpp::reference_type::shared_mutable: {
-        return ref_type_ = RefType::Shared;
-      }
-      case gen::cpp::reference_type::boxed_intern:
-      case gen::cpp::reference_type::boxed: {
-        return ref_type_ = RefType::NotRef;
-      }
-      case gen::cpp::reference_type::none: {
-        const t_type* resolved_type = field_->type()->get_true_type();
-        if (cpp2::get_type(resolved_type) == "std::unique_ptr<folly::IOBuf>") {
-          return ref_type_ = RefType::IOBuf;
-        }
-        return ref_type_ = RefType::NotRef;
-      }
-    }
-    // Suppress "control reaches end of non-void function" warning
-    throw std::logic_error{"Unhandled ref_type"};
-  }
-
-  bool is_ref() { return get_ref_type() != RefType::NotRef; }
-
-  RefType ref_type_{RefType::NotRef};
-  bool ref_type_cached_ = false;
-};
-
 std::string py3_mstch_program::visit_type_impl(
     const t_type* orig_type, bool fromTypeDef) {
   bool hasPy3EnableCppAdapterAnnot =
@@ -1241,6 +1191,10 @@ class t_mstch_py3_generator : public t_mstch_generator {
   FileType file_type_ = FileType::NotTypesFile;
   py3_generator_context context_{program_, &file_type_};
 
+  void initialize_context(t_whisker_generator::context_visitor& visitor) final {
+    context_.register_visitors(visitor);
+  }
+
   whisker::map::raw globals(prototype_database& proto) const override {
     whisker::map::raw globals = t_mstch_generator::globals(proto);
     globals["py_string_literal"] = whisker::dsl::make_function(
@@ -1278,6 +1232,57 @@ class t_mstch_py3_generator : public t_mstch_generator {
       return self.kind() == t_const_value::CV_STRING
           ? get_escaped_string<nonascii_handling::no_escape>(self.get_string())
           : "";
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_field>::ptr make_prototype_for_field(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_field(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_field>::extends(std::move(base));
+
+    def.property("reference?", [this](const t_field& self) {
+      return context_.get_field_cpp_kind(self) != field_cpp_kind::value;
+    });
+    def.property("unique_ref?", [this](const t_field& self) {
+      return context_.get_field_cpp_kind(self) == field_cpp_kind::unique_ptr;
+    });
+    def.property("shared_ref?", [this](const t_field& self) {
+      return context_.get_field_cpp_kind(self) ==
+          field_cpp_kind::shared_ptr_mutable;
+    });
+    def.property("shared_const_ref?", [this](const t_field& self) {
+      return context_.get_field_cpp_kind(self) ==
+          field_cpp_kind::shared_ptr_const;
+    });
+    def.property("iobuf_ref?", [this](const t_field& self) {
+      return context_.get_field_cpp_kind(self) == field_cpp_kind::iobuf;
+    });
+    def.property("has_ref_accessor?", [this](const t_field& self) {
+      const field_cpp_kind cpp_kind = context_.get_field_cpp_kind(self);
+      return cpp_kind == field_cpp_kind::value ||
+          cpp_kind == field_cpp_kind::iobuf;
+    });
+    def.property("hasDefaultValue?", [this](const t_field& self) {
+      return field_has_default_value(self, context_.get_field_cpp_kind(self));
+    });
+    def.property("optional_default?", [](const t_field& self) {
+      return self.qualifier() == t_field_qualifier::optional &&
+          self.default_value() != nullptr;
+    });
+    def.property("PEP484Optional?", [this](const t_field& self) {
+      return !field_has_default_value(self, context_.get_field_cpp_kind(self));
+    });
+    def.property("isset?", [this](const t_field& self) {
+      const field_cpp_kind cpp_kind = context_.get_field_cpp_kind(self);
+      return (cpp_kind == field_cpp_kind::value ||
+              cpp_kind == field_cpp_kind::iobuf) &&
+          self.qualifier() != t_field_qualifier::required;
+    });
+    def.property("boxed_ref?", [](const t_field& self) {
+      return gen::cpp::find_ref_type(self) == gen::cpp::reference_type::boxed;
     });
 
     return std::move(def).make();
@@ -1439,7 +1444,6 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_type>(&context_);
   mstch_context_.add<py3_mstch_typedef>();
   mstch_context_.add<py3_mstch_struct>();
-  mstch_context_.add<py3_mstch_field>();
 }
 
 void t_mstch_py3_generator::generate_init_files() {

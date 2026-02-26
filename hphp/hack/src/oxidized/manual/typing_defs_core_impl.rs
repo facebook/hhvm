@@ -104,33 +104,13 @@ impl std::fmt::Debug for Ty_ {
             Tdynamic => write!(f, "Tdynamic"),
             Toption(ty) => f.debug_tuple("Toption").field(ty).finish(),
             Tprim(tprim) => write!(f, "Tprim({:?})", tprim),
-            Tneg(tprim) => write!(f, "Tneg({:?})", tprim),
-            Tlabel(name) => write!(f, "Tlabel({:?})", name),
             Tfun(fun_type) => f.debug_tuple("Tfun").field(fun_type).finish(),
             Ttuple(tys) => f.debug_tuple("Ttuple").field(tys).finish(),
             Tshape(shape) => f.debug_tuple("Tshape").field(shape).finish(),
-            Tvar(ident) => f.debug_tuple("Tvar").field(ident).finish(),
             Tgeneric(name) => f.debug_tuple("Tgeneric").field(name).finish(),
             Tunion(tys) => f.debug_tuple("Tunion").field(tys).finish(),
             Tintersection(tys) => f.debug_tuple("Tintersection").field(tys).finish(),
             TvecOrDict(tk, tv) => f.debug_tuple("TvecOrDict").field(tk).field(tv).finish(),
-            Tnewtype(name, tys, constraint) => f
-                .debug_tuple("Tnewtype")
-                .field(name)
-                .field(tys)
-                .field(constraint)
-                .finish(),
-            Tdependent(dependent_type, ty) => f
-                .debug_tuple("Tdependent")
-                .field(dependent_type)
-                .field(ty)
-                .finish(),
-            Tclass(id, exact, tys) => f
-                .debug_tuple("Tclass")
-                .field(id)
-                .field(exact)
-                .field(tys)
-                .finish(),
             TclassPtr(ty) => f.debug_tuple("TclassPtr").field(ty).finish(),
         }
     }

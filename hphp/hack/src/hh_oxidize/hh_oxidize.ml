@@ -52,6 +52,7 @@ let oxidize filename =
   let module_name = String.chop_suffix_exn in_basename ~suffix:".ml" in
   let module_name = convert_module_name module_name in
   log "Converting %s" module_name;
+  Convert_type_decl.reset_excluded_types ();
   let oxidized_module =
     Utils.with_log_indent (fun () ->
         Output.with_output_context ~module_name ~mli_signature (fun () ->

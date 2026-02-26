@@ -17,9 +17,51 @@ open State
 open Convert_longident
 open Rust_type
 
+(* Types marked with [@@oxidize.exclude] are not generated in Rust.
+   GADT constructors whose return type instantiates a type parameter
+   with an excluded type are silently filtered out. *)
+let excluded_types : SSet.t ref = ref SSet.empty
+
+let reset_excluded_types () = excluded_types := SSet.empty
+
+let add_excluded_type name = excluded_types := SSet.add name !excluded_types
+
+let is_excluded_type name = SSet.mem name !excluded_types
+
+let has_oxidize_exclude_attr (attrs : attributes) : bool =
+  List.exists attrs ~f:(fun { attr_name; attr_payload; _ } ->
+      match (attr_name, attr_payload) with
+      | ({ txt = "oxidize.exclude"; _ }, PStr []) -> true
+      | _ -> false)
+
+let rec collect_type_names_from_core_type (ct : core_type) : string list =
+  match ct.ptyp_desc with
+  | Ptyp_constr ({ txt = Lident name; _ }, args) ->
+    name :: List.concat_map args ~f:collect_type_names_from_core_type
+  | Ptyp_constr (_, args) ->
+    List.concat_map args ~f:collect_type_names_from_core_type
+  | Ptyp_tuple tys -> List.concat_map tys ~f:collect_type_names_from_core_type
+  | _ -> []
+
+(** Check if a GADT constructor's return type instantiates a type parameter
+    with an excluded type. For example, [Tvar : Tvid.t -> locl_phase ty_]
+    has [pcd_res = locl_phase ty_], and if [locl_phase] is excluded, this
+    constructor is filtered out. *)
+let pcd_res_references_excluded_type (cd : constructor_declaration) : bool =
+  match cd.pcd_res with
+  | None -> false
+  | Some ct ->
+    (match ct.ptyp_desc with
+    | Ptyp_constr (_, args) ->
+      List.exists args ~f:(fun arg ->
+          List.exists
+            (collect_type_names_from_core_type arg)
+            ~f:is_excluded_type)
+    | _ -> false)
+
 let stringify_attribute { attr_name; attr_payload; _ } =
   match (attr_name, attr_payload) with
-  | ({ txt = "ocaml.doc" | "value"; _ }, _) -> None
+  | ({ txt = "ocaml.doc" | "value" | "oxidize.exclude"; _ }, _) -> None
   | ({ txt; _ }, PStr []) -> Some txt
   | ({ txt; _ }, PStr [structure_item]) ->
     let item =
@@ -947,6 +989,10 @@ let type_declaration ~mutual_rec ~safe_ints ~original_type_name name td =
           (deserialize_in_arena_macro ~force_derive_copy:false))
   (* Variant types, including GADTs. *)
   | (Ptype_variant ctors, None) ->
+    (* Filter out GADT constructors whose return type references an excluded type *)
+    let ctors =
+      List.filter ctors ~f:(fun cd -> not (pcd_res_references_excluded_type cd))
+    in
     let all_nullary =
       List.for_all ctors ~f:(fun c -> 0 = ctor_arg_len c.pcd_args)
     in
@@ -1028,7 +1074,10 @@ let type_declaration ?(mutual_rec = false) td =
   let name = convert_type_name rust_name in
   let name = rename name in
   let mod_name = curr_module_name () in
-  if denylisted name then
+  if has_oxidize_exclude_attr td.ptype_attributes then begin
+    log "Not converting type %s::%s: marked [@@oxidize.exclude]" mod_name name;
+    add_excluded_type original_type_name
+  end else if denylisted name then
     log "Not converting type %s::%s: it was denylisted" mod_name name
   else
     match Configuration.extern_type name with

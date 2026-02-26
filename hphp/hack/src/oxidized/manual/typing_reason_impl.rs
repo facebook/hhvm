@@ -6,75 +6,6 @@
 use crate::pos::Pos;
 use crate::typing_reason::*;
 
-impl WitnessLocl {
-    pub fn pos(&self) -> &Pos {
-        match self {
-            Self::Witness(pos)
-            | Self::IdxVector(pos)
-            | Self::IdxString(pos)
-            | Self::Foreach(pos)
-            | Self::Asyncforeach(pos)
-            | Self::Arith(pos)
-            | Self::ArithRet(pos)
-            | Self::ArithRetInt(pos)
-            | Self::ArithDynamic(pos)
-            | Self::BitwiseDynamic(pos)
-            | Self::IncdecDynamic(pos)
-            | Self::Comp(pos)
-            | Self::ConcatRet(pos)
-            | Self::LogicRet(pos)
-            | Self::Bitwise(pos)
-            | Self::BitwiseRet(pos)
-            | Self::NoReturn(pos)
-            | Self::NoReturnAsync(pos)
-            | Self::RetFunKind(pos, _)
-            | Self::Throw(pos)
-            | Self::Placeholder(pos)
-            | Self::RetDiv(pos)
-            | Self::YieldGen(pos)
-            | Self::YieldAsyncgen(pos)
-            | Self::YieldAsyncnull(pos)
-            | Self::YieldSend(pos)
-            | Self::UnknownClass(pos)
-            | Self::VarParam(pos)
-            | Self::UnpackParam(pos, _, _)
-            | Self::NullsafeOp(pos)
-            | Self::NullsafePipeOp(pos)
-            | Self::Predicated(pos, _)
-            | Self::IsRefinement(pos)
-            | Self::AsRefinement(pos)
-            | Self::Equal(pos)
-            | Self::Using(pos)
-            | Self::DynamicProp(pos)
-            | Self::DynamicCall(pos)
-            | Self::DynamicConstruct(pos)
-            | Self::IdxDict(pos)
-            | Self::IdxSetElement(pos)
-            | Self::UnsetField(pos, _)
-            | Self::Regex(pos)
-            | Self::TypeVariable(pos, _)
-            | Self::TypeVariableGenerics(pos, _, _, _)
-            | Self::TypeVariableError(pos, _)
-            | Self::Shape(pos, _)
-            | Self::ShapeLiteral(pos)
-            | Self::Destructure(pos)
-            | Self::KeyValueCollectionKey(pos)
-            | Self::Splice(pos)
-            | Self::EtBoolean(pos)
-            | Self::ConcatOperand(pos)
-            | Self::InterpOperand(pos)
-            | Self::MissingClass(pos)
-            | Self::CapturedLike(pos)
-            | Self::UnsafeCast(pos)
-            | Self::Pattern(pos)
-            | Self::JoinPoint(pos)
-            | Self::StaticPropertyAccess(pos)
-            | Self::ClassConstantAccess(pos)
-            | Self::Condition(pos) => pos,
-        }
-    }
-}
-
 impl WitnessDecl {
     pub fn pos(&self) -> &Pos {
         match self {
@@ -116,35 +47,10 @@ impl Reason {
     pub fn pos(&self) -> Option<&Pos> {
         use T_::*;
         match self {
-            NoReason => None,
-            Invalid => None,
-            MissingField => None,
-            FromWitnessLocl(witness) => Some(witness.pos()),
+            NoReason | Invalid => None,
             FromWitnessDecl(witness) => Some(witness.pos()),
-            Idx(pos, _)
-            | ArithRetFloat(pos, _, _)
-            | ArithRetNum(pos, _, _)
-            | Format(pos, _, _)
-            | LambdaParam(pos, _)
-            | Typeconst(box NoReason, (pos, _), _, _)
-            | RigidTvarEscape(pos, _, _, _) => Some(pos),
-            DynamicPartialEnforcement(pos_or_decl, _, _)
-            | SDTCall(pos_or_decl, _)
-            | LikeCall(pos_or_decl, _) => Some(pos_or_decl),
-            OpaqueTypeFromModule(pos_or_decl, _, _) => Some(pos_or_decl),
-            LostInfo(_, t, _)
-            | TypeAccess(t, _)
-            | DynamicCoercion(t)
-            | ExprDepType(t, _, _)
-            | Typeconst(t, _, _, _)
-            | Instantiate { type__: t, .. } => t.pos(),
-            LowerBound { .. }
-            | Flow { .. }
-            | PrjBoth { .. }
-            | PrjOne { .. }
-            | Axiom { .. }
-            | Def(_, _)
-            | Solved { .. } => None,
+            Typeconst(box NoReason, (pos, _), _, _) => Some(pos),
+            Typeconst(t, _, _, _) | ExprDepType(t, _, _) | Instantiate { type__: t, .. } => t.pos(),
         }
     }
 }

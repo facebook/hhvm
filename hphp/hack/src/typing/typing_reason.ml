@@ -143,7 +143,8 @@ let blame_to_json (Blame (pos, src)) =
 (* create private types to represent the different type phases *)
 type decl_phase = private DeclPhase [@@deriving eq, hash, show]
 
-type locl_phase = private LoclPhase [@@deriving eq, hash, show]
+type locl_phase = private LoclPhase
+[@@deriving eq, hash, show] [@@oxidize.exclude]
 
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
 let _hash_fold_phase hsv _ = hsv
@@ -379,7 +380,7 @@ type witness_locl =
   | Join_point of Pos.t
   | Static_property_access of Pos.t
   | Class_constant_access of Pos.t
-[@@deriving hash]
+[@@deriving hash] [@@oxidize.exclude]
 
 let witness_locl_to_raw_pos = function
   | Witness pos

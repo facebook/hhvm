@@ -34,7 +34,8 @@ type ce_visibility =
 (* create private types to represent the different type phases *)
 type decl_phase = Reason.decl_phase [@@deriving eq, hash, show]
 
-type locl_phase = Reason.locl_phase [@@deriving eq, hash, show]
+type locl_phase = Reason.locl_phase
+[@@deriving eq, hash, show] [@@oxidize.exclude]
 
 type val_kind =
   | Lval
@@ -151,7 +152,7 @@ type dependent_type =
    *  The expression $x->foo() would have a different one
    *)
   | DTexpr of Expression_id.t
-[@@deriving eq, hash, ord, show]
+[@@deriving eq, hash, ord, show] [@@oxidize.exclude]
 
 type user_attribute_param =
   | Classname of string
@@ -231,6 +232,7 @@ type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
 and type_tag_generic =
   | Filled of locl_phase ty
   | Wildcard of int
+[@@oxidize.exclude]
 
 and type_tag =
   | BoolTag
@@ -241,28 +243,33 @@ and type_tag =
   | ResourceTag
   | NullTag
   | ClassTag of Ast_defs.id_ * type_tag_generic list
+[@@oxidize.exclude]
 
 and shape_field_predicate = {
   sfp_optional: bool;
   sfp_predicate: type_predicate;
 }
+[@@oxidize.exclude]
 
 and shape_predicate = {
   sp_allows_unknown_fields: bool;
   sp_fields: shape_field_predicate TShapeMap.t;
 }
+[@@oxidize.exclude]
 
 (* TODO optional and variadic components T201398626 T201398652 *)
-and tuple_predicate = { tp_required: type_predicate list }
+and tuple_predicate = { tp_required: type_predicate list } [@@oxidize.exclude]
 
 and type_predicate_ =
   | IsTag of type_tag
   | IsTupleOf of tuple_predicate
   | IsShapeOf of shape_predicate
   | IsUnionOf of type_predicate list
+[@@oxidize.exclude]
 
 and type_predicate =
   (Reason.t[@hash.ignore] [@transform.opaque]) * type_predicate_
+[@@oxidize.exclude]
 
 (** see .mli *)
 and 'phase shape_field_type = {
@@ -310,6 +317,7 @@ and 'phase taccess_type = 'phase ty * (pos_id[@transform.opaque])
 and exact =
   | Exact
   | Nonexact of locl_phase class_refinement
+[@@oxidize.exclude]
 
 and 'phase class_refinement = { cr_consts: 'phase refined_const SMap.t }
 

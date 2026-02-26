@@ -2394,7 +2394,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             }
             Ty_::Taccess(_)
             | Ty_::Tany(_)
-            | Ty_::Tclass(_, _, _)
             | Ty_::Tdynamic
             | Ty_::Tgeneric(_)
             | Ty_::Tmixed
@@ -2402,11 +2401,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             | Ty_::Tnonnull
             | Ty_::Tprim(_)
             | Ty_::Tthis => return ty,
-            Ty_::Tdependent(_, _)
-            | Ty_::Tneg(_)
-            | Ty_::Tlabel(_)
-            | Ty_::Tnewtype(_, _, _)
-            | Ty_::Tvar(_) => panic!("unexpected decl type in constraint"),
         };
         Ty(ty.0, Box::new(ty_))
     }

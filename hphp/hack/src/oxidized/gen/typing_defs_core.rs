@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cfe4776107c2527bd92f2a0fc9302a52>>
+// @generated SignedSource<<b9ea9d094bfbf032ba5b6a5c84b75bb3>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -260,27 +260,6 @@ arena_deserializer::impl_deserialize_in_arena!(ConsistentKind);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
-#[repr(C, u8)]
-pub enum DependentType {
-    DTexpr(isize),
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
 #[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[repr(C, u8)]
 pub enum UserAttributeParam {
@@ -518,172 +497,6 @@ pub struct FunType {
 #[repr(C)]
 pub struct Ty(pub reason::T_, pub Box<Ty_>);
 
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[repr(C, u8)]
-pub enum TypeTagGeneric {
-    Filled(Ty),
-    Wildcard(isize),
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[repr(C, u8)]
-pub enum TypeTag {
-    BoolTag,
-    IntTag,
-    ArraykeyTag,
-    FloatTag,
-    NumTag,
-    ResourceTag,
-    NullTag,
-    ClassTag(ast_defs::Id_, Vec<TypeTagGeneric>),
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "sfp_")]
-#[repr(C)]
-pub struct ShapeFieldPredicate {
-    pub optional: bool,
-    pub predicate: TypePredicate,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "sp_")]
-#[repr(C)]
-pub struct ShapePredicate {
-    pub allows_unknown_fields: bool,
-    pub fields: t_shape_map::TShapeMap<ShapeFieldPredicate>,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[repr(C)]
-pub struct TuplePredicate {
-    pub tp_required: Vec<TypePredicate>,
-}
-
-/// Represents the predicate of a type switch, i.e. in the expression
-/// ```
-///      if ($x is Bool) { ... } else { ... }
-/// ```
-///
-/// The predicate would be `is Bool`
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[repr(C, u8)]
-pub enum TypePredicate_ {
-    IsTag(TypeTag),
-    IsTupleOf(TuplePredicate),
-    IsShapeOf(ShapePredicate),
-    IsUnionOf(Vec<TypePredicate>),
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[repr(C)]
-pub struct TypePredicate(pub reason::Reason, pub Box<TypePredicate_>);
-
 /// A shape may specify whether or not fields are required. For example, consider
 /// this typedef:
 ///
@@ -820,41 +633,6 @@ pub enum Ty_ {
     /// renamed to Tinstance, where a Tinstance is an instantiation of a Tclass
     #[rust_to_ocaml(name = "Tclass_ptr")]
     TclassPtr(Ty),
-    Tvar(isize),
-    /// The type of an opaque type or enum. Outside their defining files or
-    /// when they represent enums, they are "opaque", which means that they
-    /// only unify with themselves. Within a file, uses of newtypes are
-    /// expanded to their definitions (unless the newtype is an enum).
-    ///
-    /// However, it is possible to have a constraint that allows us to relax
-    /// opaqueness. For example:
-    ///
-    /// newtype MyType as int = ...
-    ///
-    /// or
-    ///
-    /// enum MyType: int as int { ... }
-    ///
-    /// Outside of the file where the type was defined, this translates to:
-    ///
-    /// Tnewtype ((pos, "MyType"), [], Tprim Tint)
-    ///
-    /// which means that MyType is abstract, but is a subtype of int as well.
-    /// When the constraint is omitted, the third parameter is set to mixed.
-    ///
-    /// The second parameter is the list of type arguments to the type.
-    Tnewtype(String, Vec<Ty>, Ty),
-    /// see dependent_type
-    Tdependent(DependentType, Ty),
-    /// An instance of a class or interface, ty list are the arguments
-    /// If exact=Exact, then this represents instances of *exactly* this class
-    /// If exact=Nonexact, this also includes subclasses
-    /// TODO(T199606542) rename this to Tinstance
-    Tclass(PosId, Exact, Vec<Ty>),
-    /// The negation of the [type_predicate]
-    Tneg(TypePredicate),
-    /// The type of the label expression #ID
-    Tlabel(String),
 }
 
 #[derive(
@@ -875,28 +653,6 @@ pub enum Ty_ {
 #[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct TaccessType(pub Ty, pub PosId);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[repr(C, u8)]
-pub enum Exact {
-    Exact,
-    Nonexact(ClassRefinement),
-}
 
 /// Class refinements are for type annotations like
 ///

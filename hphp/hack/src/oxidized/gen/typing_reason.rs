@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<36b0f17ec3f46b3a387886940028cc8b>>
+// @generated SignedSource<<b59f42b95d33a89c53c99ef03c945894>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -402,135 +402,6 @@ pub enum FlowKind {
     FlowInstantiate(String),
 }
 
-/// Witness the reason for a type during typing using the position of a hint or
-/// expression
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving hash")]
-#[repr(C, u8)]
-pub enum WitnessLocl {
-    Witness(pos::Pos),
-    #[rust_to_ocaml(name = "Idx_vector")]
-    IdxVector(pos::Pos),
-    #[rust_to_ocaml(name = "Idx_string")]
-    IdxString(pos::Pos),
-    Foreach(pos::Pos),
-    Asyncforeach(pos::Pos),
-    Arith(pos::Pos),
-    #[rust_to_ocaml(name = "Arith_ret")]
-    ArithRet(pos::Pos),
-    #[rust_to_ocaml(name = "Arith_ret_int")]
-    ArithRetInt(pos::Pos),
-    #[rust_to_ocaml(name = "Arith_dynamic")]
-    ArithDynamic(pos::Pos),
-    #[rust_to_ocaml(name = "Bitwise_dynamic")]
-    BitwiseDynamic(pos::Pos),
-    #[rust_to_ocaml(name = "Incdec_dynamic")]
-    IncdecDynamic(pos::Pos),
-    Comp(pos::Pos),
-    #[rust_to_ocaml(name = "Concat_ret")]
-    ConcatRet(pos::Pos),
-    Condition(pos::Pos),
-    #[rust_to_ocaml(name = "Logic_ret")]
-    LogicRet(pos::Pos),
-    Bitwise(pos::Pos),
-    #[rust_to_ocaml(name = "Bitwise_ret")]
-    BitwiseRet(pos::Pos),
-    #[rust_to_ocaml(name = "No_return")]
-    NoReturn(pos::Pos),
-    #[rust_to_ocaml(name = "No_return_async")]
-    NoReturnAsync(pos::Pos),
-    #[rust_to_ocaml(name = "Ret_fun_kind")]
-    RetFunKind(pos::Pos, ast_defs::FunKind),
-    Throw(pos::Pos),
-    Placeholder(pos::Pos),
-    #[rust_to_ocaml(name = "Ret_div")]
-    RetDiv(pos::Pos),
-    #[rust_to_ocaml(name = "Yield_gen")]
-    YieldGen(pos::Pos),
-    #[rust_to_ocaml(name = "Yield_asyncgen")]
-    YieldAsyncgen(pos::Pos),
-    #[rust_to_ocaml(name = "Yield_asyncnull")]
-    YieldAsyncnull(pos::Pos),
-    #[rust_to_ocaml(name = "Yield_send")]
-    YieldSend(pos::Pos),
-    #[rust_to_ocaml(name = "Unknown_class")]
-    UnknownClass(pos::Pos),
-    #[rust_to_ocaml(name = "Var_param")]
-    VarParam(pos::Pos),
-    #[rust_to_ocaml(name = "Unpack_param")]
-    UnpackParam(pos::Pos, pos_or_decl::PosOrDecl, isize),
-    #[rust_to_ocaml(name = "Nullsafe_op")]
-    NullsafeOp(pos::Pos),
-    #[rust_to_ocaml(name = "Nullsafe_pipe_op")]
-    NullsafePipeOp(pos::Pos),
-    Predicated(pos::Pos, String),
-    #[rust_to_ocaml(name = "Is_refinement")]
-    IsRefinement(pos::Pos),
-    #[rust_to_ocaml(name = "As_refinement")]
-    AsRefinement(pos::Pos),
-    Equal(pos::Pos),
-    Using(pos::Pos),
-    #[rust_to_ocaml(name = "Dynamic_prop")]
-    DynamicProp(pos::Pos),
-    #[rust_to_ocaml(name = "Dynamic_call")]
-    DynamicCall(pos::Pos),
-    #[rust_to_ocaml(name = "Dynamic_construct")]
-    DynamicConstruct(pos::Pos),
-    #[rust_to_ocaml(name = "Idx_dict")]
-    IdxDict(pos::Pos),
-    #[rust_to_ocaml(name = "Idx_set_element")]
-    IdxSetElement(pos::Pos),
-    #[rust_to_ocaml(name = "Unset_field")]
-    UnsetField(pos::Pos, String),
-    Regex(pos::Pos),
-    #[rust_to_ocaml(name = "Type_variable")]
-    TypeVariable(pos::Pos, isize),
-    #[rust_to_ocaml(name = "Type_variable_generics")]
-    TypeVariableGenerics(pos::Pos, String, String, isize),
-    #[rust_to_ocaml(name = "Type_variable_error")]
-    TypeVariableError(pos::Pos, isize),
-    Shape(pos::Pos, String),
-    #[rust_to_ocaml(name = "Shape_literal")]
-    ShapeLiteral(pos::Pos),
-    Destructure(pos::Pos),
-    #[rust_to_ocaml(name = "Key_value_collection_key")]
-    KeyValueCollectionKey(pos::Pos),
-    Splice(pos::Pos),
-    #[rust_to_ocaml(name = "Et_boolean")]
-    EtBoolean(pos::Pos),
-    #[rust_to_ocaml(name = "Concat_operand")]
-    ConcatOperand(pos::Pos),
-    #[rust_to_ocaml(name = "Interp_operand")]
-    InterpOperand(pos::Pos),
-    #[rust_to_ocaml(name = "Missing_class")]
-    MissingClass(pos::Pos),
-    #[rust_to_ocaml(name = "Captured_like")]
-    CapturedLike(pos::Pos),
-    #[rust_to_ocaml(name = "Unsafe_cast")]
-    UnsafeCast(pos::Pos),
-    Pattern(pos::Pos),
-    #[rust_to_ocaml(name = "Join_point")]
-    JoinPoint(pos::Pos),
-    #[rust_to_ocaml(name = "Static_property_access")]
-    StaticPropertyAccess(pos::Pos),
-    #[rust_to_ocaml(name = "Class_constant_access")]
-    ClassConstantAccess(pos::Pos),
-}
-
 /// Witness the reason for a type during decling using the position of a hint
 #[derive(
     Clone,
@@ -667,100 +538,15 @@ pub enum T_ {
     },
     #[rust_to_ocaml(name = "No_reason")]
     NoReason,
-    /// Lift a typing-time witness into a reason
-    #[rust_to_ocaml(name = "From_witness_locl")]
-    FromWitnessLocl(WitnessLocl),
-    /// Records that a type with reason [bound] acted as a lower bound
-    /// for the type with reason [of_]
-    #[rust_to_ocaml(name = "Lower_bound")]
-    LowerBound {
-        bound: Box<T_>,
-        of__: Box<T_>,
-    },
-    /// Records the flow of a type from an expression or hint into an
-    /// expression during typing
-    Flow {
-        from: Box<T_>,
-        kind: FlowKind,
-        into: Box<T_>,
-    },
-    /// Represents the projection of the sub- and supertype during subtype
-    /// constraints simplifiction. [sub_prj] is the subtype resulting from the
-    /// projection whilst [sub] and [super] are the reasons for the parent
-    /// types
-    #[rust_to_ocaml(name = "Prj_both")]
-    PrjBoth {
-        sub_prj: Box<T_>,
-        prj: PrjSymm,
-        sub: Box<T_>,
-        super_: Box<T_>,
-    },
-    /// Represents the projection of the sub- or supertype during subtype
-    /// constraints simplifiction. [part] is the sub/supertype resulting from
-    /// the projection whilst [whole] is the reason for the parent type.
-    #[rust_to_ocaml(name = "Prj_one")]
-    PrjOne {
-        part: Box<T_>,
-        whole: Box<T_>,
-        prj: PrjAsymm,
-    },
-    /// Represents the use of a user-defined axiom about either the
-    /// subtype or supertype during subtype constraints simplifiction.
-    /// [next] is the sub/supertype resulting from the application of the
-    /// axiom whilst [prev] is reason for original type.
-    Axiom {
-        next: Box<T_>,
-        prev: Box<T_>,
-        axiom: Axiom,
-    },
-    /// Records the definition site of type alongside the reason recording its
-    /// use.
-    Def(pos_or_decl::PosOrDecl, Box<T_>),
-    Solved {
-        solution: Box<T_>,
-        of__: isize,
-        in__: Box<T_>,
-    },
     Invalid,
-    #[rust_to_ocaml(name = "Missing_field")]
-    MissingField,
-    /// Used as an index into a vector-like
-    /// array or string. Position of indexing,
-    /// reason for the indexed type
-    Idx(pos::Pos, Box<T_>),
-    /// pos, arg float typing reason, arg position
-    #[rust_to_ocaml(name = "Arith_ret_float")]
-    ArithRetFloat(pos::Pos, Box<T_>, ArgPosition),
-    /// pos, arg num typing reason, arg position
-    #[rust_to_ocaml(name = "Arith_ret_num")]
-    ArithRetNum(pos::Pos, Box<T_>, ArgPosition),
-    #[rust_to_ocaml(name = "Lost_info")]
-    LostInfo(String, Box<T_>, Blame),
-    Format(pos::Pos, String, Box<T_>),
     Typeconst(
         Box<T_>,
         (pos_or_decl::PosOrDecl, String),
         lazy::Lazy<String>,
         Box<T_>,
     ),
-    #[rust_to_ocaml(name = "Type_access")]
-    TypeAccess(Box<T_>, Vec<(Box<T_>, lazy::Lazy<String>)>),
     #[rust_to_ocaml(name = "Expr_dep_type")]
     ExprDepType(Box<T_>, pos_or_decl::PosOrDecl, ExprDepTypeReason),
-    #[rust_to_ocaml(name = "Lambda_param")]
-    LambdaParam(pos::Pos, Box<T_>),
-    #[rust_to_ocaml(name = "Dynamic_coercion")]
-    DynamicCoercion(Box<T_>),
-    #[rust_to_ocaml(name = "Dynamic_partial_enforcement")]
-    DynamicPartialEnforcement(pos_or_decl::PosOrDecl, String, Box<T_>),
-    #[rust_to_ocaml(name = "Rigid_tvar_escape")]
-    RigidTvarEscape(pos::Pos, String, String, Box<T_>),
-    #[rust_to_ocaml(name = "Opaque_type_from_module")]
-    OpaqueTypeFromModule(pos_or_decl::PosOrDecl, String, Box<T_>),
-    #[rust_to_ocaml(name = "SDT_call")]
-    SDTCall(pos_or_decl::PosOrDecl, Box<T_>),
-    #[rust_to_ocaml(name = "Like_call")]
-    LikeCall(pos_or_decl::PosOrDecl, Box<T_>),
 }
 
 pub type Reason = T_;

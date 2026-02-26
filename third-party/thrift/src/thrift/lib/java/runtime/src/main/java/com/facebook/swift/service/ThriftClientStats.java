@@ -122,18 +122,31 @@ public class ThriftClientStats {
   }
 
   private void incrementCounterValues(String key) {
-    allTimeCounters.computeIfAbsent(key, k -> new LongAdder()).increment();
+    // Optimistic get-first to avoid ConcurrentHashMap bucket-level locking in computeIfAbsent
+    LongAdder adder = allTimeCounters.get(key);
+    if (adder == null) {
+      adder = allTimeCounters.computeIfAbsent(key, k -> new LongAdder());
+    }
+    adder.increment();
 
-    counters.computeIfAbsent(key, k -> new SlidingTimeWindowMovingCounter()).add(1);
+    SlidingTimeWindowMovingCounter counter = counters.get(key);
+    if (counter == null) {
+      counter = counters.computeIfAbsent(key, k -> new SlidingTimeWindowMovingCounter());
+    }
+    counter.add(1);
   }
 
   private void addHistogramValue(String key, long value) {
-    distributions
-        .computeIfAbsent(
-            key,
-            k ->
-                new MultiWindowDistribution(
-                    asList(Quantile.P99, Quantile.P90, Quantile.AVG, Quantile.SUM)))
-        .add(value);
+    // Optimistic get-first to avoid ConcurrentHashMap bucket-level locking in computeIfAbsent
+    MultiWindowDistribution dist = distributions.get(key);
+    if (dist == null) {
+      dist =
+          distributions.computeIfAbsent(
+              key,
+              k ->
+                  new MultiWindowDistribution(
+                      asList(Quantile.P99, Quantile.P90, Quantile.AVG, Quantile.SUM)));
+    }
+    dist.add(value);
   }
 }

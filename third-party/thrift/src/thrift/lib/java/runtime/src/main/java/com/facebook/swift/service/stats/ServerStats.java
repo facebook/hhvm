@@ -187,21 +187,40 @@ public class ServerStats {
   }
 
   private void incrementAverages(String key, int value) {
-    movingAverages.computeIfAbsent(key, k -> new ExpMovingAverageRate()).add(value);
+    // Optimistic get-first to avoid ConcurrentHashMap bucket-level locking in computeIfAbsent
+    ExpMovingAverageRate rate = movingAverages.get(key);
+    if (rate == null) {
+      rate = movingAverages.computeIfAbsent(key, k -> new ExpMovingAverageRate());
+    }
+    rate.add(value);
   }
 
   private void incrementCounter(String key, int value) {
-    allTimeCounters.computeIfAbsent(key, k -> new LongAdder()).add(value);
-    counters.computeIfAbsent(key, k -> new SlidingTimeWindowMovingCounter()).add(value);
+    // Optimistic get-first to avoid ConcurrentHashMap bucket-level locking in computeIfAbsent
+    LongAdder adder = allTimeCounters.get(key);
+    if (adder == null) {
+      adder = allTimeCounters.computeIfAbsent(key, k -> new LongAdder());
+    }
+    adder.add(value);
+
+    SlidingTimeWindowMovingCounter counter = counters.get(key);
+    if (counter == null) {
+      counter = counters.computeIfAbsent(key, k -> new SlidingTimeWindowMovingCounter());
+    }
+    counter.add(value);
   }
 
   private void updateDistribution(String key, long value) {
-    distributions
-        .computeIfAbsent(
-            key,
-            k ->
-                new MultiWindowDistribution(
-                    Arrays.asList(Quantile.AVG, Quantile.P95, Quantile.P99)))
-        .add(value);
+    // Optimistic get-first to avoid ConcurrentHashMap bucket-level locking in computeIfAbsent
+    MultiWindowDistribution dist = distributions.get(key);
+    if (dist == null) {
+      dist =
+          distributions.computeIfAbsent(
+              key,
+              k ->
+                  new MultiWindowDistribution(
+                      Arrays.asList(Quantile.AVG, Quantile.P95, Quantile.P99)));
+    }
+    dist.add(value);
   }
 }

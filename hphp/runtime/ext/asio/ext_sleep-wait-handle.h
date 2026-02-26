@@ -43,6 +43,7 @@ struct c_SleepWaitHandle final :
 
  public:
   bool cancel(const Object& exception);
+  bool cancelNoThrow();
   bool process();
   String getName();
   void exitContext(ContextIndex contextIdx);
@@ -53,6 +54,7 @@ struct c_SleepWaitHandle final :
  private:
   void setState(uint8_t state) { setKindState(Kind::Sleep, state); }
   void initialize(int64_t usecs);
+  bool cancelImpl(const Object* exception);
 
   AsioSession::TimePoint m_waketime;
   friend Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs);

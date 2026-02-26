@@ -356,6 +356,19 @@ function name<T>(Awaitable<T> $awaitable)[]: string {
 <<__Native>>
 function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
 
+
+/**
+ * Cancels a sleep wait handle, if it's still pending. Returns true if the wait-
+ * handle was cancelled (i.e. called before it finished), false otherwise.
+ *
+ * Unlike cancel(), this will not raise an exception, but will instead return
+ * immediately from the sleep.
+ *
+ * Throw InvalidArgumentException, if Awaitable is not a sleep wait handle.
+ */
+<<__Native>>
+function cancel_sleep_nothrow<T>(SleepWaitHandle $wh): bool;
+
 /**
  * Generates a backtrace for $awaitable.
  * Following conditions must be met to produce non-null backtrace:

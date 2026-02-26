@@ -73,9 +73,9 @@ void c_SleepWaitHandle::initialize(int64_t usecs) {
   }
 }
 
-bool c_SleepWaitHandle::cancel(const Object& exception) {
+bool c_SleepWaitHandle::cancelImpl(const Object* exception) {
   if (getState() != STATE_WAITING) {
-    return false;               // already finished
+    return false;
   }
 
   if (isInContext()) {
@@ -83,11 +83,15 @@ bool c_SleepWaitHandle::cancel(const Object& exception) {
   }
 
   auto parentChain = getParentChain();
-  setState(STATE_FAILED);
-  tvWriteObject(exception.get(), &m_resultOrException);
+  if (exception) {
+    setState(STATE_FAILED);
+    tvWriteObject(exception->get(), &m_resultOrException);
+  } else {
+    setState(STATE_SUCCEEDED);
+    tvWriteNull(m_resultOrException);
+  }
   parentChain.unblock();
 
-  // this is technically a lie, since sleep failed
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnSleepSuccess())) {
     session->onSleepSuccess(
@@ -101,8 +105,16 @@ bool c_SleepWaitHandle::cancel(const Object& exception) {
   return true;
 }
 
+bool c_SleepWaitHandle::cancel(const Object& exception) {
+  return cancelImpl(&exception);
+}
+
+bool c_SleepWaitHandle::cancelNoThrow() {
+  return cancelImpl(nullptr);
+}
+
 bool c_SleepWaitHandle::process() {
-  if (getState() == STATE_FAILED) {
+  if (isFinished()) {
     // sleep handle was cancelled, everything is taken care of
     return false;
   }

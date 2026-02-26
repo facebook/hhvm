@@ -17,6 +17,7 @@ namespace HH\Asio {
   function name(Awaitable<mixed> $awaitable)[]: string;
   function has_finished(Awaitable<mixed> $awaitable)[]: bool;
   function cancel(Awaitable<mixed> $awaitable, \Exception $exception): bool;
+  function cancel_sleep_nothrow(SleepWaitHandle $wh): bool;
   function backtrace(
     Awaitable<mixed> $awaitable,
     int $options = \DEBUG_BACKTRACE_PROVIDE_OBJECT,

@@ -109,6 +109,11 @@ bool HHVM_FUNCTION(cancel, const Object& obj, const Object& exception) {
   }
 }
 
+bool HHVM_FUNCTION(cancel_sleep_nothrow, const Object& obj) {
+  assertx(obj->instanceof(c_SleepWaitHandle::classof()));
+  return wait_handle<c_SleepWaitHandle>(obj.get())->cancelNoThrow();
+}
+
 Array HHVM_FUNCTION(backtrace,
                     const Object& obj,
                     int64_t options,
@@ -179,6 +184,7 @@ void AsioExtension::registerNativeFunctions() {
   HHVM_FALIAS(HH\\asio_get_running, asio_get_running);
   HHVM_FALIAS(HH\\Asio\\join, join);
   HHVM_FALIAS(HH\\Asio\\cancel, cancel);
+  HHVM_FALIAS(HH\\Asio\\cancel_sleep_nothrow, cancel_sleep_nothrow);
   HHVM_FALIAS(HH\\Asio\\backtrace, backtrace);
 }
 

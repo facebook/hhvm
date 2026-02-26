@@ -335,6 +335,12 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::testqm:
     case Vinstr::testwim:
     case Vinstr::testwm:
+#define VASM_LOAD_UPDATE_CASE(name, pre, post, ...) \
+    case Vinstr::pre: \
+    case Vinstr::post:
+    VASM_LOAD_UPDATE_SINGLE_LIST(VASM_LOAD_UPDATE_CASE)
+    VASM_LOAD_UPDATE_PAIR_LIST(VASM_LOAD_UPDATE_CASE)
+#undef VASM_LOAD_UPDATE_CASE
       assertx(!writesMemory(inst));
       assertx(!isCall(inst));
       return false;
@@ -435,6 +441,12 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::storewi:
     case Vinstr::storepair:
     case Vinstr::storepairl:
+#define VASM_STORE_UPDATE_CASE(name, pre, post, ...) \
+    case Vinstr::pre: \
+    case Vinstr::post:
+    VASM_STORE_UPDATE_SINGLE_LIST(VASM_STORE_UPDATE_CASE)
+    VASM_STORE_UPDATE_PAIR_LIST(VASM_STORE_UPDATE_CASE)
+#undef VASM_STORE_UPDATE_CASE
     case Vinstr::stublogue:
     case Vinstr::stubret:
     case Vinstr::stubtophp:

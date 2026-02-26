@@ -132,36 +132,25 @@ func main() {
 	// Startup thrift server
 	handler := &dataConformanceServiceHandler{registry}
 	proc := conformance.NewConformanceServiceProcessor(handler)
-	ts, addr, err := newServer(
-		proc,
-		// Ports must be dynamically allocated to prevent any conflicts.
-		// Allocating a free port is usually done by setting the port number as zero.
-		// Operating system should assign a free port to the application.
-		"[::]:0",
-	)
+
+	listener, err := net.Listen("tcp", "[::]:0")
 	if err != nil {
-		glog.Fatalf("failed to start server: %v", err)
+		glog.Fatalf("failed to listen: %v", err)
 	}
-	fmt.Println(addr.(*net.TCPAddr).Port)
+	addr := listener.Addr()
+	server := thrift.NewServer(proc, listener, thrift.TransportIDUpgradeToRocket)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		err := ts.ServeContext(ctx)
+		err := server.ServeContext(ctx)
 		if err != nil {
 			glog.Fatalf("failed to start server")
 		}
 	}()
+	fmt.Println(addr.(*net.TCPAddr).Port)
 
 	<-sigc
 	cancel()
 	os.Exit(0)
-}
-
-func newServer(processor thrift.Processor, addr string) (thrift.Server, net.Addr, error) {
-	listener, err := net.Listen("tcp", addr)
-	if err != nil {
-		return nil, nil, err
-	}
-	return thrift.NewServer(processor, listener, thrift.TransportIDUpgradeToRocket), listener.Addr(), nil
 }
 
 type dataConformanceServiceHandler struct {
@@ -182,24 +171,15 @@ func (h *dataConformanceServiceHandler) RoundTrip(ctx context.Context, roundTrip
 	if err != nil {
 		return nil, err
 	}
-	return newRoundTripResponse(newResponse(requestValue, data)), nil
-}
 
-// newRoundTripResponse wraps the response thrift.Any inside a RoundTripResponse.
-func newRoundTripResponse(response *thrift_any.Any) *serialization.RoundTripResponse {
-	resp := serialization.NewRoundTripResponse().
-		SetValue(response)
-	return resp
-}
-
-// newResponse creates a new response Any from the request Any using new serialized data.
-func newResponse(request *thrift_any.Any, data []byte) *thrift_any.Any {
 	respAny := thrift_any.NewAny().
 		SetData(data).
-		SetCustomProtocol(request.CustomProtocol).
-		SetProtocol(request.Protocol).
-		SetType(request.Type)
-	return respAny
+		SetCustomProtocol(requestValue.CustomProtocol).
+		SetProtocol(requestValue.Protocol).
+		SetType(requestValue.Type).
+		SetTypeHashPrefixSha2_256(requestValue.TypeHashPrefixSha2_256)
+	return serialization.NewRoundTripResponse().
+		SetValue(respAny), nil
 }
 
 // serialize serializes a thrift.Struct with a target protocol to be stored inside a thrift.Any.

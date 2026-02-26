@@ -1,11 +1,3 @@
-fb_disable_code_coverage
-  INSERT fb_disable_code_coverage
-  function
-SORT TEXT: none
-fb_double_metaphone
-  INSERT fb_double_metaphone
-  function
-SORT TEXT: none
 fb_double_metaphone_with_vowel
   INSERT fb_double_metaphone_with_vowel
   function
@@ -50,6 +42,10 @@ fb_gen_user_func
   INSERT fb_gen_user_func
   function
 SORT TEXT: none
+fb_get_allotment_shape_name
+  INSERT fb_get_allotment_shape_name
+  function
+SORT TEXT: none
 fb_get_cert_token
   INSERT fb_get_cert_token
   function
@@ -80,6 +76,10 @@ fb_get_hashout_config
 SORT TEXT: none
 fb_get_last_flush_size
   INSERT fb_get_last_flush_size
+  function
+SORT TEXT: none
+fb_get_lsst
+  INSERT fb_get_lsst
   function
 SORT TEXT: none
 fb_get_sandbox_cat

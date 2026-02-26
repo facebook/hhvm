@@ -298,6 +298,9 @@ void H3DatagramAsyncSocket::startClient() {
         qEvb, std::move(sock), fizzClientContext);
     CHECK(connectAddress_.isInitialized());
     client->addNewPeerAddress(connectAddress_);
+    if (!options_.hostname_.empty()) {
+      client->setHostname(options_.hostname_);
+    }
     if (bindAddress_.isInitialized()) {
       client->setLocalAddress(bindAddress_);
     }

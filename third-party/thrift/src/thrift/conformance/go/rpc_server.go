@@ -350,7 +350,6 @@ type basicInteractionImpl struct {
 var _ rpc.BasicInteraction = (*basicInteractionImpl)(nil)
 
 func (b *basicInteractionImpl) Init(ctx context.Context) error {
-	b.initialSum = 0
 	return nil
 }
 

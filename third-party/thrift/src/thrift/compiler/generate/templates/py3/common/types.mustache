@@ -1,0 +1,45 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{!
+This is for python types, used for typedefs aliases for use in python.
+
+Structs and enums will be namespaced appropriately if they are either defined
+in a different thrift file, or defined in the same thrift file but this is
+in the client or server source rather than the type definition source.
+
+Equivalent to the macro `types/python_type.mustache`
+}}
+{{#let export partial python_type |type|}}
+{{#pragma ignore-newlines}}
+{{#if type.bool?}}bool
+{{#else if type.byte?}}int
+{{#else if type.i16?}}int
+{{#else if type.i32?}}int
+{{#else if type.i64?}}int
+{{#else if type.double?}}float
+{{#else if type.float?}}float
+{{#else if type.void?}}object
+{{#else if type.string?}}str
+{{#else if type.binary?}}{{#if type.iobufWrapper?}}_fbthrift_iobuf.IOBuf{{#else}}bytes{{/if}}
+{{#else if type.container?}}{{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{type.flat_name}}
+  {{#else if (or type.structured? type.enum?)}}
+    {{#let ttype=type.true_type}}
+{{#if ttype.need_module_path?}}{{ttype.modulePath}}.{{/if}}{{ttype.name}}
+  {{/if type.bool?}}
+{{/let partial}}

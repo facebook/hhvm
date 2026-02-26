@@ -32,6 +32,7 @@ container types, so we'll need to define factories for them based on what they
 want to include.
 
 }}
+{{#import "common/types" as types}}
 {{> common/auto_generated_py}}
 {{^program:auto_migrate?}}
 cimport cython as __cython
@@ -571,7 +572,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
 {{/constant:value}}{{/program:constants}}
 {{/program:inplace_migrate?}}
 {{#program:filtered_typedefs}}
-{{typedef:name}} = {{#typedef:asType}}{{> types/python_type}}{{/typedef:asType}}
+{{typedef:name}} = {{#partial types.python_type type=typedef:self}}
 {{/program:filtered_typedefs}}
 {{#program:has_stream?}}
 

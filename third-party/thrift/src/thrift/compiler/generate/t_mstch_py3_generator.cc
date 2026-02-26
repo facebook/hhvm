@@ -862,23 +862,6 @@ class py3_mstch_type : public mstch_type {
   py3_generator_context::cached_type_properties& cached_props_;
 };
 
-class py3_mstch_typedef : public mstch_typedef {
- public:
-  py3_mstch_typedef(
-      const t_typedef* type, mstch_context& ctx, mstch_element_position pos)
-      : mstch_typedef(type, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"typedef:asType", &py3_mstch_typedef::asType},
-        });
-  }
-
-  mstch::node asType() {
-    return context_.type_factory->make_mstch_object(typedef_, context_);
-  }
-};
-
 class py3_mstch_struct : public mstch_struct {
  public:
   py3_mstch_struct(
@@ -1442,7 +1425,6 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_program>(&context_);
   mstch_context_.add<py3_mstch_service>(program_);
   mstch_context_.add<py3_mstch_type>(&context_);
-  mstch_context_.add<py3_mstch_typedef>();
   mstch_context_.add<py3_mstch_struct>();
 }
 

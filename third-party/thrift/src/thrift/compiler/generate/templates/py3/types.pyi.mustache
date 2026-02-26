@@ -19,6 +19,7 @@
 This template should always mirror types.pyx but for mypy typing
 
 }}
+{{#import "common/types" as types}}
 {{> common/auto_generated_py}}
 
 import enum as _python_std_enum
@@ -160,7 +161,7 @@ class {{type:flat_name}}({{> types/pep484_containers}}, _typing.Hashable):
 {{/constant:type}}
 {{/program:constants}}
 {{#program:filtered_typedefs}}
-{{typedef:name}} = {{#typedef:asType}}{{> types/python_type}}{{/typedef:asType}}
+{{typedef:name}} = {{#partial types.python_type type=typedef:self}}
 {{/program:filtered_typedefs}}
 {{#program:has_stream?}}
 

@@ -20,6 +20,7 @@
 #include <cmath>
 #include <thread>
 
+#include <gflags/gflags.h>
 #include <folly/Random.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>

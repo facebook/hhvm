@@ -21,7 +21,7 @@ final class LazyAnyTest extends LazyAnyTestBase {
 
   use ClassLevelTest;
 
-  const classname<IThriftStruct> CLASSNAME = unicorn_test_MainStruct::class;
+  const class<IThriftStruct> CLASSNAME = unicorn_test_MainStruct::class;
   const classname<TProtocolSerializer> DATA_SERIALIZER =
     TCompactSerializer::class;
   const ?apache_thrift_StandardProtocol THRIFT_PROTOCOL = null;
@@ -34,7 +34,7 @@ final class LazyAnySimpleJsonTest extends LazyAnyTestBase {
 
   use ClassLevelTest;
 
-  const classname<IThriftStruct> CLASSNAME =
+  const class<IThriftStruct> CLASSNAME =
     unicorn_test_MainStructSimpleJson::class;
   const classname<TProtocolSerializer> DATA_SERIALIZER =
     JSONThriftSerializer::class;

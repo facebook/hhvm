@@ -56,7 +56,7 @@ final class TBinarySerializerTest extends WWWTest {
   // call on protocol.
   private function normalDeserialize(
     string $object_string,
-    classname<IThriftStruct> $class_name,
+    class<IThriftStruct> $class_name,
   ): IThriftStruct {
     $transport = new TMemoryBuffer($object_string);
     $protocol = new TBinaryProtocolAccelerated($transport);

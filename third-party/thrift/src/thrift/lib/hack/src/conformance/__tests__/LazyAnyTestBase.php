@@ -19,7 +19,7 @@
 <<Oncalls('search_topaggr'), Feature('FBApp_Search_IndexServe')>>
 abstract class LazyAnyTestBase extends WWWTest {
 
-  abstract const classname<IThriftStruct> CLASSNAME;
+  abstract const class<IThriftStruct> CLASSNAME;
   abstract const classname<TProtocolSerializer> DATA_SERIALIZER;
   abstract const ?apache_thrift_StandardProtocol THRIFT_PROTOCOL;
   abstract const string CPP_HEX_BINARY_SERIALIZED;

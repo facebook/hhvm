@@ -45,7 +45,7 @@ final class TCompactProtocolAcceleratedTest extends WWWTest {
   }
 
   private function getTestData(
-    classname<CompactTestStruct> $class = CompactTestStruct::class,
+    class<CompactTestStruct> $class = CompactTestStruct::class,
   ): CompactTestStruct {
     $ret = new $class();
 

@@ -78,7 +78,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::BiDiService>::f
         "simple",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -210,7 +211,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::BiDiService>::f
         "response",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -342,7 +344,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::BiDiService>::f
         "canThrow",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

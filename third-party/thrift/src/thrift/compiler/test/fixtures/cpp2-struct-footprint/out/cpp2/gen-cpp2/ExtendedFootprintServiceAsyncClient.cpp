@@ -55,7 +55,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "getComplexMap",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

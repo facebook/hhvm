@@ -315,7 +315,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "noReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -517,7 +518,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "boolReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -723,7 +725,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "i16Return",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -929,7 +932,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "i32Return",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1135,7 +1139,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "i64Return",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1341,7 +1346,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "floatReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1547,7 +1553,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "doubleReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1753,7 +1760,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "stringReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1955,7 +1963,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "binaryReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2157,7 +2166,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "mapReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2359,7 +2369,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "simpleTypedefReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2565,7 +2576,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "complexTypedefReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2767,7 +2779,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "list_mostComplexTypedefReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2969,7 +2982,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "enumReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3175,7 +3189,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "list_EnumReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3377,7 +3392,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "structReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3579,7 +3595,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "set_StructReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3781,7 +3798,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "unionReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3983,7 +4001,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "list_UnionReturn",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4186,7 +4205,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "readDataEb",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4389,7 +4409,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
         "readData",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

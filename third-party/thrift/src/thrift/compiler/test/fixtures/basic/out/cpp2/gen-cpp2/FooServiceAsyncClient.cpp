@@ -55,7 +55,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "simple_rpc",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

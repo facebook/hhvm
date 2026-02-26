@@ -97,7 +97,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::thrift::shared_intera
         "SharedInteraction.init",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -274,7 +275,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::thrift::shared_intera
         "SharedInteraction.do_something",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -447,7 +449,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::thrift::shared_intera
         "SharedInteraction.tear_down",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

@@ -55,7 +55,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::MyNode>::fbthri
         "do_mid",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

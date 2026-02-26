@@ -108,7 +108,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainer
         "mapList",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -311,7 +312,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainer
         "mapSet",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -514,7 +516,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainer
         "listMap",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -717,7 +720,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainer
         "listSet",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -920,7 +924,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::NestedContainer
         "turtles",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

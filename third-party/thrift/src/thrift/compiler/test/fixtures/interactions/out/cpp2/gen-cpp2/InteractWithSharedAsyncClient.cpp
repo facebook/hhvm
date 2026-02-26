@@ -55,7 +55,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::InteractWithSha
         "do_some_similar_things",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -338,7 +339,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::InteractWithSha
         "MyInteraction.frobnicate",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -515,7 +517,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::InteractWithSha
         "MyInteraction.ping",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -642,7 +645,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::InteractWithSha
         "MyInteraction.truthify",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -809,7 +813,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::InteractWithSha
         "MyInteraction.encode",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1004,7 +1009,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::InteractWithSha
         "SharedInteraction.init",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1181,7 +1187,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::InteractWithSha
         "SharedInteraction.do_something",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1354,7 +1361,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::InteractWithSha
         "SharedInteraction.tear_down",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

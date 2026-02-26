@@ -146,7 +146,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
         "method",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -285,7 +286,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
         "methodAndReponse",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -424,7 +426,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
         "methodThrow",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -563,7 +566,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
         "methodSinkThrow",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -702,7 +706,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
         "methodFinalThrow",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -841,7 +846,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
         "methodBothThrow",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -980,7 +986,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
         "methodFast",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

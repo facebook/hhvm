@@ -68,7 +68,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "first",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -271,7 +272,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "second",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

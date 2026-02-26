@@ -109,7 +109,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::fbt
         "foo",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -308,7 +309,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::fbt
         "interact",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -506,7 +508,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::fbt
         "interactFast",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -708,7 +711,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::fbt
         "serialize",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -989,7 +993,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::MyI
         "MyInteraction.frobnicate",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1166,7 +1171,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::MyI
         "MyInteraction.ping",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1293,7 +1299,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::MyI
         "MyInteraction.truthify",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1460,7 +1467,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::MyI
         "MyInteraction.encode",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1678,7 +1686,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::MyI
         "MyInteractionFast.frobnicate",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1855,7 +1864,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::MyI
         "MyInteractionFast.ping",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1982,7 +1992,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::MyI
         "MyInteractionFast.truthify",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2149,7 +2160,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::MyI
         "MyInteractionFast.encode",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2310,7 +2322,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Factories>::Ser
         "SerialInteraction.frobnicate",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

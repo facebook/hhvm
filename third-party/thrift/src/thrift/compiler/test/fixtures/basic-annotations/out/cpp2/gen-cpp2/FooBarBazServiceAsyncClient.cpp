@@ -81,7 +81,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::FooBarBazServic
         "foo",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -283,7 +284,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::FooBarBazServic
         "bar",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -485,7 +487,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::FooBarBazServic
         "baz",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

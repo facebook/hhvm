@@ -227,7 +227,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "processIOBuf",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -429,7 +430,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "getStruct",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -632,7 +634,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "setStruct",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -835,7 +838,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "setStructList",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1037,7 +1041,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "getStructList",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1239,7 +1244,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "getNestedContainer",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1441,7 +1447,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "getTypedefStruct",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1643,7 +1650,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "getTypedefList",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1845,7 +1853,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "getUnion",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2043,7 +2052,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "getCalculator",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2246,7 +2256,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "streamStructs",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2444,7 +2455,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "streamWithSinkInitial",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2642,7 +2654,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "streamWithSinkException",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2858,7 +2871,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
         "Calculator.add",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

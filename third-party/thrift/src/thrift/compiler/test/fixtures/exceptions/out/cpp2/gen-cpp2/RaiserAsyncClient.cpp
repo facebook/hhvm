@@ -94,7 +94,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Raiser>::fbthri
         "doBland",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -296,7 +297,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Raiser>::fbthri
         "doRaise",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -498,7 +500,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Raiser>::fbthri
         "get200",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -700,7 +703,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::Raiser>::fbthri
         "get500",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

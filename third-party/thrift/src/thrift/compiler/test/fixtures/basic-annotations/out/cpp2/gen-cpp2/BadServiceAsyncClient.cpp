@@ -58,7 +58,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::GoodService>::f
         "bar",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -282,7 +283,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::GoodService>::B
         "BadInteraction.foo",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

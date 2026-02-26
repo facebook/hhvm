@@ -83,7 +83,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::tes
         "init",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -289,7 +290,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::tes
         "method_that_throws",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -497,7 +499,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::tes
         "return_void_method",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

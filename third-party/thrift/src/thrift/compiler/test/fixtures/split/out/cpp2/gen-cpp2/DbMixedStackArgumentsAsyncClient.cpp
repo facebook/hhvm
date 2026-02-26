@@ -69,7 +69,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::DbMixedStackArg
         "getDataByKey0",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -272,7 +273,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::DbMixedStackArg
         "getDataByKey1",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

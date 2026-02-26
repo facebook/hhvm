@@ -55,7 +55,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::MyLeaf>::fbthri
         "do_leaf",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

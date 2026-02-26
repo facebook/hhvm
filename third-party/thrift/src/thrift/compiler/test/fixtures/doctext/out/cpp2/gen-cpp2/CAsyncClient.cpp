@@ -84,7 +84,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::C>::fbthrift_se
         "f",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -287,7 +288,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::C>::fbthrift_se
         "numbers",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -486,7 +488,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::C>::fbthrift_se
         "thing",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

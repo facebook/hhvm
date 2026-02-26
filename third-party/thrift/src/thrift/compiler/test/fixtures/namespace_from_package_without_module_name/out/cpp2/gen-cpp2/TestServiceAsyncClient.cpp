@@ -56,7 +56,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::namespace_from_
         "init",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

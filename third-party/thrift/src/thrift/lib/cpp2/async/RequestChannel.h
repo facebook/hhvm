@@ -312,14 +312,19 @@ SerializedRequest preprocessSendT(
     folly::StringPiece methodName,
     folly::FunctionRef<void(Protocol*)> writefunc,
     folly::FunctionRef<size_t(Protocol*)> sizefunc,
-    uint64_t checksumSamplingRate) {
+    uint64_t checksumSamplingRate,
+    folly::IOBufFactory* ioBufFactory = nullptr) {
   return folly::fibers::runInMainContext([&] {
     size_t bufSize = sizefunc(prot);
     folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+    if (ioBufFactory) {
+      queue.setIOBufFactory(ioBufFactory);
+    }
 
     // Preallocate small buffer headroom for transports metadata & framing.
     constexpr size_t kHeadroomBytes = 128;
-    auto buf = folly::IOBuf::create(kHeadroomBytes + bufSize);
+    auto buf = ioBufFactory ? (*ioBufFactory)(kHeadroomBytes + bufSize)
+                            : folly::IOBuf::create(kHeadroomBytes + bufSize);
     buf->advance(kHeadroomBytes);
     queue.append(std::move(buf));
 
@@ -354,7 +359,9 @@ SerializedRequest preprocessSendT(
       header.setCrc32c(apache::thrift::checksum::crc32c(*queue.front()));
     }
 
-    return SerializedRequest(queue.move());
+    auto result = SerializedRequest(queue.move());
+    result.ioBufFactory = ioBufFactory;
+    return result;
   });
 }
 

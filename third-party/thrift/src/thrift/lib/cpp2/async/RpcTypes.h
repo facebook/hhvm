@@ -30,6 +30,7 @@ struct SerializedRequest {
       : buffer(std::move(buffer_)) {}
 
   std::unique_ptr<folly::IOBuf> buffer;
+  folly::IOBufFactory* ioBufFactory{nullptr};
 };
 
 class SerializedCompressedRequest {

@@ -69,7 +69,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::HeaderClientMet
         "echo",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -287,7 +288,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::HeaderClientMet
         "echo_2",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

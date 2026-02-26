@@ -433,7 +433,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "void_ret_i16_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -637,7 +638,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "void_ret_byte_i16_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -840,7 +842,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "void_ret_map_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1044,7 +1047,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "void_ret_map_setlist_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1247,7 +1251,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "void_ret_map_typedef_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1450,7 +1455,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "void_ret_enum_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1653,7 +1659,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "void_ret_struct_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1856,7 +1863,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "void_ret_listunion_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2060,7 +2068,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "bool_ret_i32_i64_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2267,7 +2276,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "bool_ret_map_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2474,7 +2484,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "bool_ret_union_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2682,7 +2693,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "i64_ret_float_double_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2890,7 +2902,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "i64_ret_string_typedef_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3101,7 +3114,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "i64_ret_i32_i32_i32_i32_i32_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3308,7 +3322,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "double_ret_setstruct_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3515,7 +3530,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "string_ret_string_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3718,7 +3734,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "binary_ret_binary_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3921,7 +3938,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "map_ret_bool_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4125,7 +4143,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "list_ret_map_setlist_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4328,7 +4347,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "mapsetlistmapliststring_ret_listlistlist_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4531,7 +4551,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "typedef_ret_i32_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4738,7 +4759,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "listtypedef_ret_typedef_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4941,7 +4963,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "enum_ret_double_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -5149,7 +5172,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "enum_ret_double_enum_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -5356,7 +5380,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "listenum_ret_map_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -5559,7 +5584,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "struct_ret_i16_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -5762,7 +5788,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "setstruct_ret_set_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -5966,7 +5993,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "union_ret_i32_i32_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -6169,7 +6197,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "listunion_string_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -6391,7 +6420,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Para
         "annotatedParams",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

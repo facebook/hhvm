@@ -69,7 +69,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::apache::thrift::fixtu
         "bounce_map",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -272,7 +273,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::apache::thrift::fixtu
         "binary_keyed_map",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

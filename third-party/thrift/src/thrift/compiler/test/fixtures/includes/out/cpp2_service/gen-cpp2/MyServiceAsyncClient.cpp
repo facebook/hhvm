@@ -70,7 +70,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::MyService>::fbt
         "query",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -274,7 +275,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::MyService>::fbt
         "has_arg_docs",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

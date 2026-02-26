@@ -154,7 +154,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::extra::svc::ExtraServ
         "simple_function",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -360,7 +361,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::extra::svc::ExtraServ
         "throws_function",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -563,7 +565,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::extra::svc::ExtraServ
         "throws_function2",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -771,7 +774,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::extra::svc::ExtraServ
         "throws_function3",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -973,7 +977,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::extra::svc::ExtraServ
         "oneway_void_ret",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1122,7 +1127,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::extra::svc::ExtraServ
         "oneway_void_ret_i32_i32_i32_i32_i32_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1268,7 +1274,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::extra::svc::ExtraServ
         "oneway_void_ret_map_setlist_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1413,7 +1420,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::extra::svc::ExtraServ
         "oneway_void_ret_struct_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1558,7 +1566,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::extra::svc::ExtraServ
         "oneway_void_ret_listunion_param",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

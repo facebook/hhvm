@@ -58,7 +58,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::tes
         "func",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

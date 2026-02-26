@@ -68,7 +68,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::MyServicePrioPa
         "ping",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -270,7 +271,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::MyServicePrioPa
         "pong",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

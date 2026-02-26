@@ -588,7 +588,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "get_five",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -795,7 +796,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "add_five",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1001,7 +1003,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "do_nothing",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1205,7 +1208,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "concat",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1408,7 +1412,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "get_value",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1615,7 +1620,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "negate",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1822,7 +1828,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "tiny",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2029,7 +2036,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "small",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2236,7 +2244,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "big",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2443,7 +2452,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "two",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2649,7 +2659,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "expected_exception",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -2851,7 +2862,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "unexpected_exception",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3058,7 +3070,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "sum_i16_list",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3265,7 +3278,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "sum_i32_list",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3472,7 +3486,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "sum_i64_list",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3679,7 +3694,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "concat_many",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -3882,7 +3898,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "count_structs",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4089,7 +4106,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "sum_set",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4297,7 +4315,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "contains_word",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4505,7 +4524,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "get_map_value",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4708,7 +4728,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "map_length",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -4915,7 +4936,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "sum_map_values",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -5122,7 +5144,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "complex_sum_i32",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -5329,7 +5352,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "repeat_name",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -5531,7 +5555,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "get_struct",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -5734,7 +5759,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "fib",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -5937,7 +5963,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "unique_words",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -6140,7 +6167,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "words_count",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -6343,7 +6371,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "set_enum",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -6551,7 +6580,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "list_of_lists",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -6754,7 +6784,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "word_character_frequency",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -6957,7 +6988,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "list_of_sets",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -7160,7 +7192,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "nested_map_argument",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -7367,7 +7400,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "make_sentence",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -7570,7 +7604,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "get_union",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -7773,7 +7808,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "get_keys",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -7976,7 +8012,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "lookup_double",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -8183,7 +8220,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "retrieve_binary",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -8386,7 +8424,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "contain_binary",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -8589,7 +8628,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "contain_enum",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -8792,7 +8832,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "get_binary_union_struct",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -8994,7 +9035,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::SimpleSe
         "get_struct_hidden",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

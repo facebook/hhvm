@@ -55,7 +55,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::MyServicePrioCh
         "pang",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

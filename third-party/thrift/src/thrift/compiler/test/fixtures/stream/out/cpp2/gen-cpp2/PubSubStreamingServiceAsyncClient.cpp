@@ -189,7 +189,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
         "returnstream",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -387,7 +388,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
         "streamthrows",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -585,7 +587,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
         "servicethrows",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -783,7 +786,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
         "servicethrows2",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -981,7 +985,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
         "boththrows",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1179,7 +1184,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
         "responseandstreamstreamthrows",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1377,7 +1383,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
         "responseandstreamservicethrows",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1575,7 +1582,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
         "responseandstreamboththrows",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1774,7 +1782,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
         "returnstreamFast",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

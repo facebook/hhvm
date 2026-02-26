@@ -171,7 +171,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "ping",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -373,7 +374,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "getRandomData",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -576,7 +578,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "sink",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -780,7 +783,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "putDataById",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -983,7 +987,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "hasDataById",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1190,7 +1195,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "getDataById",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1393,7 +1399,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "deleteDataById",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1597,7 +1604,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "lobDataById",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1741,7 +1749,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "invalid_return_for_hack",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -1943,7 +1952,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
         "rpc_skipped_codegen",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

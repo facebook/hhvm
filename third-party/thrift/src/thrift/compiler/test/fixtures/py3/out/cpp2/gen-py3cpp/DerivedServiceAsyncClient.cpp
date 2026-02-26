@@ -55,7 +55,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::py3::simple::DerivedS
         "get_six",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

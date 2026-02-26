@@ -56,7 +56,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::BoxService>::fb
         "getABoxSession",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 
@@ -279,7 +280,8 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::BoxService>::Bo
         "BoxedInteraction.getABox",
         writer,
         sizer,
-        channel_->getChecksumSamplingRate());
+        channel_->getChecksumSamplingRate(),
+        getIOBufFactory());
   });
 }
 

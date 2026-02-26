@@ -944,7 +944,8 @@ folly::Try<Payload> RocketClient::sendRequestResponseSync(
       RequestResponseFrame(makeStreamId(), std::move(request)),
       queue_,
       setupFrame.get(),
-      writeSuccessCallback);
+      writeSuccessCallback,
+      getIOBufFactory());
   if (auto ew = err(scheduleWrite(ctx))) {
     return folly::Try<Payload>(std::move(ew));
   }
@@ -960,7 +961,8 @@ void RocketClient::sendRequestResponse(
       RequestResponseFrame(makeStreamId(), std::move(request)),
       queue_,
       setupFrame.get(),
-      callback.get());
+      callback.get(),
+      getIOBufFactory());
   auto callbackWithGuard = [this,
                             dg = DestructorGuard(this),
                             g = makeRequestCountGuard(RequestType::CLIENT),
@@ -1020,7 +1022,9 @@ folly::Try<void> RocketClient::sendRequestFnfSync(Payload&& request) {
   RequestContext ctx(
       RequestFnfFrame(makeStreamId(), std::move(request)),
       queue_,
-      setupFrame.get());
+      setupFrame.get(),
+      nullptr,
+      getIOBufFactory());
   if (auto ew = err(scheduleWrite(ctx))) {
     return folly::Try<void>(std::move(ew));
   }
@@ -1033,7 +1037,9 @@ void RocketClient::sendRequestFnf(
   auto rctx = std::make_unique<RequestContext>(
       RequestFnfFrame(makeStreamId(), std::move(request)),
       queue_,
-      setupFrame.get());
+      setupFrame.get(),
+      nullptr,
+      getIOBufFactory());
   auto callbackWithGuard =
       [dg = DestructorGuard(this),
        g = makeRequestCountGuard(RequestType::CLIENT),
@@ -1252,7 +1258,12 @@ class RocketClient::SendFrameContext : public folly::fibers::Baton::Waiter {
   template <class Frame>
   SendFrameContext(RocketClient& client, Frame&& frame, OnError&& onError)
       : client_(client),
-        ctx_(std::forward<Frame>(frame), client_.queue_),
+        ctx_(
+            std::forward<Frame>(frame),
+            client_.queue_,
+            nullptr,
+            nullptr,
+            client_.getIOBufFactory()),
         onError_(std::forward<OnError>(onError)) {}
 
   template <class InitFunc>

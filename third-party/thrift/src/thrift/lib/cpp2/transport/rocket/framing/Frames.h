@@ -76,7 +76,8 @@ class SetupFrame {
 
   bool encodeMetadataUsingBinary() const { return encodeMetadataUsingBinary_; }
 
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
   void serialize(Serializer& writer) &&;
 
  private:
@@ -125,7 +126,8 @@ class RequestResponseFrame {
     return Flags(flags_).metadata(payload().hasNonemptyMetadata());
   }
 
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
   void serialize(Serializer& writer) &&;
 
  private:
@@ -166,7 +168,8 @@ class RequestFnfFrame {
     return Flags(flags_).metadata(payload().hasNonemptyMetadata());
   }
 
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
   void serialize(Serializer& writer) &&;
 
  private:
@@ -217,7 +220,8 @@ class RequestStreamFrame {
     return Flags(flags_).metadata(payload().hasNonemptyMetadata());
   }
 
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
   void serialize(Serializer& writer) &&;
 
  private:
@@ -276,7 +280,8 @@ class RequestChannelFrame {
     return Flags(flags_).metadata(payload().hasNonemptyMetadata());
   }
 
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
   void serialize(Serializer& writer) &&;
 
  private:
@@ -310,7 +315,8 @@ class RequestNFrame {
 
   int32_t requestN() const noexcept { return requestN_; }
 
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
   void serialize(Serializer& writer) &&;
 
  private:
@@ -330,7 +336,8 @@ class CancelFrame {
 
   StreamId streamId() const noexcept { return streamId_; }
 
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
   void serialize(Serializer& writer) &&;
 
  private:
@@ -371,7 +378,8 @@ class PayloadFrame {
     return Flags(flags_).metadata(payload().hasNonemptyMetadata());
   }
 
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
   void serialize(Serializer& writer) &&;
 
  private:
@@ -410,7 +418,8 @@ class ErrorFrame {
   const Payload& payload() const noexcept { return payload_; }
   Payload& payload() noexcept { return payload_; }
 
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
   void serialize(Serializer& writer) &&;
 
  private:
@@ -438,7 +447,8 @@ class MetadataPushFrame {
   const folly::IOBuf* metadata() & { return metadata_.get(); }
 
   void serialize(Serializer& writer) &&;
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
 
  private:
   struct FromMetadata {};
@@ -462,7 +472,8 @@ class KeepAliveFrame {
   std::unique_ptr<folly::IOBuf> data() && { return std::move(data_); }
 
   void serialize(Serializer& writer) &&;
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
 
   StreamId streamId() const noexcept { return streamId_; }
 
@@ -508,7 +519,8 @@ class ExtFrame {
   ExtFrameType extFrameType() const noexcept { return extFrameType_; }
 
   void serialize(Serializer& writer) &&;
-  std::unique_ptr<folly::IOBuf> serialize() &&;
+  std::unique_ptr<folly::IOBuf> serialize(
+      folly::IOBufFactory* ioBufFactory = nullptr) &&;
 
  private:
   StreamId streamId_;

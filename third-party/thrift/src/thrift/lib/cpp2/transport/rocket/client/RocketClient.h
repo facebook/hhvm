@@ -676,6 +676,13 @@ class RocketClient : public virtual folly::DelayedDestruction,
       payloadSerializerHolder_;
   std::optional<CustomCompressionSetupRequest> customCompressionSetupRequest_;
   std::shared_ptr<CustomCompressor> customCompressor_;
+  folly::IOBufFactory* ioBufFactory_{nullptr};
+
+ public:
+  void setIOBufFactory(folly::IOBufFactory* factory) {
+    ioBufFactory_ = factory;
+  }
+  folly::IOBufFactory* getIOBufFactory() const { return ioBufFactory_; }
 };
 
 } // namespace rocket

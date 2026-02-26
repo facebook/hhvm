@@ -66,11 +66,13 @@ class RequestContext {
       Frame&& frame,
       RequestContextQueue& queue,
       SetupFrame* setupFrame = nullptr,
-      WriteSuccessCallback* writeSuccessCallback = nullptr)
+      WriteSuccessCallback* writeSuccessCallback = nullptr,
+      folly::IOBufFactory* ioBufFactory = nullptr)
       : queue_(queue),
         streamId_(frame.streamId()),
         frameType_(Frame::frameType()),
-        writeSuccessCallback_(writeSuccessCallback) {
+        writeSuccessCallback_(writeSuccessCallback),
+        ioBufFactory_(ioBufFactory) {
     // Some `Frame`s lack a `payload()` method -- `RequestNFrame`,
     // `CancelFrame`, etc -- but those that do should have `.fds`.
     if constexpr (folly::is_detected<payload_method_t, Frame>::value) {
@@ -195,6 +197,7 @@ class RequestContext {
   folly::HHWheelTimer::Callback* timeoutCallback_{nullptr};
   folly::Try<Payload> responsePayload_;
   WriteSuccessCallback* const writeSuccessCallback_{nullptr};
+  folly::IOBufFactory* ioBufFactory_{nullptr};
   folly::Function<std::pair<std::unique_ptr<folly::IOBuf>, FrameType>(int32_t)>
       deferredInit_{nullptr};
 
@@ -202,10 +205,10 @@ class RequestContext {
   void serialize(Frame&& frame, SetupFrame* setupFrame) {
     DCHECK(!serializedFrame_);
 
-    serializedFrame_ = std::move(frame).serialize();
+    serializedFrame_ = std::move(frame).serialize(ioBufFactory_);
 
     if (UNLIKELY(setupFrame != nullptr)) {
-      Serializer writer;
+      Serializer writer(ioBufFactory_);
       std::move(*setupFrame).serialize(writer);
       auto setupBuffer = std::move(writer).move();
       setupBuffer->prependChain(std::move(serializedFrame_));

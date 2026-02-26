@@ -964,6 +964,8 @@ void RocketClientChannelBase::sendThriftRequest(
   preprocessHeader(header.get());
   auto timeout = getClientTimeout(rpcOptions);
   auto buf = std::move(request.buffer);
+  auto* ioBufFactory = request.ioBufFactory;
+  getRocketClientImpl().setIOBufFactory(ioBufFactory);
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       kind,

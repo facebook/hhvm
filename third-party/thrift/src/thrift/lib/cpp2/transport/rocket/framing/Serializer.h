@@ -37,7 +37,16 @@ class Serializer {
   static constexpr size_t kBytesForFrameOrMetadataLength = 3;
   static constexpr size_t kMinimumFrameHeaderLength = 9;
 
-  Serializer() { queue_.append(folly::IOBuf::create(kQueueAppenderChunkSize)); }
+  Serializer() : Serializer(nullptr) {}
+
+  explicit Serializer(folly::IOBufFactory* ioBufFactory) {
+    auto buf = ioBufFactory ? (*ioBufFactory)(kQueueAppenderChunkSize)
+                            : folly::IOBuf::create(kQueueAppenderChunkSize);
+    queue_.append(std::move(buf));
+    if (ioBufFactory) {
+      queue_.setIOBufFactory(ioBufFactory);
+    }
+  }
 
   // All data in rsocket protocol is transmitted in Big Endian format.
   template <class T>

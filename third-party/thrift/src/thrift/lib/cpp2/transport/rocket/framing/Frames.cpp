@@ -113,8 +113,9 @@ std::enable_if_t<!has_initial_request_n<Frame>::value, void>
 serializeInitialNIfPresent(const Frame&, HeaderSerializer&) {}
 
 template <class Frame>
-std::unique_ptr<folly::IOBuf> serializeIntoIOBuf(Frame&& frame) {
-  Serializer writer;
+std::unique_ptr<folly::IOBuf> serializeIntoIOBuf(
+    Frame&& frame, folly::IOBufFactory* ioBufFactory = nullptr) {
+  Serializer writer(ioBufFactory);
   std::move(frame).serialize(writer);
   return std::move(writer).move();
 }
@@ -149,7 +150,8 @@ std::unique_ptr<folly::IOBuf> serializeIntoHeadroom(Frame&& frame) {
 }
 
 template <class Frame>
-std::unique_ptr<folly::IOBuf> serializeIntoHeadroomIfPossible(Frame&& frame) {
+std::unique_ptr<folly::IOBuf> serializeIntoHeadroomIfPossible(
+    Frame&& frame, folly::IOBufFactory* ioBufFactory = nullptr) {
   constexpr size_t kHeadroomSize =
       Frame::frameHeaderSize() + 2 * Serializer::kBytesForFrameOrMetadataLength;
   if (LIKELY(
@@ -159,13 +161,14 @@ std::unique_ptr<folly::IOBuf> serializeIntoHeadroomIfPossible(Frame&& frame) {
           frame.payload().buffer()->headroom() >= kHeadroomSize)) {
     return serializeIntoHeadroom(std::move(frame));
   } else {
-    return serializeIntoIOBuf(std::move(frame));
+    return serializeIntoIOBuf(std::move(frame), ioBufFactory);
   }
 }
 } // namespace
 
-std::unique_ptr<folly::IOBuf> SetupFrame::serialize() && {
-  return serializeIntoIOBuf(std::move(*this));
+std::unique_ptr<folly::IOBuf> SetupFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
+  return serializeIntoIOBuf(std::move(*this), ioBufFactory);
 }
 
 void SetupFrame::serialize(Serializer& writer) && {
@@ -263,12 +266,13 @@ void SetupFrame::serialize(Serializer& writer) && {
   DCHECK_EQ(Serializer::kBytesForFrameOrMetadataLength + frameSize, nwritten);
 }
 
-std::unique_ptr<folly::IOBuf> RequestResponseFrame::serialize() && {
+std::unique_ptr<folly::IOBuf> RequestResponseFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
   if (THRIFT_FLAG(rocket_enable_frame_relative_alignment)) {
     FrameDataFirstFieldAligner<RequestResponseFrame> aligner(*this);
     aligner.align();
   }
-  return serializeIntoHeadroomIfPossible(std::move(*this));
+  return serializeIntoHeadroomIfPossible(std::move(*this), ioBufFactory);
 }
 
 void RequestResponseFrame::serialize(Serializer& writer) && {
@@ -303,8 +307,9 @@ void RequestResponseFrame::serializeIntoSingleFrame(Serializer& writer) && {
   DCHECK_EQ(Serializer::kBytesForFrameOrMetadataLength + frameSize, nwritten);
 }
 
-std::unique_ptr<folly::IOBuf> RequestFnfFrame::serialize() && {
-  return serializeIntoHeadroomIfPossible(std::move(*this));
+std::unique_ptr<folly::IOBuf> RequestFnfFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
+  return serializeIntoHeadroomIfPossible(std::move(*this), ioBufFactory);
 }
 
 void RequestFnfFrame::serialize(Serializer& writer) && {
@@ -339,8 +344,9 @@ void RequestFnfFrame::serializeIntoSingleFrame(Serializer& writer) && {
   DCHECK_EQ(Serializer::kBytesForFrameOrMetadataLength + frameSize, nwritten);
 }
 
-std::unique_ptr<folly::IOBuf> RequestStreamFrame::serialize() && {
-  return serializeIntoHeadroomIfPossible(std::move(*this));
+std::unique_ptr<folly::IOBuf> RequestStreamFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
+  return serializeIntoHeadroomIfPossible(std::move(*this), ioBufFactory);
 }
 
 void RequestStreamFrame::serialize(Serializer& writer) && {
@@ -378,8 +384,9 @@ void RequestStreamFrame::serializeIntoSingleFrame(Serializer& writer) && {
   DCHECK_EQ(Serializer::kBytesForFrameOrMetadataLength + frameSize, nwritten);
 }
 
-std::unique_ptr<folly::IOBuf> RequestChannelFrame::serialize() && {
-  return serializeIntoHeadroomIfPossible(std::move(*this));
+std::unique_ptr<folly::IOBuf> RequestChannelFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
+  return serializeIntoHeadroomIfPossible(std::move(*this), ioBufFactory);
 }
 
 void RequestChannelFrame::serialize(Serializer& writer) && {
@@ -419,8 +426,9 @@ void RequestChannelFrame::serializeIntoSingleFrame(Serializer& writer) && {
   DCHECK_EQ(Serializer::kBytesForFrameOrMetadataLength + frameSize, nwritten);
 }
 
-std::unique_ptr<folly::IOBuf> RequestNFrame::serialize() && {
-  return serializeIntoIOBuf(std::move(*this));
+std::unique_ptr<folly::IOBuf> RequestNFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
+  return serializeIntoIOBuf(std::move(*this), ioBufFactory);
 }
 
 void RequestNFrame::serialize(Serializer& writer) && {
@@ -447,8 +455,9 @@ void RequestNFrame::serialize(Serializer& writer) && {
   DCHECK_EQ(Serializer::kBytesForFrameOrMetadataLength + frameSize, nwritten);
 }
 
-std::unique_ptr<folly::IOBuf> CancelFrame::serialize() && {
-  return serializeIntoIOBuf(std::move(*this));
+std::unique_ptr<folly::IOBuf> CancelFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
+  return serializeIntoIOBuf(std::move(*this), ioBufFactory);
 }
 
 void CancelFrame::serialize(Serializer& writer) && {
@@ -513,12 +522,14 @@ void PayloadFrame::serializeIntoSingleFrame(Serializer& writer) && {
   DCHECK_EQ(Serializer::kBytesForFrameOrMetadataLength + frameSize, nwritten);
 }
 
-std::unique_ptr<folly::IOBuf> PayloadFrame::serialize() && {
-  return serializeIntoHeadroomIfPossible(std::move(*this));
+std::unique_ptr<folly::IOBuf> PayloadFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
+  return serializeIntoHeadroomIfPossible(std::move(*this), ioBufFactory);
 }
 
-std::unique_ptr<folly::IOBuf> ErrorFrame::serialize() && {
-  return serializeIntoIOBuf(std::move(*this));
+std::unique_ptr<folly::IOBuf> ErrorFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
+  return serializeIntoIOBuf(std::move(*this), ioBufFactory);
 }
 
 void ErrorFrame::serialize(Serializer& writer) && {
@@ -574,14 +585,16 @@ void MetadataPushFrame::serialize(Serializer& writer) && {
   DCHECK_EQ(Serializer::kBytesForFrameOrMetadataLength + frameSize, nwritten);
 }
 
-std::unique_ptr<folly::IOBuf> MetadataPushFrame::serialize() && {
-  Serializer writer;
+std::unique_ptr<folly::IOBuf> MetadataPushFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
+  Serializer writer(ioBufFactory);
   std::move(*this).serialize(writer);
   return std::move(writer).move();
 }
 
-std::unique_ptr<folly::IOBuf> KeepAliveFrame::serialize() && {
-  return serializeIntoIOBuf(std::move(*this));
+std::unique_ptr<folly::IOBuf> KeepAliveFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
+  return serializeIntoIOBuf(std::move(*this), ioBufFactory);
 }
 
 void KeepAliveFrame::serialize(Serializer& writer) && {
@@ -618,8 +631,9 @@ void KeepAliveFrame::serialize(Serializer& writer) && {
   DCHECK_EQ(Serializer::kBytesForFrameOrMetadataLength + frameSize, nwritten);
 }
 
-std::unique_ptr<folly::IOBuf> ExtFrame::serialize() && {
-  Serializer writer;
+std::unique_ptr<folly::IOBuf> ExtFrame::serialize(
+    folly::IOBufFactory* ioBufFactory) && {
+  Serializer writer(ioBufFactory);
   std::move(*this).serialize(writer);
   return std::move(writer).move();
 }

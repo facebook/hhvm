@@ -169,7 +169,7 @@ TEST(McRouteHandleProvider, sr_route) {
   auto rh = setup.getRoute(kSimpleSRRoute);
   EXPECT_TRUE(rh != nullptr);
   EXPECT_EQ(
-      "srroute|service=mcrouter.test.thrifttest.oregon.ucache_ab_conveyor_shadow_proxy|timeout=1000|connect_timeout=1000|keep_routing_prefix=false|salt=|asynclog_name=|set_routing_key=true|client_id=|write_checksum=false|all_checksum=false|jump_threads=false|return_error_on_mc_delete_failure=false|set_shard_id=false|sm_scope=|sm_domain=|skip_thread_affinity=false|set_request_timeout=true|num_affinity_threads=1",
+      "srroute|service=mcrouter.test.thrifttest.oregon.ucache_ab_conveyor_shadow_proxy|timeout=1000|connect_timeout=1000|keep_routing_prefix=false|salt=|asynclog_name=|set_routing_key=true|client_id=|write_checksum=false|all_checksum=false|jump_threads=false|return_error_on_mc_delete_failure=false|set_shard_id=false|sm_scope=|sm_domain=|skip_thread_affinity=false|set_request_timeout=true|num_affinity_threads=1|partition_start=0|partition_size=0",
       rh->routeName());
 }
 

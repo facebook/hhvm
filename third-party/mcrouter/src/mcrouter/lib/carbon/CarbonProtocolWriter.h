@@ -508,7 +508,7 @@ class CarbonProtocolWriterImpl {
   template <class T>
   typename std::enable_if<IsCarbonStruct<T>::value, void>::type writeRaw(
       const T& data) {
-    data.serialize(*this);
+    serialize(data, *this);
   }
 
   template <class T>

@@ -169,7 +169,7 @@ class CarbonProtocolReader {
   template <class T>
   typename std::enable_if<IsCarbonStruct<T>::value, void>::type readRawInto(
       T& data) {
-    data.deserialize(*this);
+    deserialize(data, *this);
   }
 
   template <class T>

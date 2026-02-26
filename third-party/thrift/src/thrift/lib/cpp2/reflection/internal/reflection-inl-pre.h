@@ -164,16 +164,6 @@ struct mark_set_fn {
 
 constexpr mark_set_fn mark_set;
 
-struct variant_member_name {
-  template <typename Descriptor>
-  using apply = typename Descriptor::metadata::name;
-};
-
-struct variant_member_field_id {
-  template <typename Descriptor>
-  using apply = typename Descriptor::metadata::id;
-};
-
 template <typename A>
 using data_member_accessor = invoke_reffer_thru<A>;
 

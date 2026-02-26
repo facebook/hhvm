@@ -8,5 +8,4 @@
 
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_fatal.h"
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_fatal_union.h"
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_fatal_struct.h"

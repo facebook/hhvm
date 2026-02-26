@@ -216,76 +216,6 @@ TEST(reflection, IsReflectableStruct) {
           std::unordered_map<std::string, struct1>>>();
 }
 
-TEST(reflection, IsReflectableUnion) {
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<reflection_tags::module>>();
-
-  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_union<enum1>>();
-  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_union<enum2>>();
-  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_union<enum3>>();
-
-  EXPECT_SAME<std::true_type, apache::thrift::is_reflectable_union<union1>>();
-  EXPECT_SAME<std::true_type, apache::thrift::is_reflectable_union<union2>>();
-  EXPECT_SAME<std::true_type, apache::thrift::is_reflectable_union<union3>>();
-
-  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_union<struct1>>();
-  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_union<struct2>>();
-  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_union<struct3>>();
-
-  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_union<void>>();
-  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_union<int>>();
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::string>>();
-
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::vector<int>>>();
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::vector<std::string>>>();
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::vector<struct1>>>();
-
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::set<int>>>();
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::set<std::string>>>();
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::set<struct1>>>();
-
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::unordered_set<int>>>();
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::unordered_set<std::string>>>();
-
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::map<int, std::string>>>();
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::map<std::string, struct1>>>();
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<std::map<struct1, struct2>>>();
-
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<
-          std::unordered_map<int, std::string>>>();
-  EXPECT_SAME<
-      std::false_type,
-      apache::thrift::is_reflectable_union<
-          std::unordered_map<std::string, struct1>>>();
-}
-
 TEST(reflection, ReflectTypeClassOfThriftClass) {
   EXPECT_SAME<
       apache::thrift::type_class::unknown,
@@ -305,16 +235,6 @@ TEST(reflection, ReflectTypeClassOfThriftClass) {
   EXPECT_SAME<
       apache::thrift::type_class::unknown,
       apache::thrift::reflect_type_class_of_thrift_class<enum1>>();
-
-  EXPECT_SAME<
-      apache::thrift::type_class::variant,
-      apache::thrift::reflect_type_class_of_thrift_class<union1>>();
-  EXPECT_SAME<
-      apache::thrift::type_class::variant,
-      apache::thrift::reflect_type_class_of_thrift_class<union2>>();
-  EXPECT_SAME<
-      apache::thrift::type_class::variant,
-      apache::thrift::reflect_type_class_of_thrift_class<union3>>();
 
   EXPECT_SAME<
       apache::thrift::type_class::structure,

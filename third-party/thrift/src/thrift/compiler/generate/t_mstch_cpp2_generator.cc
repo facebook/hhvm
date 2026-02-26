@@ -840,7 +840,6 @@ class cpp_mstch_program : public mstch_program {
          {"program:legacy_api?", &cpp_mstch_program::legacy_api},
          {"program:fatal_languages", &cpp_mstch_program::fatal_languages},
          {"program:fatal_enums", &cpp_mstch_program::fatal_enums},
-         {"program:fatal_unions", &cpp_mstch_program::fatal_unions},
          {"program:fatal_structs", &cpp_mstch_program::fatal_structs},
          {"program:fatal_constants", &cpp_mstch_program::fatal_constants},
          {"program:fatal_services", &cpp_mstch_program::fatal_services},
@@ -890,15 +889,6 @@ class cpp_mstch_program : public mstch_program {
     std::vector<std::string> result;
     for (const auto* enm : program_->enums()) {
       result.push_back(get_fatal_string_short_id(enm));
-    }
-    return result;
-  }
-  std::vector<std::string> get_fatal_union_names() {
-    std::vector<std::string> result;
-    for (const t_structured* obj : program_->structured_definitions()) {
-      if (obj->is<t_union>()) {
-        result.push_back(get_fatal_string_short_id(obj));
-      }
     }
     return result;
   }
@@ -1070,9 +1060,6 @@ class cpp_mstch_program : public mstch_program {
   mstch::node fatal_enums() {
     return to_fatal_string_array(get_fatal_enum_names());
   }
-  mstch::node fatal_unions() {
-    return to_fatal_string_array(get_fatal_union_names());
-  }
   mstch::node fatal_structs() {
     return to_fatal_string_array(get_fatal_struct_names());
   }
@@ -1104,11 +1091,6 @@ class cpp_mstch_program : public mstch_program {
     }
     // structs, unions and exceptions
     for (const t_structured* obj : program_->structured_definitions()) {
-      if (obj->is<t_union>()) {
-        // When generating <program_name>_fatal_union.h, we will generate
-        // <union_name>_Type_enum_traits
-        unique_names.emplace("Type", "Type");
-      }
       collect_fatal_string_annotated(unique_names, obj);
       for (const auto& m : obj->fields()) {
         collect_fatal_string_annotated(unique_names, &m);
@@ -2608,7 +2590,6 @@ void t_mstch_cpp2_generator::generate_reflection(const t_program* program) {
   // Unique Compile-time Strings, Metadata tags and Metadata registration
   render_to_file(prog, "module_fatal.h", name + "_fatal.h");
 
-  render_to_file(prog, "module_fatal_union.h", name + "_fatal_union.h");
   render_to_file(prog, "module_fatal_struct.h", name + "_fatal_struct.h");
   render_to_file(prog, "module_fatal_constant.h", name + "_fatal_constant.h");
   render_to_file(prog, "module_fatal_service.h", name + "_fatal_service.h");

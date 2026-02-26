@@ -24,7 +24,8 @@ Since this file will eventually be removed, do not import from here, use
 }}
 {{#import "common/constants" as constants}}
 {{> common/auto_generated_py}}
-{{#program:hasConstants}}
+  {{#each (array.enumerate program:self.consts with_first=true) as |i constant first?|}}
+    {{#if first?}}
 import thrift.py3.types
 
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types
@@ -42,7 +43,6 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 )
 {{/program:hasContainerTypes}}
 
-{{#program:constants}}
-{{constant:name}} = {{#partial constants.inplace_const_value value=constant:self.value }}
-{{/program:constants}}
-{{/program:hasConstants}}
+    {{/if first?}}
+{{constant.name}} = {{#partial constants.inplace_const_value value=constant.value }}
+  {{/each}}

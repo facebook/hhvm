@@ -58,6 +58,16 @@ mstch::array create_string_array(const std::vector<std::string>& values) {
   return mstch_array;
 }
 
+whisker::object to_whisker_string_array(
+    const std::vector<std::string>& values) {
+  whisker::array::raw arr;
+  arr.reserve(values.size());
+  for (const std::string& s : values) {
+    arr.emplace_back(whisker::make::string(s));
+  }
+  return whisker::make::array(std::move(arr));
+}
+
 // TO-DO: remove duplicate in pyi
 bool has_types(const t_program* program) {
   assert(program != nullptr);
@@ -266,42 +276,27 @@ class py3_mstch_program : public mstch_program {
         {
             {"program:unique_functions_by_return_type",
              &py3_mstch_program::unique_functions_by_return_type},
-            {"program:has_types?", &py3_mstch_program::program_has_types},
             {"program:needs_container_converters?",
              &py3_mstch_program::needs_container_converters},
             {"program:cppNamespaces", &py3_mstch_program::getCpp2Namespace},
             {"program:py3Namespaces", &py3_mstch_program::getPy3Namespace},
             {"program:includeNamespaces",
              &py3_mstch_program::includeNamespaces},
-            {"program:cppIncludes", &py3_mstch_program::getCppIncludes},
             {"program:containerTypes", &py3_mstch_program::getContainerTypes},
-            {"program:hasConstants", &py3_mstch_program::hasConstants},
             {"program:hasContainerTypes",
              &py3_mstch_program::hasContainerTypes},
-            {"program:hasEnumTypes", &py3_mstch_program::hasEnumTypes},
             {"program:hasUnionTypes", &py3_mstch_program::hasUnionTypes},
             {"program:customTemplates", &py3_mstch_program::getCustomTemplates},
             {"program:customTypes", &py3_mstch_program::getCustomTypes},
             {"program:has_stream?", &py3_mstch_program::hasStream},
-            {"program:python_capi_converter?",
-             &py3_mstch_program::capi_converter},
-            {"program:capi_module_prefix",
-             &py3_mstch_program::capi_module_prefix},
-            {"program:auto_migrate?", &py3_mstch_program::auto_migrate},
-            {"program:gen_legacy_container_converters?",
-             &py3_mstch_program::legacy_container_converters},
             {"program:stream_types", &py3_mstch_program::getStreamTypes},
             {"program:response_and_stream_functions",
              &py3_mstch_program::response_and_stream_functions},
             {"program:stream_exceptions",
              &py3_mstch_program::getStreamExceptions},
-            {"program:cpp_gen_path", &py3_mstch_program::getCppGenPath},
-            {"program:py_deprecated_module_path",
-             &py3_mstch_program::py_deprecated_module_path},
             {"program:filtered_structs", &py3_mstch_program::filtered_objects},
             {"program:filtered_typedefs",
              &py3_mstch_program::filtered_typedefs},
-            {"program:gen_py3_cython?", &py3_mstch_program::gen_py3_cython},
         });
     gather_included_program_namespaces();
     visit_types_for_services_and_interactions();
@@ -315,12 +310,6 @@ class py3_mstch_program : public mstch_program {
     }
   }
 
-  mstch::node getCppGenPath() {
-    return std::string(has_option("py3cpp") ? "gen-py3cpp" : "gen-cpp2");
-  }
-
-  mstch::node program_has_types() { return has_types(program_); }
-
   mstch::node getContainerTypes() { return make_mstch_types(containers_); }
 
   mstch::node hasContainerTypes() { return !containers_.empty(); }
@@ -331,17 +320,6 @@ class py3_mstch_program : public mstch_program {
          has_option("gen_legacy_container_converters"));
   }
 
-  mstch::node hasConstants() {
-    for (auto constant : program_->consts()) {
-      if (!is_hidden(*constant)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  mstch::node hasEnumTypes() { return !program_->enums().empty(); }
-
   mstch::node hasUnionTypes() {
     for (const auto* ttype : objects_) {
       if (ttype->is<t_union>()) {
@@ -349,16 +327,6 @@ class py3_mstch_program : public mstch_program {
       }
     }
     return false;
-  }
-
-  mstch::node getCppIncludes() {
-    mstch::array a;
-    if (program_->language_includes().count("cpp")) {
-      for (const auto& include : program_->language_includes().at("cpp")) {
-        a.emplace_back(include);
-      }
-    }
-    return a;
   }
 
   mstch::node unique_functions_by_return_type() {
@@ -424,30 +392,6 @@ class py3_mstch_program : public mstch_program {
 
   mstch::node hasStream() {
     return !has_option("no_stream") && !streamTypes_.empty();
-  }
-
-  mstch::node capi_converter() { return has_option("python_capi_converter"); }
-
-  mstch::node capi_module_prefix() {
-    return python::gen_capi_module_prefix_impl(program_);
-  }
-
-  mstch::node auto_migrate() { return has_option("auto_migrate"); }
-
-  mstch::node gen_py3_cython() {
-    return !(has_option("auto_migrate") || has_option("inplace_migrate"));
-  }
-
-  mstch::node legacy_container_converters() {
-    return has_option("gen_legacy_container_converters");
-  }
-
-  mstch::node py_deprecated_module_path() {
-    const std::string& module_path = program_->get_namespace("py");
-    if (module_path.empty()) {
-      return program_->name();
-    }
-    return module_path;
   }
 
  protected:
@@ -1283,10 +1227,54 @@ class t_mstch_py3_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
     auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
 
-    // this option triggers generation of py3 structs as wrappers around
-    // thrift-python structs
+    def.property("consts", [&proto](const t_program& self) {
+      // Overrides t_whisker_generator's `consts`, ignoring hidden consts
+      whisker::array::raw consts;
+      for (const t_const* constant : self.consts()) {
+        if (!is_hidden(*constant)) {
+          consts.emplace_back(proto.create<t_const>(*constant));
+        }
+      }
+      return whisker::make::array(std::move(consts));
+    });
+    def.property(
+        "has_types?", [](const t_program& self) { return has_types(&self); });
+    def.property("py_deprecated_module_path", [](const t_program& self) {
+      const std::string& module_path = self.get_namespace("py");
+      return module_path.empty() ? self.name() : module_path;
+    });
+    def.property("cpp_gen_path", [this](const t_program&) {
+      return whisker::make::string(
+          has_compiler_option("py3cpp") ? "gen-py3cpp" : "gen-cpp2");
+    });
+    def.property("python_capi_converter?", [this](const t_program&) {
+      return has_compiler_option("python_capi_converter");
+    });
+    def.property("capi_module_prefix", [](const t_program& self) {
+      return python::gen_capi_module_prefix_impl(&self);
+    });
+    def.property("auto_migrate?", [this](const t_program&) {
+      return has_compiler_option("auto_migrate");
+    });
+    def.property("gen_legacy_container_converters?", [this](const t_program&) {
+      return has_compiler_option("gen_legacy_container_converters");
+    });
     def.property("inplace_migrate?", [this](const t_program&) {
+      // this option triggers generation of py3 structs as wrappers around
+      // thrift-python structs
       return has_compiler_option("inplace_migrate");
+    });
+    def.property("gen_py3_cython?", [this](const t_program&) {
+      return !(
+          has_compiler_option("auto_migrate") ||
+          has_compiler_option("inplace_migrate"));
+    });
+    def.property("cppIncludes", [](const t_program& self) {
+      if (const auto& it = self.language_includes().find("cpp");
+          it != self.language_includes().end()) {
+        return to_whisker_string_array(it->second);
+      }
+      return whisker::make::array();
     });
 
     return std::move(def).make();

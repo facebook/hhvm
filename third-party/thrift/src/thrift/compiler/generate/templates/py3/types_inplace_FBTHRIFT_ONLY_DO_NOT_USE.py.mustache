@@ -48,12 +48,12 @@ import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:n
 
 
 {{#program:includeNamespaces}}
-{{#hasTypes?}}
+  {{#if hasTypes?}}
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
-{{#program:hasConstants}}
+    {{#if (not (array.empty? program:self.consts))}}
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types
-{{/program:hasConstants}}
-{{/hasTypes?}}
+    {{/if (not (array.empty? program:self.consts))}}
+  {{/if hasTypes?}}
 {{/program:includeNamespaces}}
 
 def get_types_reflection():

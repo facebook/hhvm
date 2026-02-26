@@ -18,10 +18,10 @@
 {{> common/auto_generated_py}}
 {{> types/cimport_extern }}
 
-{{#program:cppIncludes}}
-cdef extern from "{{.}}":
+{{#each program:cppIncludes as |include|}}
+cdef extern from "{{include}}":
   pass
-{{/program:cppIncludes}}{{!
+{{/each}}{{!
 }}{{#program:customTemplates}}
 {{> types/custom_template}}
 {{/program:customTemplates}}{{!

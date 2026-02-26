@@ -7,15 +7,15 @@
  *)
 
 type package_warning_info = {
-  current_package: (string * Pos.t) option;
-  target_package: (string * Pos.t) option;
+  current_package: Package.pos_id option;
+  target_package: Package.pos_id option;
   target_package_before_override: string option;
 }
 
 type package_error_info = {
-  current_package: (string * Pos.t) option;
+  current_package: Package.pos_id option;
   current_package_assignment_kind: string;
-  target_package: (string * Pos.t) option;
+  target_package: Package.pos_id option;
   target_package_assignment_kind: string;
   target_id: string;
 }

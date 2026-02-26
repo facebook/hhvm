@@ -699,7 +699,7 @@ module M = struct
             if from_includes then
               acc
             else
-              (pkg, pos) :: acc
+              (pos, pkg) :: acc
           | Not_exists_in_deployment
           | Unsatisfiable_package_constraints ->
             acc)
@@ -717,7 +717,7 @@ module M = struct
     in
     let loaded_packages = get_loaded_packages_list env in
     let loaded_pkg_includes =
-      List.concat_map loaded_packages ~f:(fun (loaded_pkg_name, _) ->
+      List.concat_map loaded_packages ~f:(fun (_, loaded_pkg_name) ->
           match get_package_by_name env loaded_pkg_name with
           | None -> []
           | Some pkg ->

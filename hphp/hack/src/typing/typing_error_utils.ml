@@ -1268,29 +1268,29 @@ end = struct
   end
 
   module Eval_package = struct
-    let get_package_str_pos p_opt =
+    let get_package_pos_id p_opt =
       match p_opt with
-      | Some (s, pos) -> (Printf.sprintf "package `%s`" s, pos)
+      | Some (pos, id) -> (Printf.sprintf "package `%s`" id, pos)
       | None -> ("the default package", Pos.none)
 
     let cross_pkg_access
         (pos : Pos.t)
         (decl_pos : Pos_or_decl.t)
-        (current_package : (string * Pos.t) option)
+        (current_package : Package.pos_id option)
         (current_package_assignment_kind : string)
-        (target_package : (string * Pos.t) option)
+        (target_package : Package.pos_id option)
         (target_package_assignment_kind : string)
         (target_filename : Relative_path.t)
         (target_id : string)
         (target_symbol_spec : string)
-        (loaded_packages : (string * Pos.t) list)
+        (loaded_packages : Package.pos_id list)
         (included_packages : (string * string * Pos.t) list)
         (soft : bool) =
       let (current_pkg_name, current_pkg_pos) =
-        get_package_str_pos current_package
+        get_package_pos_id current_package
       in
       let (target_package_name, target_package_pos) =
-        get_package_str_pos target_package
+        get_package_pos_id target_package
       in
       let target_filename = Relative_path.suffix target_filename in
       let target_id = Markdown_lite.md_codify (Utils.strip_ns target_id) in
@@ -1324,7 +1324,7 @@ end = struct
              ]
            in
            let loaded_reasons =
-             List.map loaded_packages ~f:(fun (pkg, pkg_pos) ->
+             List.map loaded_packages ~f:(fun (pkg_pos, pkg) ->
                  ( Pos_or_decl.of_raw_pos pkg_pos,
                    Printf.sprintf
                      "package `%s` is assumed to be deployed here"
@@ -1354,13 +1354,11 @@ end = struct
         (pos : Pos.t)
         (decl_pos : Pos_or_decl.t)
         (target_package : string)
-        (current_package : (string * Pos.t) option)
-        (loaded_packages : (string * Pos.t) list)
+        (current_package : Package.pos_id option)
+        (loaded_packages : Package.pos_id list)
         (included_packages : (string * string * Pos.t) list) =
       let (current_pkg_name, current_pkg_pos) =
-        match current_package with
-        | Some (name, pos) -> (Printf.sprintf "`%s`" name, pos)
-        | None -> ("the default package", Pos.none)
+        get_package_pos_id current_package
       in
       let claim = lazy (pos, "Cannot reference this __RequirePackage function")
       and reasons =
@@ -1373,12 +1371,12 @@ end = struct
                    target_package );
                ( Pos_or_decl.of_raw_pos current_pkg_pos,
                  Printf.sprintf
-                   "the current file belongs to package %s"
+                   "the current file belongs to %s"
                    current_pkg_name );
              ]
            in
            let loaded_reasons =
-             List.map loaded_packages ~f:(fun (pkg, pkg_pos) ->
+             List.map loaded_packages ~f:(fun (pkg_pos, pkg) ->
                  ( Pos_or_decl.of_raw_pos pkg_pos,
                    Printf.sprintf
                      "package `%s` is assumed to be deployed here"
@@ -1403,7 +1401,7 @@ end = struct
         (decl_pos : Pos_or_decl.t)
         (current_soft_package_opt : (Pos.t * string) option)
         (target_package : string)
-        (loaded_packages : (string * Pos.t) list)
+        (loaded_packages : Package.pos_id list)
         (included_packages : (string * string * Pos.t) list) =
       let claim =
         lazy (pos, "Cannot reference this `__SoftRequirePackage` function")
@@ -1430,7 +1428,7 @@ end = struct
              | None -> [])
            in
            let loaded_reasons =
-             List.map loaded_packages ~f:(fun (pkg, pkg_pos) ->
+             List.map loaded_packages ~f:(fun (pkg_pos, pkg) ->
                  ( Pos_or_decl.of_raw_pos pkg_pos,
                    Printf.sprintf
                      "package `%s` is assumed to be deployed here"

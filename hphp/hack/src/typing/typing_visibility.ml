@@ -453,9 +453,7 @@ let check_cross_package ~use_pos ~def_pos:_ env package_requirement =
       | Some _ ->
         (* Convert from Package.t option to (string * Pos.t) option *)
         let current_package =
-          Option.map current_pkg ~f:(fun pkg ->
-              let (pos, name) = pkg.Package.name in
-              (name, pos))
+          Option.map current_pkg ~f:(fun pkg -> pkg.Package.name)
         in
         Some
           (Typing_error.package

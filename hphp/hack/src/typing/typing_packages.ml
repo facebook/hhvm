@@ -33,15 +33,15 @@ let get_package_violation env current_pkg target_pkg =
           Some r))
 
 type package_warning_info = {
-  current_package: (string * Pos.t) option;
-  target_package: (string * Pos.t) option;
+  current_package: Package.pos_id option;
+  target_package: Package.pos_id option;
   target_package_before_override: string option;
 }
 
 type package_error_info = {
-  current_package: (string * Pos.t) option;
+  current_package: Package.pos_id option;
   current_package_assignment_kind: string;
-  target_package: (string * Pos.t) option;
+  target_package: Package.pos_id option;
   target_package_assignment_kind: string;
   target_id: string;
 }
@@ -63,7 +63,7 @@ let is_excluded env (file : Relative_path.t) =
 let get_package_profile
     (env : Typing_env_types.env)
     (pkg_membership : Aast_defs.package_membership option) :
-    Package.t option * (string * Pos.t) option * string =
+    Package.t option * Package.pos_id option * string =
   match pkg_membership with
   | Some (Aast_defs.PackageConfigAssignment pkg_name) ->
     let pkg = Env.get_package_by_name env pkg_name in
@@ -72,10 +72,10 @@ let get_package_profile
       | Some p -> Package.get_package_pos p
       | None -> Pos.none
     in
-    (pkg, Some (pkg_name, pos), "package definition")
+    (pkg, Some (pos, pkg_name), "package definition")
   | Some (Aast_defs.PackageOverride (pkg_pos, pkg_name)) ->
     ( Env.get_package_by_name env pkg_name,
-      Some (pkg_name, pkg_pos),
+      Some (pkg_pos, pkg_name),
       "package override" )
   | _ -> (None, None, "")
 

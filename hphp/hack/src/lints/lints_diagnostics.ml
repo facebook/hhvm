@@ -357,10 +357,10 @@ let awaitable_awaitable pos =
 let package_into_override
     pos current_package target_package target_package_before_override =
   let current_package_name =
-    Option.value_map current_package ~default:"<none>" ~f:fst
+    Option.value_map current_package ~default:"<none>" ~f:snd
   in
   let target_package_name =
-    Option.value_map target_package ~default:"<none>" ~f:fst
+    Option.value_map target_package ~default:"<none>" ~f:snd
   in
   let target_package_before_override_name =
     Option.value target_package_before_override ~default:"<none>"

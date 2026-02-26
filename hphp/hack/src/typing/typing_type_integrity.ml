@@ -187,8 +187,9 @@ let rec check_targs_integrity
 and check_targ_well_formed ~in_signature env tyarg (tparam : decl_tparam) =
   let in_reified = not @@ Aast.is_erased tparam.tp_reified in
   let should_check_package_boundary =
+    let open Typing_error.Primary.Package in
     if in_reified then
-      `Yes "reified generic"
+      `Yes Reified_generic
     else
       `No
   in

@@ -86,7 +86,7 @@ let mk_pkg_primary_error ~pos ~kind =
           current_filename = Relative_path.default;
           target_filename = Relative_path.default;
           target_id = "whatever";
-          target_symbol_spec = "whatever";
+          target_symbol_spec = Symbol;
           loaded_packages = [];
           included_packages = [];
         }
@@ -122,7 +122,7 @@ let mk_pkg_primary_error ~pos ~kind =
           current_filename = Relative_path.default;
           target_filename = Relative_path.default;
           target_id = "whatever";
-          target_symbol_spec = "whatever";
+          target_symbol_spec = Symbol;
           loaded_packages = [];
           included_packages = [];
         }
@@ -139,7 +139,7 @@ let mk_pkg_primary_error ~pos ~kind =
           current_filename = Relative_path.default;
           target_filename = Relative_path.default;
           target_id = "whatever";
-          target_symbol_spec = "whatever";
+          target_symbol_spec = Symbol;
           loaded_packages = [];
           included_packages = [];
         })
@@ -1355,6 +1355,7 @@ let test_any_pkg_matches_soft_included_access _ =
 
 let test_optional_path_segment_missing _ =
   let open Typing_error in
+  let open Primary.Package in
   let pos_file = Relative_path.from_root ~suffix:"foo/bar/baz.php" in
   let pos =
     Pos.make_from_lnum_bol_offset
@@ -1364,7 +1365,7 @@ let test_optional_path_segment_missing _ =
   in
   let prim_err =
     Primary.Package
-      (Primary.Package.Cross_pkg_access
+      (Cross_pkg_access
          {
            pos;
            decl_pos = Pos_or_decl.none;
@@ -1376,7 +1377,7 @@ let test_optional_path_segment_missing _ =
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
-           target_symbol_spec = "whatever";
+           target_symbol_spec = Symbol;
            loaded_packages = [];
            included_packages = [];
          })
@@ -1424,6 +1425,7 @@ let test_optional_path_segment_missing _ =
 
 let test_optional_path_segment_present _ =
   let open Typing_error in
+  let open Primary.Package in
   let pos_file = Relative_path.from_root ~suffix:"foo/qux/bar/baz.php" in
   let pos =
     Pos.make_from_lnum_bol_offset
@@ -1433,7 +1435,7 @@ let test_optional_path_segment_present _ =
   in
   let prim_err =
     Primary.Package
-      (Primary.Package.Cross_pkg_access
+      (Cross_pkg_access
          {
            pos;
            decl_pos = Pos_or_decl.none;
@@ -1445,7 +1447,7 @@ let test_optional_path_segment_present _ =
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
-           target_symbol_spec = "whatever";
+           target_symbol_spec = Symbol;
            loaded_packages = [];
            included_packages = [];
          })
@@ -1493,6 +1495,7 @@ let test_optional_path_segment_present _ =
 
 let test_path_glob _ =
   let open Typing_error in
+  let open Primary.Package in
   let pos_file = Relative_path.from_root ~suffix:"foo/bar/qux/fizz/baz.php" in
   let pos =
     Pos.make_from_lnum_bol_offset
@@ -1502,7 +1505,7 @@ let test_path_glob _ =
   in
   let prim_err =
     Primary.Package
-      (Primary.Package.Cross_pkg_access
+      (Cross_pkg_access
          {
            pos;
            decl_pos = Pos_or_decl.none;
@@ -1514,7 +1517,7 @@ let test_path_glob _ =
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
-           target_symbol_spec = "whatever";
+           target_symbol_spec = Symbol;
            loaded_packages = [];
            included_packages = [];
          })
@@ -1551,6 +1554,7 @@ let test_path_glob _ =
 
 let test_path_glob_with_optional_present _ =
   let open Typing_error in
+  let open Primary.Package in
   let pos_file =
     Relative_path.from_root ~suffix:"foo/wibble/bar/qux/fizz/baz.php"
   in
@@ -1562,7 +1566,7 @@ let test_path_glob_with_optional_present _ =
   in
   let prim_err =
     Primary.Package
-      (Primary.Package.Cross_pkg_access
+      (Cross_pkg_access
          {
            pos;
            decl_pos = Pos_or_decl.none;
@@ -1574,7 +1578,7 @@ let test_path_glob_with_optional_present _ =
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
-           target_symbol_spec = "whatever";
+           target_symbol_spec = Symbol;
            loaded_packages = [];
            included_packages = [];
          })
@@ -1614,6 +1618,7 @@ let test_path_glob_with_optional_present _ =
 
 let test_path_glob_with_optional_missing _ =
   let open Typing_error in
+  let open Primary.Package in
   let pos_file = Relative_path.from_root ~suffix:"foo/bar/qux/fizz/baz.php" in
   let pos =
     Pos.make_from_lnum_bol_offset
@@ -1623,7 +1628,7 @@ let test_path_glob_with_optional_missing _ =
   in
   let prim_err =
     Primary.Package
-      (Primary.Package.Cross_pkg_access
+      (Cross_pkg_access
          {
            pos;
            decl_pos = Pos_or_decl.none;
@@ -1635,7 +1640,7 @@ let test_path_glob_with_optional_missing _ =
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
-           target_symbol_spec = "whatever";
+           target_symbol_spec = Symbol;
            loaded_packages = [];
            included_packages = [];
          })
@@ -1675,6 +1680,7 @@ let test_path_glob_with_optional_missing _ =
 
 let test_path_glob_bad _ =
   let open Typing_error in
+  let open Primary.Package in
   let pos_file = Relative_path.from_root ~suffix:"foo/baz.php" in
   let pos =
     Pos.make_from_lnum_bol_offset
@@ -1684,7 +1690,7 @@ let test_path_glob_bad _ =
   in
   let prim_err =
     Primary.Package
-      (Primary.Package.Cross_pkg_access
+      (Cross_pkg_access
          {
            pos;
            decl_pos = Pos_or_decl.none;
@@ -1696,7 +1702,7 @@ let test_path_glob_bad _ =
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
-           target_symbol_spec = "whatever";
+           target_symbol_spec = Symbol;
            loaded_packages = [];
            included_packages = [];
          })
@@ -1739,6 +1745,7 @@ let test_path_glob_bad _ =
 
 let test_path_glob_with_optional_missing_bad _ =
   let open Typing_error in
+  let open Primary.Package in
   let pos_file = Relative_path.from_root ~suffix:"foo/baz.php" in
   let pos =
     Pos.make_from_lnum_bol_offset
@@ -1748,7 +1755,7 @@ let test_path_glob_with_optional_missing_bad _ =
   in
   let prim_err =
     Primary.Package
-      (Primary.Package.Cross_pkg_access
+      (Cross_pkg_access
          {
            pos;
            decl_pos = Pos_or_decl.none;
@@ -1760,7 +1767,7 @@ let test_path_glob_with_optional_missing_bad _ =
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
-           target_symbol_spec = "whatever";
+           target_symbol_spec = Symbol;
            loaded_packages = [];
            included_packages = [];
          })
@@ -1804,6 +1811,7 @@ let test_path_glob_with_optional_missing_bad _ =
 
 let test_path_glob_with_optional_present_bad _ =
   let open Typing_error in
+  let open Primary.Package in
   let pos_file = Relative_path.from_root ~suffix:"foo/bar/baz.php" in
   let pos =
     Pos.make_from_lnum_bol_offset
@@ -1813,7 +1821,7 @@ let test_path_glob_with_optional_present_bad _ =
   in
   let prim_err =
     Primary.Package
-      (Primary.Package.Cross_pkg_access
+      (Cross_pkg_access
          {
            pos;
            decl_pos = Pos_or_decl.none;
@@ -1825,7 +1833,7 @@ let test_path_glob_with_optional_present_bad _ =
            current_filename = Relative_path.default;
            target_filename = Relative_path.default;
            target_id = "whatever";
-           target_symbol_spec = "whatever";
+           target_symbol_spec = Symbol;
            loaded_packages = [];
            included_packages = [];
          })

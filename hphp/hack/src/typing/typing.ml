@@ -1338,8 +1338,9 @@ end = struct
             (Some fe_package_requirement);
         ]
     and (access_errs, access_linter_errors) =
+      let open Typing_error.Primary.Package in
       TVis.check_top_level_access
-        ~should_check_package_boundary:(`Yes "function")
+        ~should_check_package_boundary:(`Yes Func)
         ~in_signature:false
         ~use_pos
         ~def_pos
@@ -3633,9 +3634,10 @@ end = struct
         make_result env cst_pos (Aast.Id id) ty
       | Some const ->
         (if Env.check_packages env then
+          let open Typing_error.Primary.Package in
           match
             TVis.check_package_access
-              ~should_check_package_boundary:(`Yes "global constant")
+              ~should_check_package_boundary:(`Yes Global_const)
               ~use_pos:cst_pos
               ~def_pos:const.cd_pos
               env
@@ -5105,9 +5107,10 @@ end = struct
         if (not (String.equal (snd mid) "class")) && should_check_packages then begin
           match Env.get_class env class_name with
           | Decl_entry.Found class_ ->
+            let open Typing_error.Primary.Package in
             (match
                TVis.check_package_access
-                 ~should_check_package_boundary:(`Yes "class constant")
+                 ~should_check_package_boundary:(`Yes Class_const)
                  ~use_pos:p
                  ~def_pos:(Cls.pos class_)
                  env
@@ -11714,15 +11717,16 @@ end = struct
         | Decl_entry.Found class_ ->
           if not is_attribute_param then (
             let should_check_package_boundary =
+              let open Typing_error.Primary.Package in
               if inside_nameof || is_attribute || is_catch then
                 `No
               else if is_const then begin
                 if Env.package_allow_classconst_violations env then
                   `No
                 else
-                  `Yes "class"
+                  `Yes Class
               end else
-                `Yes "class"
+                `Yes Class
             in
             let (access_errs, access_linter_errs) =
               TVis.check_top_level_access

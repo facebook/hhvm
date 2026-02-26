@@ -1284,13 +1284,14 @@ let localize_targ ?tparam ~check_type_integrity env hint =
           not @@ Aast.is_erased tparam.tp_reified)
     in
     let should_check_package_boundary =
+      let open Typing_error.Primary.Package in
       if in_reified then
-        `Yes "reified generic"
+        `Yes Reified_generic
       else if
         Option.is_some tparam
         && not (Env.package_allow_all_generics_violations env)
       then
-        `Yes "generic"
+        `Yes Generic
       else
         `No
     in

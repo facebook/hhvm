@@ -645,9 +645,10 @@ let check_consistent_enum_inclusion
   let dest_kind = Cls.kind dest_cls in
   (* Check package visibility *)
   (if Typing_env.check_packages env then
+    let open Typing_error.Primary.Package in
     match
       Typing_visibility.check_package_access
-        ~should_check_package_boundary:(`Yes "enum")
+        ~should_check_package_boundary:(`Yes Enum)
         ~use_pos:dest_cls_pos
         ~def_pos:(Cls.pos included_cls)
         env

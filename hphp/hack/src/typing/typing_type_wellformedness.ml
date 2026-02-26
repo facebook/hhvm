@@ -295,7 +295,8 @@ and contexts_opt env = Option.value_map ~default:[] ~f:(contexts env)
 
 let hint
     ?(in_signature = true)
-    ?(should_check_package_boundary = `Yes "symbol")
+    ?(should_check_package_boundary =
+      Typing_error.Primary.Package.(`Yes Symbol))
     env
     (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
@@ -452,8 +453,9 @@ let typeconsts env tcs cls_name =
   in
   let f tconst =
     let should_check_package_boundary =
+      let open Typing_error.Primary.Package in
       if not @@ Env.package_allow_all_tconst_violations env.tenv then
-        `Yes "type constant"
+        `Yes Type_const
       else
         match get_class_const tconst.c_tconst_name with
         | `Found ttc when Option.is_none ttc.ttc_reifiable -> `No
@@ -461,7 +463,7 @@ let typeconsts env tcs cls_name =
           if Env.package_allow_reifiable_tconst_violations env.tenv then
             `No
           else
-            `Yes "reifiable type constant"
+            `Yes Reifiable_type_const
         | _ -> `No
     in
     match tconst.c_tconst_kind with
@@ -643,10 +645,11 @@ let typedef tenv (t : (_, _) typedef) =
        references. *)
     | SimpleTypeDef { tvh_vis = Transparent; tvh_hint } ->
       let should_check_package_boundary =
+        let open Typing_error.Primary.Package in
         if Env.package_allow_typedef_violations tenv then
           `No
         else
-          `Yes "transparent type alias"
+          `Yes Transparent_type_alias
       in
       (true, should_check_package_boundary, t_tparams, [(tvh_hint, [])])
     | SimpleTypeDef { tvh_vis = _; tvh_hint } ->
@@ -656,7 +659,8 @@ let typedef tenv (t : (_, _) typedef) =
       let hint_constraints_pairs =
         List.map variants ~f:(fun v -> (v.tctv_hint, v.tctv_where_constraints))
       in
-      (false, `Yes "case type", [], hint_constraints_pairs)
+      let open Typing_error.Primary.Package in
+      (false, `Yes Case_type, [], hint_constraints_pairs)
   in
   (* We don't allow constraints on typdef parameters, but we still
      need to record their kinds in the generic var environment *)
@@ -735,7 +739,11 @@ let global_constant tenv gconst =
   in
   hint_opt ~should_check_package_boundary:`No env cst_type
 
-let hint ?(should_check_package_boundary = `Yes "symbol") tenv h =
+let hint
+    ?(should_check_package_boundary =
+      Typing_error.Primary.Package.(`Yes Symbol))
+    tenv
+    h =
   let env = { typedef_tparams = []; tenv } in
   hint ~in_signature:false ~should_check_package_boundary env h
 

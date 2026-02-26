@@ -299,6 +299,23 @@ module Primary : sig
   end
 
   module Package : sig
+    type target_symbol_spec =
+      | Func
+      | Global_const
+      | Class_const
+      | Class
+      | Enum
+      | Symbol
+      | Type_const
+      | Reifiable_type_const
+      | Transparent_type_alias
+      | Case_type
+      | Reified_generic
+      | Generic
+    [@@deriving show]
+
+    val target_symbol_spec_to_string : target_symbol_spec -> string
+
     type t =
       | Cross_pkg_access of {
           pos: Pos.t;
@@ -310,7 +327,7 @@ module Primary : sig
           current_filename: Relative_path.t;
           target_filename: Relative_path.t;
           target_id: string;
-          target_symbol_spec: string;
+          target_symbol_spec: target_symbol_spec;
           loaded_packages: Package.pos_id list;
           included_packages: (string * string * Pos.t) list;
         }
@@ -340,7 +357,7 @@ module Primary : sig
           current_filename: Relative_path.t;
           target_filename: Relative_path.t;
           target_id: string;
-          target_symbol_spec: string;
+          target_symbol_spec: target_symbol_spec;
           loaded_packages: Package.pos_id list;
           included_packages: (string * string * Pos.t) list;
         }

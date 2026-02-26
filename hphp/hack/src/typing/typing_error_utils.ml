@@ -1282,7 +1282,7 @@ end = struct
         (target_package_assignment_kind : string)
         (target_filename : Relative_path.t)
         (target_id : string)
-        (target_symbol_spec : string)
+        (target_symbol_spec : Typing_error.Primary.Package.target_symbol_spec)
         (loaded_packages : Package.pos_id list)
         (included_packages : (string * string * Pos.t) list)
         (soft : bool) =
@@ -1300,7 +1300,8 @@ end = struct
           ( pos,
             Printf.sprintf
               "Cannot access %s %s defined in %s which may not be available"
-              target_symbol_spec
+              Typing_error.Primary.Package.(
+                target_symbol_spec_to_string target_symbol_spec)
               target_id
               target_package_name )
       and reasons =

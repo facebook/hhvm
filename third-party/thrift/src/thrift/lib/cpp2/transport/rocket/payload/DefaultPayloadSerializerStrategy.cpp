@@ -31,14 +31,15 @@ rocket::Payload DefaultPayloadSerializerStrategy::finalizePayload(
     std::unique_ptr<folly::IOBuf>&& payload,
     Metadata* metadata,
     folly::SocketFds fds,
-    bool encodeMetadataUsingBinary) {
+    bool encodeMetadataUsingBinary,
+    folly::IOBufFactory* ioBufFactory) {
   rocket::Payload ret;
   if (encodeMetadataUsingBinary) {
     ret = makePayload<Metadata, BinaryProtocolWriter>(
-        *metadata, std::move(payload));
+        *metadata, std::move(payload), ioBufFactory);
   } else {
     ret = makePayload<Metadata, CompactProtocolWriter>(
-        *metadata, std::move(payload));
+        *metadata, std::move(payload), ioBufFactory);
   }
   if (fds.size()) {
     ret.fds = std::move(fds.dcheckToSendOrEmpty());
@@ -52,7 +53,8 @@ rocket::Payload DefaultPayloadSerializerStrategy::packWithFds(
     std::unique_ptr<folly::IOBuf>&& payload,
     folly::SocketFds fds,
     bool encodeMetadataUsingBinary,
-    folly::AsyncTransport* transport) {
+    folly::AsyncTransport* transport,
+    folly::IOBufFactory* ioBufFactory) {
   if (auto compression = metadata->compression_ref()) {
     const auto compressionAlgorithm = *compression;
     if (compressionAlgorithm != CompressionAlgorithm::NONE &&
@@ -69,7 +71,11 @@ rocket::Payload DefaultPayloadSerializerStrategy::packWithFds(
     metadata->fdMetadata() = fdMetadata;
   }
   return finalizePayload(
-      std::move(payload), metadata, std::move(fds), encodeMetadataUsingBinary);
+      std::move(payload),
+      metadata,
+      std::move(fds),
+      encodeMetadataUsingBinary,
+      ioBufFactory);
 }
 
 template rocket::Payload
@@ -78,7 +84,8 @@ DefaultPayloadSerializerStrategy::packWithFds<RequestRpcMetadata>(
     std::unique_ptr<folly::IOBuf>&&,
     folly::SocketFds,
     bool,
-    folly::AsyncTransport*);
+    folly::AsyncTransport*,
+    folly::IOBufFactory*);
 
 template rocket::Payload
 DefaultPayloadSerializerStrategy::packWithFds<ResponseRpcMetadata>(
@@ -86,7 +93,8 @@ DefaultPayloadSerializerStrategy::packWithFds<ResponseRpcMetadata>(
     std::unique_ptr<folly::IOBuf>&&,
     folly::SocketFds,
     bool,
-    folly::AsyncTransport*);
+    folly::AsyncTransport*,
+    folly::IOBufFactory*);
 
 template rocket::Payload
 DefaultPayloadSerializerStrategy::packWithFds<StreamPayloadMetadata>(
@@ -94,7 +102,8 @@ DefaultPayloadSerializerStrategy::packWithFds<StreamPayloadMetadata>(
     std::unique_ptr<folly::IOBuf>&&,
     folly::SocketFds,
     bool,
-    folly::AsyncTransport*);
+    folly::AsyncTransport*,
+    folly::IOBufFactory*);
 
 bool DefaultPayloadSerializerStrategy::
     canSerializeMetadataIntoDataBufferHeadroom(
@@ -107,8 +116,12 @@ template <class Metadata, class ProtocolWriter>
 Payload DefaultPayloadSerializerStrategy::makePayloadWithHeadroom(
     ProtocolWriter& writer,
     const Metadata& metadata,
-    std::unique_ptr<folly::IOBuf> data) {
+    std::unique_ptr<folly::IOBuf> data,
+    folly::IOBufFactory* ioBufFactory) {
   folly::IOBufQueue queue;
+  if (ioBufFactory) {
+    queue.setIOBufFactory(ioBufFactory);
+  }
   // Store previous state of the buffer pointers and rewind it.
   auto startBuffer = data->buffer();
   auto start = data->data();
@@ -134,11 +147,16 @@ Payload DefaultPayloadSerializerStrategy::makePayloadWithoutHeadroom(
     size_t serSize,
     ProtocolWriter& writer,
     const Metadata& metadata,
-    std::unique_ptr<folly::IOBuf> data) {
+    std::unique_ptr<folly::IOBuf> data,
+    folly::IOBufFactory* ioBufFactory) {
   folly::IOBufQueue queue;
+  if (ioBufFactory) {
+    queue.setIOBufFactory(ioBufFactory);
+  }
   constexpr size_t kMinAllocBytes = 1024;
-  auto buf =
-      folly::IOBuf::create(std::max(kHeadroomBytes + serSize, kMinAllocBytes));
+  auto allocSize = std::max(kHeadroomBytes + serSize, kMinAllocBytes);
+  auto buf = ioBufFactory ? (*ioBufFactory)(allocSize)
+                          : folly::IOBuf::create(allocSize);
   buf->advance(kHeadroomBytes);
   queue.append(std::move(buf));
   writer.setOutput(&queue);
@@ -149,38 +167,53 @@ Payload DefaultPayloadSerializerStrategy::makePayloadWithoutHeadroom(
 
 template <class Metadata, class ProtocolWriter>
 Payload DefaultPayloadSerializerStrategy::makePayload(
-    const Metadata& metadata, std::unique_ptr<folly::IOBuf> data) {
+    const Metadata& metadata,
+    std::unique_ptr<folly::IOBuf> data,
+    folly::IOBufFactory* ioBufFactory) {
   ProtocolWriter writer;
   // Default is to leave some headroom for rsocket headers
   size_t serSize = metadata.serializedSizeZC(&writer);
 
   // If possible, serialize metadata into the headeroom of data.
   if (canSerializeMetadataIntoDataBufferHeadroom(data, serSize)) {
-    return makePayloadWithHeadroom(writer, metadata, std::move(data));
+    return makePayloadWithHeadroom(
+        writer, metadata, std::move(data), ioBufFactory);
   } else {
     return makePayloadWithoutHeadroom(
-        serSize, writer, metadata, std::move(data));
+        serSize, writer, metadata, std::move(data), ioBufFactory);
   }
 }
 
 template Payload DefaultPayloadSerializerStrategy::
     makePayload<RequestRpcMetadata, BinaryProtocolWriter>(
-        const RequestRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
+        const RequestRpcMetadata&,
+        std::unique_ptr<folly::IOBuf> data,
+        folly::IOBufFactory*);
 template Payload DefaultPayloadSerializerStrategy::
     makePayload<ResponseRpcMetadata, BinaryProtocolWriter>(
-        const ResponseRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
+        const ResponseRpcMetadata&,
+        std::unique_ptr<folly::IOBuf> data,
+        folly::IOBufFactory*);
 template Payload DefaultPayloadSerializerStrategy::
     makePayload<StreamPayloadMetadata, BinaryProtocolWriter>(
-        const StreamPayloadMetadata&, std::unique_ptr<folly::IOBuf> data);
+        const StreamPayloadMetadata&,
+        std::unique_ptr<folly::IOBuf> data,
+        folly::IOBufFactory*);
 
 template Payload DefaultPayloadSerializerStrategy::
     makePayload<RequestRpcMetadata, CompactProtocolWriter>(
-        const RequestRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
+        const RequestRpcMetadata&,
+        std::unique_ptr<folly::IOBuf> data,
+        folly::IOBufFactory*);
 template Payload DefaultPayloadSerializerStrategy::
     makePayload<ResponseRpcMetadata, CompactProtocolWriter>(
-        const ResponseRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
+        const ResponseRpcMetadata&,
+        std::unique_ptr<folly::IOBuf> data,
+        folly::IOBufFactory*);
 template Payload DefaultPayloadSerializerStrategy::
     makePayload<StreamPayloadMetadata, CompactProtocolWriter>(
-        const StreamPayloadMetadata&, std::unique_ptr<folly::IOBuf> data);
+        const StreamPayloadMetadata&,
+        std::unique_ptr<folly::IOBuf> data,
+        folly::IOBufFactory*);
 
 } // namespace apache::thrift::rocket

@@ -990,7 +990,8 @@ void RocketClientChannelBase::sendThriftRequest(
         std::move(buf),
         rpcOptions.copySocketFdsToSend(),
         encodeMetadataUsingBinary(),
-        getRocketClientImpl().getTransportWrapper());
+        getRocketClientImpl().getTransportWrapper(),
+        getRocketClientImpl().getIOBufFactory());
     requestPayload.setDataFirstFieldAlignment(
         rpcOptions.getFrameRelativeDataAlignment());
     if (metadata.protocol()) {

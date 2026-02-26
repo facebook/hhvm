@@ -66,7 +66,8 @@ class DefaultPayloadSerializerStrategy final
       std::unique_ptr<folly::IOBuf>&& payload,
       folly::SocketFds fds,
       bool encodeMetadataUsingBinary,
-      folly::AsyncTransport* transport);
+      folly::AsyncTransport* transport,
+      folly::IOBufFactory* ioBufFactory = nullptr);
 
   template <typename T>
   std::unique_ptr<folly::IOBuf> packCompact(const T& data) {
@@ -151,7 +152,8 @@ class DefaultPayloadSerializerStrategy final
       std::unique_ptr<folly::IOBuf>&& payload,
       Metadata* metadata,
       folly::SocketFds fds,
-      bool encodeMetadataUsingBinary);
+      bool encodeMetadataUsingBinary,
+      folly::IOBufFactory* ioBufFactory);
 
   bool canSerializeMetadataIntoDataBufferHeadroom(
       const std::unique_ptr<folly::IOBuf>& data, const size_t serSize) const;
@@ -160,18 +162,22 @@ class DefaultPayloadSerializerStrategy final
   Payload makePayloadWithHeadroom(
       ProtocolWriter& writer,
       const Metadata& metadata,
-      std::unique_ptr<folly::IOBuf> data);
+      std::unique_ptr<folly::IOBuf> data,
+      folly::IOBufFactory* ioBufFactory);
 
   template <class Metadata, class ProtocolWriter>
   Payload makePayloadWithoutHeadroom(
       size_t serSize,
       ProtocolWriter& writer,
       const Metadata& metadata,
-      std::unique_ptr<folly::IOBuf> data);
+      std::unique_ptr<folly::IOBuf> data,
+      folly::IOBufFactory* ioBufFactory);
 
   template <class Metadata, class ProtocolWriter>
   Payload makePayload(
-      const Metadata& metadata, std::unique_ptr<folly::IOBuf> data);
+      const Metadata& metadata,
+      std::unique_ptr<folly::IOBuf> data,
+      folly::IOBufFactory* ioBufFactory);
 
   void verifyMetadataSize(size_t metadataSize, size_t expectedSize) {
     if (metadataSize != expectedSize) {

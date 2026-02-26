@@ -99,7 +99,8 @@ class ChecksumPayloadSerializerStrategy final
       std::unique_ptr<folly::IOBuf>&& payload,
       folly::SocketFds fds,
       bool encodeMetadataUsingBinary,
-      folly::AsyncTransport* transport) {
+      folly::AsyncTransport* transport,
+      folly::IOBufFactory* ioBufFactory = nullptr) {
     if (payload != nullptr) {
       if (auto checksumOpt =
               calculateChecksum(*payload, metadata->checksum())) {
@@ -111,7 +112,8 @@ class ChecksumPayloadSerializerStrategy final
         std::move(payload),
         std::move(fds),
         encodeMetadataUsingBinary,
-        transport);
+        transport,
+        ioBufFactory);
   }
 
   template <class PayloadType>

@@ -26,19 +26,19 @@ import (
 type channelClientConstructor func(channel RequestChannel) any
 
 var (
-	registryMu sync.RWMutex
-	registry   = make(map[reflect.Type]channelClientConstructor)
+	clientRegistryMu sync.RWMutex
+	clientRegistry   = make(map[reflect.Type]channelClientConstructor)
 )
 
 // THIS FUNCTION IS FOR INTERNAL USE ONLY.
 // InternalRegisterClientConstructor registers a constructor function for a client type.
 // This is intended to be called from generated code's init() function.
 func InternalRegisterClientConstructor[T io.Closer](constructor func(channel RequestChannel) T) {
-	registryMu.Lock()
-	defer registryMu.Unlock()
+	clientRegistryMu.Lock()
+	defer clientRegistryMu.Unlock()
 
 	clientType := reflect.TypeFor[T]()
-	registry[clientType] = func(ch RequestChannel) any {
+	clientRegistry[clientType] = func(ch RequestChannel) any {
 		return constructor(ch)
 	}
 }
@@ -47,11 +47,11 @@ func InternalRegisterClientConstructor[T io.Closer](constructor func(channel Req
 // InternalConstructClientFromRegistry creates a client of type T from a channel using the registered constructor.
 // Returns the client or an error if no constructor was found for the type.
 func InternalConstructClientFromRegistry[T io.Closer](channel RequestChannel) (T, error) {
-	registryMu.RLock()
-	defer registryMu.RUnlock()
+	clientRegistryMu.RLock()
+	defer clientRegistryMu.RUnlock()
 
 	clientType := reflect.TypeFor[T]()
-	if constructor, ok := registry[clientType]; ok {
+	if constructor, ok := clientRegistry[clientType]; ok {
 		return constructor(channel).(T), nil
 	}
 	var zero T

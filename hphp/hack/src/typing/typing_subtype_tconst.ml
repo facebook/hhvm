@@ -83,17 +83,30 @@ let add_tyvar_type_const env var tconstid ty ~on_error =
   let (env, upper_ty_errs, cycles_upper) =
     ITySet.fold
       (fun bound (env, ty_errs_acc, cycles_acc) ->
-        let (env, err, cycles) =
-          make_type_const_equal
-            env
-            ty
-            bound
-            tconstid
-            ~on_error
-            ~as_tyvar_with_cnstr:(Some var_pos)
+        (* Skip upper bounds like mixed and supportdyn<mixed> that don't
+           have type constants. Expanding type constants on these types
+           returns Missing, leading to unsound Tany. *)
+        let bound_is_mixed =
+          match bound with
+          | LoclType lty ->
+            let (_is_supportdyn, env, lty) = Utils.strip_supportdyn env lty in
+            Utils.is_mixed env lty
+          | _ -> false
         in
-        let ty_errs_acc = Option.to_list err @ ty_errs_acc in
-        (env, ty_errs_acc, cycles @ cycles_acc))
+        if bound_is_mixed then
+          (env, ty_errs_acc, cycles_acc)
+        else
+          let (env, err, cycles) =
+            make_type_const_equal
+              env
+              ty
+              bound
+              tconstid
+              ~on_error
+              ~as_tyvar_with_cnstr:(Some var_pos)
+          in
+          let ty_errs_acc = Option.to_list err @ ty_errs_acc in
+          (env, ty_errs_acc, cycles @ cycles_acc))
       upper_bounds
       (env, [], [])
   in

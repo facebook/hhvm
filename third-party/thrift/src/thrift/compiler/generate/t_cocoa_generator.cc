@@ -98,7 +98,6 @@ class t_cocoa_generator : public t_concat_generator {
       const t_const_value* value,
       bool containerize_it = false);
 
-  void generate_cocoa_struct(const t_struct* tstruct, bool is_exception);
   void generate_cocoa_struct_interface(
       std::ofstream& out,
       const t_structured* tstruct,
@@ -162,10 +161,6 @@ class t_cocoa_generator : public t_concat_generator {
   void generate_cocoa_service_server_implementation(
       std::ofstream& out, const t_service* tservice);
   void generate_cocoa_service_helpers(const t_service* tservice);
-  void generate_service_client(const t_service* tservice);
-  void generate_service_server(const t_service* tservice);
-  void generate_process_function(
-      const t_service* tservice, const t_function* tfunction);
 
   /**
    * Serialization constructs
@@ -219,7 +214,6 @@ class t_cocoa_generator : public t_concat_generator {
    * Helper rendering functions
    */
 
-  std::string cocoa_prefix();
   std::string cocoa_imports();
   std::string cocoa_thrift_imports();
   std::string custom_thrift_marker();
@@ -237,7 +231,6 @@ class t_cocoa_generator : public t_concat_generator {
       const t_paramlist& params);
   std::string argument_list(const t_paramlist& tparamlist);
   std::string type_to_enum(const t_type* ttype);
-  std::string format_string_for_type(const t_type* type);
   std::string call_field_setter(
       const t_field* tfield, const std::string& fieldName);
   std::string containerize(const t_type* ttype, const std::string& fieldName);
@@ -3011,51 +3004,6 @@ std::string t_cocoa_generator::type_to_enum(const t_type* type) {
   }
 
   throw std::runtime_error("INVALID TYPE IN type_to_enum: " + type->name());
-}
-
-/**
- * Returns a format std::string specifier for the supplied parse type.
- */
-std::string t_cocoa_generator::format_string_for_type(const t_type* type) {
-  type = type->get_true_type();
-
-  if (const auto* primitive = type->try_as<t_primitive_type>()) {
-    t_primitive_type::type tbase = primitive->primitive_type();
-    switch (tbase) {
-      case t_primitive_type::type::t_void:
-        throw std::runtime_error("NO T_VOID CONSTRUCT");
-      case t_primitive_type::type::t_string:
-      case t_primitive_type::type::t_binary:
-        return R"(\"%@\")";
-      case t_primitive_type::type::t_bool:
-        return "%i";
-      case t_primitive_type::type::t_byte:
-        return "%i";
-      case t_primitive_type::type::t_i16:
-        return "%hi";
-      case t_primitive_type::type::t_i32:
-        return "%i";
-      case t_primitive_type::type::t_i64:
-        return "%qi";
-      case t_primitive_type::type::t_double:
-        return "%f";
-      case t_primitive_type::type::t_float:
-        return "%f";
-    }
-  } else if (type->is<t_enum>()) {
-    return "%i";
-  } else if (type->is<t_structured>()) {
-    return "%@";
-  } else if (type->is<t_map>()) {
-    return "%@";
-  } else if (type->is<t_set>()) {
-    return "%@";
-  } else if (type->is<t_list>()) {
-    return "%@";
-  }
-
-  throw std::runtime_error(
-      "INVALID TYPE IN format_string_for_type: " + type->name());
 }
 
 /**

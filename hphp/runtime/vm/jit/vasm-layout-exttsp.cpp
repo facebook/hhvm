@@ -524,6 +524,7 @@ struct ExtTSPImpl {
 	  succNodes.resize(numNodes);
     predNodes.resize(numNodes);
     std::vector<uint64_t> outDegree(numNodes, 0);
+    std::vector<uint64_t> inDegree(numNodes, 0);
     size_t numJumps = 0;
     for (Block& block : allBlocks) {
       auto succSet = succs(unit.blocks[block.label]);
@@ -531,6 +532,7 @@ struct ExtTSPImpl {
         uint64_t pred = block.index;
         uint64_t succ = labelIndex[succLabel];
         outDegree[pred]++;
+        inDegree[succ]++;
         uint64_t executionCount = scale.weight(block.label, succLabel);
         if (pred != succ && executionCount > 0)
           numJumps++;
@@ -539,6 +541,15 @@ struct ExtTSPImpl {
       }
     }
     allJumps.reserve(numJumps);
+
+    // Reserve space for succNodes, predNodes, outJumps and inJumps for each block
+    for (Block& block : allBlocks) {
+      auto idx = block.index;
+      block.outJumps.reserve(outDegree[idx]);
+      block.inJumps.reserve(inDegree[idx]);
+      succNodes[idx].reserve(outDegree[idx]);
+      predNodes[idx].reserve(inDegree[idx]);
+    }
 
     // Initialize edges for the blocks and compute their total in/out weights
     for (Block& block : allBlocks) {

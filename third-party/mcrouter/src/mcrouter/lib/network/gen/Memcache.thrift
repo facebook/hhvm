@@ -24,22 +24,6 @@ namespace cpp2 facebook.memcache.thrift
 namespace py3 facebook.memcache.thrift
 namespace hack memcache
 
-@thrift.DeprecatedUnvalidatedAnnotations{
-  items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-"
-  },
-}
 struct MemcacheRequestCommon {
   1: optional carbon.ui64 beforeLatencyUs
   2: optional carbon.ui64 afterLatencyUs
@@ -49,41 +33,12 @@ struct MemcacheRequestCommon {
   6: optional carbon.ui32 mcTenantId
   7: optional string ticket
 }
-@thrift.DeprecatedUnvalidatedAnnotations{
-  items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-"
-  },
-}
 struct MemcacheReplyCommon {
   1: carbon.ui32 replySourceBitMask
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McGetRequest {
@@ -94,20 +49,7 @@ struct McGetRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McGetReply {
@@ -122,20 +64,7 @@ struct McGetReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McSetRequest {
@@ -148,20 +77,7 @@ struct McSetRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McSetReply {
@@ -175,20 +91,7 @@ struct McSetReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McDeleteRequest {
@@ -202,20 +105,7 @@ struct McDeleteRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McDeleteReply {
@@ -229,20 +119,7 @@ struct McDeleteReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McLeaseGetRequest {
@@ -253,20 +130,7 @@ struct McLeaseGetRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McLeaseGetReply {
@@ -282,20 +146,7 @@ struct McLeaseGetReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McLeaseSetRequest {
@@ -309,20 +160,7 @@ struct McLeaseSetRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McLeaseSetReply {
@@ -334,20 +172,7 @@ struct McLeaseSetReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McAddRequest {
@@ -360,20 +185,7 @@ struct McAddRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McAddReply {
@@ -385,20 +197,7 @@ struct McAddReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McReplaceRequest {
@@ -411,20 +210,7 @@ struct McReplaceRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McReplaceReply {
@@ -436,20 +222,7 @@ struct McReplaceReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McGetsRequest {
@@ -460,20 +233,7 @@ struct McGetsRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McGetsReply {
@@ -488,20 +248,7 @@ struct McGetsReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McCasRequest {
@@ -515,20 +262,7 @@ struct McCasRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McCasReply {
@@ -540,20 +274,7 @@ struct McCasReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McIncrRequest {
@@ -565,20 +286,7 @@ struct McIncrRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McIncrReply {
@@ -591,20 +299,7 @@ struct McIncrReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McDecrRequest {
@@ -616,20 +311,7 @@ struct McDecrRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McDecrReply {
@@ -642,20 +324,7 @@ struct McDecrReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McMetagetRequest {
@@ -666,20 +335,7 @@ struct McMetagetRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McMetagetReply {
@@ -695,20 +351,7 @@ struct McMetagetReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McAppendRequest {
@@ -721,20 +364,7 @@ struct McAppendRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McAppendReply {
@@ -746,20 +376,7 @@ struct McAppendReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McPrependRequest {
@@ -772,20 +389,7 @@ struct McPrependRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McPrependReply {
@@ -797,20 +401,7 @@ struct McPrependReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McTouchRequest {
@@ -821,20 +412,7 @@ struct McTouchRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McTouchReply {
@@ -846,20 +424,7 @@ struct McTouchReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McFlushReRequest {
@@ -869,20 +434,7 @@ struct McFlushReRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McFlushReReply {
@@ -894,20 +446,7 @@ struct McFlushReReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McFlushAllRequest {
@@ -918,20 +457,7 @@ struct McFlushAllRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McFlushAllReply {
@@ -943,20 +469,7 @@ struct McFlushAllReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McGatRequest {
@@ -967,20 +480,7 @@ struct McGatRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McGatReply {
@@ -994,20 +494,7 @@ struct McGatReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McGatsRequest {
@@ -1018,20 +505,7 @@ struct McGatsRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct McGatsReply {

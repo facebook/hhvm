@@ -31,11 +31,6 @@ void serialize(const HelloRequest& self, Writer&& writer) {
   writer.writeStructEnd();
 }
 
-template <class Writer>
-void HelloRequest::serialize(Writer&& writer) const {
-  hellogoodbye::thrift::serialize(*this, std::forward<Writer>(writer));
-}
-
 template <class V>
 void visitFields(HelloRequest& self, V&& v) {
   if (!v.visitField(1, "key", *self.key_ref())) {
@@ -92,16 +87,6 @@ void visitFields(const HelloRequest& self, V&& v) {
   }
 }
 
-template <class V>
-void HelloRequest::visitFields(V&& v) {
-  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void HelloRequest::visitFields(V&& v) const {
-  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const HelloReply& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -109,11 +94,6 @@ void serialize(const HelloReply& self, Writer&& writer) {
   writer.writeField(2 /* field id */, self.message_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void HelloReply::serialize(Writer&& writer) const {
-  hellogoodbye::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -136,16 +116,6 @@ void visitFields(const HelloReply& self, V&& v) {
   }
 }
 
-template <class V>
-void HelloReply::visitFields(V&& v) {
-  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void HelloReply::visitFields(V&& v) const {
-  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const GoodbyeRequest& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -153,11 +123,6 @@ void serialize(const GoodbyeRequest& self, Writer&& writer) {
   writer.writeField(2 /* field id */, self.shardId_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void GoodbyeRequest::serialize(Writer&& writer) const {
-  hellogoodbye::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -180,16 +145,6 @@ void visitFields(const GoodbyeRequest& self, V&& v) {
   }
 }
 
-template <class V>
-void GoodbyeRequest::visitFields(V&& v) {
-  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void GoodbyeRequest::visitFields(V&& v) const {
-  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const GoodbyeReply& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -197,11 +152,6 @@ void serialize(const GoodbyeReply& self, Writer&& writer) {
   writer.writeField(2 /* field id */, self.message_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void GoodbyeReply::serialize(Writer&& writer) const {
-  hellogoodbye::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -222,16 +172,6 @@ void visitFields(const GoodbyeReply& self, V&& v) {
   if (!v.visitField(2, "message", *self.message_ref())) {
     return;
   }
-}
-
-template <class V>
-void GoodbyeReply::visitFields(V&& v) {
-  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void GoodbyeReply::visitFields(V&& v) const {
-  hellogoodbye::thrift::visitFields(*this, std::forward<V>(v));
 }
 } // namespace thrift
 } // namespace hellogoodbye

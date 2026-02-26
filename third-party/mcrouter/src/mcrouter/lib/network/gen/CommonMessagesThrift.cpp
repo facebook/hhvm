@@ -45,10 +45,6 @@ void deserialize(McVersionRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void McVersionRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
-}
-
 void deserialize(McVersionReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -86,10 +82,6 @@ void deserialize(McVersionReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void McVersionReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
-}
-
 void deserialize(McStatsRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -113,10 +105,6 @@ void deserialize(McStatsRequest& self, carbon::CarbonProtocolReader& reader) {
     }
   }
   reader.readStructEnd();
-}
-
-void McStatsRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
 }
 
 void deserialize(McStatsReply& self, carbon::CarbonProtocolReader& reader) {
@@ -156,10 +144,6 @@ void deserialize(McStatsReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void McStatsReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
-}
-
 void deserialize(McShutdownRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -183,10 +167,6 @@ void deserialize(McShutdownRequest& self, carbon::CarbonProtocolReader& reader) 
     }
   }
   reader.readStructEnd();
-}
-
-void McShutdownRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
 }
 
 void deserialize(McShutdownReply& self, carbon::CarbonProtocolReader& reader) {
@@ -222,10 +202,6 @@ void deserialize(McShutdownReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void McShutdownReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
-}
-
 void deserialize(McQuitRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -249,10 +225,6 @@ void deserialize(McQuitRequest& self, carbon::CarbonProtocolReader& reader) {
     }
   }
   reader.readStructEnd();
-}
-
-void McQuitRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
 }
 
 void deserialize(McQuitReply& self, carbon::CarbonProtocolReader& reader) {
@@ -288,10 +260,6 @@ void deserialize(McQuitReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void McQuitReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
-}
-
 void deserialize(McExecRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -315,10 +283,6 @@ void deserialize(McExecRequest& self, carbon::CarbonProtocolReader& reader) {
     }
   }
   reader.readStructEnd();
-}
-
-void McExecRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
 }
 
 void deserialize(McExecReply& self, carbon::CarbonProtocolReader& reader) {
@@ -358,10 +322,6 @@ void deserialize(McExecReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void McExecReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
-}
-
 void deserialize(GoAwayAcknowledgement& /* self */, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -382,10 +342,6 @@ void deserialize(GoAwayAcknowledgement& /* self */, carbon::CarbonProtocolReader
     }
   }
   reader.readStructEnd();
-}
-
-void GoAwayAcknowledgement::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
 }
 
 void deserialize(GoAwayRequest& self, carbon::CarbonProtocolReader& reader) {
@@ -415,10 +371,6 @@ void deserialize(GoAwayRequest& self, carbon::CarbonProtocolReader& reader) {
     }
   }
   reader.readStructEnd();
-}
-
-void GoAwayRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace memcache

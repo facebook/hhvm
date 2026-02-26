@@ -22,22 +22,6 @@ cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 namespace cpp2 benchmark.thrift
 namespace py3 benchmark.thrift
 
-@thrift.DeprecatedUnvalidatedAnnotations{
-  items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-"
-  },
-}
 struct CarbonTestDataSmall {
   1: i32 intField1
   2: i64 longField1
@@ -46,22 +30,6 @@ struct CarbonTestDataSmall {
   5: string_to_i32_std_map stringMap1
   6: bool boolField1
   7: double doubleField1
-}
-@thrift.DeprecatedUnvalidatedAnnotations{
-  items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-"
-  },
 }
 struct CarbonTestDataMedium {
   1: i32 intField1
@@ -85,22 +53,6 @@ struct CarbonTestDataMedium {
   19: string_to_i32_std_map stringMap3
   20: bool boolField3
   21: double doubleField3
-}
-@thrift.DeprecatedUnvalidatedAnnotations{
-  items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-"
-  },
 }
 struct CarbonTestDataLarge {
   1: i32 intField1

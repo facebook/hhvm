@@ -72,10 +72,6 @@ void deserialize(HelloRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void HelloRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  hellogoodbye::thrift::deserialize(*this, reader);
-}
-
 void deserialize(HelloReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -103,10 +99,6 @@ void deserialize(HelloReply& self, carbon::CarbonProtocolReader& reader) {
     }
   }
   reader.readStructEnd();
-}
-
-void HelloReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  hellogoodbye::thrift::deserialize(*this, reader);
 }
 
 void deserialize(GoodbyeRequest& self, carbon::CarbonProtocolReader& reader) {
@@ -138,10 +130,6 @@ void deserialize(GoodbyeRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void GoodbyeRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  hellogoodbye::thrift::deserialize(*this, reader);
-}
-
 void deserialize(GoodbyeReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -169,10 +157,6 @@ void deserialize(GoodbyeReply& self, carbon::CarbonProtocolReader& reader) {
     }
   }
   reader.readStructEnd();
-}
-
-void GoodbyeReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  hellogoodbye::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace hellogoodbye

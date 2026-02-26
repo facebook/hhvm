@@ -202,10 +202,6 @@ void deserialize(ManyFields& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void ManyFields::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(McExpTestRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -237,10 +233,6 @@ void deserialize(McExpTestRequest& self, carbon::CarbonProtocolReader& reader) {
     }
   }
   reader.readStructEnd();
-}
-
-void McExpTestRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  facebook::memcache::test::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace test

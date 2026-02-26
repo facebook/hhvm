@@ -25,20 +25,7 @@ namespace py3 carbon.test.B.thrift
 
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct TestBRequest {
@@ -47,20 +34,7 @@ struct TestBRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct TestBReply {

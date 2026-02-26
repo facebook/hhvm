@@ -50,10 +50,6 @@ void deserialize(TestBRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void TestBRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::B::thrift::deserialize(*this, reader);
-}
-
 void deserialize(TestBReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -81,10 +77,6 @@ void deserialize(TestBReply& self, carbon::CarbonProtocolReader& reader) {
     }
   }
   reader.readStructEnd();
-}
-
-void TestBReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::B::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace B

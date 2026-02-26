@@ -209,10 +209,6 @@ void deserialize(TestRequest& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void TestRequest::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(TestReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -246,10 +242,6 @@ void deserialize(TestReply& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
-void TestReply::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(TestRequestStringKey& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -273,10 +265,6 @@ void deserialize(TestRequestStringKey& self, carbon::CarbonProtocolReader& reade
     }
   }
   reader.readStructEnd();
-}
-
-void TestRequestStringKey::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
 }
 
 void deserialize(TestReplyStringKey& self, carbon::CarbonProtocolReader& reader) {
@@ -304,10 +292,6 @@ void deserialize(TestReplyStringKey& self, carbon::CarbonProtocolReader& reader)
   reader.readStructEnd();
 }
 
-void TestReplyStringKey::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(TestOptionalBool& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -331,10 +315,6 @@ void deserialize(TestOptionalBool& self, carbon::CarbonProtocolReader& reader) {
     }
   }
   reader.readStructEnd();
-}
-
-void TestOptionalBool::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
 }
 
 void deserialize(TestUnion& self, carbon::CarbonProtocolReader& reader) {
@@ -368,10 +348,6 @@ void deserialize(TestUnion& self, carbon::CarbonProtocolReader& reader) {
     }
   }
   reader.readStructEnd();
-}
-
-void TestUnion::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
 }
 
 void deserialize(TestF14Containers& self, carbon::CarbonProtocolReader& reader) {
@@ -427,10 +403,6 @@ void deserialize(TestF14Containers& self, carbon::CarbonProtocolReader& reader) 
   reader.readStructEnd();
 }
 
-void TestF14Containers::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(TestStdContainers& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -484,10 +456,6 @@ void deserialize(TestStdContainers& self, carbon::CarbonProtocolReader& reader) 
   reader.readStructEnd();
 }
 
-void TestStdContainers::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(StructWithEnumUInt32& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -511,10 +479,6 @@ void deserialize(StructWithEnumUInt32& self, carbon::CarbonProtocolReader& reade
     }
   }
   reader.readStructEnd();
-}
-
-void StructWithEnumUInt32::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
 }
 
 void deserialize(StructWithEnumUInt16& self, carbon::CarbonProtocolReader& reader) {
@@ -542,10 +506,6 @@ void deserialize(StructWithEnumUInt16& self, carbon::CarbonProtocolReader& reade
   reader.readStructEnd();
 }
 
-void StructWithEnumUInt16::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(StructWithEnumUInt8& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -569,10 +529,6 @@ void deserialize(StructWithEnumUInt8& self, carbon::CarbonProtocolReader& reader
     }
   }
   reader.readStructEnd();
-}
-
-void StructWithEnumUInt8::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
 }
 
 void deserialize(StructWithEnumInt32& self, carbon::CarbonProtocolReader& reader) {
@@ -600,10 +556,6 @@ void deserialize(StructWithEnumInt32& self, carbon::CarbonProtocolReader& reader
   reader.readStructEnd();
 }
 
-void StructWithEnumInt32::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(StructWithEnumInt16& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -629,10 +581,6 @@ void deserialize(StructWithEnumInt16& self, carbon::CarbonProtocolReader& reader
   reader.readStructEnd();
 }
 
-void StructWithEnumInt16::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(StructWithEnumInt8& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -656,10 +604,6 @@ void deserialize(StructWithEnumInt8& self, carbon::CarbonProtocolReader& reader)
     }
   }
   reader.readStructEnd();
-}
-
-void StructWithEnumInt8::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
 }
 
 void deserialize(StructWithOptionalEnumUInt32& self, carbon::CarbonProtocolReader& reader) {
@@ -691,10 +635,6 @@ void deserialize(StructWithOptionalEnumUInt32& self, carbon::CarbonProtocolReade
   reader.readStructEnd();
 }
 
-void StructWithOptionalEnumUInt32::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(StructWithOptionalEnumUInt16& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -722,10 +662,6 @@ void deserialize(StructWithOptionalEnumUInt16& self, carbon::CarbonProtocolReade
     }
   }
   reader.readStructEnd();
-}
-
-void StructWithOptionalEnumUInt16::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
 }
 
 void deserialize(StructWithOptionalEnumUInt8& self, carbon::CarbonProtocolReader& reader) {
@@ -757,10 +693,6 @@ void deserialize(StructWithOptionalEnumUInt8& self, carbon::CarbonProtocolReader
   reader.readStructEnd();
 }
 
-void StructWithOptionalEnumUInt8::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(StructWithOptionalEnumInt32& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -788,10 +720,6 @@ void deserialize(StructWithOptionalEnumInt32& self, carbon::CarbonProtocolReader
     }
   }
   reader.readStructEnd();
-}
-
-void StructWithOptionalEnumInt32::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
 }
 
 void deserialize(StructWithOptionalEnumInt16& self, carbon::CarbonProtocolReader& reader) {
@@ -823,10 +751,6 @@ void deserialize(StructWithOptionalEnumInt16& self, carbon::CarbonProtocolReader
   reader.readStructEnd();
 }
 
-void StructWithOptionalEnumInt16::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
-}
-
 void deserialize(StructWithOptionalEnumInt8& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -854,10 +778,6 @@ void deserialize(StructWithOptionalEnumInt8& self, carbon::CarbonProtocolReader&
     }
   }
   reader.readStructEnd();
-}
-
-void StructWithOptionalEnumInt8::deserialize(carbon::CarbonProtocolReader& reader) {
-  carbon::test::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace test

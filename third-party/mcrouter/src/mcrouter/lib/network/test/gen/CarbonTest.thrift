@@ -22,22 +22,6 @@ cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 namespace cpp2 facebook.memcache.test.thrift
 namespace py3 facebook.memcache.test.thrift
 
-@thrift.DeprecatedUnvalidatedAnnotations{
-  items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-"
-  },
-}
 struct ManyFields {
   1: carbon.IOBuf buf1
   2: carbon.IOBuf buf2
@@ -79,22 +63,6 @@ struct ManyFields {
   38: carbon.IOBuf buf38
   39: carbon.IOBuf buf39
   40: carbon.IOBuf buf40
-}
-@thrift.DeprecatedUnvalidatedAnnotations{
-  items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-"
-  },
 }
 struct McExpTestRequest {
   1: carbon.IOBufKey key

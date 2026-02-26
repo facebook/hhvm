@@ -27,11 +27,6 @@ void serialize(const TestBRequest& self, Writer&& writer) {
   writer.writeStructEnd();
 }
 
-template <class Writer>
-void TestBRequest::serialize(Writer&& writer) const {
-  carbon::test::B::thrift::serialize(*this, std::forward<Writer>(writer));
-}
-
 template <class V>
 void visitFields(TestBRequest& self, V&& v) {
   if (!v.visitField(1, "key", *self.key_ref())) {
@@ -52,16 +47,6 @@ void visitFields(const TestBRequest& self, V&& v) {
   }
 }
 
-template <class V>
-void TestBRequest::visitFields(V&& v) {
-  carbon::test::B::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void TestBRequest::visitFields(V&& v) const {
-  carbon::test::B::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const TestBReply& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -69,11 +54,6 @@ void serialize(const TestBReply& self, Writer&& writer) {
   writer.writeField(2 /* field id */, self.valInt32_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void TestBReply::serialize(Writer&& writer) const {
-  carbon::test::B::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -94,16 +74,6 @@ void visitFields(const TestBReply& self, V&& v) {
   if (!v.visitField(2, "valInt32", *self.valInt32_ref())) {
     return;
   }
-}
-
-template <class V>
-void TestBReply::visitFields(V&& v) {
-  carbon::test::B::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void TestBReply::visitFields(V&& v) const {
-  carbon::test::B::thrift::visitFields(*this, std::forward<V>(v));
 }
 } // namespace thrift
 } // namespace B

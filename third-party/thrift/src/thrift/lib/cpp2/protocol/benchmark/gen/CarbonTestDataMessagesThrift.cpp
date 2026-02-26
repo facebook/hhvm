@@ -68,10 +68,6 @@ void deserialize(CarbonTestDataSmall& self, carbon::CarbonProtocolReader& reader
   reader.readStructEnd();
 }
 
-void CarbonTestDataSmall::deserialize(carbon::CarbonProtocolReader& reader) {
-  benchmark::thrift::deserialize(*this, reader);
-}
-
 void deserialize(CarbonTestDataMedium& self, carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -175,10 +171,6 @@ void deserialize(CarbonTestDataMedium& self, carbon::CarbonProtocolReader& reade
     }
   }
   reader.readStructEnd();
-}
-
-void CarbonTestDataMedium::deserialize(carbon::CarbonProtocolReader& reader) {
-  benchmark::thrift::deserialize(*this, reader);
 }
 
 void deserialize(CarbonTestDataLarge& self, carbon::CarbonProtocolReader& reader) {
@@ -452,10 +444,6 @@ void deserialize(CarbonTestDataLarge& self, carbon::CarbonProtocolReader& reader
     }
   }
   reader.readStructEnd();
-}
-
-void CarbonTestDataLarge::deserialize(carbon::CarbonProtocolReader& reader) {
-  benchmark::thrift::deserialize(*this, reader);
 }
 } // namespace thrift
 } // namespace benchmark

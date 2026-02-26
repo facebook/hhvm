@@ -30,11 +30,6 @@ void serialize(const CarbonTestDataSmall& self, Writer&& writer) {
   writer.writeStructEnd();
 }
 
-template <class Writer>
-void CarbonTestDataSmall::serialize(Writer&& writer) const {
-  benchmark::thrift::serialize(*this, std::forward<Writer>(writer));
-}
-
 template <class V>
 void visitFields(CarbonTestDataSmall& self, V&& v) {
   if (!v.visitField(1, "intField1", *self.intField1_ref())) {
@@ -85,16 +80,6 @@ void visitFields(const CarbonTestDataSmall& self, V&& v) {
   }
 }
 
-template <class V>
-void CarbonTestDataSmall::visitFields(V&& v) {
-  benchmark::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void CarbonTestDataSmall::visitFields(V&& v) const {
-  benchmark::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const CarbonTestDataMedium& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -121,11 +106,6 @@ void serialize(const CarbonTestDataMedium& self, Writer&& writer) {
   writer.writeField(21 /* field id */, self.doubleField3_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void CarbonTestDataMedium::serialize(Writer&& writer) const {
-  benchmark::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -262,16 +242,6 @@ void visitFields(const CarbonTestDataMedium& self, V&& v) {
   }
 }
 
-template <class V>
-void CarbonTestDataMedium::visitFields(V&& v) {
-  benchmark::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void CarbonTestDataMedium::visitFields(V&& v) const {
-  benchmark::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const CarbonTestDataLarge& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -340,11 +310,6 @@ void serialize(const CarbonTestDataLarge& self, Writer&& writer) {
   writer.writeField(63 /* field id */, self.doubleField9_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void CarbonTestDataLarge::serialize(Writer&& writer) const {
-  benchmark::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -731,16 +696,6 @@ void visitFields(const CarbonTestDataLarge& self, V&& v) {
   if (!v.visitField(63, "doubleField9", *self.doubleField9_ref())) {
     return;
   }
-}
-
-template <class V>
-void CarbonTestDataLarge::visitFields(V&& v) {
-  benchmark::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void CarbonTestDataLarge::visitFields(V&& v) const {
-  benchmark::thrift::visitFields(*this, std::forward<V>(v));
 }
 } // namespace thrift
 } // namespace benchmark

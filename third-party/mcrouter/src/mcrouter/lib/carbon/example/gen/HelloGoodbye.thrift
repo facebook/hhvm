@@ -32,20 +32,7 @@ enum EnumUInt32 {
 
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct HelloRequest {
@@ -60,20 +47,7 @@ struct HelloRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct HelloReply {
@@ -82,20 +56,7 @@ struct HelloReply {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct GoodbyeRequest {
@@ -104,20 +65,7 @@ struct GoodbyeRequest {
 }
 @thrift.DeprecatedUnvalidatedAnnotations{
   items = {
-    "cpp.methods": "
-  template <class V>
-  void visitFields(V&& v);
-  template <class V>
-  void visitFields(V&& v) const;
-
-  template <class Writer>
-  void serialize(Writer&& writer) const;
-
-  void deserialize(carbon::CarbonProtocolReader& reader);
-
-",
-"cpp.virtual": "1"
-
+    "cpp.virtual": "1"
   },
 }
 struct GoodbyeReply {

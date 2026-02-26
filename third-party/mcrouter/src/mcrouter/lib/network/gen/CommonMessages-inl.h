@@ -25,11 +25,6 @@ void serialize(const McVersionRequest& self, Writer&& writer) {
   writer.writeStructEnd();
 }
 
-template <class Writer>
-void McVersionRequest::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
-}
-
 template <class V>
 void visitFields(McVersionRequest& self, V&& v) {
   if (!v.visitField(1, "key", *self.key_ref())) {
@@ -44,16 +39,6 @@ void visitFields(const McVersionRequest& self, V&& v) {
   }
 }
 
-template <class V>
-void McVersionRequest::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void McVersionRequest::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const McVersionReply& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -63,11 +48,6 @@ void serialize(const McVersionReply& self, Writer&& writer) {
   writer.writeField(4 /* field id */, self.appSpecificErrorCode_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void McVersionReply::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -102,27 +82,12 @@ void visitFields(const McVersionReply& self, V&& v) {
   }
 }
 
-template <class V>
-void McVersionReply::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void McVersionReply::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const McStatsRequest& self, Writer&& writer) {
   writer.writeStructBegin();
   writer.writeField(1 /* field id */, self.key_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void McStatsRequest::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -139,16 +104,6 @@ void visitFields(const McStatsRequest& self, V&& v) {
   }
 }
 
-template <class V>
-void McStatsRequest::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void McStatsRequest::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const McStatsReply& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -158,11 +113,6 @@ void serialize(const McStatsReply& self, Writer&& writer) {
   writer.writeField(4 /* field id */, self.appSpecificErrorCode_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void McStatsReply::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -197,27 +147,12 @@ void visitFields(const McStatsReply& self, V&& v) {
   }
 }
 
-template <class V>
-void McStatsReply::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void McStatsReply::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const McShutdownRequest& self, Writer&& writer) {
   writer.writeStructBegin();
   writer.writeField(1 /* field id */, self.key_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void McShutdownRequest::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -234,16 +169,6 @@ void visitFields(const McShutdownRequest& self, V&& v) {
   }
 }
 
-template <class V>
-void McShutdownRequest::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void McShutdownRequest::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const McShutdownReply& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -252,11 +177,6 @@ void serialize(const McShutdownReply& self, Writer&& writer) {
   writer.writeField(3 /* field id */, self.appSpecificErrorCode_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void McShutdownReply::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -285,27 +205,12 @@ void visitFields(const McShutdownReply& self, V&& v) {
   }
 }
 
-template <class V>
-void McShutdownReply::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void McShutdownReply::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const McQuitRequest& self, Writer&& writer) {
   writer.writeStructBegin();
   writer.writeField(1 /* field id */, self.key_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void McQuitRequest::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -322,16 +227,6 @@ void visitFields(const McQuitRequest& self, V&& v) {
   }
 }
 
-template <class V>
-void McQuitRequest::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void McQuitRequest::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const McQuitReply& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -340,11 +235,6 @@ void serialize(const McQuitReply& self, Writer&& writer) {
   writer.writeField(3 /* field id */, self.appSpecificErrorCode_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void McQuitReply::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -373,27 +263,12 @@ void visitFields(const McQuitReply& self, V&& v) {
   }
 }
 
-template <class V>
-void McQuitReply::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void McQuitReply::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const McExecRequest& self, Writer&& writer) {
   writer.writeStructBegin();
   writer.writeField(1 /* field id */, self.key_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void McExecRequest::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -410,16 +285,6 @@ void visitFields(const McExecRequest& self, V&& v) {
   }
 }
 
-template <class V>
-void McExecRequest::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void McExecRequest::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const McExecReply& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -429,11 +294,6 @@ void serialize(const McExecReply& self, Writer&& writer) {
   writer.writeField(4 /* field id */, self.appSpecificErrorCode_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void McExecReply::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -468,16 +328,6 @@ void visitFields(const McExecReply& self, V&& v) {
   }
 }
 
-template <class V>
-void McExecReply::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void McExecReply::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const GoAwayAcknowledgement& /* self */, Writer&& writer) {
   writer.writeStructBegin();
@@ -486,26 +336,11 @@ void serialize(const GoAwayAcknowledgement& /* self */, Writer&& writer) {
   writer.writeStructEnd();
 }
 
-template <class Writer>
-void GoAwayAcknowledgement::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
-}
-
 template <class V>
 void visitFields(GoAwayAcknowledgement&, V&&) {}
 
 template <class V>
 void visitFields(const GoAwayAcknowledgement&, V&&) {}
-
-template <class V>
-void GoAwayAcknowledgement::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void GoAwayAcknowledgement::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
 
 template <class Writer>
 void serialize(const GoAwayRequest& self, Writer&& writer) {
@@ -514,11 +349,6 @@ void serialize(const GoAwayRequest& self, Writer&& writer) {
   writer.writeField(2 /* field id */, self.reason_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void GoAwayRequest::serialize(Writer&& writer) const {
-  facebook::memcache::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -539,16 +369,6 @@ void visitFields(const GoAwayRequest& self, V&& v) {
   if (!v.visitField(2, "reason", *self.reason_ref())) {
     return;
   }
-}
-
-template <class V>
-void GoAwayRequest::visitFields(V&& v) {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void GoAwayRequest::visitFields(V&& v) const {
-  facebook::memcache::thrift::visitFields(*this, std::forward<V>(v));
 }
 } // namespace thrift
 } // namespace memcache

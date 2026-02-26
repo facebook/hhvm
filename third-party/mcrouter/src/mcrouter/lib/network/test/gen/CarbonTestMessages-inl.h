@@ -65,11 +65,6 @@ void serialize(const ManyFields& self, Writer&& writer) {
   writer.writeStructEnd();
 }
 
-template <class Writer>
-void ManyFields::serialize(Writer&& writer) const {
-  facebook::memcache::test::thrift::serialize(*this, std::forward<Writer>(writer));
-}
-
 template <class V>
 void visitFields(ManyFields& self, V&& v) {
   if (!v.visitField(1, "buf1", *self.buf1_ref())) {
@@ -318,16 +313,6 @@ void visitFields(const ManyFields& self, V&& v) {
   }
 }
 
-template <class V>
-void ManyFields::visitFields(V&& v) {
-  facebook::memcache::test::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void ManyFields::visitFields(V&& v) const {
-  facebook::memcache::test::thrift::visitFields(*this, std::forward<V>(v));
-}
-
 template <class Writer>
 void serialize(const McExpTestRequest& self, Writer&& writer) {
   writer.writeStructBegin();
@@ -336,11 +321,6 @@ void serialize(const McExpTestRequest& self, Writer&& writer) {
   writer.writeField(3 /* field id */, self.deadlineMs_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
-}
-
-template <class Writer>
-void McExpTestRequest::serialize(Writer&& writer) const {
-  facebook::memcache::test::thrift::serialize(*this, std::forward<Writer>(writer));
 }
 
 template <class V>
@@ -367,16 +347,6 @@ void visitFields(const McExpTestRequest& self, V&& v) {
   if (!v.visitField(3, "deadlineMs", *self.deadlineMs_ref())) {
     return;
   }
-}
-
-template <class V>
-void McExpTestRequest::visitFields(V&& v) {
-  facebook::memcache::test::thrift::visitFields(*this, std::forward<V>(v));
-}
-
-template <class V>
-void McExpTestRequest::visitFields(V&& v) const {
-  facebook::memcache::test::thrift::visitFields(*this, std::forward<V>(v));
 }
 } // namespace thrift
 } // namespace test

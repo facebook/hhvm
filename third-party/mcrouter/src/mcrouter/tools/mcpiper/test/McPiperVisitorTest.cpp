@@ -25,7 +25,7 @@ void testBasic(bool scriptMode) {
   msg.message_ref() = "A message";
 
   McPiperVisitor v(scriptMode);
-  msg.visitFields(v);
+  visitFields(msg, v);
 
   auto str = std::move(v).styled();
 
@@ -41,7 +41,7 @@ void testComplete(bool scriptMode) {
       {"key01", {1, 2, 3}}, {"key02", {5, 6}}, {"key03", {}}};
 
   McPiperVisitor v(scriptMode);
-  msg.visitFields(v);
+  visitFields(msg, v);
 
   auto str = std::move(v).styled();
 

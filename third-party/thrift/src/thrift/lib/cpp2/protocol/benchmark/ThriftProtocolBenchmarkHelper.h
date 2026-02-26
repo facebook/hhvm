@@ -84,7 +84,7 @@ std::unique_ptr<folly::IOBuf> serializeCarbonDefault(
   TestData testData = createCarbonTestData<TestData>();
 
   carbon::CarbonProtocolWriter writer(storage);
-  testData.serialize(writer);
+  serialize(testData, writer);
 
   auto [iovecs, size] = storage.getIovecs();
 
@@ -141,6 +141,6 @@ TestData deserializeCarbonDefault(
   carbon::CarbonProtocolReader reader{carbon::CarbonCursor(serialized.get())};
 
   TestData testData;
-  testData.deserialize(reader);
+  deserialize(testData, reader);
   return testData;
 }

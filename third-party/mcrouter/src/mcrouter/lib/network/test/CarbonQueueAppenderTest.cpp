@@ -32,7 +32,7 @@ TEST(CarbonQueueAppenderTest, longString) {
   reply.message_ref() = message;
 
   carbon::CarbonProtocolWriter writer(storage);
-  reply.serialize(writer);
+  writer.writeRaw(reply);
 
   CaretMessageInfo info;
   info.bodySize = storage.computeBodySize();
@@ -64,7 +64,7 @@ TEST(CarbonQueueAppenderTest, longString) {
   auto inputBody = folly::IOBuf::wrapBuffer(
       input.data() + inputHeader.headerSize, inputHeader.bodySize);
   carbon::CarbonProtocolReader reader(folly::io::Cursor(inputBody.get()));
-  inputReply.deserialize(reader);
+  reader.readRawInto(inputReply);
 
   EXPECT_EQ(carbon::Result::REMOTE_ERROR, *inputReply.result_ref());
   EXPECT_EQ(message, *inputReply.message_ref());
@@ -133,7 +133,7 @@ TEST(CarbonQueueAppender, manyFields) {
   carbon::CarbonProtocolWriter writer(storage);
 
   // This will trigger CarbonQueueAppenderStorage::coalesce() logic
-  manyFields.serialize(writer);
+  writer.writeRaw(manyFields);
 
   CaretMessageInfo info;
   info.bodySize = storage.computeBodySize();
@@ -165,7 +165,7 @@ TEST(CarbonQueueAppender, manyFields) {
   auto inputBody = folly::IOBuf::wrapBuffer(
       input.data() + inputHeader.headerSize, inputHeader.bodySize);
   carbon::CarbonProtocolReader reader(folly::io::Cursor(inputBody.get()));
-  manyFields2.deserialize(reader);
+  reader.readRawInto(manyFields2);
 
   EXPECT_STREQ(
       str1, reinterpret_cast<const char*>(manyFields2.buf1_ref()->data()));

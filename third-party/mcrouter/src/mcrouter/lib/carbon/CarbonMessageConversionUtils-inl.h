@@ -473,7 +473,7 @@ class FromDynamicVisitor {
     };
 
     FromDynamicVisitor visitor(json, std::move(onChildError));
-    valRef.foreachMember(visitor);
+    foreachMember(valRef, visitor);
     return numChildErrors == 0;
   }
 
@@ -603,7 +603,7 @@ folly::dynamic convertToFollyDynamic(
     const Message& m,
     FollyDynamicConversionOptions opts) {
   detail::ToDynamicVisitor visitor(opts);
-  m.visitFields(visitor);
+  visitFields(m, visitor);
   return visitor.moveOutput();
 }
 
@@ -614,7 +614,7 @@ void convertFromFollyDynamic(
     std::function<void(folly::StringPiece fieldName, folly::StringPiece msg)>
         onError) {
   detail::FromDynamicVisitor visitor(json, std::move(onError));
-  m.visitFields(visitor);
+  visitFields(m, visitor);
 }
 
 } // namespace carbon

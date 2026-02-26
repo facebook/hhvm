@@ -34,7 +34,7 @@ void serializeCarbonStruct(
     const Message& msg,
     carbon::CarbonQueueAppenderStorage& storage) {
   carbon::CarbonProtocolWriter writer(storage);
-  msg.serialize(writer);
+  writer.writeRaw(msg);
 }
 
 template <class Request>
@@ -119,7 +119,7 @@ class CarbonMessageDispatcher {
     req.setTraceContext(
         carbon::tracing::deserializeTraceContext(headerInfo.traceId));
 
-    req.deserialize(reader);
+    reader.readRawInto(req);
     static_cast<Proc&>(me).onTypedMessage(
         headerInfo, reqBuf, std::move(req), std::forward<Args>(args)...);
   }

@@ -213,7 +213,7 @@ class CarbonLookasideRoute {
             folly::io::Cursor cur(&cacheReply.value_ref().value());
             carbon::CarbonProtocolReader reader(cur);
             ReplyT<Request> reply;
-            reply.deserialize(reader);
+            reader.readRawInto(reply);
             ret.assign(std::move(reply));
           }
           baton.post();
@@ -251,7 +251,7 @@ class CarbonLookasideRoute {
               carbon::CarbonProtocolReader reader(cur);
               ReplyT<Request> reply;
               try {
-                reply.deserialize(reader);
+                reader.readRawInto(reply);
                 ret.assign(std::move(reply));
               } catch (const std::exception&) {
                 folly::fibers::addTask(
@@ -293,7 +293,7 @@ class CarbonLookasideRoute {
     return folly::fibers::runInMainContext([&reply]() {
       carbon::CarbonQueueAppenderStorage storage;
       carbon::CarbonProtocolWriter writer(storage);
-      reply.serialize(writer);
+      writer.writeRaw(reply);
       folly::IOBuf body(folly::IOBuf::CREATE, storage.computeBodySize());
       const auto iovs = storage.getIovecs();
       for (size_t i = 0; i < iovs.second; ++i) {

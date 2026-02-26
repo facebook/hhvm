@@ -54,7 +54,7 @@ Out deserialize(CarbonQueueAppenderStorage& storage, size_t& bytesWritten) {
   // Deserialize the serialized data
   Out deserialized;
   CarbonProtocolReader reader{carbon::CarbonCursor(&buf)};
-  deserialized.deserialize(reader);
+  reader.readRawInto(deserialized);
 
   return deserialized;
 }
@@ -65,7 +65,7 @@ Out serializeAndDeserialize(const T& toSerialize, size_t& bytesWritten) {
   // Serialize the request
   CarbonQueueAppenderStorage storage;
   CarbonProtocolWriter writer(storage);
-  toSerialize.serialize(writer);
+  writer.writeRaw(toSerialize);
 
   return detail::deserialize<Out>(storage, bytesWritten);
 }

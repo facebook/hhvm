@@ -468,7 +468,7 @@ TEST(CarbonTest, repeatStorageUsage) {
   outRequest.testLongString_ref() = std::move(testStr);
 
   for (int i = 0; i < 100; i++) {
-    outRequest.serialize(writer);
+    serialize(outRequest, writer);
     storage.reset();
   }
 }

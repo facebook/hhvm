@@ -144,7 +144,7 @@ class BlackholingPolicyVisitor {
 template <class R>
 bool shouldBlackhole(const R& req, const folly::dynamic& jsonMap) {
   detail::BlackholingPolicyVisitor visitor(jsonMap);
-  req.visitFields(visitor);
+  visitFields(req, visitor);
   return visitor.shouldBlackhole();
 }
 } // namespace mcrouter

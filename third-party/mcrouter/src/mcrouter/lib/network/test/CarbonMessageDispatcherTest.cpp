@@ -54,7 +54,7 @@ TEST(CarbonMessage, basic) {
   /* serialize into an iobuf */
   carbon::CarbonQueueAppenderStorage storage;
   carbon::CarbonProtocolWriter writer(storage);
-  get.serialize(writer);
+  writer.writeRaw(get);
 
   folly::IOBuf body(folly::IOBuf::CREATE, storage.computeBodySize());
   const auto iovs = storage.getIovecs();

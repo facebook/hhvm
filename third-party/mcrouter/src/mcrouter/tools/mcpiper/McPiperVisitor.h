@@ -217,7 +217,7 @@ class McPiperVisitor {
     facebook::memcache::StyledString out;
 
     McPiperVisitor printer(script_, indent_ + 1);
-    value.visitFields(printer);
+    visitFields(value, printer);
     auto content = std::move(printer).styled();
     if (!content.empty()) {
       out.pushBack('{');
@@ -327,7 +327,7 @@ template <class R>
 facebook::memcache::StyledString
 print(const R& req, folly::StringPiece /* name */, bool script) {
   detail::McPiperVisitor printer(script, 1 /* indentation */);
-  req.visitFields(printer);
+  visitFields(req, printer);
   return std::move(printer).styled();
 }
 

@@ -98,7 +98,7 @@ TEST(CarbonMockMc, basic) {
 
   carbon::CarbonQueueAppenderStorage storage;
   carbon::CarbonProtocolWriter writer(storage);
-  getReq.serialize(writer);
+  writer.writeRaw(getReq);
 
   CaretMessageInfo requestInfo;
   requestInfo.bodySize = storage.computeBodySize();
@@ -132,7 +132,7 @@ TEST(CarbonMockMc, basic) {
       reply.data() + replyInfo.headerSize, replyInfo.bodySize);
   carbon::CarbonProtocolReader reader(carbon::CarbonCursor(readBuf.get()));
   McGetReply getReply;
-  getReply.deserialize(reader);
+  reader.readRawInto(getReply);
 
   EXPECT_EQ(carbon::Result::FOUND, *getReply.result_ref());
 

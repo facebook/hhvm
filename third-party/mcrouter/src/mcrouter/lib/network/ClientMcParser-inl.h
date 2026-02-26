@@ -121,7 +121,7 @@ void ClientMcParser<Callback>::forwardCaretReply(
   folly::io::Cursor cur(finalBuffer);
   cur += offset;
   carbon::CarbonProtocolReader reader(cur);
-  reply.deserialize(reader);
+  reader.readRawInto(reply);
   reply.setTraceContext(
       carbon::tracing::deserializeTraceContext(headerInfo.traceId));
 

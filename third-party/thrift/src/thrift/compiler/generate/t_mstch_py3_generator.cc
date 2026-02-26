@@ -156,6 +156,15 @@ std::vector<std::string> get_type_py3_namespace(
 
 enum class FileType { CBindingsFile, TypesFile, NotTypesFile };
 
+struct Py3StructuredContext {
+  /** Whether any fields are marked as hidden */
+  bool hasHiddenFields{false};
+  /** Whether any fields have a default value */
+  bool hasDefaultedFields{false};
+  /** Fields not marked as `py3.hidden` / `@python.Py3Hidden` */
+  std::vector<const t_field*> nonHiddenFields;
+};
+
 class py3_generator_context {
  public:
   using cached_type_properties =
@@ -171,11 +180,31 @@ class py3_generator_context {
     return find_cpp_kinds_.at(&field);
   }
 
+  const Py3StructuredContext& get_structured_context(
+      const t_structured& structured) const {
+    assert(structured_contexts_.contains(&structured));
+    return structured_contexts_.at(&structured);
+  }
+
   const t_program* program() const { return program_; }
   const FileType* file_type() const { return file_type_; }
 
   void register_visitors(t_whisker_generator::context_visitor& visitor) {
     using context = t_whisker_generator::whisker_generator_visitor_context;
+    visitor.add_structured_definition_visitor(
+        [this](const context&, const t_structured& node) {
+          Py3StructuredContext& node_ctx = structured_contexts_[&node];
+          node_ctx.nonHiddenFields.reserve(node.fields().size());
+          for (const t_field& field : node.fields()) {
+            if (is_hidden(field)) {
+              node_ctx.hasHiddenFields = true;
+            } else {
+              node_ctx.nonHiddenFields.emplace_back(&field);
+              node_ctx.hasDefaultedFields |= field.default_value() != nullptr;
+            }
+          }
+        });
+
     visitor.add_field_visitor([this](const context&, const t_field& field) {
       switch (gen::cpp::find_ref_type(field)) {
         case gen::cpp::reference_type::unique: {
@@ -213,6 +242,8 @@ class py3_generator_context {
   const t_program* program_;
   const FileType* file_type_;
 
+  std::unordered_map<const t_structured*, Py3StructuredContext>
+      structured_contexts_;
   std::unordered_map<const t_field*, field_cpp_kind> find_cpp_kinds_;
 
   // These properties are mutable as they are (or contain) caches which must be
@@ -865,74 +896,27 @@ class py3_mstch_type : public mstch_type {
 class py3_mstch_struct : public mstch_struct {
  public:
   py3_mstch_struct(
-      const t_structured* s, mstch_context& ctx, mstch_element_position pos)
-      : mstch_struct(s, ctx, pos) {
+      const t_structured* s,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const py3_generator_context* py3_context)
+      : mstch_struct(s, ctx, pos), context_{*py3_context} {
     register_methods(
         this,
         {
-            {"struct:is_struct_orderable?",
-             &py3_mstch_struct::isStructOrderable},
-            {"struct:cpp_noncomparable", &py3_mstch_struct::cppNonComparable},
-            {"struct:cpp_noncopyable?", &py3_mstch_struct::cppNonCopyable},
             {"struct:py3_fields", &py3_mstch_struct::py3_fields},
-            {"struct:has_hidden_fields?", &py3_mstch_struct::has_hidden_fields},
-            {"struct:has_defaulted_field?",
-             &py3_mstch_struct::has_defaulted_field},
-            {"struct:allow_inheritance?", &py3_mstch_struct::allow_inheritance},
         });
-    py3_fields_ = struct_->fields().copy();
-    py3_fields_.erase(
-        std::remove_if(
-            py3_fields_.begin(),
-            py3_fields_.end(),
-            [this](const t_field* field) {
-              bool hidden = field->has_unstructured_annotation("py3.hidden") ||
-                  field->has_structured_annotation(kPythonPy3HiddenUri);
-              this->hidden_fields |= hidden;
-              return hidden;
-            }),
-        py3_fields_.end());
   }
 
-  mstch::node allow_inheritance() {
-    return struct_->has_structured_annotation(
-        kPythonMigrationBlockingAllowInheritanceUri);
-  }
-
-  mstch::node isStructOrderable() {
-    return cpp2::OrderableTypeUtils::is_orderable(*struct_) &&
-        !struct_->has_unstructured_annotation("no_default_comparators");
-  }
-
-  mstch::node cppNonComparable() {
-    return struct_->has_unstructured_annotation(
-        {"cpp.noncomparable", "cpp2.noncomparable"});
-  }
-
-  mstch::node cppNonCopyable() {
-    return struct_->has_unstructured_annotation(
-        {"cpp.noncopyable", "cpp2.noncopyable"});
-  }
-
-  mstch::node py3_fields() { return make_mstch_fields(py3_fields_); }
-
-  mstch::node has_hidden_fields() { return hidden_fields; }
-
-  mstch::node has_defaulted_field() {
-    if (struct_->is<t_union>()) {
-      return false;
-    }
-    for (const auto& field : py3_fields_) {
-      if (field->default_value()) {
-        return true;
-      }
-    }
-    return false;
+  mstch::node py3_fields() {
+    // TODO(T256504508): Templates require properties from `py3_mstch_field` /
+    // `py3_mstch_type`, so those must be migrated to Whisker first
+    return make_mstch_fields(
+        context_.get_structured_context(*struct_).nonHiddenFields);
   }
 
  private:
-  std::vector<const t_field*> py3_fields_;
-  bool hidden_fields = false;
+  const py3_generator_context& context_;
 };
 
 std::string py3_mstch_program::visit_type_impl(
@@ -1308,6 +1292,39 @@ class t_mstch_py3_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_structured>::ptr make_prototype_for_structured(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_structured(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_structured>::extends(std::move(base));
+
+    def.property("allow_inheritance?", [](const t_structured& self) {
+      return self.has_structured_annotation(
+          kPythonMigrationBlockingAllowInheritanceUri);
+    });
+    def.property("cpp_noncomparable?", [](const t_structured& self) {
+      return self.has_unstructured_annotation(
+          {"cpp.noncomparable", "cpp2.noncomparable"});
+    });
+    def.property("cpp_noncopyable?", [](const t_structured& self) {
+      return self.has_unstructured_annotation(
+          {"cpp.noncopyable", "cpp2.noncopyable"});
+    });
+    def.property("is_struct_orderable?", [](const t_structured& self) {
+      return !self.has_unstructured_annotation("no_default_comparators") &&
+          cpp2::OrderableTypeUtils::is_orderable(self);
+    });
+    def.property("has_hidden_fields?", [this](const t_structured& self) {
+      return context_.get_structured_context(self).hasHiddenFields;
+    });
+    def.property("has_defaulted_fields?", [this](const t_structured& self) {
+      return context_.get_structured_context(self).hasDefaultedFields &&
+          !self.is<t_union>();
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_type>::ptr make_prototype_for_type(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
@@ -1406,7 +1423,7 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_program>(&context_);
   mstch_context_.add<py3_mstch_service>(program_);
   mstch_context_.add<py3_mstch_type>(&context_);
-  mstch_context_.add<py3_mstch_struct>();
+  mstch_context_.add<py3_mstch_struct>(&context_);
 }
 
 void t_mstch_py3_generator::generate_init_files() {

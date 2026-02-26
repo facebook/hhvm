@@ -80,11 +80,9 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
         },
     )
 {{#struct:py3_fields}}
-{{#struct:has_defaulted_field?}}
-{{#first?}}
+  {{#if (and first? struct:has_defaulted_fields?)}}
     defaults = _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types.{{struct:name}}()
-{{/first?}}
-{{/struct:has_defaulted_field?}}
+  {{/if (and first? struct:has_defaulted_fields?)}}
     spec.add_field(
         __FieldSpec._fbthrift_create(
             id={{field:id}},

@@ -432,12 +432,12 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
     {{! Below are some things that are common to structs and unions: }}
     def __copy__({{struct:name}} self):
         return self{{! Thrift-py3 has immutable semantics}}
-    {{#struct:cpp_noncomparable}}
+    {{#if struct:cpp_noncomparable?}}
 
     def __eq__({{struct:name}} self, other):
         return isinstance(other, {{struct:name}}) and self._fbthrift_noncomparable_eq(other)
-    {{/struct:cpp_noncomparable}}
-    {{^struct:is_struct_orderable?}}
+    {{/if struct:cpp_noncomparable?}}
+    {{#if (not struct:is_struct_orderable?)}}
 
     def __eq__({{struct:name}} self, other):
         if not isinstance(other, {{struct:name}}):
@@ -448,9 +448,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         if not isinstance(other, {{struct:name}}):
             return True
         return deref(self.{{> types/cpp_obj}}) != deref((<{{struct:name}}>other).{{> types/cpp_obj}})
-    {{/struct:is_struct_orderable?}}
-    {{^struct:cpp_noncomparable}}
-    {{#struct:is_struct_orderable?}}
+    {{#else if (not struct:cpp_noncomparable?)}}
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -459,8 +457,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
             (<{{struct:name}}>other).{{> types/cpp_obj}},
             op,
         ) if r is None else r
-    {{/struct:is_struct_orderable?}}
-    {{/struct:cpp_noncomparable}}
+    {{/if (not struct:is_struct_orderable?)}}
 
     @staticmethod
     def __get_reflection__():

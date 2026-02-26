@@ -42,19 +42,19 @@ cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:n
 
     cdef cppclass {{> types/c_struct }} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}"{{#struct:exception?}}(cTException){{/struct:exception?}}:
         {{> types/c_struct }}() except +
-        {{^struct:cpp_noncopyable?}}
+      {{#if (not struct:cpp_noncopyable?)}}
         {{> types/c_struct }}(const {{> types/c_struct }}&) except +
-        {{/struct:cpp_noncopyable?}}
-        {{^struct:cpp_noncomparable}}
+      {{/if (not struct:cpp_noncopyable?)}}
+      {{#if (not struct:cpp_noncomparable?)}}
         bint operator==({{> types/c_struct }}&)
         bint operator!=({{> types/c_struct }}&)
-        {{#struct:is_struct_orderable?}}
+        {{#if struct:is_struct_orderable?}}
         bint operator<({{> types/c_struct }}&)
         bint operator>({{> types/c_struct }}&)
         bint operator<=({{> types/c_struct }}&)
         bint operator>=({{> types/c_struct }}&)
-        {{/struct:is_struct_orderable?}}
-        {{/struct:cpp_noncomparable}}
+        {{/if struct:is_struct_orderable?}}
+      {{/if (not struct:cpp_noncomparable?)}}
     {{^struct:union?}}
     {{#struct:py3_fields}}
         {{#field:has_ref_accessor?}}

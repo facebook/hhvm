@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl;
-use crate::local;
 use crate::reason::Reason;
 
 /// A type which can be traversed by a `Visitor`.
@@ -49,9 +48,6 @@ pub trait Visitor<R: Reason> {
     }
 
     fn visit_decl_ty(&mut self, o: &decl::Ty<R>) {
-        o.recurse(self.object());
-    }
-    fn visit_local_ty(&mut self, o: &local::Ty<R>) {
         o.recurse(self.object());
     }
 

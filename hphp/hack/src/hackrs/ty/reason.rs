@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use core::panic;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::sync::Arc;
@@ -27,9 +26,6 @@ use serde::Serialize;
 use serde::de::DeserializeOwned;
 
 use crate::decl;
-use crate::local;
-use crate::prop::Prop;
-use crate::prop::PropF;
 use crate::visitor::Walkable;
 
 pub trait Reason:
@@ -77,8 +73,6 @@ pub trait Reason:
     fn pos(&self) -> &Self::Pos;
 
     fn decl_ty_conser() -> &'static Conser<decl::Ty_<Self>>;
-    fn local_ty_conser() -> &'static Conser<local::Ty_<Self, local::Ty<Self>>>;
-    fn prop_conser() -> &'static Conser<PropF<Self, Prop<Self>>>;
 
     fn from_oxidized(reason: oxidized::typing_reason::T_) -> Self {
         Self::mk(|| {
@@ -197,19 +191,6 @@ impl Reason for BReason {
         static CONSER: Lazy<Conser<decl::Ty_<BReason>>> = Lazy::new(Conser::new);
         &CONSER
     }
-
-    #[inline]
-    fn local_ty_conser() -> &'static Conser<local::Ty_<BReason, local::Ty<BReason>>> {
-        static CONSER: Lazy<Conser<local::Ty_<BReason, local::Ty<BReason>>>> =
-            Lazy::new(Conser::new);
-        &CONSER
-    }
-
-    #[inline]
-    fn prop_conser() -> &'static Conser<PropF<BReason, Prop<BReason>>> {
-        static CONSER: Lazy<Conser<PropF<BReason, Prop<BReason>>>> = Lazy::new(Conser::new);
-        &CONSER
-    }
 }
 
 impl Walkable<BReason> for BReason {}
@@ -259,19 +240,6 @@ impl Reason for NReason {
     #[inline]
     fn decl_ty_conser() -> &'static Conser<decl::Ty_<NReason>> {
         static CONSER: Lazy<Conser<decl::Ty_<NReason>>> = Lazy::new(Conser::new);
-        &CONSER
-    }
-
-    #[inline]
-    fn local_ty_conser() -> &'static Conser<local::Ty_<NReason, local::Ty<NReason>>> {
-        static CONSER: Lazy<Conser<local::Ty_<NReason, local::Ty<NReason>>>> =
-            Lazy::new(Conser::new);
-        &CONSER
-    }
-
-    #[inline]
-    fn prop_conser() -> &'static Conser<PropF<NReason, Prop<NReason>>> {
-        static CONSER: Lazy<Conser<PropF<NReason, Prop<NReason>>>> = Lazy::new(Conser::new);
         &CONSER
     }
 }

@@ -31,7 +31,7 @@ Header file for ClientsWrapper.cpp for cython to import in CythonClients.pxd.
 #endif
 {{#service:extends}}
 {{#service:externalProgram?}}
-#include <{{service:includePrefix}}gen-py3/{{service:programName}}/clients_wrapper.h>
+#include <{{service:program.include_prefix}}gen-py3/{{service:program.name}}/clients_wrapper.h>
 {{/service:externalProgram?}}
 {{/service:extends}}
 {{/program:services}}
@@ -54,12 +54,12 @@ Header file for ClientsWrapper.cpp for cython to import in CythonClients.pxd.
 
 {{#program:services}}
 class {{service:name}}ClientWrapper : {{!
-}}{{#service:extends?}}{{#service:extends}}public ::{{#service:cppNamespaces}}{{value}}::{{/service:cppNamespaces}}{{service:name}}ClientWrapper{{/service:extends}}{{/service:extends?}}{{!
+}}{{#service:extends?}}{{#service:extends}}public ::{{#each service:program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service:name}}ClientWrapper{{/service:extends}}{{/service:extends?}}{{!
 }}{{^service:extends?}}public ::thrift::py3::ClientWrapper{{/service:extends?}}{{!
 }} {
   public:
     using {{#service:extends?}}{{#service:extends}}{{!
-    }}::{{#service:cppNamespaces}}{{value}}::{{/service:cppNamespaces}}{{service:name}}ClientWrapper::{{service:name}}ClientWrapper{{!
+    }}::{{#each service:program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service:name}}ClientWrapper::{{service:name}}ClientWrapper{{!
     }}{{/service:extends}}{{/service:extends?}}{{!
     }}{{^service:extends?}}::thrift::py3::ClientWrapper::ClientWrapper{{/service:extends?}};
 

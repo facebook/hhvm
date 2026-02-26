@@ -112,7 +112,7 @@ from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.
 {{/service:supportedInteractions}}
 {{#service:extends}}
 {{#service:externalProgram?}}
-from {{#service:py3Namespaces}}{{value}}.{{/service:py3Namespaces}}{{service:programName}}.clients_wrapper cimport c{{service:name}}ClientWrapper
+from {{#each service:program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{service:program.name}}.clients_wrapper cimport c{{service:name}}ClientWrapper
 {{/service:externalProgram?}}
 {{/service:extends}}
 {{/program:services}}
@@ -129,8 +129,8 @@ cdef object _{{service:name}}_annotations = _py_types.MappingProxyType({
 
 @cython.auto_pickle(False)
 cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
-    }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
-    }}{{service:programName}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
+    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
+    }}{{service:program.name}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
   }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
     annotations = _{{service:name}}_annotations
 
@@ -226,8 +226,8 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
 {{#service:supportedInteractions}}
 @cython.auto_pickle(False)
 cdef class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
-    }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
-    }}{{service:programName}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
+    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
+    }}{{service:program.name}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
   }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
 
 {{#service:supportedFunctions}}

@@ -15,6 +15,11 @@
   limitations under the License.
 
 }}
+{{#let partial service_qualified_name |service|}}
+{{#pragma ignore-newlines}}
+{{#each service.program.cppNamespaces as |ns|}}::{{ns}}{{/each}}
+::{{service.cpp_name}}
+{{/let partial}}
 {{> common/auto_generated_c}}
 {{^program:auto_migrate?}}
 
@@ -39,7 +44,8 @@
 {{/struct:exception?}}
 {{/program:filtered_structs}}
 {{#program:services}}
-  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<{{service:qualified_name}}>>::gen(response);
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<{{!
+    }}{{#partial service_qualified_name service=service:self}}>>::gen(response);
 {{/program:services}}
   return metadata;
 }

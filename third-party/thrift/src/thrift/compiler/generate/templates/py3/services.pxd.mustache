@@ -38,8 +38,8 @@ cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}services as _{{#incl
 
 {{#program:services}}
 cdef class {{service:name}}Interface({{#service:extends}}{{#service:externalProgram?}}{{!
-  }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
-    }}{{service:programName}}_services.{{/service:externalProgram?}}{{service:name}}Interface{{!
+  }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
+    }}{{service:program.name}}_services.{{/service:externalProgram?}}{{service:name}}Interface{{!
   }}{{/service:extends}}{{!
   }}{{^service:extends?}}ServiceInterface{{/service:extends?}}):
     {{#service:functions?}}

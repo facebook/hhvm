@@ -91,8 +91,8 @@ cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/clients_wra
   }}::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{service:name}}ClientWrapper"{{!
   }}{{#service:extends}}({{!
     }}{{#service:externalProgram?}}{{!
-    }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
-    }}{{service:programName}}_clients_wrapper.{{!
+    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
+    }}{{service:program.name}}_clients_wrapper.{{!
     }}{{/service:externalProgram?}}c{{service:name}}ClientWrapper{{!
   }}){{/service:extends}}:
     {{^service:extends?}}

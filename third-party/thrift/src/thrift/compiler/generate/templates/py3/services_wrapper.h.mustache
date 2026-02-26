@@ -32,7 +32,7 @@ created by the thrift compiler for generated cpp2 code.
 #endif
 {{#service:extends}}
 {{#service:externalProgram?}}
-#include <{{service:includePrefix}}gen-py3/{{service:programName}}/services_wrapper.h>
+#include <{{service:program.include_prefix}}gen-py3/{{service:program.name}}/services_wrapper.h>
 {{/service:externalProgram?}}
 {{/service:extends}}
 {{/program:services}}
@@ -46,7 +46,7 @@ created by the thrift compiler for generated cpp2 code.
 
 {{#program:services}}
 class {{service:name}}Wrapper : {{!
-  }}{{#service:extends}}public ::{{#service:cppNamespaces}}{{value}}::{{/service:cppNamespaces}}{{service:name}}Wrapper, {{/service:extends}}{{!
+  }}{{#service:extends}}public ::{{#each service:program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service:name}}Wrapper, {{/service:extends}}{{!
   }}virtual public {{service:cpp_name}}SvIf{{!
 }} {
 {{^service:extends?}}

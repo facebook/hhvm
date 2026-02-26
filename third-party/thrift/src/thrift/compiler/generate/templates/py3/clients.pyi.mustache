@@ -44,8 +44,8 @@ _{{service:name}}T = _typing.TypeVar('_{{service:name}}T', bound='{{service:name
 
 
 class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
-    }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
-    }}{{service:programName}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
+    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
+    }}{{service:program.name}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
   }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
 
 {{#service:supportedFunctions}}
@@ -76,8 +76,8 @@ _{{parent_service_name}}_{{service:name}} = _typing.TypeVar('_{{parent_service_n
 
 
 class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
-    }}_{{#service:py3Namespaces}}{{value}}_{{/service:py3Namespaces}}{{!
-    }}{{service:programName}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
+    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
+    }}{{service:program.name}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
   }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
 
 {{#service:supportedFunctions}}

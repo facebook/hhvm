@@ -511,12 +511,6 @@ class py3_mstch_service : public mstch_service {
     register_methods(
         this,
         {
-            {"service:externalProgram?", &py3_mstch_service::isExternalProgram},
-            {"service:cppNamespaces", &py3_mstch_service::cppNamespaces},
-            {"service:py3Namespaces", &py3_mstch_service::py3Namespaces},
-            {"service:programName", &py3_mstch_service::programName},
-            {"service:includePrefix", &py3_mstch_service::includePrefix},
-            {"service:qualified_name", &py3_mstch_service::qualified_name},
             {"service:supportedFunctions",
              &py3_mstch_service::get_supported_functions},
             {"service:lifecycleFunctions",
@@ -534,26 +528,6 @@ class py3_mstch_service : public mstch_service {
             &function.interaction()->as<t_interaction>());
       }
     }
-  }
-
-  mstch::node isExternalProgram() { return prog_ != service_->program(); }
-
-  mstch::node cppNamespaces() {
-    return create_string_array(
-        cpp2::get_gen_namespace_components(*service_->program()));
-  }
-
-  mstch::node py3Namespaces() {
-    return create_string_array(get_py3_namespace(service_->program()));
-  }
-
-  mstch::node programName() { return service_->program()->name(); }
-
-  mstch::node includePrefix() { return service_->program()->include_prefix(); }
-
-  mstch::node qualified_name() {
-    return cpp2::get_gen_namespace(*service_->program()) +
-        "::" + cpp2::get_name(service_);
   }
 
   std::vector<const t_function*> supportedFunctions() {
@@ -1271,6 +1245,19 @@ class t_mstch_py3_generator : public t_mstch_generator {
     });
     def.property("py3Namespaces", [](const t_program& self) {
       return to_whisker_string_array(get_py3_namespace(&self));
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_service>::ptr make_prototype_for_service(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_service(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_service>::extends(std::move(base));
+
+    def.property("externalProgram?", [this](const t_service& self) {
+      return self.program() != program_;
     });
 
     return std::move(def).make();

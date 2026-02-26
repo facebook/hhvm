@@ -875,9 +875,6 @@ class py3_mstch_struct : public mstch_struct {
              &py3_mstch_struct::isStructOrderable},
             {"struct:cpp_noncomparable", &py3_mstch_struct::cppNonComparable},
             {"struct:cpp_noncopyable?", &py3_mstch_struct::cppNonCopyable},
-            {"struct:exception_message?",
-             &py3_mstch_struct::hasExceptionMessage},
-            {"struct:exception_message", &py3_mstch_struct::exceptionMessage},
             {"struct:py3_fields", &py3_mstch_struct::py3_fields},
             {"struct:py3_fields?", &py3_mstch_struct::has_py3_fields},
             {"struct:has_hidden_fields?", &py3_mstch_struct::has_hidden_fields},
@@ -919,16 +916,6 @@ class py3_mstch_struct : public mstch_struct {
   mstch::node cppNonCopyable() {
     return struct_->has_unstructured_annotation(
         {"cpp.noncopyable", "cpp2.noncopyable"});
-  }
-
-  mstch::node hasExceptionMessage() {
-    return !!dynamic_cast<const t_exception&>(*struct_).get_message_field();
-  }
-
-  mstch::node exceptionMessage() {
-    const auto* message_field =
-        dynamic_cast<const t_exception&>(*struct_).get_message_field();
-    return message_field ? python::get_py3_name(*message_field) : "";
   }
 
   mstch::node py3_fields() { return make_mstch_fields(py3_fields_); }

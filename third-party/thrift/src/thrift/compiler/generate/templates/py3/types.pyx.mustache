@@ -247,21 +247,15 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
         return super().__repr__()
 
     def __str__({{struct:name}} self):
-        {{^struct:exception?}}
-        return super().__str__()
-        {{/struct:exception?}}
-        {{#struct:exception?}}
-        {{#struct:exception_message?}}
-        field = self.{{struct:exception_message}}
+      {{#if (and struct:exception? (object.notnull? exception:message_field))}}
+        field = self.{{exception:message_field.py_name}}
         if field is None:
             {{! optional field, stringify }}
             return str(field)
         return field
-        {{/struct:exception_message?}}
-        {{^struct:exception_message?}}
+      {{#else}}
         return super().__str__()
-        {{/struct:exception_message?}}
-        {{/struct:exception?}}
+      {{/if (and struct:exception? (object.notnull? exception:message_field))}}
 
 
 {{/struct:union?}}{{!

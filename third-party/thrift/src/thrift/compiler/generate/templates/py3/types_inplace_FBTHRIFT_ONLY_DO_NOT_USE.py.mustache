@@ -310,20 +310,19 @@ class {{struct:name}}({{> types/python_struct_class }}):
 
     {{/struct:is_struct_orderable?}}
 
-    {{#struct:exception?}}
+    {{#if struct:exception?}}
     def __str__(self):
-        {{#struct:exception_message?}}
-        field = self.{{struct:exception_message}}
+      {{#if (object.notnull? exception:message_field)}}
+        field = self.{{exception:message_field.py_name}}
         if field is None:
             {{! optional field, stringify }}
             return str(field)
         return field
-        {{/struct:exception_message?}}
-        {{^struct:exception_message?}}
+      {{#else}}
         return super().__str__()
-        {{/struct:exception_message?}}
+      {{/if (object.notnull? exception:message_field)}}
 
-    {{/struct:exception?}}
+    {{/if struct:exception?}}
     def __hash__(self):
         return super().__hash__()
 

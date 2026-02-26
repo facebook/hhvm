@@ -40,7 +40,7 @@ to a python type.
 }}{{#type:binary?}}_value{{/type:binary?}}{{!
 }}{{#type:structured}}{{!
   }}{{#program:inplace_migrate?}}{{!
-    }}{{> types/python_type}}.from_python({{!
+    }}{{#partial types.python_type type=type:self}}.from_python({{!
     }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
     }}__deref_const[{{> types/cython_cpp_type }}](_value))){{!
   }}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!
@@ -52,5 +52,5 @@ to a python type.
   }}{{> types/container_from_cpp }}(_value){{!
 }}{{/type:container?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
-}}{{#type:enum}}{{> types/python_type}}(<int> _value){{/type:enum}}{{!
+}}{{#type:enum}}{{#partial types.python_type type=type:self}}(<int> _value){{/type:enum}}{{!
 }}{{/type:customBinaryType?}}

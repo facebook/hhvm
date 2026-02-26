@@ -25,7 +25,7 @@ def fromValue(value) -> {{struct:name}}:
         return {{struct:name}}()
     {{! We do this with strict types first, then we will do int to float conversion}}
     {{#struct:py3_fields}}{{#field:type}}
-    if isinstance(value, {{> types/python_type}}):
+    if isinstance(value, {{#partial types.python_type type=field:self.type}}):
         {{#type:number?}}
         if not isinstance(value, bool):
             try:

@@ -44,7 +44,7 @@ to a python type.
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}cmove(result.value()))){{!
 }}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
-  }}{{> types/python_type}}.from_python({{!
+  }}{{#partial types.python_type type=type:self}}.from_python({{!
   }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
   }}__deref_const[{{> types/cython_cpp_type }}](result.value()))){{!
 }}{{/program:inplace_migrate?}}{{/type:structured}}{{!
@@ -52,7 +52,7 @@ to a python type.
   }}{{> types/container_from_cpp}}(cmove(result.value())){{!
 }}{{/type:container?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
-}}{{#type:enum}}{{> types/python_type}}(<int> result.value()){{/type:enum}}{{!
+}}{{#type:enum}}{{#partial types.python_type type=type:self}}(<int> result.value()){{/type:enum}}{{!
 }}{{/type:customBinaryType?}}{{!
 }}{{/function:stream?}}{{!
 }}{{#function:stream?}}{{!

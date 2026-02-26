@@ -156,9 +156,7 @@ class {{type:flat_name}}({{> types/pep484_containers}}, _typing.Hashable):
 
 {{/program:containerTypes}}
 {{#program:constants}}
-{{#constant:type}}
-{{constant:name}}: {{> types/python_type}} = ...
-{{/constant:type}}
+{{constant:name}}: {{#partial types.python_type type=constant:self.type}} = ...
 {{/program:constants}}
 {{#program:filtered_typedefs}}
 {{typedef:name}} = {{#partial types.python_type type=typedef:self}}

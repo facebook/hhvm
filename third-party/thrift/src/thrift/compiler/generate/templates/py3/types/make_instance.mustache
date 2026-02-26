@@ -42,8 +42,8 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
         {{#type:container?}}
         if item is None:
             raise TypeError("None is not of the type {{> types/pep484_type}}")
-        if not isinstance(item, {{> types/python_type}}):
-            item = {{> types/python_type}}(item)
+        if not isinstance(item, {{#partial types.python_type type=type:self}}):
+            item = {{#partial types.python_type type=type:self}}(item)
         {{/type:container?}}
         {{^type:container?}}
         if not isinstance(item, {{> types/python_is_instance_type}}):
@@ -60,8 +60,8 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
         {{#type:container?}}
         if item is None:
             raise TypeError("None is not of type {{> types/pep484_type}}")
-        if not isinstance(item, {{> types/python_type}}):
-            item = {{> types/python_type}}(item)
+        if not isinstance(item, {{#partial types.python_type type=type:self}}):
+            item = {{#partial types.python_type type=type:self}}(item)
         {{/type:container?}}
         {{^type:container?}}
         if not isinstance(item, {{> types/python_is_instance_type}}):
@@ -83,8 +83,8 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
         {{#type:container?}}
         if key is None:
             raise TypeError("None is not of type {{> types/pep484_type}}")
-        if not isinstance(key, {{> types/python_type}}):
-            key = {{> types/python_type}}(key)
+        if not isinstance(key, {{#partial types.python_type type=type:self}}):
+            key = {{#partial types.python_type type=type:self}}(key)
         {{/type:container?}}
         {{^type:container?}}
         if not isinstance(key, {{> types/python_is_instance_type}}):
@@ -102,8 +102,8 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
         {{#type:container?}}
         if item is None:
             raise TypeError("None is not of type {{> types/pep484_type}}")
-        if not isinstance(item, {{> types/python_type}}):
-            item = {{> types/python_type}}(item)
+        if not isinstance(item, {{#partial types.python_type type=type:self}}):
+            item = {{#partial types.python_type type=type:self}}(item)
         {{/type:container?}}
         {{^type:container?}}
         if not isinstance(item, {{> types/python_is_instance_type}}):

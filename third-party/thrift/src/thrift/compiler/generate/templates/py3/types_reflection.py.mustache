@@ -32,6 +32,7 @@ container types, so we'll need to define factories for them based on what they
 want to include.
 
 }}
+{{#import "common/types" as types}}
 {{> common/auto_generated_py}}
 
 
@@ -89,7 +90,7 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
             id={{field:id}},
             name="{{field:name}}",
             py_name="{{field:py_name}}",
-            type={{#field:type}}{{> types/python_type}}{{/field:type}},
+            type={{#partial types.python_type type=field:self.type}},
             kind={{#field:type}}{{> types/thrift_number_type}}{{/field:type}},
             qualifier=__Qualifier.{{!
                 }}{{#field:required?}}REQUIRED{{/field:required?}}{{!
@@ -115,28 +116,24 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
 {{#program:containerTypes}}
 {{#type:list?}}
 def get_reflection__{{type:flat_name}}() -> __ListSpec :
-    {{#type:list_elem_type}}
     return __ListSpec._fbthrift_create(
-        value={{> types/python_type}},
-        kind={{> types/thrift_number_type}},
+        value={{#partial types.python_type type=type:self.true_type.elem_type}},
+        kind={{#type:list_elem_type}}{{> types/thrift_number_type}}{{/type:list_elem_type}},
     )
-    {{/type:list_elem_type}}
 {{/type:list?}}
 {{#type:set?}}
 def get_reflection__{{type:flat_name}}() -> __SetSpec:
-    {{#type:set_elem_type}}
     return __SetSpec._fbthrift_create(
-        value={{> types/python_type}},
-        kind={{> types/thrift_number_type}},
+        value={{#partial types.python_type type=type:self.true_type.elem_type}},
+        kind={{#type:set_elem_type}}{{> types/thrift_number_type}}{{/type:set_elem_type}},
      )
-    {{/type:set_elem_type}}
 {{/type:set?}}
 {{#type:map?}}
 def get_reflection__{{type:flat_name}}() -> __MapSpec:
     return __MapSpec._fbthrift_create(
-        key={{#type:key_type}}{{> types/python_type}}{{/type:key_type}},
+        key={{#partial types.python_type type=type:self.true_type.key_type}},
         key_kind={{#type:key_type}}{{> types/thrift_number_type}}{{/type:key_type}},
-        value={{#type:value_type}}{{> types/python_type}}{{/type:value_type}},
+        value={{#partial types.python_type type=type:self.true_type.val_type}},
         value_kind={{#type:value_type}}{{> types/thrift_number_type}}{{/type:value_type}},
     )
 {{/type:map?}}

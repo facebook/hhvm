@@ -70,7 +70,7 @@ else:
 }}{{/type:binary?}}{{!
 }}{{#type:enum}}{{!
   }}self.py_value = translate_cpp_enum_to_python({{!
-    }}{{> types/python_type}}, {{!
+    }}{{#partial types.python_type type=type:self}}, {{!
     }}<int>deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}()){{!
 }}{{/type:enum}}{{!
 }}{{#type:structured?}}{{!

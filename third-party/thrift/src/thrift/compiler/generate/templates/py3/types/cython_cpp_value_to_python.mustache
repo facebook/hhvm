@@ -41,7 +41,7 @@ to be converted from unicode to binary representation.
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
     }}make_shared[{{> types/cython_cpp_type}}]({{field:py_name}})){{!
   }}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
-    }}{{> types/python_type }}.from_python({{!
+    }}{{#partial types.python_type type=type:self}}.from_python({{!
     }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
     }}__deref_const[{{> types/cython_cpp_type }}]({{field:py_name}}))){{!
   }}{{/program:inplace_migrate?}}{{!
@@ -49,5 +49,5 @@ to be converted from unicode to binary representation.
 }}{{#type:container?}}{{!
   }}{{> types/container_from_cpp}}({{field:py_name}}){{!
 }}{{/type:container?}}{{!
-}}{{#type:enum?}}{{> types/python_type}}(<int> {{field:py_name}}){{/type:enum?}}{{!
+}}{{#type:enum?}}{{#partial types.python_type type=type:self}}(<int> {{field:py_name}}){{/type:enum?}}{{!
 }}{{/type:customBinaryType?}}

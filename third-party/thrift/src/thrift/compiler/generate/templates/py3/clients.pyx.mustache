@@ -22,6 +22,7 @@ The generated file is pretty big, but the bulk of the generation is done inside
 the clients/callback partial.
 
 }}
+{{#import "common/types" as types}}
 {{> common/auto_generated_py}}
 {{^program:auto_migrate?}}
 from libc.stdint cimport (
@@ -164,8 +165,8 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
         {{#function:args}}
         {{#field:type}}
         {{#type:container?}}
-        if not isinstance({{field:py_name}}, {{> types/python_type}}):
-            {{field:py_name}} = {{> types/python_type}}({{field:py_name}})
+        if not isinstance({{field:py_name}}, {{#partial types.python_type type=field:self.type}}):
+            {{field:py_name}} = {{#partial types.python_type type=field:self.type}}({{field:py_name}})
         {{/type:container?}}
         {{#type:integer?}}
         if not isinstance({{field:py_name}}, int):
@@ -245,8 +246,8 @@ cdef class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#servi
         {{#function:args}}
         {{#field:type}}
         {{#type:container?}}
-        if not isinstance({{field:py_name}}, {{> types/python_type}}):
-            {{field:py_name}} = {{> types/python_type}}({{field:py_name}})
+        if not isinstance({{field:py_name}}, {{#partial types.python_type type=field:self.type}}):
+            {{field:py_name}} = {{#partial types.python_type type=field:self.type}}({{field:py_name}})
         {{/type:container?}}
         {{#type:integer?}}
         if not isinstance({{field:py_name}}, int):

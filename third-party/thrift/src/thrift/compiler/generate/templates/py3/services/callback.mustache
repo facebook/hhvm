@@ -95,9 +95,9 @@ async def {{service:name}}_{{function:name}}_coro(
         result = {{#function:return_type}}{{^function:stream?}}await {{/function:stream?}}{{/function:return_type}}self.{{function:name}}({{#function:args}}
                     {{field:py_name}}{{^last?}},{{/last?}}{{/function:args}})
         {{#function:return_type}}
-        {{#type:container?}}
-        result = {{> types/python_type}}(result)
-        {{/type:container?}}
+        {{#if function:self.return_type.container?}}
+        result = {{#partial types.python_type type=function:self.return_type}}(result)
+        {{/if function:self.return_type.container?}}
         {{#function:stream?}}
         {{#function:stream_has_first_response?}}
         result = await result
@@ -113,7 +113,7 @@ async def {{service:name}}_{{function:name}}_coro(
         {{/function:return_type}}
     {{#function:exceptions}}
     {{#field:type}}
-    except {{> types/python_type}} as ex:
+    except {{#partial types.python_type type=field:self.type}} as ex:
         promise.cPromise.setException{{!
 }}{{^program:inplace_migrate?}}{{!
           }}(deref((<{{> types/cython_python_type}}> ex).{{> types/cpp_obj}})){{!

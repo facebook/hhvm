@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "common/types" as types}}
 {{> common/auto_generated_py}}
 {{^program:auto_migrate?}}
 {{^program:inplace_migrate?}}
@@ -89,8 +90,8 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
             return
         {{^type:container?}}
         {{#type:enum?}}
-        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, {{> types/python_type}}):
-            raise TypeError(f'field {{field:py_name}} value: {repr(_fbthrift_value)} is not of the enum type { {{> types/python_type}} }.')
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, {{#partial types.python_type type=field:self.type}}):
+            raise TypeError(f'field {{field:py_name}} value: {repr(_fbthrift_value)} is not of the enum type { {{#partial types.python_type type=field:self.type}} }.')
         {{/type:enum?}}
         {{^type:enum?}}
         if not isinstance(_fbthrift_value, {{> types/python_is_instance_type}}):
@@ -98,7 +99,7 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
             _fbthrift_value = _from_python_or_raise(_fbthrift_value, "{{field:py_name}}", {{> types/python_is_instance_type}})
             {{/type:structured?}}
             {{^type:structured?}}
-            raise TypeError(f'{{field:py_name}} is not a { {{> types/python_type}} !r}.')
+            raise TypeError(f'{{field:py_name}} is not a { {{#partial types.python_type type=field:self.type}} !r}.')
             {{/type:structured?}}
         {{#type:integer?}}
         {{! inject cython int overflow checks }}

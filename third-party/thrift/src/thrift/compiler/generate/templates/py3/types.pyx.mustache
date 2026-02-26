@@ -291,7 +291,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         {{^type:structured?}}
         if {{field:py_name}} is not None:
             if not isinstance({{field:py_name}}, {{> types/python_is_instance_type}}):
-                raise TypeError(f'{{field:py_name}} is not a { {{> types/python_type}} !r}.')
+                raise TypeError(f'{{field:py_name}} is not a { {{#partial types.python_type type=field:self.type}} !r}.')
 
         {{/type:structured?}}
         {{/type:cythonTypeNoneable?}}
@@ -324,7 +324,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         {{! We do this with strict types first, then we will do int to float conversion}}
         {{#struct:py3_fields}}
         {{#field:type}}
-        if isinstance(value, {{> types/python_type}}):
+        if isinstance(value, {{#partial types.python_type type=field:self.type}}):
             {{#type:number?}}
             if not isinstance(value, pbool):
                 try:
@@ -597,7 +597,7 @@ cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
         }}result.hasException[{{> types/cython_cpp_type}}]():
             pyfuture.set_exception({{!
             }}{{#program:inplace_migrate?}}{{#type:structured}}{{!
-                }}{{> types/python_type}}.from_python({{!
+                }}{{#partial types.python_type type=type:self}}.from_python({{!
                 }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
                 }}thrift.py3.exceptions.unwrap_exception[{{> types/cython_cpp_type}}](result.exception()))){{!
             }}{{/type:structured}}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!

@@ -21,6 +21,7 @@ are re-exported via types.pyx
 
 }}
 {{#import "common/constants" as constants}}
+{{#import "common/types" as types}}
 {{> common/auto_generated_py}}
 {{#program:inplace_migrate?}}
 
@@ -236,7 +237,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
                 return None
             {{/struct:union?}}{{/field:optional?}}
             self._fbthrift_inner__{{field:py_name}} = {{!
-                }}{{> types/python_type}}.from_python(__python_val)
+                }}{{#partial types.python_type type=field:self.type}}.from_python(__python_val)
 
         return self._fbthrift_inner__{{field:py_name}}
 {{/type:needs_convert?}}{{^type:needs_convert?}}{{^field:optional_default?}}

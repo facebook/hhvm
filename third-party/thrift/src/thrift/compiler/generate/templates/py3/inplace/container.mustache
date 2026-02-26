@@ -67,8 +67,8 @@ class {{type:flat_name}}(thrift.py3.types.List):
     {{#type:container?}}
         if item is None:
             raise TypeError("None is not of the type {{> types/pep484_type}}")
-        if not isinstance(item, {{> types/python_type}}):
-            item = {{> types/python_type}}(item)
+        if not isinstance(item, {{#partial types.python_type type=type:self}}):
+            item = {{#partial types.python_type type=type:self}}(item)
     {{/type:container?}}
     {{^type:container?}}
         if not (
@@ -86,11 +86,11 @@ class {{type:flat_name}}(thrift.py3.types.List):
         if item is None:
             return None
         {{#type:list_elem_type}}
-        if isinstance(item, {{> types/python_type}}):
+        if isinstance(item, {{#partial types.python_type type=type:self}}):
             return item
         {{#type:container?}}
         try:
-            return {{> types/python_type}}(item)
+            return {{#partial types.python_type type=type:self}}(item)
         except:
             pass
         {{/type:container?}}
@@ -109,7 +109,7 @@ class {{type:flat_name}}(thrift.py3.types.List):
     {{/type:needs_convert?}}
     {{#type:needs_convert?}}
         _items = [
-            {{> types/python_type}}.from_python(item)
+            {{#partial types.python_type type=type:self}}.from_python(item)
             for item in python_list
         ]
     {{/type:needs_convert?}}
@@ -127,7 +127,7 @@ class {{type:flat_name}}(thrift.py3.types.List):
     {{#type:list_elem_type}}
         _items = [
             {{#type:is_container_of_struct?}}
-            {{> types/python_type}}.from_python(item)
+            {{#partial types.python_type type=type:self}}.from_python(item)
             {{/type:is_container_of_struct?}}
             {{^type:is_container_of_struct?}}
             _ensure_py3_or_raise(item, "item", {{> types/python_is_instance_type}})
@@ -179,8 +179,8 @@ class {{type:flat_name}}(thrift.py3.types.Set):
     {{#type:container?}}
         if item is None:
             raise TypeError("None is not of the type {{> types/pep484_type}}")
-        if not isinstance(item, {{> types/python_type}}):
-            item = {{> types/python_type}}(item)
+        if not isinstance(item, {{#partial types.python_type type=type:self}}):
+            item = {{#partial types.python_type type=type:self}}(item)
     {{/type:container?}}
     {{^type:container?}}
         if not (
@@ -198,11 +198,11 @@ class {{type:flat_name}}(thrift.py3.types.Set):
         if item is None:
             return None
         {{#type:set_elem_type}}
-        if isinstance(item, {{> types/python_type}}):
+        if isinstance(item, {{#partial types.python_type type=type:self}}):
             return item
         {{#type:container?}}
         try:
-            return {{> types/python_type}}(item)
+            return {{#partial types.python_type type=type:self}}(item)
         except:
             return None
         {{/type:container?}}
@@ -221,7 +221,7 @@ class {{type:flat_name}}(thrift.py3.types.Set):
     {{/type:needs_convert?}}
     {{#type:needs_convert?}}
         _items = frozenset(
-            {{> types/python_type}}.from_python(item)
+            {{#partial types.python_type type=type:self}}.from_python(item)
             for item in python_set
         )
     {{/type:needs_convert?}}
@@ -239,7 +239,7 @@ class {{type:flat_name}}(thrift.py3.types.Set):
     {{#type:set_elem_type}}
         _items = frozenset(
             {{#type:is_container_of_struct?}}
-            {{> types/python_type}}.from_python(item)
+            {{#partial types.python_type type=type:self}}.from_python(item)
             {{/type:is_container_of_struct?}}
             {{^type:is_container_of_struct?}}
             _ensure_py3_or_raise(item, "item", {{> types/python_is_instance_type}})
@@ -292,8 +292,8 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     {{#type:container?}}
         if key is None:
             raise TypeError("None is not of the type {{> types/pep484_type}}")
-        if not isinstance(key, {{> types/python_type}}):
-            key = {{> types/python_type}}(key)
+        if not isinstance(key, {{#partial types.python_type type=type:self}}):
+            key = {{#partial types.python_type type=type:self}}(key)
     {{/type:container?}}
     {{^type:container?}}
         if not (
@@ -311,11 +311,11 @@ class {{type:flat_name}}(thrift.py3.types.Map):
         if key is None:
             return None
         {{#type:key_type}}
-        if isinstance(key, {{> types/python_type}}):
+        if isinstance(key, {{#partial types.python_type type=type:self}}):
             return key
         {{#type:container?}}
         try:
-            return {{> types/python_type}}(key)
+            return {{#partial types.python_type type=type:self}}(key)
         except:
             return None
         {{/type:container?}}
@@ -327,8 +327,8 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     {{#type:container?}}
         if item is None:
             raise TypeError("None is not of the type {{> types/pep484_type}}")
-        if not isinstance(item, {{> types/python_type}}):
-            item = {{> types/python_type}}(item)
+        if not isinstance(item, {{#partial types.python_type type=type:self}}):
+            item = {{#partial types.python_type type=type:self}}(item)
     {{/type:container?}}
     {{^type:container?}}
         if not (
@@ -353,7 +353,7 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     {{/type:needs_convert?}}
     {{#type:needs_convert?}}
         _keys = (
-            {{> types/python_type}}.from_python(key)
+            {{#partial types.python_type type=type:self}}.from_python(key)
             for key in python_map.keys()
         )
     {{/type:needs_convert?}}
@@ -364,7 +364,7 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     {{/type:needs_convert?}}
     {{#type:needs_convert?}}
         _values = (
-            {{> types/python_type}}.from_python(item)
+            {{#partial types.python_type type=type:self}}.from_python(item)
             for item in python_map.values()
         )
     {{/type:needs_convert?}}
@@ -382,7 +382,7 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     {{#type:key_type}}
     {{#type:is_container_of_struct?}}
         _keys = (
-            {{> types/python_type}}.from_python(key)
+            {{#partial types.python_type type=type:self}}.from_python(key)
             for key in python_map.keys()
         )
     {{/type:is_container_of_struct?}}
@@ -401,7 +401,7 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     {{#type:value_type}}
     {{#type:is_container_of_struct?}}
         _values = (
-            {{> types/python_type}}.from_python(value)
+            {{#partial types.python_type type=type:self}}.from_python(value)
             for value in python_map.values()
         )
     {{/type:is_container_of_struct?}}

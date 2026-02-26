@@ -19,6 +19,7 @@ namespace __fbthrift_refl {
 
 struct __fbthrift_strings_module {
   using StructWithFieldAdapter = ::fatal::sequence<char, 'S', 't', 'r', 'u', 'c', 't', 'W', 'i', 't', 'h', 'F', 'i', 'e', 'l', 'd', 'A', 'd', 'a', 'p', 't', 'e', 'r'>;
+  using Type = ::fatal::sequence<char, 'T', 'y', 'p', 'e'>;
   using UnionWithTypedefFieldAdapter = ::fatal::sequence<char, 'U', 'n', 'i', 'o', 'n', 'W', 'i', 't', 'h', 'T', 'y', 'p', 'e', 'd', 'e', 'f', 'F', 'i', 'e', 'l', 'd', 'A', 'd', 'a', 'p', 't', 'e', 'r'>;
   using __fbthrift_hash_015f7e6bc5aeaf483724089e9252cc13b50951a6b69412522765cff4d780306e = ::fatal::sequence<char, 'k', '2'>;
   using __fbthrift_hash_043a718774c572bd8a25adbeb1bfcd5c0256ae11cecf9f9c3f925d0e52beaf89 = ::fatal::sequence<char, 's'>;
@@ -364,6 +365,14 @@ class module_tags {
     using enum3 = __fbthrift_strings::enum3;
     using enum_with_special_names = __fbthrift_strings::enum_with_special_names;
   };
+  struct __fbthrift_unions {
+    using union1 = __fbthrift_strings::union1;
+    using union2 = __fbthrift_strings::union2;
+    using union3 = __fbthrift_strings::union3;
+    using unionA = __fbthrift_strings::unionA;
+    using union_with_special_names = __fbthrift_strings::union_with_special_names;
+    using UnionWithTypedefFieldAdapter = __fbthrift_strings::UnionWithTypedefFieldAdapter;
+  };
   struct __fbthrift_structs {
     using structA = __fbthrift_strings::structA;
     using structB = __fbthrift_strings::structB;
@@ -399,6 +408,7 @@ class module_tags {
   using strings = __fbthrift_strings;
   using languages = __fbthrift_languages;
   using enums = __fbthrift_enums;
+  using unions = __fbthrift_unions;
   using structs = __fbthrift_structs;
   using constants = __fbthrift_constants;
   using services = __fbthrift_services;

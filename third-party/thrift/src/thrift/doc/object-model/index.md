@@ -264,8 +264,8 @@ When there is no ambiguity, the specification henceforth uses these terms interc
     * etc.
 * **<Bookmark id="floating-point-number-types">Floating point numbers</Bookmark>**: single and double precision
   * A number from the set of real numbers in [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754) `binary32` and `binary64` formats, respectively, except that
-    * `NaN` is <Bookmark id="nan">excluded</Bookmark>— there is no such <KW>datum</KW> in the <KW>dataset</KW> of Thrift floating point numbers.
-    * Zero is <Bookmark id="zero-not-signed">not signed</Bookmark> — there is exactly one <KW>datum</KW> that represents the [additive identity](https://en.wikipedia.org/wiki/Additive_identity).
+    * `NaN` is excluded — there is no such <KW>datum</KW> in the <KW>dataset</KW> of Thrift floating point numbers.
+    * Zero is not signed — there is exactly one <KW>datum</KW> that represents the [additive identity](https://en.wikipedia.org/wiki/Additive_identity).
 * **<Bookmark id="text-type">Unicode text</Bookmark>**
   * An unbounded sequence of Unicode code points.
 * **<Bookmark id="byte-array-type">Byte array</Bookmark>**
@@ -346,9 +346,20 @@ A <Bookmark id="field-identity">**<KW>field identity</KW>**</Bookmark> consists 
   * Must be unique among all <KW>field ids</KW> for a given <KW>type</KW>.
   * Must be between `-32,768` and `+32,767` (inclusive). i.e. the range of signed 16 bit integers.
 * a textual **<KW>field name</KW>**
-  * Must be non-empty and unique among all <KW>field names</KW> for a given <KW>type</KW>.
+  * Must be a valid [<KW>Thrift identifier</KW>](#thrift-identifier).
+  * Must be unique among all <KW>field names</KW> for a given <KW>type</KW>.
 
 Two <KW>fields</KW> share the same identity if either their <KW>field ids</KW> or <KW>field names</KW> are equivalent.
+
+:::info <Bookmark id="thrift-identifier"><KW>Thrift identifier</KW></Bookmark>
+A **<KW>Thrift identifier</KW>** is a textual name for user-defined constructs such as [<KW>field names</KW>](#field-identity) or [<KW>enum names</KW>](#enum-name). It must begin with a letter (`a`-`z`, `A`-`Z`) or underscore (`_`), followed by zero or more letters, underscores, or digits (`0`-`9`).
+
+```grammar
+identifier       ::= identifier_start identifier_rest*
+identifier_start ::= "a"..."z" | "A"..."Z" | "_"
+identifier_rest  ::= identifier_start | "0"..."9"
+```
+:::
 
 A <Bookmark id="presence-qualifier">**<KW>presence qualifier</KW>**</Bookmark> is one of the following:
 
@@ -399,7 +410,10 @@ A Thrift **<KW>union</KW>** is a <KW>structured type</KW> with the following add
 A Thrift **<KW>enum</KW>** is defined by:
 * A [*Thrift URI*](#thrift-uri)
 * A set of <KW>user-specified properties</KW>, which are:
-  * A mapping from unique textual <Bookmark id="enum-name"><KW>enum-names</KW></Bookmark> to their corresponding unique [32-bit signed integer](#fixed-width-signed-integer-types) <Bookmark id="enum-value"><KW>enum-values</KW></Bookmark>.
+  * A mapping from textual <Bookmark id="enum-name"><KW>enum-names</KW></Bookmark> to their corresponding [32-bit signed integer](#fixed-width-signed-integer-types) <Bookmark id="enum-value"><KW>enum-values</KW></Bookmark>.
+    * Each specified <KW>enum-name</KW> must be a valid [<KW>Thrift identifier</KW>](#thrift-identifier).
+    * Each specified <KW>enum-name</KW> must be unique within one <KW>enum type</KW>.
+    * Each specified <KW>enum-value</KW> must be unique within one <KW>enum type</KW>.
   * A set of [<KW>annotation maps</KW>](#annotation-maps):
     * an <KW>annotation map</KW> for the <KW>enum type</KW> itself, and
     * an <KW>annotation map</KW> for each specified <KW>enum-name</KW>.
@@ -556,23 +570,29 @@ Examples:
 
 #### Float`{N}`
 
-A **`Float{N}`-kind <KW>record</KW>** represents a <KW>datum</KW> from the set of Thrift [fixed-width floating-point numbers](#floating-point-number-types) of corresponding precision:
-* single precision (i.e. 32 bits) — **`Float32`**-kind
-* double precision (i.e. 64 bits) — **`Float64`**-kind
+A **`Float{N}`-kind <KW>record</KW>** represents a <KW>datum</KW> from the set of fixed-width floating-point numbers in the corresponding [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754) format:
+* **`Float32`**-kind — `binary32` (single precision)
+* **`Float64`**-kind — `binary64` (double precision)
 
-:::note **Reminder**
-`Float{N}`-kind <KW>records</KW> exclude `NaN` and signed zeros, [matching the corresponding Thrift <KW>datum</KW>](#nan).
-:::
+Except that:
+* The fraction/mantissa component of the IEEE 754 binary `NaN` values is ignored, i.e.:
+* Each `Float{N}` record-kind has exactly two `NaN` datums:
+  * `-NaN`, and
+  * `+NaN` (or simply `NaN`)
+* Notably, they do not recognize:
+  * distinct `NaN` flavors ("[Quiet NaN](https://en.wikipedia.org/wiki/NaN#Quiet_NaN)" vs. "[Signaling NaN](https://en.wikipedia.org/wiki/NaN#Signaling_NaN)"), or
+  * [`NaN` payloads](https://en.wikipedia.org/wiki/IEEE_754#Binary)
 
 Examples:
 ```python
 ✅ Float32(1.5)
 ✅ Float32(1.0)
 ✅ Float32(0.0)
-✅ Float64(-0.0) # same as Float64(0.0)
+✅ Float64(-0.0)
 ✅ Float32(∞)
 ✅ Float64(-∞)
-❌ Float64(NaN)
+✅ Float64(NaN)
+✅ Float32(-NaN)
 ❌ Float64(0.1) # 0.1 is not representable in IEEE 754 binary32 or binary64
 ❌ Float64(π)
 ```
@@ -1164,9 +1184,8 @@ Then, the <KW>partial record</KW> can be **<KW>embedded</KW>** in a (potentially
 <!-- https://lucid.app/lucidchart/03314913-6de3-4bf7-892c-b9bc6c58f3bd/edit?viewport_loc=-361%2C-687%2C1768%2C1779%2Crs1_rGd7Sxn~&invitationId=inv_395eb116-6626-4d5b-bb58-fb973bf5c3ca -->
 <Figure image={valueMappingImageUrl} caption="Mapping of a Thrift value across type systems" width="100%" />
 
-### Requirements
 
-#### Common Field Preservation
+### Common Field Preservation
 
 The [<KW>schema change</KW>](#schema-change) of a <KW>structured type</KW> <T0 /> → <T1 /> is said to be <KW>common field preserving</KW> if it does not affect the interpretation of the value of any <KW>field</KW> whose [<KW>field identity</KW>](#field-identity) remains in common between them.
 
@@ -1314,27 +1333,62 @@ It follows that the schema change <T0 /> → <T1 /> above *is common field prese
 
 </Example>
 
-#### Sealed Types
+### Sealed Types
 
-A Thrift <KW>type</KW> is **<KW>sealed</KW>** if any <KW>schema change</KW> implies that the *project-embed* round-trip should fail. In practice, this means that any schema change to a <KW>sealed type</KW> is considered "backwards-incompatible".
+#### Definition
+
+A Thrift <KW>type</KW> is **<KW>sealed</KW>** iff the equality or inequality of any two values of that type (as defined by <code><a href="#operation-areequal">areEqual</a></code>) is preserved whenever the values are [mapped](#value-mapping) to any other <KW>type system</KW>.
+
+Intuitively, this means that the type in question and any types recursively referenced by it cannot have fields added or removed (if structured) and cannot be `any`.
+
+Formally:
+<Requirement>
+
+A Thrift <KW>type</KW> `T` is **<KW>sealed</KW>** if and only if **for any**
+* <S0 /> and <S1 /> — <KW>type systems</KW>
+* <T0 /> and <T1 /> — <KW>types</KW> in <S0 /> and <S1 /> respectively, with the same <KW>type identity</KW> <code>T</code>
+* <code>a<sub>0</sub></code>, <code>b<sub>0</sub></code> ∈ <code>dataset(T<sub>0</sub>)</code> — <KW>values</KW> of <KW>type</KW> <T0 />
+* <code>a<sub>1</sub></code>, <code>b<sub>1</sub></code> — values obtained by <a href="#value-mapping">mapping</a> <code>a<sub>0</sub></code>, <code>b<sub>0</sub></code> from <T0 /> to <T1 /> via <a href="#operation-project">project</a>-<a href="#operation-embed">embed</a>, i.e.:
+
+  * <code>a<sub>1</sub></code> = <code>embed<sub>S<sub>1</sub></sub>(T<sub>1</sub>, project<sub>S<sub>0</sub></sub>(a<sub>0</sub>))</code>
+  * <code>b<sub>1</sub></code> = <code>embed<sub>S<sub>1</sub></sub>(T<sub>1</sub>, project<sub>S<sub>0</sub></sub>(b<sub>0</sub>))</code>
+
+the following biconditional holds:
+
+<code>areEqual<sub>S<sub>0</sub></sub>(a<sub>0</sub>, b<sub>0</sub>)</code> ⇔ <code>areEqual<sub>S<sub>1</sub></sub>(a<sub>1</sub>, b<sub>1</sub>)</code>
+
+</Requirement>
+
+#### Corollary - Fixed datasets
+
+The set of all possible <KW>datums</KW> (i.e., the [<KW>dataset</KW>](#dataset)) of a <KW>sealed</KW> type is fixed, and can never change.
+
+Any <KW>value</KW> that is not present in all <KW>type systems</KW> would violate the aforementioned biconditional, per the pigeonhole principle.
+
+#### Importance
 
 Only <KW>sealed types</KW> may be used as the element of a [<KW>set type</KW>](#set-of-v) or the key of a [<KW>map type</KW>](#map-of-k-to-v).
-This restriction guarantees that the *project-embed* round-trip always preserves the cardinality of `Set`-kind and `Map`-kind <KW>records</KW> respectively, should it succeed.
+
+This restriction, combined with the definition above, guarantees that the *project-embed* round-trip always preserves the cardinality of `Set`-kind and `Map`-kind <KW>records</KW> respectively, should it succeed.
+
+In other words, it ensures that keys are not considered unique in some <KW>type systems</KW> and conflicting in others.
+
+#### Type Sealed-ness
 
 The following table encodes whether a <KW>type</KW> is <KW>sealed</KW> or not:
 
 <CenterHorizontally>
 
-| Type | Sealed? |
-| ----- | ----- |
-| [<KW>primitive</KW>](#primitive-types), except `any` | Yes |
-| [`any`](#any-type) | No (since the contained value may not be <KW>sealed</KW>) |
-| [<KW>enum</KW>](#enum-types) | Yes (since unnamed <KW>values</KW> are still part of its <KW>dataset</KW>) |
-| [<KW>structured</KW>](#structured-types) | Yes, if [explicitly <KW>sealed</KW> by its definition](#structured-type-sealed) |
-| [<KW>opaque alias</KW>](#opaque-alias-types) | Yes, if <KW>target type</KW> is <KW>sealed</KW> |
-| [<KW>list of `V`</KW>](#list-of-v) | Yes, if `V` is <KW>sealed</KW> |
-| [<KW>set of `V`</KW>](#set-of-v) | Yes (since `V` must be <KW>sealed</KW>) |
-| [<KW>map of `K` to `V`</KW>](#map-of-k-to-v) | Yes, if `V` is <KW>sealed</KW> (note that `K` must be <KW>sealed</KW>) |
+| Type                                                 | Sealed?
+| ---------------------------------------------------- | -------------------------------------------------------------------------------
+| [<KW>primitive</KW>](#primitive-types), except `any` | Yes
+| [`any`](#any-type)                                   | No (since the contained value may not be <KW>sealed</KW>)
+| [<KW>enum</KW>](#enum-types)                         | Yes (since unnamed <KW>values</KW> are still part of its <KW>dataset</KW>)
+| [<KW>structured</KW>](#structured-types)             | Yes, if [explicitly <KW>sealed</KW> by its definition](#structured-type-sealed)
+| [<KW>opaque alias</KW>](#opaque-alias-types)         | Yes, if <KW>target type</KW> is <KW>sealed</KW>
+| [<KW>list of `V`</KW>](#list-of-v)                   | Yes, if `V` is <KW>sealed</KW>
+| [<KW>set of `V`</KW>](#set-of-v)                     | Yes (since `V` must be <KW>sealed</KW>)
+| [<KW>map of `K` to `V`</KW>](#map-of-k-to-v)         | Yes, if `V` is <KW>sealed</KW> (note that `K` must be <KW>sealed</KW>)
 
 </CenterHorizontally>
 
@@ -1772,20 +1826,21 @@ Equivalent to **<code><a href="#operation-materialize">materialize<sub>S,P</sub>
 | May 20, 2025      | 1.0.0   | Initial version
 | June 16, 2025     | 1.1.0   | [`MINOR`](#versioning-minor):<ol><li>Added [<KW>Annotation Map</KW>](#annotation-maps) concept, and updated <KW>user-specified properties</KW> to include annotations.</li></ol>[`PATCH`](#versioning-patch): <ol><li>Changed [<KW>presence qualifiers</KW>](#presence-qualifier): renamed <KW>unqualified</KW> to <KW>always-present</KW>.<br />Rationale: the term "unqualified" conflates a Thrift IDL concept (i.e., the lack of a qualifier in the `.thrift` source) with a semantic one in the object model (of a field always having a value). Indeed, the lack of a qualifier in IDL may actually correspond to different *semantic presence qualifiers*: in a <KW>struct</KW>, it corresponds to <KW>always-present</KW>, whereas in a <KW>union</KW> it corresponds to <KW>optional</KW>.</li><li>Various typos and style fixes.</li></ol>
 | November 10, 2025 | 1.1.1   | [`PATCH`](#versioning-patch): <ol><li>Reworded [Common Field Preservation](#common-field-preservation) and added [Example](#example-common-field-preserving-change).</li><li>Fixed indentation of `embed` operation details, some typos and nits.</li></ol>
+| February 24, 2026 | 1.2.0   | [`MINOR`](#versioning-minor):<ol><li>Added [Thrift identifier](#thrift-identifier) definition, applied to enum names and field names.</li><li>Allow `NaN` and signed zero <KW>datums</KW> for [`Float{N}`-kind records](#floatn).</li></ol>[`PATCH`](#versioning-patch): <ol><li>[Sealed types](#sealed-types): added formal definition.</li><li>Minor header changes.</li></ol>
 
 ### Versioning
 
 Releases use [Semantic Versioning](https://semver.org/), with a 3-component version number: `MAJOR.MINOR.PATCH`, where:
 
-* <Bookmark id="versioning-major"><code>MAJOR</code></Bookmark> version bumps indicate changes that are *backwards incompatible*.
+* `MAJOR` <Bookmark id="versioning-major" /> version bumps indicate changes that are backwards incompatible*.
   * Previously compliant implementations and uses may no longer be compliant.
   * For example, this could be due to new semantics that directly contradict previous versions.
   * Such changes should be *extremely rare*.
-* <Bookmark id="versioning-minor"><code>MINOR</code></Bookmark> version bumps indicate changes that *do not contradict previous versions, but may extend them*.
+* `MINOR` <Bookmark id="versioning-minor" /> version bumps indicate changes that *do not contradict previous versions, but may extend them*.
   * Previously compliant implementations and uses remain compliant.
   * Previously undefined behavior may become compliant or non-compliant.
   * Such changes should be relatively common, as the result of an explicit review by the Thrift team of formal change proposals.
-* <Bookmark id="versioning-patch"><code>PATCH</code></Bookmark> version bumps *do not impact compliance in any way.*
+* `PATCH` <Bookmark id="versioning-patch" /> version bumps *do not impact compliance in any way.*
   * They are typically non-semantic changes to the document, such as examples, clarifications, typographical fixes, etc.
   * All previous assumptions and semantics remain unchanged.
   * Such changes are extremely common.

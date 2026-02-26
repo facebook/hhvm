@@ -83,6 +83,33 @@ std::vector<std::string> get_py3_namespace_with_name(const t_program* program) {
   return ns;
 }
 
+bool is_number(const t_type& resolved) {
+  return resolved.is_any_int() || resolved.is_byte() ||
+      resolved.is_floating_point();
+}
+
+bool is_iobuf(const std::string& cpp_type) {
+  return cpp_type == "folly::IOBuf";
+}
+
+bool is_iobuf_ref(const std::string& cpp_type) {
+  return cpp_type == "std::unique_ptr<folly::IOBuf>";
+}
+
+bool is_flexible_binary(const t_type& resolved, const std::string& cpp_type) {
+  return resolved.is_binary() && !cpp_type.empty() && !is_iobuf(cpp_type) &&
+      !is_iobuf_ref(cpp_type) &&
+      // We know that folly::fbstring is completely substitutable for
+      // std::string and it's a common-enough type to special-case:
+      cpp_type != "folly::fbstring" && cpp_type != "::folly::fbstring";
+}
+
+bool is_custom_binary_type(
+    const t_type& resolved, const std::string& cpp_type) {
+  return is_iobuf(cpp_type) || is_iobuf_ref(cpp_type) ||
+      is_flexible_binary(resolved, cpp_type);
+}
+
 bool type_needs_convert(const t_type* type) {
   return type->is<t_structured>() || type->is<t_container>();
 }
@@ -157,13 +184,6 @@ bool field_has_default_value(
        field.qualifier() != t_field_qualifier::optional);
 }
 
-std::vector<std::string> get_type_py3_namespace(
-    const t_program* prog, const std::string& suffix) {
-  auto ns = get_py3_namespace_with_name(prog);
-  ns.push_back(suffix);
-  return ns;
-}
-
 enum class FileType { CBindingsFile, TypesFile, NotTypesFile };
 
 struct Py3StructuredContext {
@@ -180,8 +200,7 @@ class py3_generator_context {
   using cached_type_properties =
       apache::thrift::compiler::python::cached_properties;
 
-  py3_generator_context(const t_program* program, const FileType* file_type)
-      : program_(program), file_type_(file_type) {}
+  py3_generator_context(const t_program* program) : program_(program) {}
 
   cached_type_properties& get_cached_type_props(const t_type* type) const;
 
@@ -197,7 +216,6 @@ class py3_generator_context {
   }
 
   const t_program* program() const { return program_; }
-  const FileType* file_type() const { return file_type_; }
 
   void register_visitors(t_whisker_generator::context_visitor& visitor) {
     using context = t_whisker_generator::whisker_generator_visitor_context;
@@ -250,7 +268,6 @@ class py3_generator_context {
 
  private:
   const t_program* program_;
-  const FileType* file_type_;
 
   std::unordered_map<const t_structured*, Py3StructuredContext>
       structured_contexts_;
@@ -566,232 +583,6 @@ class py3_mstch_service : public mstch_service {
   std::set<const t_interaction*, interaction_name_less> supported_interactions_;
 };
 
-class py3_mstch_type : public mstch_type {
- public:
-  py3_mstch_type(
-      const t_type* type,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      py3_generator_context* c)
-      : mstch_type(type, ctx, pos),
-        prog_(c->program()),
-        file_type_(c->file_type()),
-        cached_props_(c->get_cached_type_props(type)) {
-    register_methods(
-        this,
-        {
-            {"type:module_auto_migrate_path",
-             &py3_mstch_type::moduleAutoMigratePath},
-            {"type:cbinding_path", &py3_mstch_type::cbinding_path},
-            {"type:capi_converter_path", &py3_mstch_type::capi_converter_path},
-            {"type:cppTemplate", &py3_mstch_type::cppTemplate},
-            {"type:cythonTemplate", &py3_mstch_type::cythonTemplate},
-            {"type:defaultTemplate?", &py3_mstch_type::isDefaultTemplate},
-            {"type:customCppType", &py3_mstch_type::customCppType},
-            {"type:customCppType?", &py3_mstch_type::isCustomCppType},
-            {"type:cythonCustomType", &py3_mstch_type::cythonType},
-            {"type:number?", &py3_mstch_type::isNumber},
-            {"type:integer?", &py3_mstch_type::isInteger},
-            {"type:containerOfString?", &py3_mstch_type::isContainerOfString},
-            {"type:cythonTypeNoneable?", &py3_mstch_type::cythonTypeNoneable},
-            {"type:hasCythonType?", &py3_mstch_type::hasCythonType},
-            {"type:iobuf?", &py3_mstch_type::isIOBuf},
-            {"type:iobufRef?", &py3_mstch_type::isIOBufRef},
-            {"type:flexibleBinary?", &py3_mstch_type::isFlexibleBinary},
-            {"type:customBinaryType?", &py3_mstch_type::isCustomBinaryType},
-            {"type:simple?", &py3_mstch_type::isSimple},
-            {"type:needs_convert?", &py3_mstch_type::needs_convert},
-            {"type:is_container_of_struct?",
-             &py3_mstch_type::is_container_of_struct},
-            {"type:elem_needs_convert?",
-             &py3_mstch_type::element_needs_convert},
-            {"type:key_needs_convert?", &py3_mstch_type::map_key_needs_convert},
-            {"type:val_needs_convert?",
-             &py3_mstch_type::map_value_needs_convert},
-
-            {"type:need_cbinding_path?",
-             {with_no_caching, &py3_mstch_type::need_cbinding_path}},
-        });
-  }
-
-  mstch::node need_cbinding_path() {
-    // Need import if in a different declaration file, or type originated in a
-    // different Thrift program
-    return *file_type_ != FileType::CBindingsFile ||
-        (resolved_type_->program() != nullptr &&
-         resolved_type_->program() != prog_);
-  }
-
-  mstch::node cbinding_path() {
-    return fmt::format(
-        "_{}",
-        fmt::join(
-            get_type_py3_namespace(get_type_program(), "cbindings"), "_"));
-  }
-
-  mstch::node capi_converter_path() {
-    return fmt::format(
-        "_{}",
-        fmt::join(
-            get_type_py3_namespace(get_type_program(), "thrift_converter"),
-            "_"));
-  }
-
-  mstch::node moduleAutoMigratePath() {
-    return fmt::format(
-        "_{}",
-        fmt::join(
-            get_type_py3_namespace(get_type_program(), "thrift_types"), "_"));
-  }
-
-  mstch::node cppTemplate() { return cached_props_.cpp_template(); }
-
-  mstch::node cythonTemplate() { return to_cython_template(); }
-
-  mstch::node isDefaultTemplate() {
-    return cached_props_.is_default_template(resolved_type_);
-  }
-
-  mstch::node customCppType() { return cached_props_.cpp_type(); }
-
-  mstch::node cythonType() { return to_cython_type(); }
-
-  mstch::node isCustomCppType() { return is_custom_cpp_type(); }
-
-  mstch::node isNumber() { return is_number(); }
-
-  mstch::node isInteger() { return is_integer(); }
-
-  mstch::node isContainerOfString() {
-    return is_list_of_string() || is_set_of_string();
-  }
-
-  mstch::node cythonTypeNoneable() {
-    return !(is_number() || resolved_type_->is<t_container>());
-  }
-
-  mstch::node hasCythonType() { return has_cython_type(); }
-
-  mstch::node isIOBuf() { return is_iobuf(); }
-
-  mstch::node isIOBufRef() { return is_iobuf_ref(); }
-
-  mstch::node isFlexibleBinary() { return is_flexible_binary(); }
-
-  mstch::node isCustomBinaryType() { return is_custom_binary_type(); }
-
-  // types that don't have an underlying C++ type
-  // i.e., structs, unions, exceptions all enclose a C++ type
-  mstch::node isSimple() {
-    return (resolved_type_->is<t_primitive_type>() ||
-            resolved_type_->is<t_enum>() ||
-            resolved_type_->is<t_container>()) &&
-        !is_custom_binary_type();
-  }
-
-  // types that need conversion to py3 if accessed from thrift-python struct
-  // fields
-  mstch::node needs_convert() { return type_needs_convert(resolved_type_); }
-
-  mstch::node is_container_of_struct() {
-    return resolved_type_->is<t_container>() &&
-        container_needs_convert(resolved_type_);
-  }
-
-  // type:list_elem_type etc. is defined in mstch_objects, so the returned
-  // type node doesn't define type:needs_convert
-  mstch::node element_needs_convert() {
-    if (const t_list* list = resolved_type_->try_as<t_list>()) {
-      return type_needs_convert(list->elem_type().get_type());
-    } else if (const t_set* set = resolved_type_->try_as<t_set>()) {
-      return type_needs_convert(set->elem_type().get_type());
-    }
-    return false;
-  }
-
-  mstch::node map_key_needs_convert() {
-    if (const t_map* map = resolved_type_->try_as<t_map>()) {
-      return type_needs_convert(map->key_type().get_type());
-    }
-    return false;
-  }
-
-  mstch::node map_value_needs_convert() {
-    if (const t_map* map = resolved_type_->try_as<t_map>()) {
-      return type_needs_convert(map->val_type().get_type());
-    }
-    return false;
-  }
-
-  bool is_custom_cpp_type() const { return cached_props_.cpp_type() != ""; }
-
- protected:
-  const t_program* get_type_program() const {
-    if (const t_program* p = resolved_type_->program()) {
-      return p;
-    }
-    return prog_;
-  }
-
-  std::string to_cython_template() const {
-    return cached_props_.to_cython_template();
-  }
-
-  std::string to_cython_type() const { return cached_props_.to_cython_type(); }
-
-  bool is_integer() const {
-    return resolved_type_->is_any_int() || resolved_type_->is_byte();
-  }
-
-  bool is_number() const {
-    return is_integer() || resolved_type_->is_floating_point();
-  }
-
-  bool is_list_of_string() {
-    if (const t_list* list = resolved_type_->try_as<t_list>()) {
-      return list->elem_type()->is_string_or_binary();
-    }
-    return false;
-  }
-
-  bool is_set_of_string() {
-    if (const t_set* set = resolved_type_->try_as<t_set>()) {
-      return set->elem_type()->is_string_or_binary();
-    }
-    return false;
-  }
-
-  bool has_cython_type() const {
-    return has_option("inplace_migrate")
-        ? !(resolved_type_->is<t_container>() ||
-            resolved_type_->is<t_struct>() || resolved_type_->is<t_union>())
-        : !resolved_type_->is<t_container>();
-  }
-
-  bool is_iobuf() const { return cached_props_.cpp_type() == "folly::IOBuf"; }
-
-  bool is_iobuf_ref() const {
-    return cached_props_.cpp_type() == "std::unique_ptr<folly::IOBuf>";
-  }
-
-  bool is_flexible_binary() const {
-    return resolved_type_->is_binary() && is_custom_cpp_type() && !is_iobuf() &&
-        !is_iobuf_ref() &&
-        // We know that folly::fbstring is completely substitutable for
-        // std::string and it's a common-enough type to special-case:
-        cached_props_.cpp_type() != "folly::fbstring" &&
-        cached_props_.cpp_type() != "::folly::fbstring";
-  }
-
-  bool is_custom_binary_type() const {
-    return is_iobuf() || is_iobuf_ref() || is_flexible_binary();
-  }
-
-  const t_program* prog_;
-  const FileType* file_type_;
-  py3_generator_context::cached_type_properties& cached_props_;
-};
-
 class py3_mstch_struct : public mstch_struct {
  public:
   py3_mstch_struct(
@@ -808,8 +599,8 @@ class py3_mstch_struct : public mstch_struct {
   }
 
   mstch::node py3_fields() {
-    // TODO(T256504508): Templates require properties from `py3_mstch_field` /
-    // `py3_mstch_type`, so those must be migrated to Whisker first
+    // TODO(T256504508): Templates require properties from `mstch_field`, so
+    // those must be migrated to Whisker first
     return make_mstch_fields(
         context_.get_structured_context(*struct_).nonHiddenFields);
   }
@@ -1036,7 +827,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
 
   std::filesystem::path generateRootPath_;
   FileType file_type_ = FileType::NotTypesFile;
-  py3_generator_context context_{program_, &file_type_};
+  py3_generator_context context_{program_};
 
   void initialize_context(t_whisker_generator::context_visitor& visitor) final {
     context_.register_visitors(visitor);
@@ -1054,6 +845,11 @@ class t_mstch_py3_generator : public t_mstch_generator {
                   ctx.argument<whisker::string>(0)));
         });
     return globals;
+  }
+
+  const t_program* get_true_type_program(const t_type& type) const {
+    const t_type* resolved = type.get_true_type();
+    return resolved->program() == nullptr ? program_ : resolved->program();
   }
 
   prototype<t_const_value>::ptr make_prototype_for_const_value(
@@ -1172,7 +968,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
       const t_program* program =
           self.program() == nullptr ? get_program() : self.program();
       return fmt::format(
-          "_{}", fmt::join(get_type_py3_namespace(program, "types"), "_"));
+          "_{}_types", fmt::join(get_py3_namespace_with_name(program), "_"));
     });
     return std::move(def).make();
   }
@@ -1315,37 +1111,158 @@ class t_mstch_py3_generator : public t_mstch_generator {
           ? get_program()
           : true_type->program();
       return fmt::format(
-          "_{}", fmt::join(get_type_py3_namespace(program, "types"), "_"));
+          "_{}_types", fmt::join(get_py3_namespace_with_name(program), "_"));
     });
-
     def.property("module_path_period_separated", [this](const t_type& self) {
       const t_type* true_type = self.get_true_type();
       const t_program* program = true_type->program() == nullptr
           ? get_program()
           : true_type->program();
       return fmt::format(
-          "{}", fmt::join(get_type_py3_namespace(program, "types"), "."));
+          "{}.types", fmt::join(get_py3_namespace_with_name(program), "."));
     });
-
     def.property("need_module_path?", [this](const t_type& self) {
-      if (file_type_ == FileType::NotTypesFile) {
-        return true;
-      }
-      const t_type* true_type = self.get_true_type();
-      return (
-          true_type->program() != nullptr &&
-          true_type->program() != get_program());
+      return file_type_ == FileType::NotTypesFile ||
+          get_true_type_program(self) != get_program();
     });
-
     def.property("iobufWrapper?", [this](const t_type& self) {
       const py3_generator_context::cached_type_properties& cached_props =
           context_.get_cached_type_props(&self);
       return cached_props.cpp_type() == "folly::IOBuf" ||
           cached_props.cpp_type() == "std::unique_ptr<folly::IOBuf>";
     });
-
     def.property("flat_name", [this](const t_type& self) {
       return context_.get_cached_type_props(&self).flat_name();
+    });
+    def.property("need_cbinding_path?", [this](const t_type& self) {
+      // Need import if in a different declaration file, or type originated in a
+      // different Thrift program
+      return file_type_ != FileType::CBindingsFile ||
+          get_true_type_program(self) != get_program();
+    });
+    def.property("cbinding_path", [this](const t_type& self) {
+      return fmt::format(
+          "_{}_cbindings",
+          fmt::join(
+              get_py3_namespace_with_name(get_true_type_program(self)), "_"));
+    });
+    def.property("capi_converter_path", [this](const t_type& self) {
+      return fmt::format(
+          "_{}_thrift_converter",
+          fmt::join(
+              get_py3_namespace_with_name(get_true_type_program(self)), "_"));
+    });
+    def.property("module_auto_migrate_path", [this](const t_type& self) {
+      return fmt::format(
+          "_{}_thrift_types",
+          fmt::join(
+              get_py3_namespace_with_name(get_true_type_program(self)), "_"));
+    });
+    def.property("cppTemplate", [this](const t_type& self) {
+      return context_.get_cached_type_props(&self).cpp_template();
+    });
+    def.property("cythonTemplate", [this](const t_type& self) {
+      return context_.get_cached_type_props(&self).to_cython_template();
+    });
+    def.property("defaultTemplate?", [this](const t_type& self) {
+      return context_.get_cached_type_props(&self).is_default_template(
+          self.get_true_type());
+    });
+    def.property("customCppType", [this](const t_type& self) {
+      return context_.get_cached_type_props(&self).cpp_type();
+    });
+    def.property("cythonCustomType", [this](const t_type& self) {
+      return context_.get_cached_type_props(&self).to_cython_type();
+    });
+    def.property("customCppType?", [this](const t_type& self) {
+      return !context_.get_cached_type_props(&self).cpp_type().empty();
+    });
+    def.property("number?", [](const t_type& self) {
+      return is_number(*self.get_true_type());
+    });
+    def.property("integer?", [](const t_type& self) {
+      const t_type& resolved = *self.get_true_type();
+      return resolved.is_any_int() || resolved.is_byte();
+    });
+    def.property("containerOfString?", [](const t_type& self) {
+      const t_type& resolved = *self.get_true_type();
+      if (const t_list* list = resolved.try_as<t_list>()) {
+        return list->elem_type()->is_string_or_binary();
+      }
+      if (const t_set* set = resolved.try_as<t_set>()) {
+        return set->elem_type()->is_string_or_binary();
+      }
+      return false;
+    });
+    def.property("cythonTypeNoneable?", [](const t_type& self) {
+      const t_type& resolved = *self.get_true_type();
+      return !is_number(resolved) && !resolved.is<t_container>();
+    });
+    def.property("hasCythonType?", [this](const t_type& self) {
+      const t_type& resolved = *self.get_true_type();
+      return has_compiler_option("inplace_migrate")
+          ? !(resolved.is<t_container>() || resolved.is<t_structured>())
+          : !resolved.is<t_container>();
+    });
+    def.property("iobuf?", [this](const t_type& self) {
+      return is_iobuf(context_.get_cached_type_props(&self).cpp_type());
+    });
+    def.property("iobufRef?", [this](const t_type& self) {
+      return is_iobuf_ref(context_.get_cached_type_props(&self).cpp_type());
+    });
+    def.property("flexibleBinary?", [this](const t_type& self) {
+      return is_flexible_binary(
+          *self.get_true_type(),
+          context_.get_cached_type_props(&self).cpp_type());
+    });
+    def.property("customBinaryType?", [this](const t_type& self) {
+      return is_custom_binary_type(
+          *self.get_true_type(),
+          context_.get_cached_type_props(&self).cpp_type());
+    });
+    // types that don't have an underlying C++ type
+    // i.e., structs, unions, exceptions all enclose a C++ type
+    def.property("simple?", [this](const t_type& self) {
+      const t_type& resolved = *self.get_true_type();
+      return (resolved.is<t_primitive_type>() || resolved.is<t_enum>() ||
+              resolved.is<t_container>()) &&
+          !is_custom_binary_type(
+                 resolved, context_.get_cached_type_props(&self).cpp_type());
+    });
+    // types that need conversion to py3 if accessed from thrift-python struct
+    // fields
+    def.property("needs_convert?", [](const t_type& self) {
+      return type_needs_convert(self.get_true_type());
+    });
+    def.property("is_container_of_struct?", [](const t_type& self) {
+      const t_type& resolved = *self.get_true_type();
+      return resolved.is<t_container>() && container_needs_convert(&resolved);
+    });
+    // type:list_elem_type etc. is defined in mstch_objects, so the returned
+    // type node doesn't define type:needs_convert
+    def.property("elem_needs_convert?", [](const t_type& self) {
+      const t_type& resolved = *self.get_true_type();
+      if (const t_list* list = resolved.try_as<t_list>()) {
+        return type_needs_convert(&list->elem_type().deref());
+      }
+      if (const t_set* set = resolved.try_as<t_set>()) {
+        return type_needs_convert(&set->elem_type().deref());
+      }
+      return false;
+    });
+    def.property("key_needs_convert?", [](const t_type& self) {
+      const t_type& resolved = *self.get_true_type();
+      if (const t_map* map = resolved.try_as<t_map>()) {
+        return type_needs_convert(&map->key_type().deref());
+      }
+      return false;
+    });
+    def.property("val_needs_convert?", [](const t_type& self) {
+      const t_type& resolved = *self.get_true_type();
+      if (const t_map* map = resolved.try_as<t_map>()) {
+        return type_needs_convert(&map->val_type().deref());
+      }
+      return false;
     });
 
     return std::move(def).make();
@@ -1384,7 +1301,6 @@ py3_generator_context::get_cached_type_props(const t_type* type) const {
 void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_program>(&context_);
   mstch_context_.add<py3_mstch_service>(program_);
-  mstch_context_.add<py3_mstch_type>(&context_);
   mstch_context_.add<py3_mstch_struct>(&context_);
 }
 

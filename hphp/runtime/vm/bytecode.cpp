@@ -767,7 +767,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   if (!isContainer(unpackArgs)) throwInvalidUnpackArgs();
   stack.discard();
   SCOPE_EXIT { tvDecRefGen(unpackArgs); };
-  
+
   auto const numPositionalArgs = numArgs - numNamedArgs;
   auto const numUnpackArgs = getContainerSize(unpackArgs);
   auto const numPositionalParams = func->numPositionalParams();
@@ -2182,6 +2182,7 @@ OPTBLD_INLINE void verifyRetTypeImpl(size_t ind, HPHP::VerifyRetKind kind) {
       break;
     case HPHP::VerifyRetKind::NonNull:
       for (auto const& tc : constraints.range()) {
+        if (!tc.isCheckable()) continue;
         if (tc.isNullable()) continue;
         auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
         tc.verifyReturnNonNull(retVal, ctx, func);
@@ -3567,7 +3568,7 @@ void doFCall(PrologueFlags prologueFlags, const Func* func,
   calleeGenericsChecks(func, prologueFlags.hasGenerics());
   calleeArgumentArityChecks(func, numArgsInclUnpack, numArgsInclUnpack - func->numNamedParams());
   calleeArgumentTypeChecks(func, numArgsInclUnpack, ctx);
-  calleeDynamicCallChecks(func, prologueFlags.isDynamicCall());  
+  calleeDynamicCallChecks(func, prologueFlags.isDynamicCall());
   calleeCoeffectChecks(func, prologueFlags.coeffects(), numArgsInclUnpack, ctx);
   func->recordCall();
   initFuncInputs(func, numArgsInclUnpack);

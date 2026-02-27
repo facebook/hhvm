@@ -231,7 +231,7 @@ Variant HHVM_FUNCTION(pow, const Variant& base, const Variant& exp) {
     // calculate pow(long,long) in O(log exp) operations, bail if overflow
     int64_t l1 = 1;
     while (eint >= 1) {
-      int overflow;
+      long overflow;
       double dval = 0.0;
       if (eint % 2) {
         --eint;

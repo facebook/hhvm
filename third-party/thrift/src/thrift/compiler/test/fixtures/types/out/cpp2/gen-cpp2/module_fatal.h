@@ -213,6 +213,8 @@ class module_tags {
     using is_unscoped = __fbthrift_strings::is_unscoped;
     using MyForwardRefEnum = __fbthrift_strings::MyForwardRefEnum;
   };
+  struct __fbthrift_unions {
+      };
   struct __fbthrift_structs {
     using empty_struct = __fbthrift_strings::empty_struct;
     using decorated_struct = __fbthrift_strings::decorated_struct;
@@ -259,6 +261,7 @@ class module_tags {
   using strings = __fbthrift_strings;
   using languages = __fbthrift_languages;
   using enums = __fbthrift_enums;
+  using unions = __fbthrift_unions;
   using structs = __fbthrift_structs;
   using constants = __fbthrift_constants;
   using services = __fbthrift_services;

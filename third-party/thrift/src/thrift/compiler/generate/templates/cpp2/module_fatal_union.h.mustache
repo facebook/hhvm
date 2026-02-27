@@ -1,0 +1,144 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{> Autogen}}
+#pragma once
+
+{{#program:thrift_includes}}
+#include  "{{program:include_prefix}}{{program:name}}_fatal_types.h"
+{{/program:thrift_includes}}
+
+#include "{{program:include_prefix}}{{program:name}}_types.h"
+#include "{{program:include_prefix}}{{program:name}}_fatal.h"
+
+#include <fatal/type/enum.h>
+#include <fatal/type/variant_traits.h>
+
+#include <type_traits>
+
+namespace {{program:cpp_qualified_namespace}} {
+
+namespace __fbthrift_refl {
+namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
+{{#program:structs}}{{#struct:union?}}
+class {{struct:cpp_name}}_tenum_traits {
+ public:
+  using type = {{struct:cpp_fullname}}::Type;
+
+ private:
+  {{#struct:fields}}
+  struct __fbthrift_value_{{field:cpp_name}} {
+    using name = __fbthrift_strings_{{program:name}}::{{field:name_hash}};
+    using value = std::integral_constant<type, type::{{field:cpp_name}}>;
+  };
+
+  {{/struct:fields}}
+  struct __fbthrift_member {
+    {{#struct:fields}}
+    using {{field:cpp_name}} = __fbthrift_value_{{field:cpp_name}};
+    {{/struct:fields}}
+  };
+
+ public:
+  using name = __fbthrift_strings_{{program:name}}::Type;
+  using member = __fbthrift_member;
+  using fields = ::fatal::list<
+      {{#struct:fields}}
+      member::{{field:cpp_name}}{{^last?}},{{/last?}}
+      {{/struct:fields}}
+  >;
+
+  static char const *to_string(type e, char const *fallback) {
+    switch (e) {
+      {{#struct:fields}}
+      case type::{{field:cpp_name}}: return "{{field:cpp_name}}";
+      {{/struct:fields}}
+      default: return fallback;
+    }
+  }
+};
+
+class {{struct:cpp_name}}_variant_traits {
+ private:
+  struct __fbthrift_ids {
+    {{#struct:fields}}
+    using {{field:cpp_name}} = std::integral_constant<{{struct:cpp_fullname}}::Type, {{struct:cpp_fullname}}::Type::{{field:cpp_name}}>;
+    {{/struct:fields}}
+  };
+
+  {{#struct:fields}}
+  struct __fbthrift_member_{{field:cpp_name}} {
+    using name = __fbthrift_strings_{{program:name}}::{{field:name_hash}};
+    using tag = ::apache::thrift::ident::{{field:cpp_name}};
+    static constexpr ::apache::thrift::field_id_t id = {{field:id}};
+    using type_class = {{#field:type}}{{type:type_class}}{{/field:type}};
+    struct setter {
+      template <typename... Args>
+      decltype(auto) operator ()({{struct:cpp_fullname}} &variant, Args &&...args) const {
+        return variant.set_{{field:cpp_name}}(std::forward<Args>(args)...);
+      }
+    };
+    struct getter {
+      decltype(auto) operator ()({{struct:cpp_fullname}} const &variant) const {
+        return variant.get_{{field:cpp_name}}();
+      }
+      decltype(auto) operator ()({{struct:cpp_fullname}} &variant) const {
+        return variant.mutable_{{field:cpp_name}}();
+      }
+      decltype(auto) operator ()({{struct:cpp_fullname}} &&variant) const {
+        return std::move(variant).move_{{field:cpp_name}}();
+      }
+    };
+  };
+  {{/struct:fields}}
+
+ public:
+  using type = {{struct:cpp_fullname}};
+  using name = __fbthrift_strings_{{program:name}}::{{struct:cpp_name}};
+  using id = type::Type;
+  using ids = __fbthrift_ids;
+  using descriptors = ::fatal::list<
+      {{#struct:fields}}
+      ::fatal::variant_member_descriptor<
+          {{field:cpp_type}},
+           __fbthrift_ids::{{field:cpp_name}},
+          __fbthrift_member_{{field:cpp_name}}::getter,
+          __fbthrift_member_{{field:cpp_name}}::setter,
+          ::apache::thrift::reflected_variant_member_metadata<__fbthrift_member_{{field:cpp_name}}>>{{^last?}},{{/last?}}
+    {{/struct:fields}}
+  >;
+
+  static id get_id(type const &variant) {
+    return variant.getType();
+  }
+
+  static bool empty(type const &variant) {
+    return variant.getType() == id::__EMPTY__;
+  }
+
+  static void clear(type &variant) {
+    return apache::thrift::clear(variant);
+  }
+};
+{{/struct:union?}}{{/program:structs}}
+} // __fbthrift_refl
+
+{{#program:structs}}{{#struct:union?}}
+FATAL_REGISTER_ENUM_TRAITS(__fbthrift_refl::{{struct:cpp_name}}_tenum_traits);
+FATAL_REGISTER_VARIANT_TRAITS(__fbthrift_refl::{{struct:cpp_name}}_variant_traits);
+{{/struct:union?}}{{/program:structs}}
+} // namespace {{program:cpp_qualified_namespace}}

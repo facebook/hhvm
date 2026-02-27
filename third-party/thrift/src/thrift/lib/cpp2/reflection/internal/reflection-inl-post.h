@@ -39,12 +39,20 @@ reflect_type_class_of_thrift_class_impl {
   using type = fatal::conditional<
       is_reflectable_struct<T>::value,
       type_class::structure,
-      type_class::unknown>;
+      fatal::conditional<
+          is_reflectable_union<T>::value,
+          type_class::variant,
+          type_class::unknown>>;
 };
 
 template <typename T, bool IsTry>
 struct reflect_module_tag_selector<type_class::enumeration, T, IsTry> {
   static_assert(folly::always_false<T>);
+};
+
+template <typename T, bool IsTry>
+struct reflect_module_tag_selector<type_class::variant, T, IsTry> {
+  using type = typename fatal::variant_traits<T>::metadata::module;
 };
 
 template <typename T, bool IsTry>

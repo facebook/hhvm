@@ -63,6 +63,8 @@ class enums_tags {
     using AnEnumD = __fbthrift_strings::AnEnumD;
     using AnEnumE = __fbthrift_strings::AnEnumE;
   };
+  struct __fbthrift_unions {
+      };
   struct __fbthrift_structs {
     using SomeStruct = __fbthrift_strings::SomeStruct;
   };
@@ -80,6 +82,7 @@ class enums_tags {
   using strings = __fbthrift_strings;
   using languages = __fbthrift_languages;
   using enums = __fbthrift_enums;
+  using unions = __fbthrift_unions;
   using structs = __fbthrift_structs;
   using constants = __fbthrift_constants;
   using services = __fbthrift_services;

@@ -75,6 +75,8 @@ class extra_services_tags {
   };
   struct __fbthrift_enums {
       };
+  struct __fbthrift_unions {
+      };
   struct __fbthrift_structs {
     using containerStruct2 = __fbthrift_strings::containerStruct2;
   };
@@ -89,6 +91,7 @@ class extra_services_tags {
   using strings = __fbthrift_strings;
   using languages = __fbthrift_languages;
   using enums = __fbthrift_enums;
+  using unions = __fbthrift_unions;
   using structs = __fbthrift_structs;
   using constants = __fbthrift_constants;
   using services = __fbthrift_services;

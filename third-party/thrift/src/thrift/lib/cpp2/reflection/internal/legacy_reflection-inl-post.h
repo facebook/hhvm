@@ -257,6 +257,45 @@ struct impl<T, type_class::structure> {
   }
 };
 
+template <typename T>
+struct impl<T, type_class::variant> {
+  using meta = reflect_variant<T>;
+  struct visitor {
+    template <typename MemberInfo, size_t Index>
+    void operator()(
+        fatal::indexed<MemberInfo, Index>, schema_t& schema, datatype_t& dt) {
+      typename MemberInfo::getter getter;
+      using type = deref_inner_t<decltype(getter(std::declval<T&>()))>;
+      using type_class = typename MemberInfo::metadata::type_class;
+      using type_helper = get_helper<type, type_class>;
+      using member_name = typename MemberInfo::metadata::name;
+      type_helper::register_into(schema);
+      auto& f = (*dt.fields())[MemberInfo::metadata::id::value];
+      *f.isRequired_ref() = true;
+      *f.type_ref() = type_helper::id();
+      *f.name_ref() = fatal::to_instance<std::string, member_name>();
+      *f.order_ref() = Index;
+    }
+  };
+  static std::string rname() {
+    using pa = ::apache::thrift::detail::st::private_access;
+    return fmt::format(
+        "struct {}.{}",
+        pa::__fbthrift_get_module_name<T>(),
+        pa::__fbthrift_get_class_name<T>());
+  }
+  static id_t rid() {
+    static const auto storage = get_type_id(type_t::TYPE_STRUCT, rname());
+    return storage;
+  }
+  static void go(schema_t& schema) {
+    registering_datatype(schema, rname(), rid(), [&](datatype_t& dt) {
+      apache::thrift::ensure_isset_unsafe(dt.fields());
+      fatal::foreach<typename meta::traits::descriptors>(visitor(), schema, dt);
+    });
+  }
+};
+
 template <typename T, typename ValueTypeClass>
 struct impl<T, type_class::list<ValueTypeClass>> {
   using value_type = typename T::value_type;

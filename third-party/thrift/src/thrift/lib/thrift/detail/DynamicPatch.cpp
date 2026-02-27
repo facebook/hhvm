@@ -2266,7 +2266,12 @@ void DynamicPatch::apply(Value& value) const {
 }
 
 void DynamicPatch::applyToDataFieldInsideAny(type::AnyStruct& any) const {
-  // TODO(dokwon): Consider checking type on any directly for optimization.
+  if (any.type()->baseType() == type::BaseType::Struct ||
+      any.type()->baseType() == type::BaseType::Union ||
+      any.type()->baseType() == type::BaseType::Exception) {
+    // If any holds an object, use the optimized version.
+    return applyObjectInAny(badge, any);
+  }
   auto value = protocol::detail::parseValueFromAny(any);
   apply(value);
   any = detail::toAny(

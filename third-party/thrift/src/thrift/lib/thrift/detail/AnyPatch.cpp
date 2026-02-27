@@ -111,15 +111,13 @@ template <class Patch>
 void AnyPatch<Patch>::apply(type::AnyStruct& val) const {
   auto applyTypePatches = [&](const TypeToPatchMapAdapter::AdaptedType* prior,
                               const TypeToPatchMapAdapter::AdaptedType* after) {
-    std::optional<protocol::Value> dynVal;
-
     // To support applying AnyPatch to Thrift Any storing type with
     // 'typeHashPrefixSha2_256', we need to iterate the whole map.
+    folly::small_vector<const DynamicPatch*, 2> patches;
     if (prior) {
       for (const auto& [type, patch] : *prior) {
         if (type::identicalType(type, val.type().value())) {
-          dynVal = protocol::detail::parseValueFromAny(val);
-          patch.apply(*dynVal);
+          patches.push_back(&patch);
           break;
         }
       }
@@ -127,20 +125,29 @@ void AnyPatch<Patch>::apply(type::AnyStruct& val) const {
     if (after) {
       for (const auto& [type, patch] : *after) {
         if (type::identicalType(type, val.type().value())) {
-          if (!dynVal) {
-            dynVal = protocol::detail::parseValueFromAny(val);
-          }
-          patch.apply(*dynVal);
+          patches.push_back(&patch);
           break;
         }
       }
     }
 
-    if (dynVal.has_value()) {
-      val = protocol::detail::toAny(
-                dynVal.value(), val.type().value(), val.protocol().value())
-                .toThrift();
+    if (patches.empty()) {
+      return;
     }
+
+    if (patches.size() == 1) {
+      patches[0]->applyToDataFieldInsideAny(val);
+      return;
+    }
+
+    auto dyn = protocol::parseValueFromAny(val);
+    for (const auto& patch : patches) {
+      patch->apply(dyn);
+    }
+
+    val =
+        protocol::detail::toAny(dyn, val.type().value(), val.protocol().value())
+            .toThrift();
   };
 
   if (hasAssign()) {

@@ -1110,9 +1110,7 @@ class DynamicStructurePatch {
       }
 
       if (remove_.contains(id)) {
-        throw std::runtime_error(
-            "Patch that deleted ensured id: " +
-            std::to_string(folly::to_underlying(id)));
+        continue;
       }
 
       auto value = v;

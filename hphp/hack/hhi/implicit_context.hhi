@@ -23,6 +23,26 @@ namespace HH {
       (function ()[defaults]: Awaitable<T>) $f,
     )[zoned]: (function ()[defaults]: Awaitable<T>);
 
+    <<__Sealed()>>
+    abstract class PreparedContext {
+      /**
+       * Execute a closure with all prepared contexts active.
+       * Contexts are nested in the order they appear (first = outermost).
+       */
+      final public static function runBatchAsync<Tout>(
+        vec<\HH\ImplicitContext\PreparedContext> $prepared,
+        (function ()[_]: Awaitable<Tout>) $f,
+      )[leak_safe, ctx $f]: Awaitable<Tout>;
+
+      /**
+       * Synchronous variant.
+       */
+      final public static function runBatch<Tout>(
+        vec<\HH\ImplicitContext\PreparedContext> $prepared,
+        (function ()[_]: Tout) $f,
+      )[leak_safe, ctx $f]: Tout;
+    }
+
   } // namespace ImplicitContext
 
   // Avoid referencing an internal class in OSS.
@@ -37,6 +57,10 @@ namespace HH {
       this::TData $context,
       (function ()[_]: Tout) $f,
     )[leak_safe, ctx $f]: Tout;
+
+    final protected static function prepare(
+      this::TData $context,
+    )[]: \HH\ImplicitContext\PreparedContext;
   }
 
   // Avoid referencing an internal class in OSS.
@@ -53,6 +77,10 @@ namespace HH {
       this::TData $context,
       (function ()[_]: Tout) $f,
     )[leak_safe, ctx $f]: Tout;
+
+    final protected static function prepare(
+      this::TData $context,
+    )[]: \HH\ImplicitContext\PreparedContext;
   }
 
   <<__Sealed(MemoAgnosticImplicitContext::class, MemoSensitiveImplicitContext::class)>>
@@ -71,6 +99,10 @@ namespace HH {
       this::TData $context,
       (function ()[_]: Tout) $f,
     )[leak_safe, ctx $f]: Tout;
+
+    abstract protected static function prepare(
+      this::TData $context,
+    )[]: \HH\ImplicitContext\PreparedContext;
   }
 
   /**

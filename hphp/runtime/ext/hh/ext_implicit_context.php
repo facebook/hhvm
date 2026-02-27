@@ -35,6 +35,117 @@ function embed_implicit_context_state_in_async_closure<T>(
   };
 }
 
+<<__Sealed(
+  \HH\ImplicitContext\_Private\MemoAgnosticPreparedContext::class,
+  \HH\ImplicitContext\_Private\MemoSensitivePreparedContext::class,
+)>>
+abstract class PreparedContext {
+  final public function __construct(
+    private class<ImplicitContextBase> $icClass,
+    private mixed $context,
+  )[] {}
+
+  /**
+   * Execute a closure with all prepared contexts active.
+   * Contexts are nested in the order they appear (first = outermost).
+   */
+  final public static async function runBatchAsync<Tout>(
+    vec<\HH\ImplicitContext\PreparedContext> $prepared,
+    (function ()[_]: Awaitable<Tout>) $f,
+  )[leak_safe, ctx $f]: Awaitable<Tout> {
+    invariant(!\HH\Lib\C\is_empty($prepared), 'Must have at least one context');
+
+    // TODO: fold these context creations into a single one.
+    try {
+      $first_context = null;
+      foreach ($prepared as $prepared_context) {
+        $ic_class = $prepared_context->icClass;
+        $context = $prepared_context->context;
+        if ($prepared_context is \HH\ImplicitContext\_Private\MemoAgnosticPreparedContext) {
+          $next_context = \HH\ImplicitContext\_Private\create_memo_agnostic(
+            $ic_class,
+            $context,
+          );
+        } else if ($prepared_context is \HH\ImplicitContext\_Private\MemoSensitivePreparedContext) {
+          $next_context = \HH\ImplicitContext\_Private\create_memo_sensitive(
+            $ic_class,
+            $context,
+            $context->getInstanceKey()
+          );
+        } else {
+          invariant_violation(
+            'Unexpected prepared context type: %s',
+            \get_class($prepared_context),
+          );
+        }
+        $prev_context = \HH\ImplicitContext\_Private\set_implicit_context_by_value(
+          $next_context
+        );
+        $first_context ??= $prev_context;
+      }
+
+      $result = $f();
+    } finally {
+      if ($first_context is nonnull) {
+        \HH\ImplicitContext\_Private\set_implicit_context_by_value(
+          $first_context,
+        );
+      }
+    }
+    // Needs to be awaited here so that context dependency is established
+    // between parent/child functions
+    return await $result;
+  }
+
+  /**
+   * Synchronous variant.
+   */
+  final public static function runBatch<Tout>(
+    vec<\HH\ImplicitContext\PreparedContext> $prepared,
+    (function ()[_]: Tout) $f,
+  )[leak_safe, ctx $f]: Tout {
+    invariant(!\HH\Lib\C\is_empty($prepared), 'Must have at least one context');
+
+    // TODO: fold these context creations into a single one.
+    try {
+      $first_context = null;
+      foreach ($prepared as $prepared_context) {
+        $ic_class = $prepared_context->icClass;
+        $context = $prepared_context->context;
+        if ($prepared_context is \HH\ImplicitContext\_Private\MemoAgnosticPreparedContext) {
+          $next_context = \HH\ImplicitContext\_Private\create_memo_agnostic(
+            $ic_class,
+            $context,
+          );
+        } else if ($prepared_context is \HH\ImplicitContext\_Private\MemoSensitivePreparedContext) {
+          $next_context = \HH\ImplicitContext\_Private\create_memo_sensitive(
+            $ic_class,
+            $context,
+            $context->getInstanceKey()
+          );
+        } else {
+          invariant_violation(
+            'Unexpected prepared context type: %s',
+            \get_class($prepared_context),
+          );
+        }
+        $prev_context = \HH\ImplicitContext\_Private\set_implicit_context_by_value(
+          $next_context
+        );
+        $first_context ??= $prev_context;
+      }
+
+      return $f();
+    } finally {
+      if ($first_context is nonnull) {
+        \HH\ImplicitContext\_Private\set_implicit_context_by_value(
+          $first_context,
+        );
+      }
+    }
+  }
+}
+
 enum State: string as string {
   VALUE = 'VALUE';
   INACCESSIBLE = 'INACCESSIBLE';
@@ -53,6 +164,12 @@ function get_state_unsafe()[zoned]: string /* State */;
 } // namespace ImplicitContext
 
 namespace ImplicitContext\_Private {
+
+final class MemoAgnosticPreparedContext extends \HH\ImplicitContext\PreparedContext {
+}
+
+final class MemoSensitivePreparedContext extends \HH\ImplicitContext\PreparedContext {
+}
 
 <<__NativeData>>
 final class ImplicitContextData {}
@@ -135,6 +252,15 @@ abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
     }
   }
 
+  final protected static function prepare(
+    this::TData $context,
+  )[]: \HH\ImplicitContext\PreparedContext {
+    return new \HH\ImplicitContext\_Private\MemoAgnosticPreparedContext(
+      static::class,
+      $context,
+    );
+  }
+
   private static function createContext(
     this::TData $context,
   )[leak_safe]: ImplicitContext\_Private\ImplicitContextData {
@@ -179,6 +305,15 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
     }
   }
 
+  final protected static function prepare(
+    this::TData $context,
+  )[]: \HH\ImplicitContext\PreparedContext {
+    return new \HH\ImplicitContext\_Private\MemoSensitivePreparedContext(
+      static::class,
+      $context,
+    );
+  }
+
   private static function createContext(
     this::TData $context,
   )[leak_safe]: ImplicitContext\_Private\ImplicitContextData {
@@ -208,6 +343,10 @@ abstract class ImplicitContextBase {
     this::TData $context,
     (function()[_]: Tout) $f,
   )[leak_safe, ctx $f]: Tout;
+
+  abstract protected static function prepare(
+    this::TData $context,
+  )[]: \HH\ImplicitContext\PreparedContext;
 }
 
 // These will come handy if we decide to seal the PHP classes

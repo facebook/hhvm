@@ -234,6 +234,19 @@ scope& addChildForContainer(
   return containerScope;
 }
 
+scope& addChildForNamespaceNode(
+    const std::string& prefix,
+    const t_namespace& namespaceNode,
+    scope& parentScope) {
+  scope& namespaceNodeScope = parentScope.make_child(
+      "{} [t_namespace] @{:#x}", prefix, uintptr_t(&namespaceNode));
+
+  addChildForNode("(base)", namespaceNode, namespaceNodeScope);
+  namespaceNodeScope.make_child("language: {}", namespaceNode.language());
+  namespaceNodeScope.make_child("ns: {}", namespaceNode.ns());
+  return namespaceNodeScope;
+}
+
 scope& addChildForTypedef(
     const std::string& prefix,
     const t_typedef& typedefAst,
@@ -568,6 +581,18 @@ scope& addChildForProgram(
         programScope.make_child("namespaces (size: {})", namespaceCount);
     for (const auto& [k, v] : program.namespaces()) {
       namespaceScope.make_child("{}: {}", k, v->ns());
+    }
+  }
+
+  const std::vector<t_namespace*>& namespaceNodes = program.namespace_nodes();
+  if (!namespaceNodes.empty()) {
+    scope& nsNodesScope = programScope.make_child(
+        "namespace_nodes (size: {})", namespaceNodes.size());
+    for (std::size_t i = 0; i < namespaceNodes.size(); ++i) {
+      addChildForNamespaceNode(
+          fmt::format("namespace_nodes[{}]", i),
+          *namespaceNodes[i],
+          nsNodesScope);
     }
   }
 

@@ -204,15 +204,18 @@ class t_program : public t_named {
       const std::string& language,
       const std::string& name_space,
       source_range range = {}) {
-    if (namespaces_.contains(language)) {
-      // There is already a namespace for the given language. This is unexpected
-      // (and should be an error), but is handled for backwards compatibility.
-      return;
-    }
+    // Always create and add a t_namespace node, but only keep the first
+    // namespace for a given language in `namespaces_`.
+
     auto ns = std::make_unique<t_namespace>(language, name_space);
     ns->set_src_range(range);
-    namespaces_[language] = ns.get();
+    t_namespace* const ns_ptr = ns.get();
     nodes_.push_back(std::move(ns));
+    namespace_nodes_.push_back(ns_ptr);
+
+    if (!namespaces_.contains(language)) {
+      namespaces_[language] = ns_ptr;
+    }
   }
 
   /**
@@ -247,6 +250,10 @@ class t_program : public t_named {
 
   const std::map<std::string, t_namespace*>& namespaces() const {
     return namespaces_;
+  }
+
+  const std::vector<t_namespace*>& namespace_nodes() const {
+    return namespace_nodes_;
   }
 
   const std::unordered_map<std::string, std::vector<std::string>>&
@@ -362,6 +369,7 @@ class t_program : public t_named {
   std::string full_path_;
   std::string include_prefix_;
   std::map<std::string, t_namespace*> namespaces_;
+  std::vector<t_namespace*> namespace_nodes_;
   std::unordered_map<std::string, std::vector<std::string>> language_includes_;
   std::shared_ptr<t_global_scope> global_scope_;
   scope::program_scope program_scope_;

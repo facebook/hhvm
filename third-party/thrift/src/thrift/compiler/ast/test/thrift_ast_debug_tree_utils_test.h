@@ -43,6 +43,15 @@ constexpr auto kVirtualTestFileExpected = R"([t_program_bundle]
       ├─ includes_for_codegen (size: 0)
       ├─ namespaces (size: 1)
       │  ╰─ py3: foo.bar
+      ├─ namespace_nodes (size: 1)
+      │  ╰─ namespace_nodes[0] [t_namespace] @0xNORMALIZED_5
+      │     ├─ (base) [t_node] @0xNORMALIZED_5
+      │     │  ├─ src_range [source_range]
+      │     │  │  ├─ begin (offset): 0
+      │     │  │  ╰─ end (offset): 0
+      │     │  ╰─ unstructured_annotations (size: 0)
+      │     ├─ language: py3
+      │     ╰─ ns: foo.bar
       ├─ language_includes (size: 0)
       ├─ typedefs (size: 0)
       ├─ enums (size: 0)
@@ -625,6 +634,63 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  ├─ js: thrift.annotation.thrift
    │  │  ├─ py: thrift.annotation.thrift
    │  │  ╰─ py.asyncio: facebook_thrift_asyncio.annotation.thrift
+   │  ├─ namespace_nodes (size: 7)
+   │  │  ├─ namespace_nodes[0] [t_namespace] @0xNORMALIZED_30
+   │  │  │  ├─ (base) [t_node] @0xNORMALIZED_30
+   │  │  │  │  ├─ src_range [source_range]
+   │  │  │  │  │  ├─ begin (offset): 704
+   │  │  │  │  │  ╰─ end (offset): 760
+   │  │  │  │  ╰─ unstructured_annotations (size: 0)
+   │  │  │  ├─ language: java
+   │  │  │  ╰─ ns: com.facebook.thrift.annotation_deprecated
+   │  │  ├─ namespace_nodes[1] [t_namespace] @0xNORMALIZED_31
+   │  │  │  ├─ (base) [t_node] @0xNORMALIZED_31
+   │  │  │  │  ├─ src_range [source_range]
+   │  │  │  │  │  ├─ begin (offset): 761
+   │  │  │  │  │  ╰─ end (offset): 820
+   │  │  │  │  ╰─ unstructured_annotations (size: 0)
+   │  │  │  ├─ language: android
+   │  │  │  ╰─ ns: com.facebook.thrift.annotation_deprecated
+   │  │  ├─ namespace_nodes[2] [t_namespace] @0xNORMALIZED_32
+   │  │  │  ├─ (base) [t_node] @0xNORMALIZED_32
+   │  │  │  │  ├─ src_range [source_range]
+   │  │  │  │  │  ├─ begin (offset): 821
+   │  │  │  │  │  ╰─ end (offset): 858
+   │  │  │  │  ╰─ unstructured_annotations (size: 0)
+   │  │  │  ├─ language: js
+   │  │  │  ╰─ ns: thrift.annotation.thrift
+   │  │  ├─ namespace_nodes[3] [t_namespace] @0xNORMALIZED_33
+   │  │  │  ├─ (base) [t_node] @0xNORMALIZED_33
+   │  │  │  │  ├─ src_range [source_range]
+   │  │  │  │  │  ├─ begin (offset): 859
+   │  │  │  │  │  ╰─ end (offset): 921
+   │  │  │  │  ╰─ unstructured_annotations (size: 0)
+   │  │  │  ├─ language: py.asyncio
+   │  │  │  ╰─ ns: facebook_thrift_asyncio.annotation.thrift
+   │  │  ├─ namespace_nodes[4] [t_namespace] @0xNORMALIZED_34
+   │  │  │  ├─ (base) [t_node] @0xNORMALIZED_34
+   │  │  │  │  ├─ src_range [source_range]
+   │  │  │  │  │  ├─ begin (offset): 922
+   │  │  │  │  │  ╰─ end (offset): 959
+   │  │  │  │  ╰─ unstructured_annotations (size: 0)
+   │  │  │  ├─ language: go
+   │  │  │  ╰─ ns: thrift.annotation.thrift
+   │  │  ├─ namespace_nodes[5] [t_namespace] @0xNORMALIZED_35
+   │  │  │  ├─ (base) [t_node] @0xNORMALIZED_35
+   │  │  │  │  ├─ src_range [source_range]
+   │  │  │  │  │  ├─ begin (offset): 960
+   │  │  │  │  │  ╰─ end (offset): 997
+   │  │  │  │  ╰─ unstructured_annotations (size: 0)
+   │  │  │  ├─ language: py
+   │  │  │  ╰─ ns: thrift.annotation.thrift
+   │  │  ╰─ namespace_nodes[6] [t_namespace] @0xNORMALIZED_36
+   │  │     ├─ (base) [t_node] @0xNORMALIZED_36
+   │  │     │  ├─ src_range [source_range]
+   │  │     │  │  ├─ begin (offset): 998
+   │  │     │  │  ╰─ end (offset): 1044
+   │  │     │  ╰─ unstructured_annotations (size: 0)
+   │  │     ├─ language: hs
+   │  │     ╰─ ns: Facebook.Thrift.Annotation.Thrift
    │  ├─ language_includes (size: 0)
    │  ├─ typedefs (size: 0)
    │  ├─ enums (size: 1)
@@ -653,9 +719,9 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │  ╰─ true_type: [t_type*] 0xNORMALIZED_5
    │  │     │     ╰─ full_name: thrift.RpcPriority
    │  │     ├─ values (size: 5)
-   │  │     │  ├─ values[0] [t_enum_value] @0xNORMALIZED_30
-   │  │     │  │  ├─ (base) [t_named] @0xNORMALIZED_30
-   │  │     │  │  │  ├─ (base) [t_node] @0xNORMALIZED_30
+   │  │     │  ├─ values[0] [t_enum_value] @0xNORMALIZED_37
+   │  │     │  │  ├─ (base) [t_named] @0xNORMALIZED_37
+   │  │     │  │  │  ├─ (base) [t_node] @0xNORMALIZED_37
    │  │     │  │  │  │  ├─ src_range [source_range]
    │  │     │  │  │  │  │  ├─ begin (offset): 7299
    │  │     │  │  │  │  │  ╰─ end (offset): 7318
@@ -675,9 +741,9 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │  │  │     ╰─ end (offset): 7313
    │  │     │  │  ├─ value: 0
    │  │     │  │  ╰─ has_value: true
-   │  │     │  ├─ values[1] [t_enum_value] @0xNORMALIZED_31
-   │  │     │  │  ├─ (base) [t_named] @0xNORMALIZED_31
-   │  │     │  │  │  ├─ (base) [t_node] @0xNORMALIZED_31
+   │  │     │  ├─ values[1] [t_enum_value] @0xNORMALIZED_38
+   │  │     │  │  ├─ (base) [t_named] @0xNORMALIZED_38
+   │  │     │  │  │  ├─ (base) [t_node] @0xNORMALIZED_38
    │  │     │  │  │  │  ├─ src_range [source_range]
    │  │     │  │  │  │  │  ├─ begin (offset): 7321
    │  │     │  │  │  │  │  ╰─ end (offset): 7330
@@ -697,9 +763,9 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │  │  │     ╰─ end (offset): 7325
    │  │     │  │  ├─ value: 1
    │  │     │  │  ╰─ has_value: true
-   │  │     │  ├─ values[2] [t_enum_value] @0xNORMALIZED_32
-   │  │     │  │  ├─ (base) [t_named] @0xNORMALIZED_32
-   │  │     │  │  │  ├─ (base) [t_node] @0xNORMALIZED_32
+   │  │     │  ├─ values[2] [t_enum_value] @0xNORMALIZED_39
+   │  │     │  │  ├─ (base) [t_named] @0xNORMALIZED_39
+   │  │     │  │  │  ├─ (base) [t_node] @0xNORMALIZED_39
    │  │     │  │  │  │  ├─ src_range [source_range]
    │  │     │  │  │  │  │  ├─ begin (offset): 7333
    │  │     │  │  │  │  │  ╰─ end (offset): 7347
@@ -719,9 +785,9 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │  │  │     ╰─ end (offset): 7342
    │  │     │  │  ├─ value: 2
    │  │     │  │  ╰─ has_value: true
-   │  │     │  ├─ values[3] [t_enum_value] @0xNORMALIZED_33
-   │  │     │  │  ├─ (base) [t_named] @0xNORMALIZED_33
-   │  │     │  │  │  ├─ (base) [t_node] @0xNORMALIZED_33
+   │  │     │  ├─ values[3] [t_enum_value] @0xNORMALIZED_40
+   │  │     │  │  ├─ (base) [t_named] @0xNORMALIZED_40
+   │  │     │  │  │  ├─ (base) [t_node] @0xNORMALIZED_40
    │  │     │  │  │  │  ├─ src_range [source_range]
    │  │     │  │  │  │  │  ├─ begin (offset): 7350
    │  │     │  │  │  │  │  ╰─ end (offset): 7361
@@ -741,9 +807,9 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │  │  │     ╰─ end (offset): 7356
    │  │     │  │  ├─ value: 3
    │  │     │  │  ╰─ has_value: true
-   │  │     │  ╰─ values[4] [t_enum_value] @0xNORMALIZED_34
-   │  │     │     ├─ (base) [t_named] @0xNORMALIZED_34
-   │  │     │     │  ├─ (base) [t_node] @0xNORMALIZED_34
+   │  │     │  ╰─ values[4] [t_enum_value] @0xNORMALIZED_41
+   │  │     │     ├─ (base) [t_named] @0xNORMALIZED_41
+   │  │     │     │  ├─ (base) [t_node] @0xNORMALIZED_41
    │  │     │     │  │  ├─ src_range [source_range]
    │  │     │     │  │  │  ├─ begin (offset): 7364
    │  │     │     │  │  │  ╰─ end (offset): 7380
@@ -766,8 +832,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     ├─ unused: 113
    │  │     ╰─ consts (size: 5)
    │  │        ├─ consts[0] [t_const]
-   │  │        │  ├─ (base) [t_named] @0xNORMALIZED_35
-   │  │        │  │  ├─ (base) [t_node] @0xNORMALIZED_35
+   │  │        │  ├─ (base) [t_named] @0xNORMALIZED_42
+   │  │        │  │  ├─ (base) [t_node] @0xNORMALIZED_42
    │  │        │  │  │  ├─ src_range [source_range]
    │  │        │  │  │  │  ├─ begin (offset): 0
    │  │        │  │  │  │  ╰─ end (offset): 0
@@ -792,13 +858,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │        │  │  ├─ type: [t_type*] 0xNORMALIZED_12
    │  │        │  │  │  ╰─ full_name: i32
    │  │        │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │        │  ╰─ value [t_const_value*] 0xNORMALIZED_36
+   │  │        │  ╰─ value [t_const_value*] 0xNORMALIZED_43
    │  │        │     ├─ src_range: <absent>
    │  │        │     ├─ is_empty? false
    │  │        │     ╰─ kind: integer
    │  │        ├─ consts[1] [t_const]
-   │  │        │  ├─ (base) [t_named] @0xNORMALIZED_37
-   │  │        │  │  ├─ (base) [t_node] @0xNORMALIZED_37
+   │  │        │  ├─ (base) [t_named] @0xNORMALIZED_44
+   │  │        │  │  ├─ (base) [t_node] @0xNORMALIZED_44
    │  │        │  │  │  ├─ src_range [source_range]
    │  │        │  │  │  │  ├─ begin (offset): 0
    │  │        │  │  │  │  ╰─ end (offset): 0
@@ -823,13 +889,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │        │  │  ├─ type: [t_type*] 0xNORMALIZED_12
    │  │        │  │  │  ╰─ full_name: i32
    │  │        │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │        │  ╰─ value [t_const_value*] 0xNORMALIZED_38
+   │  │        │  ╰─ value [t_const_value*] 0xNORMALIZED_45
    │  │        │     ├─ src_range: <absent>
    │  │        │     ├─ is_empty? false
    │  │        │     ╰─ kind: integer
    │  │        ├─ consts[2] [t_const]
-   │  │        │  ├─ (base) [t_named] @0xNORMALIZED_39
-   │  │        │  │  ├─ (base) [t_node] @0xNORMALIZED_39
+   │  │        │  ├─ (base) [t_named] @0xNORMALIZED_46
+   │  │        │  │  ├─ (base) [t_node] @0xNORMALIZED_46
    │  │        │  │  │  ├─ src_range [source_range]
    │  │        │  │  │  │  ├─ begin (offset): 0
    │  │        │  │  │  │  ╰─ end (offset): 0
@@ -854,13 +920,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │        │  │  ├─ type: [t_type*] 0xNORMALIZED_12
    │  │        │  │  │  ╰─ full_name: i32
    │  │        │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │        │  ╰─ value [t_const_value*] 0xNORMALIZED_40
+   │  │        │  ╰─ value [t_const_value*] 0xNORMALIZED_47
    │  │        │     ├─ src_range: <absent>
    │  │        │     ├─ is_empty? false
    │  │        │     ╰─ kind: integer
    │  │        ├─ consts[3] [t_const]
-   │  │        │  ├─ (base) [t_named] @0xNORMALIZED_41
-   │  │        │  │  ├─ (base) [t_node] @0xNORMALIZED_41
+   │  │        │  ├─ (base) [t_named] @0xNORMALIZED_48
+   │  │        │  │  ├─ (base) [t_node] @0xNORMALIZED_48
    │  │        │  │  │  ├─ src_range [source_range]
    │  │        │  │  │  │  ├─ begin (offset): 0
    │  │        │  │  │  │  ╰─ end (offset): 0
@@ -885,13 +951,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │        │  │  ├─ type: [t_type*] 0xNORMALIZED_12
    │  │        │  │  │  ╰─ full_name: i32
    │  │        │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │        │  ╰─ value [t_const_value*] 0xNORMALIZED_42
+   │  │        │  ╰─ value [t_const_value*] 0xNORMALIZED_49
    │  │        │     ├─ src_range: <absent>
    │  │        │     ├─ is_empty? false
    │  │        │     ╰─ kind: integer
    │  │        ╰─ consts[4] [t_const]
-   │  │           ├─ (base) [t_named] @0xNORMALIZED_43
-   │  │           │  ├─ (base) [t_node] @0xNORMALIZED_43
+   │  │           ├─ (base) [t_named] @0xNORMALIZED_50
+   │  │           │  ├─ (base) [t_node] @0xNORMALIZED_50
    │  │           │  │  ├─ src_range [source_range]
    │  │           │  │  │  ├─ begin (offset): 0
    │  │           │  │  │  ╰─ end (offset): 0
@@ -916,7 +982,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │           │  ├─ type: [t_type*] 0xNORMALIZED_12
    │  │           │  │  ╰─ full_name: i32
    │  │           │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │           ╰─ value [t_const_value*] 0xNORMALIZED_44
+   │  │           ╰─ value [t_const_value*] 0xNORMALIZED_51
    │  │              ├─ src_range: <absent>
    │  │              ├─ is_empty? false
    │  │              ╰─ kind: integer
@@ -937,8 +1003,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 2)
    │  │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_45
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_45
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_52
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_52
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 1348
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 1362
@@ -960,16 +1026,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 1348
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 1362
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_46
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_53
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Program
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_47
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_54
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ╰─ structured_annotations[1] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_48
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_48
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_55
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_55
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 1363
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 1380
@@ -991,10 +1057,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 1363
    │  │  │  │  │  │     │  │  ╰─ end (offset): 1380
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_49
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_56
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Definition
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_50
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_57
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -1009,10 +1075,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_15
    │  │  │  │     ╰─ full_name: thrift.Experimental
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[1] [t_structured] @0xNORMALIZED_51
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_51
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_51
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_51
+   │  │  ├─ structs_and_unions[1] [t_structured] @0xNORMALIZED_58
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_58
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_58
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_58
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 2005
    │  │  │  │  │  │  │  ╰─ end (offset): 2461
@@ -1024,8 +1090,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 2)
    │  │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_52
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_52
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_59
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_59
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 2005
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 2022
@@ -1047,16 +1113,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 2005
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 2022
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_53
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_60
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Structured
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_54
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_61
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ╰─ structured_annotations[1] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_55
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_55
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_62
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_62
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 2023
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 2034
@@ -1078,10 +1144,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 2023
    │  │  │  │  │  │     │  │  ╰─ end (offset): 2034
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_56
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_63
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Enum
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_57
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_64
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -1093,12 +1159,12 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 2042
    │  │  │  │  │     ╰─ end (offset): 2052
    │  │  │  │  ├─ full_name: thrift.ReserveIds
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_51
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_58
    │  │  │  │     ╰─ full_name: thrift.ReserveIds
    │  │  │  ╰─ fields (size: 2)
-   │  │  │     ├─ fields[0] [t_field] @0xNORMALIZED_58
-   │  │  │     │  ├─ (base) [t_named] @0xNORMALIZED_58
-   │  │  │     │  │  ├─ (base) [t_node] @0xNORMALIZED_58
+   │  │  │     ├─ fields[0] [t_field] @0xNORMALIZED_65
+   │  │  │     │  ├─ (base) [t_named] @0xNORMALIZED_65
+   │  │  │     │  │  ├─ (base) [t_node] @0xNORMALIZED_65
    │  │  │     │  │  │  ├─ src_range [source_range]
    │  │  │     │  │  │  │  ├─ begin (offset): 2102
    │  │  │     │  │  │  │  ╰─ end (offset): 2119
@@ -1125,14 +1191,14 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │     │  │  ├─ src_range [source_range]
    │  │  │     │  │  │  ├─ begin (offset): 2105
    │  │  │     │  │  │  ╰─ end (offset): 2114
-   │  │  │     │  │  ├─ type: [t_type*] 0xNORMALIZED_59
+   │  │  │     │  │  ├─ type: [t_type*] 0xNORMALIZED_66
    │  │  │     │  │  │  ╰─ full_name: list<i32>
    │  │  │     │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
    │  │  │     │  ├─ is_injected? false
    │  │  │     │  ╰─ default_value [t_const_value*] 0x0
-   │  │  │     ╰─ fields[1] [t_field] @0xNORMALIZED_60
-   │  │  │        ├─ (base) [t_named] @0xNORMALIZED_60
-   │  │  │        │  ├─ (base) [t_node] @0xNORMALIZED_60
+   │  │  │     ╰─ fields[1] [t_field] @0xNORMALIZED_67
+   │  │  │        ├─ (base) [t_named] @0xNORMALIZED_67
+   │  │  │        │  ├─ (base) [t_node] @0xNORMALIZED_67
    │  │  │        │  │  ├─ src_range [source_range]
    │  │  │        │  │  │  ├─ begin (offset): 2432
    │  │  │        │  │  │  ╰─ end (offset): 2459
@@ -1159,15 +1225,15 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │        │  ├─ src_range [source_range]
    │  │  │        │  │  ├─ begin (offset): 2435
    │  │  │        │  │  ╰─ end (offset): 2448
-   │  │  │        │  ├─ type: [t_type*] 0xNORMALIZED_61
+   │  │  │        │  ├─ type: [t_type*] 0xNORMALIZED_68
    │  │  │        │  │  ╰─ full_name: map<i32, i32>
    │  │  │        │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
    │  │  │        ├─ is_injected? false
    │  │  │        ╰─ default_value [t_const_value*] 0x0
-   │  │  ├─ structs_and_unions[2] [t_structured] @0xNORMALIZED_62
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_62
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_62
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_62
+   │  │  ├─ structs_and_unions[2] [t_structured] @0xNORMALIZED_69
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_69
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_69
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_69
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 2653
    │  │  │  │  │  │  │  ╰─ end (offset): 2782
@@ -1179,8 +1245,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 2)
    │  │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_63
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_63
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_70
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_70
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 2653
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 2670
@@ -1202,16 +1268,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 2653
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 2670
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_53
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_60
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Structured
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_64
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_71
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ╰─ structured_annotations[1] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_65
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_65
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_72
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_72
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 2671
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 2684
@@ -1236,7 +1302,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_15
    │  │  │  │  │  │     │  │  ╰─ full_name: thrift.Experimental
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_66
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_73
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -1248,12 +1314,12 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 2719
    │  │  │  │  │     ╰─ end (offset): 2748
    │  │  │  │  ├─ full_name: thrift.RequiresBackwardCompatibility
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_62
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_69
    │  │  │  │     ╰─ full_name: thrift.RequiresBackwardCompatibility
    │  │  │  ╰─ fields (size: 1)
-   │  │  │     ╰─ fields[0] [t_field] @0xNORMALIZED_67
-   │  │  │        ├─ (base) [t_named] @0xNORMALIZED_67
-   │  │  │        │  ├─ (base) [t_node] @0xNORMALIZED_67
+   │  │  │     ╰─ fields[0] [t_field] @0xNORMALIZED_74
+   │  │  │        ├─ (base) [t_named] @0xNORMALIZED_74
+   │  │  │        │  ├─ (base) [t_node] @0xNORMALIZED_74
    │  │  │        │  │  ├─ src_range [source_range]
    │  │  │        │  │  │  ├─ begin (offset): 2753
    │  │  │        │  │  │  ╰─ end (offset): 2780
@@ -1280,20 +1346,20 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │        │  ├─ src_range [source_range]
    │  │  │        │  │  ├─ begin (offset): 2756
    │  │  │        │  │  ╰─ end (offset): 2760
-   │  │  │        │  ├─ type: [t_type*] 0xNORMALIZED_68
+   │  │  │        │  ├─ type: [t_type*] 0xNORMALIZED_75
    │  │  │        │  │  ╰─ full_name: bool
    │  │  │        │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
    │  │  │        ├─ is_injected? false
-   │  │  │        ╰─ default_value [t_const_value*] 0xNORMALIZED_69
+   │  │  │        ╰─ default_value [t_const_value*] 0xNORMALIZED_76
    │  │  │           ├─ src_range [source_range]
    │  │  │           │  ├─ begin (offset): 2774
    │  │  │           │  ╰─ end (offset): 2779
    │  │  │           ├─ is_empty? false
    │  │  │           ╰─ kind: bool
-   │  │  ├─ structs_and_unions[3] [t_structured] @0xNORMALIZED_70
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_70
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_70
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_70
+   │  │  ├─ structs_and_unions[3] [t_structured] @0xNORMALIZED_77
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_77
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_77
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_77
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 3563
    │  │  │  │  │  │  │  ╰─ end (offset): 3642
@@ -1305,8 +1371,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 4)
    │  │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_71
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_71
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_78
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_78
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3563
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3577
@@ -1328,16 +1394,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3563
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3577
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_46
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_53
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Program
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_72
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_79
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ├─ structured_annotations[1] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_73
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_73
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_80
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_80
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3578
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3591
@@ -1359,16 +1425,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3578
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3591
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_74
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_81
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Struct
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_75
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_82
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ├─ structured_annotations[2] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_76
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_76
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_83
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_83
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3592
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3608
@@ -1390,16 +1456,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3592
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3608
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_77
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_84
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Exception
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_78
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_85
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ╰─ structured_annotations[3] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_79
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_79
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_86
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_86
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 3609
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 3621
@@ -1421,10 +1487,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 3609
    │  │  │  │  │  │     │  │  ╰─ end (offset): 3621
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_80
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_87
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Field
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_81
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_88
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -1436,13 +1502,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 3629
    │  │  │  │  │     ╰─ end (offset): 3639
    │  │  │  │  ├─ full_name: thrift.TerseWrite
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_70
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_77
    │  │  │  │     ╰─ full_name: thrift.TerseWrite
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[4] [t_structured] @0xNORMALIZED_82
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_82
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_82
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_82
+   │  │  ├─ structs_and_unions[4] [t_structured] @0xNORMALIZED_89
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_89
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_89
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_89
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 4548
    │  │  │  │  │  │  │  ╰─ end (offset): 4574
@@ -1454,8 +1520,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_83
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_83
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_90
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_90
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 4548
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 4560
@@ -1477,10 +1543,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 4548
    │  │  │  │  │  │     │  │  ╰─ end (offset): 4560
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_80
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_87
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Field
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_84
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_91
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -1492,13 +1558,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 4568
    │  │  │  │  │     ╰─ end (offset): 4571
    │  │  │  │  ├─ full_name: thrift.Box
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_82
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_89
    │  │  │  │     ╰─ full_name: thrift.Box
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[5] [t_structured] @0xNORMALIZED_85
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_85
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_85
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_85
+   │  │  ├─ structs_and_unions[5] [t_structured] @0xNORMALIZED_92
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_92
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_92
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_92
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 4733
    │  │  │  │  │  │  │  ╰─ end (offset): 4761
@@ -1510,8 +1576,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_86
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_86
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_93
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_93
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 4733
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 4745
@@ -1533,10 +1599,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 4733
    │  │  │  │  │  │     │  │  ╰─ end (offset): 4745
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_80
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_87
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Field
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_87
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_94
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -1548,13 +1614,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 4753
    │  │  │  │  │     ╰─ end (offset): 4758
    │  │  │  │  ├─ full_name: thrift.Mixin
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_85
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_92
    │  │  │  │     ╰─ full_name: thrift.Mixin
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[6] [t_structured] @0xNORMALIZED_88
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_88
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_88
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_88
+   │  │  ├─ structs_and_unions[6] [t_structured] @0xNORMALIZED_95
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_95
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_95
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_95
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 5121
    │  │  │  │  │  │  │  ╰─ end (offset): 5213
@@ -1566,8 +1632,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 2)
    │  │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_89
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_89
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_96
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_96
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 5121
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 5134
@@ -1589,16 +1655,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 5121
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 5134
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_74
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_81
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Struct
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_90
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_97
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ╰─ structured_annotations[1] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_91
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_91
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_98
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_98
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 5135
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 5148
@@ -1623,7 +1689,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_15
    │  │  │  │  │  │     │  │  ╰─ full_name: thrift.Experimental
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_92
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_99
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -1635,13 +1701,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 5187
    │  │  │  │  │     ╰─ end (offset): 5210
    │  │  │  │  ├─ full_name: thrift.SerializeInFieldIdOrder
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_88
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_95
    │  │  │  │     ╰─ full_name: thrift.SerializeInFieldIdOrder
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[7] [t_structured] @0xNORMALIZED_93
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_93
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_93
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_93
+   │  │  ├─ structs_and_unions[7] [t_structured] @0xNORMALIZED_100
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_100
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_100
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_100
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 5352
    │  │  │  │  │  │  │  ╰─ end (offset): 5385
@@ -1653,8 +1719,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_94
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_94
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_101
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_101
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 5352
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 5363
@@ -1676,10 +1742,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 5352
    │  │  │  │  │  │     │  │  ╰─ end (offset): 5363
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_56
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_63
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Enum
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_95
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_102
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -1691,13 +1757,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 5371
    │  │  │  │  │     ╰─ end (offset): 5382
    │  │  │  │  ├─ full_name: thrift.BitmaskEnum
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_93
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_100
    │  │  │  │     ╰─ full_name: thrift.BitmaskEnum
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[8] [t_structured] @0xNORMALIZED_96
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_96
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_96
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_96
+   │  │  ├─ structs_and_unions[8] [t_structured] @0xNORMALIZED_103
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_103
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_103
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_103
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 6632
    │  │  │  │  │  │  │  ╰─ end (offset): 6671
@@ -1709,8 +1775,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_97
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_97
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_104
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_104
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 6632
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 6644
@@ -1732,10 +1798,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 6632
    │  │  │  │  │  │     │  │  ╰─ end (offset): 6644
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_80
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_87
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Field
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_98
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_105
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -1747,13 +1813,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 6652
    │  │  │  │  │     ╰─ end (offset): 6668
    │  │  │  │  ├─ full_name: thrift.ExceptionMessage
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_96
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_103
    │  │  │  │     ╰─ full_name: thrift.ExceptionMessage
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[9] [t_structured] @0xNORMALIZED_99
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_99
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_99
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_99
+   │  │  ├─ structs_and_unions[9] [t_structured] @0xNORMALIZED_106
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_106
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_106
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_106
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 6818
    │  │  │  │  │  │  │  ╰─ end (offset): 6864
@@ -1765,8 +1831,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 2)
    │  │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_100
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_100
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_107
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_107
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 6818
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 6830
@@ -1788,16 +1854,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 6818
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 6830
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_80
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_87
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Field
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_101
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_108
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ╰─ structured_annotations[1] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_102
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_102
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_109
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_109
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 6831
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 6844
@@ -1822,7 +1888,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_15
    │  │  │  │  │  │     │  │  ╰─ full_name: thrift.Experimental
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_103
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_110
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -1834,13 +1900,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 6852
    │  │  │  │  │     ╰─ end (offset): 6861
    │  │  │  │  ├─ full_name: thrift.InternBox
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_99
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_106
    │  │  │  │     ╰─ full_name: thrift.InternBox
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[10] [t_structured] @0xNORMALIZED_104
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_104
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_104
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_104
+   │  │  ├─ structs_and_unions[10] [t_structured] @0xNORMALIZED_111
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_111
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_111
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_111
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 6951
    │  │  │  │  │  │  │  ╰─ end (offset): 6986
@@ -1852,8 +1918,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_105
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_105
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_112
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_112
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 6951
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 6969
@@ -1875,10 +1941,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 6951
    │  │  │  │  │  │     │  │  ╰─ end (offset): 6969
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_106
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_113
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Interaction
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_107
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_114
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -1890,13 +1956,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 6977
    │  │  │  │  │     ╰─ end (offset): 6983
    │  │  │  │  ├─ full_name: thrift.Serial
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_104
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_111
    │  │  │  │     ╰─ full_name: thrift.Serial
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[11] [t_structured] @0xNORMALIZED_108
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_108
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_108
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_108
+   │  │  ├─ structs_and_unions[11] [t_structured] @0xNORMALIZED_115
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_115
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_115
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_115
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 7071
    │  │  │  │  │  │  │  ╰─ end (offset): 7149
@@ -1908,8 +1974,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 3)
    │  │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_109
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_109
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_116
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_116
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 7071
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 7082
@@ -1931,16 +1997,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 7071
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 7082
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_56
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_63
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Enum
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_110
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_117
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ├─ structured_annotations[1] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_111
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_111
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_118
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_118
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 7083
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 7097
@@ -1962,16 +2028,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 7083
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 7097
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_112
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_119
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Service
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_113
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_120
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ╰─ structured_annotations[2] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_114
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_114
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_121
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_121
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 7098
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 7115
@@ -1993,10 +2059,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 7098
    │  │  │  │  │  │     │  │  ╰─ end (offset): 7115
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_53
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_60
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Structured
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_115
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_122
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2008,12 +2074,12 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 7123
    │  │  │  │  │     ╰─ end (offset): 7126
    │  │  │  │  ├─ full_name: thrift.Uri
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_108
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_115
    │  │  │  │     ╰─ full_name: thrift.Uri
    │  │  │  ╰─ fields (size: 1)
-   │  │  │     ╰─ fields[0] [t_field] @0xNORMALIZED_116
-   │  │  │        ├─ (base) [t_named] @0xNORMALIZED_116
-   │  │  │        │  ├─ (base) [t_node] @0xNORMALIZED_116
+   │  │  │     ╰─ fields[0] [t_field] @0xNORMALIZED_123
+   │  │  │        ├─ (base) [t_named] @0xNORMALIZED_123
+   │  │  │        │  ├─ (base) [t_node] @0xNORMALIZED_123
    │  │  │        │  │  ├─ src_range [source_range]
    │  │  │        │  │  │  ├─ begin (offset): 7131
    │  │  │        │  │  │  ╰─ end (offset): 7147
@@ -2040,15 +2106,15 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │        │  ├─ src_range [source_range]
    │  │  │        │  │  ├─ begin (offset): 7134
    │  │  │        │  │  ╰─ end (offset): 7140
-   │  │  │        │  ├─ type: [t_type*] 0xNORMALIZED_117
+   │  │  │        │  ├─ type: [t_type*] 0xNORMALIZED_124
    │  │  │        │  │  ╰─ full_name: string
    │  │  │        │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
    │  │  │        ├─ is_injected? false
    │  │  │        ╰─ default_value [t_const_value*] 0x0
-   │  │  ├─ structs_and_unions[12] [t_structured] @0xNORMALIZED_118
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_118
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_118
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_118
+   │  │  ├─ structs_and_unions[12] [t_structured] @0xNORMALIZED_125
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_125
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_125
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_125
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 7218
    │  │  │  │  │  │  │  ╰─ end (offset): 7277
@@ -2060,8 +2126,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_119
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_119
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_126
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_126
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 7218
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 7233
@@ -2083,10 +2149,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 7218
    │  │  │  │  │  │     │  │  ╰─ end (offset): 7233
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_120
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_127
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Function
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_121
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_128
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2098,12 +2164,12 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 7241
    │  │  │  │  │     ╰─ end (offset): 7249
    │  │  │  │  ├─ full_name: thrift.Priority
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_118
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_125
    │  │  │  │     ╰─ full_name: thrift.Priority
    │  │  │  ╰─ fields (size: 1)
-   │  │  │     ╰─ fields[0] [t_field] @0xNORMALIZED_122
-   │  │  │        ├─ (base) [t_named] @0xNORMALIZED_122
-   │  │  │        │  ├─ (base) [t_node] @0xNORMALIZED_122
+   │  │  │     ╰─ fields[0] [t_field] @0xNORMALIZED_129
+   │  │  │        ├─ (base) [t_named] @0xNORMALIZED_129
+   │  │  │        │  ├─ (base) [t_node] @0xNORMALIZED_129
    │  │  │        │  │  ├─ src_range [source_range]
    │  │  │        │  │  │  ├─ begin (offset): 7254
    │  │  │        │  │  │  ╰─ end (offset): 7275
@@ -2135,10 +2201,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │        │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
    │  │  │        ├─ is_injected? false
    │  │  │        ╰─ default_value [t_const_value*] 0x0
-   │  │  ├─ structs_and_unions[13] [t_structured] @0xNORMALIZED_123
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_123
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_123
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_123
+   │  │  ├─ structs_and_unions[13] [t_structured] @0xNORMALIZED_130
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_130
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_130
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_130
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 8214
    │  │  │  │  │  │  │  ╰─ end (offset): 8248
@@ -2150,8 +2216,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_124
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_124
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_131
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_131
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 8214
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 8231
@@ -2173,10 +2239,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 8214
    │  │  │  │  │  │     │  │  ╰─ end (offset): 8231
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_53
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_60
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Structured
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_125
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_132
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2188,13 +2254,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 8239
    │  │  │  │  │     ╰─ end (offset): 8245
    │  │  │  │  ├─ full_name: thrift.Sealed
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_123
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_130
    │  │  │  │     ╰─ full_name: thrift.Sealed
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[14] [t_structured] @0xNORMALIZED_126
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_126
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_126
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_126
+   │  │  ├─ structs_and_unions[14] [t_structured] @0xNORMALIZED_133
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_133
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_133
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_133
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 8309
    │  │  │  │  │  │  │  ╰─ end (offset): 8402
@@ -2206,8 +2272,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_127
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_127
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_134
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_134
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 8309
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 8326
@@ -2229,10 +2295,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 8309
    │  │  │  │  │  │     │  │  ╰─ end (offset): 8326
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_49
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_56
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Definition
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_128
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_135
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2244,12 +2310,12 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 8334
    │  │  │  │  │     ╰─ end (offset): 8366
    │  │  │  │  ├─ full_name: thrift.DeprecatedUnvalidatedAnnotations
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_126
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_133
    │  │  │  │     ╰─ full_name: thrift.DeprecatedUnvalidatedAnnotations
    │  │  │  ╰─ fields (size: 1)
-   │  │  │     ╰─ fields[0] [t_field] @0xNORMALIZED_129
-   │  │  │        ├─ (base) [t_named] @0xNORMALIZED_129
-   │  │  │        │  ├─ (base) [t_node] @0xNORMALIZED_129
+   │  │  │     ╰─ fields[0] [t_field] @0xNORMALIZED_136
+   │  │  │        ├─ (base) [t_named] @0xNORMALIZED_136
+   │  │  │        │  ├─ (base) [t_node] @0xNORMALIZED_136
    │  │  │        │  │  ├─ src_range [source_range]
    │  │  │        │  │  │  ├─ begin (offset): 8371
    │  │  │        │  │  │  ╰─ end (offset): 8400
@@ -2276,15 +2342,15 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │        │  ├─ src_range [source_range]
    │  │  │        │  │  ├─ begin (offset): 8374
    │  │  │        │  │  ╰─ end (offset): 8393
-   │  │  │        │  ├─ type: [t_type*] 0xNORMALIZED_130
+   │  │  │        │  ├─ type: [t_type*] 0xNORMALIZED_137
    │  │  │        │  │  ╰─ full_name: map<string, string>
    │  │  │        │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
    │  │  │        ├─ is_injected? false
    │  │  │        ╰─ default_value [t_const_value*] 0x0
-   │  │  ├─ structs_and_unions[15] [t_structured] @0xNORMALIZED_131
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_131
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_131
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_131
+   │  │  ├─ structs_and_unions[15] [t_structured] @0xNORMALIZED_138
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_138
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_138
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_138
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 8809
    │  │  │  │  │  │  │  ╰─ end (offset): 8860
@@ -2296,8 +2362,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_132
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_132
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_139
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_139
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 8809
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 8826
@@ -2319,10 +2385,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 8809
    │  │  │  │  │  │     │  │  ╰─ end (offset): 8826
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_49
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_56
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Definition
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_133
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_140
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2334,13 +2400,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 8834
    │  │  │  │  │     ╰─ end (offset): 8857
    │  │  │  │  ├─ full_name: thrift.AllowReservedIdentifier
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_131
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_138
    │  │  │  │     ╰─ full_name: thrift.AllowReservedIdentifier
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[16] [t_structured] @0xNORMALIZED_134
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_134
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_134
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_134
+   │  │  ├─ structs_and_unions[16] [t_structured] @0xNORMALIZED_141
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_141
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_141
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_141
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 8862
    │  │  │  │  │  │  │  ╰─ end (offset): 8908
@@ -2352,8 +2418,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_135
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_135
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_142
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_142
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 8862
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 8876
@@ -2375,10 +2441,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 8862
    │  │  │  │  │  │     │  │  ╰─ end (offset): 8876
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_46
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_53
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Program
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_136
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_143
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2390,13 +2456,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 8884
    │  │  │  │  │     ╰─ end (offset): 8905
    │  │  │  │  ├─ full_name: thrift.AllowReservedFilename
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_134
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_141
    │  │  │  │     ╰─ full_name: thrift.AllowReservedFilename
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[17] [t_structured] @0xNORMALIZED_137
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_137
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_137
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_137
+   │  │  ├─ structs_and_unions[17] [t_structured] @0xNORMALIZED_144
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_144
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_144
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_144
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 9034
    │  │  │  │  │  │  │  ╰─ end (offset): 9075
@@ -2408,8 +2474,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_138
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_138
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_145
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_145
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 9034
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 9047
@@ -2431,10 +2497,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 9034
    │  │  │  │  │  │     │  │  ╰─ end (offset): 9047
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_74
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_81
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Struct
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_139
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_146
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2446,13 +2512,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 9055
    │  │  │  │  │     ╰─ end (offset): 9072
    │  │  │  │  ├─ full_name: thrift.RuntimeAnnotation
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_137
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_144
    │  │  │  │     ╰─ full_name: thrift.RuntimeAnnotation
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[18] [t_structured] @0xNORMALIZED_140
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_140
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_140
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_140
+   │  │  ├─ structs_and_unions[18] [t_structured] @0xNORMALIZED_147
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_147
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_147
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_147
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 10405
    │  │  │  │  │  │  │  ╰─ end (offset): 10451
@@ -2464,8 +2530,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_141
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_141
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_148
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_148
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 10405
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 10419
@@ -2487,10 +2553,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 10405
    │  │  │  │  │  │     │  │  ╰─ end (offset): 10419
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_142
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_149
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Typedef
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_143
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_150
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2502,13 +2568,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 10427
    │  │  │  │  │     ╰─ end (offset): 10448
    │  │  │  │  ├─ full_name: thrift.AllowLegacyTypedefUri
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_140
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_147
    │  │  │  │     ╰─ full_name: thrift.AllowLegacyTypedefUri
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[19] [t_structured] @0xNORMALIZED_144
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_144
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_144
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_144
+   │  │  ├─ structs_and_unions[19] [t_structured] @0xNORMALIZED_151
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_151
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_151
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_151
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 11696
    │  │  │  │  │  │  │  ╰─ end (offset): 11756
@@ -2520,8 +2586,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_145
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_145
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_152
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_152
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 11696
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 11708
@@ -2543,10 +2609,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 11696
    │  │  │  │  │  │     │  │  ╰─ end (offset): 11708
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_80
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_87
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Field
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_146
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_153
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2558,13 +2624,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 11716
    │  │  │  │  │     ╰─ end (offset): 11753
    │  │  │  │  ├─ full_name: thrift.AllowUnsafeOptionalCustomDefaultValue
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_144
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_151
    │  │  │  │     ╰─ full_name: thrift.AllowUnsafeOptionalCustomDefaultValue
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[20] [t_structured] @0xNORMALIZED_147
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_147
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_147
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_147
+   │  │  ├─ structs_and_unions[20] [t_structured] @0xNORMALIZED_154
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_154
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_154
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_154
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 12482
    │  │  │  │  │  │  │  ╰─ end (offset): 12544
@@ -2576,8 +2642,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_148
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_148
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_155
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_155
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 12482
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 12494
@@ -2599,10 +2665,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 12482
    │  │  │  │  │  │     │  │  ╰─ end (offset): 12494
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_80
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_87
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Field
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_149
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_156
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2614,13 +2680,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 12502
    │  │  │  │  │     ╰─ end (offset): 12541
    │  │  │  │  ├─ full_name: thrift.AllowUnsafeUnionFieldCustomDefaultValue
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_147
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_154
    │  │  │  │     ╰─ full_name: thrift.AllowUnsafeUnionFieldCustomDefaultValue
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[21] [t_structured] @0xNORMALIZED_150
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_150
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_150
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_150
+   │  │  ├─ structs_and_unions[21] [t_structured] @0xNORMALIZED_157
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_157
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_157
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_157
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 13134
    │  │  │  │  │  │  │  ╰─ end (offset): 13190
@@ -2632,8 +2698,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 1)
    │  │  │  │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_151
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_151
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_158
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_158
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 13134
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 13146
@@ -2655,10 +2721,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 13134
    │  │  │  │  │  │     │  │  ╰─ end (offset): 13146
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_80
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_87
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Field
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_152
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_159
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2670,13 +2736,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 13154
    │  │  │  │  │     ╰─ end (offset): 13187
    │  │  │  │  ├─ full_name: thrift.AllowUnsafeRequiredFieldQualifier
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_150
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_157
    │  │  │  │     ╰─ full_name: thrift.AllowUnsafeRequiredFieldQualifier
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[22] [t_structured] @0xNORMALIZED_153
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_153
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_153
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_153
+   │  │  ├─ structs_and_unions[22] [t_structured] @0xNORMALIZED_160
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_160
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_160
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_160
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 15193
    │  │  │  │  │  │  │  ╰─ end (offset): 15270
@@ -2688,8 +2754,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 3)
    │  │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_154
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_154
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_161
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_161
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 15193
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 15207
@@ -2711,16 +2777,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 15193
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 15207
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_46
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_53
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Program
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_155
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_162
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ├─ structured_annotations[1] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_156
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_156
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_163
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_163
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 15208
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 15225
@@ -2742,16 +2808,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 15208
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 15225
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_53
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_60
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Structured
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_157
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_164
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ╰─ structured_annotations[2] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_158
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_158
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_165
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_165
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 15226
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 15237
@@ -2773,10 +2839,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 15226
    │  │  │  │  │  │     │  │  ╰─ end (offset): 15237
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_56
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_63
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.Enum
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_159
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_166
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2788,13 +2854,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 15245
    │  │  │  │  │     ╰─ end (offset): 15267
    │  │  │  │  ├─ full_name: thrift.AllowLegacyMissingUris
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_153
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_160
    │  │  │  │     ╰─ full_name: thrift.AllowLegacyMissingUris
    │  │  │  ╰─ fields (size: 0)
-   │  │  ├─ structs_and_unions[23] [t_structured] @0xNORMALIZED_160
-   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_160
-   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_160
-   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_160
+   │  │  ├─ structs_and_unions[23] [t_structured] @0xNORMALIZED_167
+   │  │  │  ├─ (base) [t_type] @0xNORMALIZED_167
+   │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_167
+   │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_167
    │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  ├─ begin (offset): 16001
    │  │  │  │  │  │  │  ╰─ end (offset): 16091
@@ -2806,8 +2872,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  ├─ generated? false
    │  │  │  │  │  ├─ structured_annotations (size: 3)
    │  │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_161
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_161
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_168
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_168
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 16001
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 16013
@@ -2829,16 +2895,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 16001
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 16013
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_80
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_87
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Field
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_162
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_169
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ├─ structured_annotations[1] [t_const]
-   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_163
-   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_163
+   │  │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_170
+   │  │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_170
    │  │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  │  ├─ begin (offset): 16014
    │  │  │  │  │  │  │  │  │  │  ╰─ end (offset): 16028
@@ -2860,16 +2926,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  │  │  │  │  ├─ begin (offset): 16014
    │  │  │  │  │  │  │  │  │  ╰─ end (offset): 16028
-   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_142
+   │  │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_149
    │  │  │  │  │  │  │  │  │  ╰─ full_name: scope.Typedef
    │  │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_164
+   │  │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_171
    │  │  │  │  │  │  │     ├─ src_range: <absent>
    │  │  │  │  │  │  │     ├─ is_empty? true
    │  │  │  │  │  │  │     ╰─ kind: map({})
    │  │  │  │  │  │  ╰─ structured_annotations[2] [t_const]
-   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_165
-   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_165
+   │  │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_172
+   │  │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_172
    │  │  │  │  │  │     │  │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  │  ├─ begin (offset): 16029
    │  │  │  │  │  │     │  │  │  ╰─ end (offset): 16053
@@ -2891,10 +2957,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │  │     │  ├─ src_range [source_range]
    │  │  │  │  │  │     │  │  ├─ begin (offset): 16029
    │  │  │  │  │  │     │  │  ╰─ end (offset): 16053
-   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_166
+   │  │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_173
    │  │  │  │  │  │     │  │  ╰─ full_name: scope.FunctionParameter
    │  │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_167
+   │  │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_174
    │  │  │  │  │  │        ├─ src_range: <absent>
    │  │  │  │  │  │        ├─ is_empty? true
    │  │  │  │  │  │        ╰─ kind: map({})
@@ -2906,13 +2972,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  │     ├─ begin (offset): 16061
    │  │  │  │  │     ╰─ end (offset): 16088
    │  │  │  │  ├─ full_name: thrift.AllowUnsafeNonSealedKeyType
-   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_160
+   │  │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_167
    │  │  │  │     ╰─ full_name: thrift.AllowUnsafeNonSealedKeyType
    │  │  │  ╰─ fields (size: 0)
-   │  │  ╰─ structs_and_unions[24] [t_structured] @0xNORMALIZED_168
-   │  │     ├─ (base) [t_type] @0xNORMALIZED_168
-   │  │     │  ├─ (base) [t_named] @0xNORMALIZED_168
-   │  │     │  │  ├─ (base) [t_node] @0xNORMALIZED_168
+   │  │  ╰─ structs_and_unions[24] [t_structured] @0xNORMALIZED_175
+   │  │     ├─ (base) [t_type] @0xNORMALIZED_175
+   │  │     │  ├─ (base) [t_named] @0xNORMALIZED_175
+   │  │     │  │  ├─ (base) [t_node] @0xNORMALIZED_175
    │  │     │  │  │  ├─ src_range [source_range]
    │  │     │  │  │  │  ├─ begin (offset): 16450
    │  │     │  │  │  │  ╰─ end (offset): 16636
@@ -2924,8 +2990,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │  │  ├─ generated? false
    │  │     │  │  ├─ structured_annotations (size: 1)
    │  │     │  │  │  ╰─ structured_annotations[0] [t_const]
-   │  │     │  │  │     ├─ (base) [t_named] @0xNORMALIZED_169
-   │  │     │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_169
+   │  │     │  │  │     ├─ (base) [t_named] @0xNORMALIZED_176
+   │  │     │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_176
    │  │     │  │  │     │  │  ├─ src_range [source_range]
    │  │     │  │  │     │  │  │  ├─ begin (offset): 16450
    │  │     │  │  │     │  │  │  ╰─ end (offset): 16462
@@ -2947,10 +3013,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │  │  │     │  ├─ src_range [source_range]
    │  │     │  │  │     │  │  ├─ begin (offset): 16450
    │  │     │  │  │     │  │  ╰─ end (offset): 16462
-   │  │     │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_80
+   │  │     │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_87
    │  │     │  │  │     │  │  ╰─ full_name: scope.Field
    │  │     │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-   │  │     │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_170
+   │  │     │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_177
    │  │     │  │  │        ├─ src_range: <absent>
    │  │     │  │  │        ├─ is_empty? true
    │  │     │  │  │        ╰─ kind: map({})
@@ -2962,12 +3028,12 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │  │     ├─ begin (offset): 16470
    │  │     │  │     ╰─ end (offset): 16480
    │  │     │  ├─ full_name: thrift.Deprecated
-   │  │     │  ╰─ true_type: [t_type*] 0xNORMALIZED_168
+   │  │     │  ╰─ true_type: [t_type*] 0xNORMALIZED_175
    │  │     │     ╰─ full_name: thrift.Deprecated
    │  │     ╰─ fields (size: 1)
-   │  │        ╰─ fields[0] [t_field] @0xNORMALIZED_171
-   │  │           ├─ (base) [t_named] @0xNORMALIZED_171
-   │  │           │  ├─ (base) [t_node] @0xNORMALIZED_171
+   │  │        ╰─ fields[0] [t_field] @0xNORMALIZED_178
+   │  │           ├─ (base) [t_named] @0xNORMALIZED_178
+   │  │           │  ├─ (base) [t_node] @0xNORMALIZED_178
    │  │           │  │  ├─ src_range [source_range]
    │  │           │  │  │  ├─ begin (offset): 16616
    │  │           │  │  │  ╰─ end (offset): 16634
@@ -2994,7 +3060,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │           │  ├─ src_range [source_range]
    │  │           │  │  ├─ begin (offset): 16619
    │  │           │  │  ╰─ end (offset): 16625
-   │  │           │  ├─ type: [t_type*] 0xNORMALIZED_117
+   │  │           │  ├─ type: [t_type*] 0xNORMALIZED_124
    │  │           │  │  ╰─ full_name: string
    │  │           │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
    │  │           ├─ is_injected? false
@@ -3005,112 +3071,112 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  ├─ definitions (size: 26)
    │  │  ├─ definitions[0]: [t_named*] 0xNORMALIZED_15
    │  │  │  ╰─ scoped_name: thrift.Experimental
-   │  │  ├─ definitions[1]: [t_named*] 0xNORMALIZED_51
+   │  │  ├─ definitions[1]: [t_named*] 0xNORMALIZED_58
    │  │  │  ╰─ scoped_name: thrift.ReserveIds
-   │  │  ├─ definitions[2]: [t_named*] 0xNORMALIZED_62
+   │  │  ├─ definitions[2]: [t_named*] 0xNORMALIZED_69
    │  │  │  ╰─ scoped_name: thrift.RequiresBackwardCompatibility
-   │  │  ├─ definitions[3]: [t_named*] 0xNORMALIZED_70
+   │  │  ├─ definitions[3]: [t_named*] 0xNORMALIZED_77
    │  │  │  ╰─ scoped_name: thrift.TerseWrite
-   │  │  ├─ definitions[4]: [t_named*] 0xNORMALIZED_82
+   │  │  ├─ definitions[4]: [t_named*] 0xNORMALIZED_89
    │  │  │  ╰─ scoped_name: thrift.Box
-   │  │  ├─ definitions[5]: [t_named*] 0xNORMALIZED_85
+   │  │  ├─ definitions[5]: [t_named*] 0xNORMALIZED_92
    │  │  │  ╰─ scoped_name: thrift.Mixin
-   │  │  ├─ definitions[6]: [t_named*] 0xNORMALIZED_88
+   │  │  ├─ definitions[6]: [t_named*] 0xNORMALIZED_95
    │  │  │  ╰─ scoped_name: thrift.SerializeInFieldIdOrder
-   │  │  ├─ definitions[7]: [t_named*] 0xNORMALIZED_93
+   │  │  ├─ definitions[7]: [t_named*] 0xNORMALIZED_100
    │  │  │  ╰─ scoped_name: thrift.BitmaskEnum
-   │  │  ├─ definitions[8]: [t_named*] 0xNORMALIZED_96
+   │  │  ├─ definitions[8]: [t_named*] 0xNORMALIZED_103
    │  │  │  ╰─ scoped_name: thrift.ExceptionMessage
-   │  │  ├─ definitions[9]: [t_named*] 0xNORMALIZED_99
+   │  │  ├─ definitions[9]: [t_named*] 0xNORMALIZED_106
    │  │  │  ╰─ scoped_name: thrift.InternBox
-   │  │  ├─ definitions[10]: [t_named*] 0xNORMALIZED_104
+   │  │  ├─ definitions[10]: [t_named*] 0xNORMALIZED_111
    │  │  │  ╰─ scoped_name: thrift.Serial
-   │  │  ├─ definitions[11]: [t_named*] 0xNORMALIZED_108
+   │  │  ├─ definitions[11]: [t_named*] 0xNORMALIZED_115
    │  │  │  ╰─ scoped_name: thrift.Uri
-   │  │  ├─ definitions[12]: [t_named*] 0xNORMALIZED_118
+   │  │  ├─ definitions[12]: [t_named*] 0xNORMALIZED_125
    │  │  │  ╰─ scoped_name: thrift.Priority
    │  │  ├─ definitions[13]: [t_named*] 0xNORMALIZED_5
    │  │  │  ╰─ scoped_name: thrift.RpcPriority
-   │  │  ├─ definitions[14]: [t_named*] 0xNORMALIZED_123
+   │  │  ├─ definitions[14]: [t_named*] 0xNORMALIZED_130
    │  │  │  ╰─ scoped_name: thrift.Sealed
-   │  │  ├─ definitions[15]: [t_named*] 0xNORMALIZED_126
+   │  │  ├─ definitions[15]: [t_named*] 0xNORMALIZED_133
    │  │  │  ╰─ scoped_name: thrift.DeprecatedUnvalidatedAnnotations
-   │  │  ├─ definitions[16]: [t_named*] 0xNORMALIZED_131
+   │  │  ├─ definitions[16]: [t_named*] 0xNORMALIZED_138
    │  │  │  ╰─ scoped_name: thrift.AllowReservedIdentifier
-   │  │  ├─ definitions[17]: [t_named*] 0xNORMALIZED_134
+   │  │  ├─ definitions[17]: [t_named*] 0xNORMALIZED_141
    │  │  │  ╰─ scoped_name: thrift.AllowReservedFilename
-   │  │  ├─ definitions[18]: [t_named*] 0xNORMALIZED_137
+   │  │  ├─ definitions[18]: [t_named*] 0xNORMALIZED_144
    │  │  │  ╰─ scoped_name: thrift.RuntimeAnnotation
-   │  │  ├─ definitions[19]: [t_named*] 0xNORMALIZED_140
+   │  │  ├─ definitions[19]: [t_named*] 0xNORMALIZED_147
    │  │  │  ╰─ scoped_name: thrift.AllowLegacyTypedefUri
-   │  │  ├─ definitions[20]: [t_named*] 0xNORMALIZED_144
+   │  │  ├─ definitions[20]: [t_named*] 0xNORMALIZED_151
    │  │  │  ╰─ scoped_name: thrift.AllowUnsafeOptionalCustomDefaultValue
-   │  │  ├─ definitions[21]: [t_named*] 0xNORMALIZED_147
+   │  │  ├─ definitions[21]: [t_named*] 0xNORMALIZED_154
    │  │  │  ╰─ scoped_name: thrift.AllowUnsafeUnionFieldCustomDefaultValue
-   │  │  ├─ definitions[22]: [t_named*] 0xNORMALIZED_150
+   │  │  ├─ definitions[22]: [t_named*] 0xNORMALIZED_157
    │  │  │  ╰─ scoped_name: thrift.AllowUnsafeRequiredFieldQualifier
-   │  │  ├─ definitions[23]: [t_named*] 0xNORMALIZED_153
+   │  │  ├─ definitions[23]: [t_named*] 0xNORMALIZED_160
    │  │  │  ╰─ scoped_name: thrift.AllowLegacyMissingUris
-   │  │  ├─ definitions[24]: [t_named*] 0xNORMALIZED_160
+   │  │  ├─ definitions[24]: [t_named*] 0xNORMALIZED_167
    │  │  │  ╰─ scoped_name: thrift.AllowUnsafeNonSealedKeyType
-   │  │  ╰─ definitions[25]: [t_named*] 0xNORMALIZED_168
+   │  │  ╰─ definitions[25]: [t_named*] 0xNORMALIZED_175
    │  │     ╰─ scoped_name: thrift.Deprecated
    │  ├─ structured_definitions (size: 25)
    │  │  ├─ structured_definitions[0]: [t_structured*] 0xNORMALIZED_15
    │  │  │  ╰─ name: Experimental
-   │  │  ├─ structured_definitions[1]: [t_structured*] 0xNORMALIZED_51
+   │  │  ├─ structured_definitions[1]: [t_structured*] 0xNORMALIZED_58
    │  │  │  ╰─ name: ReserveIds
-   │  │  ├─ structured_definitions[2]: [t_structured*] 0xNORMALIZED_62
+   │  │  ├─ structured_definitions[2]: [t_structured*] 0xNORMALIZED_69
    │  │  │  ╰─ name: RequiresBackwardCompatibility
-   │  │  ├─ structured_definitions[3]: [t_structured*] 0xNORMALIZED_70
+   │  │  ├─ structured_definitions[3]: [t_structured*] 0xNORMALIZED_77
    │  │  │  ╰─ name: TerseWrite
-   │  │  ├─ structured_definitions[4]: [t_structured*] 0xNORMALIZED_82
+   │  │  ├─ structured_definitions[4]: [t_structured*] 0xNORMALIZED_89
    │  │  │  ╰─ name: Box
-   │  │  ├─ structured_definitions[5]: [t_structured*] 0xNORMALIZED_85
+   │  │  ├─ structured_definitions[5]: [t_structured*] 0xNORMALIZED_92
    │  │  │  ╰─ name: Mixin
-   │  │  ├─ structured_definitions[6]: [t_structured*] 0xNORMALIZED_88
+   │  │  ├─ structured_definitions[6]: [t_structured*] 0xNORMALIZED_95
    │  │  │  ╰─ name: SerializeInFieldIdOrder
-   │  │  ├─ structured_definitions[7]: [t_structured*] 0xNORMALIZED_93
+   │  │  ├─ structured_definitions[7]: [t_structured*] 0xNORMALIZED_100
    │  │  │  ╰─ name: BitmaskEnum
-   │  │  ├─ structured_definitions[8]: [t_structured*] 0xNORMALIZED_96
+   │  │  ├─ structured_definitions[8]: [t_structured*] 0xNORMALIZED_103
    │  │  │  ╰─ name: ExceptionMessage
-   │  │  ├─ structured_definitions[9]: [t_structured*] 0xNORMALIZED_99
+   │  │  ├─ structured_definitions[9]: [t_structured*] 0xNORMALIZED_106
    │  │  │  ╰─ name: InternBox
-   │  │  ├─ structured_definitions[10]: [t_structured*] 0xNORMALIZED_104
+   │  │  ├─ structured_definitions[10]: [t_structured*] 0xNORMALIZED_111
    │  │  │  ╰─ name: Serial
-   │  │  ├─ structured_definitions[11]: [t_structured*] 0xNORMALIZED_108
+   │  │  ├─ structured_definitions[11]: [t_structured*] 0xNORMALIZED_115
    │  │  │  ╰─ name: Uri
-   │  │  ├─ structured_definitions[12]: [t_structured*] 0xNORMALIZED_118
+   │  │  ├─ structured_definitions[12]: [t_structured*] 0xNORMALIZED_125
    │  │  │  ╰─ name: Priority
-   │  │  ├─ structured_definitions[13]: [t_structured*] 0xNORMALIZED_123
+   │  │  ├─ structured_definitions[13]: [t_structured*] 0xNORMALIZED_130
    │  │  │  ╰─ name: Sealed
-   │  │  ├─ structured_definitions[14]: [t_structured*] 0xNORMALIZED_126
+   │  │  ├─ structured_definitions[14]: [t_structured*] 0xNORMALIZED_133
    │  │  │  ╰─ name: DeprecatedUnvalidatedAnnotations
-   │  │  ├─ structured_definitions[15]: [t_structured*] 0xNORMALIZED_131
+   │  │  ├─ structured_definitions[15]: [t_structured*] 0xNORMALIZED_138
    │  │  │  ╰─ name: AllowReservedIdentifier
-   │  │  ├─ structured_definitions[16]: [t_structured*] 0xNORMALIZED_134
+   │  │  ├─ structured_definitions[16]: [t_structured*] 0xNORMALIZED_141
    │  │  │  ╰─ name: AllowReservedFilename
-   │  │  ├─ structured_definitions[17]: [t_structured*] 0xNORMALIZED_137
+   │  │  ├─ structured_definitions[17]: [t_structured*] 0xNORMALIZED_144
    │  │  │  ╰─ name: RuntimeAnnotation
-   │  │  ├─ structured_definitions[18]: [t_structured*] 0xNORMALIZED_140
+   │  │  ├─ structured_definitions[18]: [t_structured*] 0xNORMALIZED_147
    │  │  │  ╰─ name: AllowLegacyTypedefUri
-   │  │  ├─ structured_definitions[19]: [t_structured*] 0xNORMALIZED_144
+   │  │  ├─ structured_definitions[19]: [t_structured*] 0xNORMALIZED_151
    │  │  │  ╰─ name: AllowUnsafeOptionalCustomDefaultValue
-   │  │  ├─ structured_definitions[20]: [t_structured*] 0xNORMALIZED_147
+   │  │  ├─ structured_definitions[20]: [t_structured*] 0xNORMALIZED_154
    │  │  │  ╰─ name: AllowUnsafeUnionFieldCustomDefaultValue
-   │  │  ├─ structured_definitions[21]: [t_structured*] 0xNORMALIZED_150
+   │  │  ├─ structured_definitions[21]: [t_structured*] 0xNORMALIZED_157
    │  │  │  ╰─ name: AllowUnsafeRequiredFieldQualifier
-   │  │  ├─ structured_definitions[22]: [t_structured*] 0xNORMALIZED_153
+   │  │  ├─ structured_definitions[22]: [t_structured*] 0xNORMALIZED_160
    │  │  │  ╰─ name: AllowLegacyMissingUris
-   │  │  ├─ structured_definitions[23]: [t_structured*] 0xNORMALIZED_160
+   │  │  ├─ structured_definitions[23]: [t_structured*] 0xNORMALIZED_167
    │  │  │  ╰─ name: AllowUnsafeNonSealedKeyType
-   │  │  ╰─ structured_definitions[24]: [t_structured*] 0xNORMALIZED_168
+   │  │  ╰─ structured_definitions[24]: [t_structured*] 0xNORMALIZED_175
    │  │     ╰─ name: Deprecated
    │  ╰─ type_instantiations (size: 3)
-   │     ├─ type_instantiations[0] [t_container] @0xNORMALIZED_59
-   │     │  ╰─ (base) [t_type] @0xNORMALIZED_59
-   │     │     ├─ (base) [t_named] @0xNORMALIZED_59
-   │     │     │  ├─ (base) [t_node] @0xNORMALIZED_59
+   │     ├─ type_instantiations[0] [t_container] @0xNORMALIZED_66
+   │     │  ╰─ (base) [t_type] @0xNORMALIZED_66
+   │     │     ├─ (base) [t_named] @0xNORMALIZED_66
+   │     │     │  ├─ (base) [t_node] @0xNORMALIZED_66
    │     │     │  │  ├─ src_range [source_range]
    │     │     │  │  │  ├─ begin (offset): 2105
    │     │     │  │  │  ╰─ end (offset): 2114
@@ -3127,12 +3193,12 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │     │     │  │  ╰─ end (offset): 0
    │     │     │  ╰─ name_range: <absent>
    │     │     ├─ full_name: list<i32>
-   │     │     ╰─ true_type: [t_type*] 0xNORMALIZED_59
+   │     │     ╰─ true_type: [t_type*] 0xNORMALIZED_66
    │     │        ╰─ full_name: list<i32>
-   │     ├─ type_instantiations[1] [t_container] @0xNORMALIZED_61
-   │     │  ╰─ (base) [t_type] @0xNORMALIZED_61
-   │     │     ├─ (base) [t_named] @0xNORMALIZED_61
-   │     │     │  ├─ (base) [t_node] @0xNORMALIZED_61
+   │     ├─ type_instantiations[1] [t_container] @0xNORMALIZED_68
+   │     │  ╰─ (base) [t_type] @0xNORMALIZED_68
+   │     │     ├─ (base) [t_named] @0xNORMALIZED_68
+   │     │     │  ├─ (base) [t_node] @0xNORMALIZED_68
    │     │     │  │  ├─ src_range [source_range]
    │     │     │  │  │  ├─ begin (offset): 2435
    │     │     │  │  │  ╰─ end (offset): 2448
@@ -3149,12 +3215,12 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │     │     │  │  ╰─ end (offset): 0
    │     │     │  ╰─ name_range: <absent>
    │     │     ├─ full_name: map<i32, i32>
-   │     │     ╰─ true_type: [t_type*] 0xNORMALIZED_61
+   │     │     ╰─ true_type: [t_type*] 0xNORMALIZED_68
    │     │        ╰─ full_name: map<i32, i32>
-   │     ╰─ type_instantiations[2] [t_container] @0xNORMALIZED_130
-   │        ╰─ (base) [t_type] @0xNORMALIZED_130
-   │           ├─ (base) [t_named] @0xNORMALIZED_130
-   │           │  ├─ (base) [t_node] @0xNORMALIZED_130
+   │     ╰─ type_instantiations[2] [t_container] @0xNORMALIZED_137
+   │        ╰─ (base) [t_type] @0xNORMALIZED_137
+   │           ├─ (base) [t_named] @0xNORMALIZED_137
+   │           │  ├─ (base) [t_node] @0xNORMALIZED_137
    │           │  │  ├─ src_range [source_range]
    │           │  │  │  ├─ begin (offset): 8374
    │           │  │  │  ╰─ end (offset): 8393
@@ -3171,7 +3237,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │           │  │  ╰─ end (offset): 0
    │           │  ╰─ name_range: <absent>
    │           ├─ full_name: map<string, string>
-   │           ╰─ true_type: [t_type*] 0xNORMALIZED_130
+   │           ╰─ true_type: [t_type*] 0xNORMALIZED_137
    │              ╰─ full_name: map<string, string>
    ╰─ programs[2] [t_program] @0xNORMALIZED_29
       ├─ (base) [t_named] @0xNORMALIZED_29
@@ -3194,7 +3260,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       ├─ path: thrift/annotation/scope.thrift
       ├─ full_path: thrift/annotation/scope.thrift
       ├─ include_prefix: thrift/annotation/
-      ├─ package [t_package] @0xNORMALIZED_172
+      ├─ package [t_package] @0xNORMALIZED_179
       │  ├─ name: facebook.com/thrift/annotation
       │  ├─ is_explicit? true
       │  ╰─ empty? false
@@ -3250,15 +3316,64 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  ├─ js: thrift.annotation.scope
       │  ├─ py: thrift.annotation.scope
       │  ╰─ py.asyncio: facebook_thrift_asyncio.annotation.scope
+      ├─ namespace_nodes (size: 6)
+      │  ├─ namespace_nodes[0] [t_namespace] @0xNORMALIZED_180
+      │  │  ├─ (base) [t_node] @0xNORMALIZED_180
+      │  │  │  ├─ src_range [source_range]
+      │  │  │  │  ├─ begin (offset): 1111
+      │  │  │  │  ╰─ end (offset): 1167
+      │  │  │  ╰─ unstructured_annotations (size: 0)
+      │  │  ├─ language: java
+      │  │  ╰─ ns: com.facebook.thrift.annotation_deprecated
+      │  ├─ namespace_nodes[1] [t_namespace] @0xNORMALIZED_181
+      │  │  ├─ (base) [t_node] @0xNORMALIZED_181
+      │  │  │  ├─ src_range [source_range]
+      │  │  │  │  ├─ begin (offset): 1168
+      │  │  │  │  ╰─ end (offset): 1227
+      │  │  │  ╰─ unstructured_annotations (size: 0)
+      │  │  ├─ language: android
+      │  │  ╰─ ns: com.facebook.thrift.annotation_deprecated
+      │  ├─ namespace_nodes[2] [t_namespace] @0xNORMALIZED_182
+      │  │  ├─ (base) [t_node] @0xNORMALIZED_182
+      │  │  │  ├─ src_range [source_range]
+      │  │  │  │  ├─ begin (offset): 1228
+      │  │  │  │  ╰─ end (offset): 1264
+      │  │  │  ╰─ unstructured_annotations (size: 0)
+      │  │  ├─ language: js
+      │  │  ╰─ ns: thrift.annotation.scope
+      │  ├─ namespace_nodes[3] [t_namespace] @0xNORMALIZED_183
+      │  │  ├─ (base) [t_node] @0xNORMALIZED_183
+      │  │  │  ├─ src_range [source_range]
+      │  │  │  │  ├─ begin (offset): 1265
+      │  │  │  │  ╰─ end (offset): 1326
+      │  │  │  ╰─ unstructured_annotations (size: 0)
+      │  │  ├─ language: py.asyncio
+      │  │  ╰─ ns: facebook_thrift_asyncio.annotation.scope
+      │  ├─ namespace_nodes[4] [t_namespace] @0xNORMALIZED_184
+      │  │  ├─ (base) [t_node] @0xNORMALIZED_184
+      │  │  │  ├─ src_range [source_range]
+      │  │  │  │  ├─ begin (offset): 1327
+      │  │  │  │  ╰─ end (offset): 1363
+      │  │  │  ╰─ unstructured_annotations (size: 0)
+      │  │  ├─ language: go
+      │  │  ╰─ ns: thrift.annotation.scope
+      │  ╰─ namespace_nodes[5] [t_namespace] @0xNORMALIZED_185
+      │     ├─ (base) [t_node] @0xNORMALIZED_185
+      │     │  ├─ src_range [source_range]
+      │     │  │  ├─ begin (offset): 1364
+      │     │  │  ╰─ end (offset): 1400
+      │     │  ╰─ unstructured_annotations (size: 0)
+      │     ├─ language: py
+      │     ╰─ ns: thrift.annotation.scope
       ├─ language_includes (size: 0)
       ├─ typedefs (size: 0)
       ├─ enums (size: 0)
       ├─ consts (size: 0)
       ├─ structs_and_unions (size: 20)
-      │  ├─ structs_and_unions[0] [t_structured] @0xNORMALIZED_173
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_173
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_173
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_173
+      │  ├─ structs_and_unions[0] [t_structured] @0xNORMALIZED_186
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_186
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_186
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_186
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 1934
       │  │  │  │  │  │  ╰─ end (offset): 1954
@@ -3277,13 +3392,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 1941
       │  │  │  │     ╰─ end (offset): 1951
       │  │  │  ├─ full_name: scope.Transitive
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_173
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_186
       │  │  │     ╰─ full_name: scope.Transitive
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[1] [t_structured] @0xNORMALIZED_46
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_46
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_46
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_46
+      │  ├─ structs_and_unions[1] [t_structured] @0xNORMALIZED_53
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_53
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_53
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_53
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2108
       │  │  │  │  │  │  ╰─ end (offset): 2125
@@ -3302,13 +3417,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2115
       │  │  │  │     ╰─ end (offset): 2122
       │  │  │  ├─ full_name: scope.Program
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_46
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_53
       │  │  │     ╰─ full_name: scope.Program
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[2] [t_structured] @0xNORMALIZED_74
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_74
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_74
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_74
+      │  ├─ structs_and_unions[2] [t_structured] @0xNORMALIZED_81
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_81
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_81
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_81
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2165
       │  │  │  │  │  │  ╰─ end (offset): 2181
@@ -3327,13 +3442,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2172
       │  │  │  │     ╰─ end (offset): 2178
       │  │  │  ├─ full_name: scope.Struct
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_74
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_81
       │  │  │     ╰─ full_name: scope.Struct
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[3] [t_structured] @0xNORMALIZED_174
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_174
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_174
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_174
+      │  ├─ structs_and_unions[3] [t_structured] @0xNORMALIZED_187
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_187
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_187
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_187
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2220
       │  │  │  │  │  │  ╰─ end (offset): 2235
@@ -3352,13 +3467,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2227
       │  │  │  │     ╰─ end (offset): 2232
       │  │  │  ├─ full_name: scope.Union
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_174
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_187
       │  │  │     ╰─ full_name: scope.Union
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[4] [t_structured] @0xNORMALIZED_77
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_77
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_77
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_77
+      │  ├─ structs_and_unions[4] [t_structured] @0xNORMALIZED_84
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_84
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_84
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_84
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2278
       │  │  │  │  │  │  ╰─ end (offset): 2297
@@ -3377,13 +3492,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2285
       │  │  │  │     ╰─ end (offset): 2294
       │  │  │  ├─ full_name: scope.Exception
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_77
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_84
       │  │  │     ╰─ full_name: scope.Exception
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[5] [t_structured] @0xNORMALIZED_175
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_175
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_175
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_175
+      │  ├─ structs_and_unions[5] [t_structured] @0xNORMALIZED_188
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_188
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_188
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_188
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2349
       │  │  │  │  │  │  ╰─ end (offset): 2374
@@ -3402,13 +3517,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2356
       │  │  │  │     ╰─ end (offset): 2371
       │  │  │  ├─ full_name: scope.ThrownException
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_175
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_188
       │  │  │     ╰─ full_name: scope.ThrownException
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[6] [t_structured] @0xNORMALIZED_80
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_80
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_80
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_80
+      │  ├─ structs_and_unions[6] [t_structured] @0xNORMALIZED_87
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_87
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_87
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_87
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2440
       │  │  │  │  │  │  ╰─ end (offset): 2455
@@ -3427,13 +3542,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2447
       │  │  │  │     ╰─ end (offset): 2452
       │  │  │  ├─ full_name: scope.Field
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_80
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_87
       │  │  │     ╰─ full_name: scope.Field
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[7] [t_structured] @0xNORMALIZED_142
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_142
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_142
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_142
+      │  ├─ structs_and_unions[7] [t_structured] @0xNORMALIZED_149
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_149
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_149
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_149
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2496
       │  │  │  │  │  │  ╰─ end (offset): 2513
@@ -3452,13 +3567,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2503
       │  │  │  │     ╰─ end (offset): 2510
       │  │  │  ├─ full_name: scope.Typedef
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_142
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_149
       │  │  │     ╰─ full_name: scope.Typedef
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[8] [t_structured] @0xNORMALIZED_112
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_112
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_112
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_112
+      │  ├─ structs_and_unions[8] [t_structured] @0xNORMALIZED_119
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_119
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_119
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_119
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2554
       │  │  │  │  │  │  ╰─ end (offset): 2571
@@ -3477,13 +3592,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2561
       │  │  │  │     ╰─ end (offset): 2568
       │  │  │  ├─ full_name: scope.Service
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_112
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_119
       │  │  │     ╰─ full_name: scope.Service
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[9] [t_structured] @0xNORMALIZED_106
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_106
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_106
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_106
+      │  ├─ structs_and_unions[9] [t_structured] @0xNORMALIZED_113
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_113
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_113
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_113
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2616
       │  │  │  │  │  │  ╰─ end (offset): 2637
@@ -3502,13 +3617,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2623
       │  │  │  │     ╰─ end (offset): 2634
       │  │  │  ├─ full_name: scope.Interaction
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_106
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_113
       │  │  │     ╰─ full_name: scope.Interaction
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[10] [t_structured] @0xNORMALIZED_120
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_120
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_120
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_120
+      │  ├─ structs_and_unions[10] [t_structured] @0xNORMALIZED_127
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_127
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_127
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_127
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2679
       │  │  │  │  │  │  ╰─ end (offset): 2697
@@ -3537,13 +3652,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2686
       │  │  │  │     ╰─ end (offset): 2694
       │  │  │  ├─ full_name: scope.Function
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_120
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_127
       │  │  │     ╰─ full_name: scope.Function
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[11] [t_structured] @0xNORMALIZED_166
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_166
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_166
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_166
+      │  ├─ structs_and_unions[11] [t_structured] @0xNORMALIZED_173
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_173
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_173
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_173
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2823
       │  │  │  │  │  │  ╰─ end (offset): 2850
@@ -3562,13 +3677,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2830
       │  │  │  │     ╰─ end (offset): 2847
       │  │  │  ├─ full_name: scope.FunctionParameter
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_166
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_173
       │  │  │     ╰─ full_name: scope.FunctionParameter
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[12] [t_structured] @0xNORMALIZED_176
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_176
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_176
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_176
+      │  ├─ structs_and_unions[12] [t_structured] @0xNORMALIZED_189
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_189
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_189
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_189
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2892
       │  │  │  │  │  │  ╰─ end (offset): 2911
@@ -3587,13 +3702,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2899
       │  │  │  │     ╰─ end (offset): 2908
       │  │  │  ├─ full_name: scope.EnumValue
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_176
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_189
       │  │  │     ╰─ full_name: scope.EnumValue
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[13] [t_structured] @0xNORMALIZED_177
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_177
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_177
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_177
+      │  ├─ structs_and_unions[13] [t_structured] @0xNORMALIZED_190
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_190
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_190
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_190
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 2950
       │  │  │  │  │  │  ╰─ end (offset): 2965
@@ -3617,13 +3732,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 2957
       │  │  │  │     ╰─ end (offset): 2962
       │  │  │  ├─ full_name: scope.Const
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_177
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_190
       │  │  │     ╰─ full_name: scope.Const
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[14] [t_structured] @0xNORMALIZED_56
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_56
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_56
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_56
+      │  ├─ structs_and_unions[14] [t_structured] @0xNORMALIZED_63
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_63
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_63
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_63
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 3130
       │  │  │  │  │  │  ╰─ end (offset): 3144
@@ -3647,13 +3762,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 3137
       │  │  │  │     ╰─ end (offset): 3141
       │  │  │  ├─ full_name: scope.Enum
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_56
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_63
       │  │  │     ╰─ full_name: scope.Enum
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[15] [t_structured] @0xNORMALIZED_53
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_53
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_53
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_53
+      │  ├─ structs_and_unions[15] [t_structured] @0xNORMALIZED_60
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_60
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_60
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_60
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 3243
       │  │  │  │  │  │  ╰─ end (offset): 3301
@@ -3665,8 +3780,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  ├─ generated? false
       │  │  │  │  ├─ structured_annotations (size: 4)
       │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_178
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_178
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_191
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_191
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3243
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3250
@@ -3688,16 +3803,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3243
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3250
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_74
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_81
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Struct
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_179
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_192
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ├─ structured_annotations[1] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_180
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_180
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_193
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_193
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3251
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3257
@@ -3719,16 +3834,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3251
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3257
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_174
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_187
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Union
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_181
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_194
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ├─ structured_annotations[2] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_182
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_182
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_195
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_195
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3258
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3268
@@ -3750,16 +3865,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3258
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3268
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_77
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_84
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Exception
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_183
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_196
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ╰─ structured_annotations[3] [t_const]
-      │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_184
-      │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_184
+      │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_197
+      │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_197
       │  │  │  │  │     │  │  ├─ src_range [source_range]
       │  │  │  │  │     │  │  │  ├─ begin (offset): 3269
       │  │  │  │  │     │  │  │  ╰─ end (offset): 3280
@@ -3781,10 +3896,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │     │  ├─ src_range [source_range]
       │  │  │  │  │     │  │  ├─ begin (offset): 3269
       │  │  │  │  │     │  │  ╰─ end (offset): 3280
-      │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_173
+      │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_186
       │  │  │  │  │     │  │  ╰─ full_name: scope.Transitive
       │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_185
+      │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_198
       │  │  │  │  │        ├─ src_range: <absent>
       │  │  │  │  │        ├─ is_empty? true
       │  │  │  │  │        ╰─ kind: map({})
@@ -3796,13 +3911,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 3288
       │  │  │  │     ╰─ end (offset): 3298
       │  │  │  ├─ full_name: scope.Structured
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_53
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_60
       │  │  │     ╰─ full_name: scope.Structured
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[16] [t_structured] @0xNORMALIZED_186
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_186
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_186
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_186
+      │  ├─ structs_and_unions[16] [t_structured] @0xNORMALIZED_199
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_199
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_199
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_199
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 3361
       │  │  │  │  │  │  ╰─ end (offset): 3414
@@ -3819,8 +3934,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  ├─ generated? false
       │  │  │  │  ├─ structured_annotations (size: 3)
       │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_187
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_187
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_200
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_200
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3361
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3369
@@ -3842,16 +3957,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3361
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3369
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_112
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_119
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Service
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_188
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_201
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ├─ structured_annotations[1] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_189
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_189
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_202
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_202
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3370
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3382
@@ -3873,16 +3988,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3370
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3382
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_106
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_113
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Interaction
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_190
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_203
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ╰─ structured_annotations[2] [t_const]
-      │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_191
-      │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_191
+      │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_204
+      │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_204
       │  │  │  │  │     │  │  ├─ src_range [source_range]
       │  │  │  │  │     │  │  │  ├─ begin (offset): 3383
       │  │  │  │  │     │  │  │  ╰─ end (offset): 3394
@@ -3904,10 +4019,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │     │  ├─ src_range [source_range]
       │  │  │  │  │     │  │  ├─ begin (offset): 3383
       │  │  │  │  │     │  │  ╰─ end (offset): 3394
-      │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_173
+      │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_186
       │  │  │  │  │     │  │  ╰─ full_name: scope.Transitive
       │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_192
+      │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_205
       │  │  │  │  │        ├─ src_range: <absent>
       │  │  │  │  │        ├─ is_empty? true
       │  │  │  │  │        ╰─ kind: map({})
@@ -3919,13 +4034,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 3402
       │  │  │  │     ╰─ end (offset): 3411
       │  │  │  ├─ full_name: scope.Interface
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_186
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_199
       │  │  │     ╰─ full_name: scope.Interface
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[17] [t_structured] @0xNORMALIZED_193
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_193
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_193
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_193
+      │  ├─ structs_and_unions[17] [t_structured] @0xNORMALIZED_206
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_206
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_206
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_206
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 3528
       │  │  │  │  │  │  ╰─ end (offset): 3609
@@ -3937,8 +4052,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  ├─ generated? false
       │  │  │  │  ├─ structured_annotations (size: 6)
       │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_194
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_194
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_207
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_207
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3528
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3539
@@ -3960,16 +4075,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3528
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3539
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_53
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_60
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Structured
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_195
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_208
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ├─ structured_annotations[1] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_196
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_196
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_209
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_209
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3540
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3550
@@ -3991,16 +4106,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3540
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3550
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_186
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_199
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Interface
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_197
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_210
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ├─ structured_annotations[2] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_198
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_198
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_211
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_211
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3551
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3559
@@ -4022,16 +4137,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3551
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3559
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_142
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_149
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Typedef
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_199
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_212
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ├─ structured_annotations[3] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_200
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_200
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_213
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_213
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3560
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3565
@@ -4053,16 +4168,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3560
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3565
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_56
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_63
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Enum
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_201
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_214
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ├─ structured_annotations[4] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_202
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_202
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_215
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_215
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3566
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3572
@@ -4084,16 +4199,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3566
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3572
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_177
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_190
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Const
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_203
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_216
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ╰─ structured_annotations[5] [t_const]
-      │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_204
-      │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_204
+      │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_217
+      │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_217
       │  │  │  │  │     │  │  ├─ src_range [source_range]
       │  │  │  │  │     │  │  │  ├─ begin (offset): 3573
       │  │  │  │  │     │  │  │  ╰─ end (offset): 3584
@@ -4115,10 +4230,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │     │  ├─ src_range [source_range]
       │  │  │  │  │     │  │  ├─ begin (offset): 3573
       │  │  │  │  │     │  │  ╰─ end (offset): 3584
-      │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_173
+      │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_186
       │  │  │  │  │     │  │  ╰─ full_name: scope.Transitive
       │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_205
+      │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_218
       │  │  │  │  │        ├─ src_range: <absent>
       │  │  │  │  │        ├─ is_empty? true
       │  │  │  │  │        ╰─ kind: map({})
@@ -4130,13 +4245,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 3592
       │  │  │  │     ╰─ end (offset): 3606
       │  │  │  ├─ full_name: scope.RootDefinition
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_193
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_206
       │  │  │     ╰─ full_name: scope.RootDefinition
       │  │  ╰─ fields (size: 0)
-      │  ├─ structs_and_unions[18] [t_structured] @0xNORMALIZED_49
-      │  │  ├─ (base) [t_type] @0xNORMALIZED_49
-      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_49
-      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_49
+      │  ├─ structs_and_unions[18] [t_structured] @0xNORMALIZED_56
+      │  │  ├─ (base) [t_type] @0xNORMALIZED_56
+      │  │  │  ├─ (base) [t_named] @0xNORMALIZED_56
+      │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_56
       │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  ├─ begin (offset): 3657
       │  │  │  │  │  │  ╰─ end (offset): 3752
@@ -4148,8 +4263,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  ├─ generated? false
       │  │  │  │  ├─ structured_annotations (size: 6)
       │  │  │  │  │  ├─ structured_annotations[0] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_206
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_206
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_219
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_219
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3657
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3672
@@ -4171,16 +4286,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3657
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3672
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_193
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_206
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.RootDefinition
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_207
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_220
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ├─ structured_annotations[1] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_208
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_208
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_221
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_221
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3673
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3679
@@ -4202,16 +4317,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3673
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3679
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_80
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_87
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Field
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_209
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_222
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ├─ structured_annotations[2] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_210
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_210
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_223
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_223
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3680
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3689
@@ -4233,16 +4348,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3680
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3689
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_120
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_127
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.Function
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_211
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_224
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ├─ structured_annotations[3] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_212
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_212
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_225
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_225
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3690
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3708
@@ -4264,16 +4379,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3690
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3708
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_166
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_173
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.FunctionParameter
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_213
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_226
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ├─ structured_annotations[4] [t_const]
-      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_214
-      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_214
+      │  │  │  │  │  │  ├─ (base) [t_named] @0xNORMALIZED_227
+      │  │  │  │  │  │  │  ├─ (base) [t_node] @0xNORMALIZED_227
       │  │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  │  ├─ begin (offset): 3709
       │  │  │  │  │  │  │  │  │  ╰─ end (offset): 3719
@@ -4295,16 +4410,16 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │  │  │  ├─ src_range [source_range]
       │  │  │  │  │  │  │  │  ├─ begin (offset): 3709
       │  │  │  │  │  │  │  │  ╰─ end (offset): 3719
-      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_176
+      │  │  │  │  │  │  │  ├─ type: [t_type*] 0xNORMALIZED_189
       │  │  │  │  │  │  │  │  ╰─ full_name: scope.EnumValue
       │  │  │  │  │  │  │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_215
+      │  │  │  │  │  │  ╰─ value [t_const_value*] 0xNORMALIZED_228
       │  │  │  │  │  │     ├─ src_range: <absent>
       │  │  │  │  │  │     ├─ is_empty? true
       │  │  │  │  │  │     ╰─ kind: map({})
       │  │  │  │  │  ╰─ structured_annotations[5] [t_const]
-      │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_216
-      │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_216
+      │  │  │  │  │     ├─ (base) [t_named] @0xNORMALIZED_229
+      │  │  │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_229
       │  │  │  │  │     │  │  ├─ src_range [source_range]
       │  │  │  │  │     │  │  │  ├─ begin (offset): 3720
       │  │  │  │  │     │  │  │  ╰─ end (offset): 3731
@@ -4326,10 +4441,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │  │     │  ├─ src_range [source_range]
       │  │  │  │  │     │  │  ├─ begin (offset): 3720
       │  │  │  │  │     │  │  ╰─ end (offset): 3731
-      │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_173
+      │  │  │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_186
       │  │  │  │  │     │  │  ╰─ full_name: scope.Transitive
       │  │  │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_217
+      │  │  │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_230
       │  │  │  │  │        ├─ src_range: <absent>
       │  │  │  │  │        ├─ is_empty? true
       │  │  │  │  │        ╰─ kind: map({})
@@ -4341,13 +4456,13 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  │     ├─ begin (offset): 3739
       │  │  │  │     ╰─ end (offset): 3749
       │  │  │  ├─ full_name: scope.Definition
-      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_49
+      │  │  │  ╰─ true_type: [t_type*] 0xNORMALIZED_56
       │  │  │     ╰─ full_name: scope.Definition
       │  │  ╰─ fields (size: 0)
-      │  ╰─ structs_and_unions[19] [t_structured] @0xNORMALIZED_218
-      │     ├─ (base) [t_type] @0xNORMALIZED_218
-      │     │  ├─ (base) [t_named] @0xNORMALIZED_218
-      │     │  │  ├─ (base) [t_node] @0xNORMALIZED_218
+      │  ╰─ structs_and_unions[19] [t_structured] @0xNORMALIZED_231
+      │     ├─ (base) [t_type] @0xNORMALIZED_231
+      │     │  ├─ (base) [t_named] @0xNORMALIZED_231
+      │     │  │  ├─ (base) [t_node] @0xNORMALIZED_231
       │     │  │  │  ├─ src_range [source_range]
       │     │  │  │  │  ├─ begin (offset): 3869
       │     │  │  │  │  ╰─ end (offset): 3906
@@ -4359,8 +4474,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │     │  │  ├─ generated? false
       │     │  │  ├─ structured_annotations (size: 1)
       │     │  │  │  ╰─ structured_annotations[0] [t_const]
-      │     │  │  │     ├─ (base) [t_named] @0xNORMALIZED_219
-      │     │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_219
+      │     │  │  │     ├─ (base) [t_named] @0xNORMALIZED_232
+      │     │  │  │     │  ├─ (base) [t_node] @0xNORMALIZED_232
       │     │  │  │     │  │  ├─ src_range [source_range]
       │     │  │  │     │  │  │  ├─ begin (offset): 3869
       │     │  │  │     │  │  │  ╰─ end (offset): 3877
@@ -4382,10 +4497,10 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │     │  │  │     │  ├─ src_range [source_range]
       │     │  │  │     │  │  ├─ begin (offset): 3869
       │     │  │  │     │  │  ╰─ end (offset): 3877
-      │     │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_46
+      │     │  │  │     │  ├─ type: [t_type*] 0xNORMALIZED_53
       │     │  │  │     │  │  ╰─ full_name: scope.Program
       │     │  │  │     │  ╰─ unresolved_type: [t_placeholder_typedef*] 0x0
-      │     │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_220
+      │     │  │  │     ╰─ value [t_const_value*] 0xNORMALIZED_233
       │     │  │  │        ├─ src_range: <absent>
       │     │  │  │        ├─ is_empty? true
       │     │  │  │        ╰─ kind: map({})
@@ -4397,93 +4512,93 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │     │  │     ├─ begin (offset): 3885
       │     │  │     ╰─ end (offset): 3903
       │     │  ├─ full_name: scope.DisableSchemaConst
-      │     │  ╰─ true_type: [t_type*] 0xNORMALIZED_218
+      │     │  ╰─ true_type: [t_type*] 0xNORMALIZED_231
       │     │     ╰─ full_name: scope.DisableSchemaConst
       │     ╰─ fields (size: 0)
       ├─ exceptions (size: 0)
       ├─ services (size: 0)
       ├─ interactions (size: 0)
       ├─ definitions (size: 20)
-      │  ├─ definitions[0]: [t_named*] 0xNORMALIZED_173
+      │  ├─ definitions[0]: [t_named*] 0xNORMALIZED_186
       │  │  ╰─ scoped_name: scope.Transitive
-      │  ├─ definitions[1]: [t_named*] 0xNORMALIZED_46
+      │  ├─ definitions[1]: [t_named*] 0xNORMALIZED_53
       │  │  ╰─ scoped_name: scope.Program
-      │  ├─ definitions[2]: [t_named*] 0xNORMALIZED_74
+      │  ├─ definitions[2]: [t_named*] 0xNORMALIZED_81
       │  │  ╰─ scoped_name: scope.Struct
-      │  ├─ definitions[3]: [t_named*] 0xNORMALIZED_174
+      │  ├─ definitions[3]: [t_named*] 0xNORMALIZED_187
       │  │  ╰─ scoped_name: scope.Union
-      │  ├─ definitions[4]: [t_named*] 0xNORMALIZED_77
+      │  ├─ definitions[4]: [t_named*] 0xNORMALIZED_84
       │  │  ╰─ scoped_name: scope.Exception
-      │  ├─ definitions[5]: [t_named*] 0xNORMALIZED_175
+      │  ├─ definitions[5]: [t_named*] 0xNORMALIZED_188
       │  │  ╰─ scoped_name: scope.ThrownException
-      │  ├─ definitions[6]: [t_named*] 0xNORMALIZED_80
+      │  ├─ definitions[6]: [t_named*] 0xNORMALIZED_87
       │  │  ╰─ scoped_name: scope.Field
-      │  ├─ definitions[7]: [t_named*] 0xNORMALIZED_142
+      │  ├─ definitions[7]: [t_named*] 0xNORMALIZED_149
       │  │  ╰─ scoped_name: scope.Typedef
-      │  ├─ definitions[8]: [t_named*] 0xNORMALIZED_112
+      │  ├─ definitions[8]: [t_named*] 0xNORMALIZED_119
       │  │  ╰─ scoped_name: scope.Service
-      │  ├─ definitions[9]: [t_named*] 0xNORMALIZED_106
+      │  ├─ definitions[9]: [t_named*] 0xNORMALIZED_113
       │  │  ╰─ scoped_name: scope.Interaction
-      │  ├─ definitions[10]: [t_named*] 0xNORMALIZED_120
+      │  ├─ definitions[10]: [t_named*] 0xNORMALIZED_127
       │  │  ╰─ scoped_name: scope.Function
-      │  ├─ definitions[11]: [t_named*] 0xNORMALIZED_166
+      │  ├─ definitions[11]: [t_named*] 0xNORMALIZED_173
       │  │  ╰─ scoped_name: scope.FunctionParameter
-      │  ├─ definitions[12]: [t_named*] 0xNORMALIZED_176
+      │  ├─ definitions[12]: [t_named*] 0xNORMALIZED_189
       │  │  ╰─ scoped_name: scope.EnumValue
-      │  ├─ definitions[13]: [t_named*] 0xNORMALIZED_177
+      │  ├─ definitions[13]: [t_named*] 0xNORMALIZED_190
       │  │  ╰─ scoped_name: scope.Const
-      │  ├─ definitions[14]: [t_named*] 0xNORMALIZED_56
+      │  ├─ definitions[14]: [t_named*] 0xNORMALIZED_63
       │  │  ╰─ scoped_name: scope.Enum
-      │  ├─ definitions[15]: [t_named*] 0xNORMALIZED_53
+      │  ├─ definitions[15]: [t_named*] 0xNORMALIZED_60
       │  │  ╰─ scoped_name: scope.Structured
-      │  ├─ definitions[16]: [t_named*] 0xNORMALIZED_186
+      │  ├─ definitions[16]: [t_named*] 0xNORMALIZED_199
       │  │  ╰─ scoped_name: scope.Interface
-      │  ├─ definitions[17]: [t_named*] 0xNORMALIZED_193
+      │  ├─ definitions[17]: [t_named*] 0xNORMALIZED_206
       │  │  ╰─ scoped_name: scope.RootDefinition
-      │  ├─ definitions[18]: [t_named*] 0xNORMALIZED_49
+      │  ├─ definitions[18]: [t_named*] 0xNORMALIZED_56
       │  │  ╰─ scoped_name: scope.Definition
-      │  ╰─ definitions[19]: [t_named*] 0xNORMALIZED_218
+      │  ╰─ definitions[19]: [t_named*] 0xNORMALIZED_231
       │     ╰─ scoped_name: scope.DisableSchemaConst
       ├─ structured_definitions (size: 20)
-      │  ├─ structured_definitions[0]: [t_structured*] 0xNORMALIZED_173
+      │  ├─ structured_definitions[0]: [t_structured*] 0xNORMALIZED_186
       │  │  ╰─ name: Transitive
-      │  ├─ structured_definitions[1]: [t_structured*] 0xNORMALIZED_46
+      │  ├─ structured_definitions[1]: [t_structured*] 0xNORMALIZED_53
       │  │  ╰─ name: Program
-      │  ├─ structured_definitions[2]: [t_structured*] 0xNORMALIZED_74
+      │  ├─ structured_definitions[2]: [t_structured*] 0xNORMALIZED_81
       │  │  ╰─ name: Struct
-      │  ├─ structured_definitions[3]: [t_structured*] 0xNORMALIZED_174
+      │  ├─ structured_definitions[3]: [t_structured*] 0xNORMALIZED_187
       │  │  ╰─ name: Union
-      │  ├─ structured_definitions[4]: [t_structured*] 0xNORMALIZED_77
+      │  ├─ structured_definitions[4]: [t_structured*] 0xNORMALIZED_84
       │  │  ╰─ name: Exception
-      │  ├─ structured_definitions[5]: [t_structured*] 0xNORMALIZED_175
+      │  ├─ structured_definitions[5]: [t_structured*] 0xNORMALIZED_188
       │  │  ╰─ name: ThrownException
-      │  ├─ structured_definitions[6]: [t_structured*] 0xNORMALIZED_80
+      │  ├─ structured_definitions[6]: [t_structured*] 0xNORMALIZED_87
       │  │  ╰─ name: Field
-      │  ├─ structured_definitions[7]: [t_structured*] 0xNORMALIZED_142
+      │  ├─ structured_definitions[7]: [t_structured*] 0xNORMALIZED_149
       │  │  ╰─ name: Typedef
-      │  ├─ structured_definitions[8]: [t_structured*] 0xNORMALIZED_112
+      │  ├─ structured_definitions[8]: [t_structured*] 0xNORMALIZED_119
       │  │  ╰─ name: Service
-      │  ├─ structured_definitions[9]: [t_structured*] 0xNORMALIZED_106
+      │  ├─ structured_definitions[9]: [t_structured*] 0xNORMALIZED_113
       │  │  ╰─ name: Interaction
-      │  ├─ structured_definitions[10]: [t_structured*] 0xNORMALIZED_120
+      │  ├─ structured_definitions[10]: [t_structured*] 0xNORMALIZED_127
       │  │  ╰─ name: Function
-      │  ├─ structured_definitions[11]: [t_structured*] 0xNORMALIZED_166
+      │  ├─ structured_definitions[11]: [t_structured*] 0xNORMALIZED_173
       │  │  ╰─ name: FunctionParameter
-      │  ├─ structured_definitions[12]: [t_structured*] 0xNORMALIZED_176
+      │  ├─ structured_definitions[12]: [t_structured*] 0xNORMALIZED_189
       │  │  ╰─ name: EnumValue
-      │  ├─ structured_definitions[13]: [t_structured*] 0xNORMALIZED_177
+      │  ├─ structured_definitions[13]: [t_structured*] 0xNORMALIZED_190
       │  │  ╰─ name: Const
-      │  ├─ structured_definitions[14]: [t_structured*] 0xNORMALIZED_56
+      │  ├─ structured_definitions[14]: [t_structured*] 0xNORMALIZED_63
       │  │  ╰─ name: Enum
-      │  ├─ structured_definitions[15]: [t_structured*] 0xNORMALIZED_53
+      │  ├─ structured_definitions[15]: [t_structured*] 0xNORMALIZED_60
       │  │  ╰─ name: Structured
-      │  ├─ structured_definitions[16]: [t_structured*] 0xNORMALIZED_186
+      │  ├─ structured_definitions[16]: [t_structured*] 0xNORMALIZED_199
       │  │  ╰─ name: Interface
-      │  ├─ structured_definitions[17]: [t_structured*] 0xNORMALIZED_193
+      │  ├─ structured_definitions[17]: [t_structured*] 0xNORMALIZED_206
       │  │  ╰─ name: RootDefinition
-      │  ├─ structured_definitions[18]: [t_structured*] 0xNORMALIZED_49
+      │  ├─ structured_definitions[18]: [t_structured*] 0xNORMALIZED_56
       │  │  ╰─ name: Definition
-      │  ╰─ structured_definitions[19]: [t_structured*] 0xNORMALIZED_218
+      │  ╰─ structured_definitions[19]: [t_structured*] 0xNORMALIZED_231
       │     ╰─ name: DisableSchemaConst
       ╰─ type_instantiations (size: 0)
 )";

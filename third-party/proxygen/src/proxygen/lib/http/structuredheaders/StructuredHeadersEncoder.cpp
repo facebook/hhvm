@@ -139,8 +139,6 @@ EncodeError StructuredHeadersEncoder::encodeItem(
     default:
       return handleEncodeError(EncodeError::ENCODING_NULL_ITEM);
   }
-
-  return EncodeError::OK;
 }
 
 EncodeError StructuredHeadersEncoder::encodeBinaryContent(

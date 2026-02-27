@@ -307,7 +307,10 @@ module Primary : sig
       | Enum
       | Symbol
       | Type_const
-      | Reifiable_type_const
+      | Reifiable_type_const of {
+          reifiable_attr_pos: Pos_or_decl.t;
+          tconst_name: string;
+        }
       | Transparent_type_alias
       | Case_type
       | Reified_generic

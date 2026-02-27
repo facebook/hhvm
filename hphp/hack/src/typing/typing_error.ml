@@ -331,7 +331,10 @@ module Primary = struct
       | Enum
       | Symbol
       | Type_const
-      | Reifiable_type_const
+      | Reifiable_type_const of {
+          reifiable_attr_pos: Pos_or_decl.t;
+          tconst_name: string;
+        }
       | Transparent_type_alias
       | Case_type
       | Reified_generic
@@ -346,7 +349,7 @@ module Primary = struct
       | Enum -> "enum"
       | Symbol -> "symbol"
       | Type_const -> "type constant"
-      | Reifiable_type_const -> "reifiable type constant"
+      | Reifiable_type_const _ -> "reifiable type constant"
       | Transparent_type_alias -> "transparent type alias"
       | Case_type -> "case type"
       | Reified_generic -> "reified generic"

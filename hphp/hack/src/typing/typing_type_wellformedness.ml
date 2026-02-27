@@ -458,12 +458,17 @@ let typeconsts env tcs cls_name =
         `Yes Type_const
       else
         match get_class_const tconst.c_tconst_name with
-        | `Found ttc when Option.is_none ttc.ttc_reifiable -> `No
-        | `Found _ ->
-          if Env.package_allow_reifiable_tconst_violations env.tenv then
-            `No
-          else
-            `Yes Reifiable_type_const
+        | `Found ttc -> begin
+          match ttc.ttc_reifiable with
+          | None -> `No
+          | Some reifiable_attr_pos ->
+            if Env.package_allow_reifiable_tconst_violations env.tenv then
+              `No
+            else
+              `Yes
+                (Reifiable_type_const
+                   { reifiable_attr_pos; tconst_name = snd ttc.ttc_name })
+        end
         | _ -> `No
     in
     match tconst.c_tconst_kind with

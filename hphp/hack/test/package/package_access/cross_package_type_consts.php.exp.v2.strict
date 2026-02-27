@@ -1,4 +1,4 @@
-error: Typing[4472] Cannot access type constant BarImpl defined in package pkg2 which may not be available [1]
+error: Typing[4472] Cannot access BarImpl defined in package pkg2, which may not be available, within a type constant [1]
 -> BarImpl is defined in cross_package_type_consts.php--foo.php [2]
 -> BarImpl belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
@@ -25,7 +25,7 @@ PACKAGES.toml:3:11
     4 | include_paths=["//"]
     5 | 
 
-error: Typing[4472] Cannot access type constant TFoo1 defined in package pkg2 which may not be available [1]
+error: Typing[4472] Cannot access TFoo1 defined in package pkg2, which may not be available, within a type constant [1]
 -> TFoo1 is defined in cross_package_type_consts.php--foo.php [2]
 -> TFoo1 belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
@@ -52,7 +52,7 @@ PACKAGES.toml:3:11
     4 | include_paths=["//"]
     5 | 
 
-error: Typing[4472] Cannot access type constant TFoo2 defined in package pkg2 which may not be available [1]
+error: Typing[4472] Cannot access TFoo2 defined in package pkg2, which may not be available, within a type constant [1]
 -> TFoo2 is defined in cross_package_type_consts.php--foo.php [2]
 -> TFoo2 belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]

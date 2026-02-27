@@ -1295,15 +1295,27 @@ end = struct
       let target_filename = Relative_path.suffix target_filename in
       let target_id = Markdown_lite.md_codify (Utils.strip_ns target_id) in
 
+      let open Typing_error.Primary.Package in
+      let target_symbol_spec_str =
+        target_symbol_spec_to_string target_symbol_spec
+      in
       let claim =
         lazy
           ( pos,
-            Printf.sprintf
-              "Cannot access %s %s defined in %s which may not be available"
-              Typing_error.Primary.Package.(
-                target_symbol_spec_to_string target_symbol_spec)
-              target_id
-              target_package_name )
+            match target_symbol_spec with
+            | Type_const
+            | Reifiable_type_const _ ->
+              Printf.sprintf
+                "Cannot access %s defined in %s, which may not be available, within a %s"
+                target_id
+                target_package_name
+                target_symbol_spec_str
+            | _ ->
+              Printf.sprintf
+                "Cannot access %s %s defined in %s which may not be available"
+                target_symbol_spec_str
+                target_id
+                target_package_name )
       and reasons =
         lazy
           (let base_reasons =
@@ -1341,7 +1353,18 @@ end = struct
                      including_pkg
                      included_pkg ))
            in
-           base_reasons @ loaded_reasons @ included_reasons)
+           let reifiable_reasons =
+             match target_symbol_spec with
+             | Reifiable_type_const { reifiable_attr_pos; tconst_name } ->
+               [
+                 ( reifiable_attr_pos,
+                   Printf.sprintf
+                     "The type constant %s is declared `<<__Reifiable>>` here"
+                     (Markdown_lite.md_codify tconst_name) );
+               ]
+             | _ -> []
+           in
+           base_reasons @ loaded_reasons @ included_reasons @ reifiable_reasons)
       in
       let code =
         if soft then

@@ -142,8 +142,7 @@ AnyData AnyData::toAny(const native_type<Tag>& v) {
 
 template <typename Tag>
 void AnyData::get(native_type<Tag>& v) const {
-  // TODO(dokwon): Check the type hash.
-  if (type() != Type::get<Tag>()) {
+  if (!identicalType(type(), Type::get<Tag>())) {
     throwTypeMismatchException(Type::get<Tag>(), type());
   }
 

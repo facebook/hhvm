@@ -292,7 +292,27 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   void apply(type::AnyData& val) const { apply(val.toThrift()); }
 
-  /// Extracts the patch for the given patch type.
+  /// Extracts patch operations for a specific type from this AnyPatch.
+  ///
+  /// This function works when the AnyPatch does not change the underlying type
+  /// during application. The extracted patch is equivalent to applying to the
+  /// underlying value directly.
+  ///
+  /// Example:
+  /// ```
+  /// Foo before = ...;
+  /// Any any = AnyData::toAny(before);
+  /// anyPatch.apply(any);
+  /// if (any.type() == type::create<Foo>()) {
+  ///   Foo after = any.get<Foo>();
+  ///   FooPatch patch = anyPatch.extractPatchAsIf<FooPatch>();
+  ///   patch.apply(before);
+  ///   assert(before == after); // Guaranteed
+  /// }
+  /// ```
+  ///
+  /// If the AnyPatch changes the underlying type, the extracted patch behavior
+  /// is unspecified since type changes cannot be expressed through VPatch.
   template <typename VPatch>
   VPatch extractPatchAsIf() const {
     using VTag = op::patched_type_tag_t<VPatch>;

@@ -554,11 +554,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt Config_keys.class_pointer_ban_class_array_key config)
     ?tco_poly_function_pointers:
       (bool_opt Config_keys.poly_function_pointers config)
-    ?tco_check_packages:(bool_opt Config_keys.check_packages config)
-    ?tco_package_config_disable_transitivity_check:
-      (bool_opt Config_keys.package_config_disable_transitivity_check config)
-    ?tco_allow_require_package_on_interface_methods:
-      (bool_opt Config_keys.allow_require_package_on_interface_methods config)
     options
 
 (** Load local config from the following sources:
@@ -679,9 +674,6 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
   let package_info =
     Package_config.load_and_parse
       ~strict:local_config.ServerLocalConfig.package_config_strict_validation
-      ~disable_transitivity_check:
-        global_opts_without_package_info
-          .tco_package_config_disable_transitivity_check
       ~pkgs_config_abs_path
   in
   Package_info.log_package_info package_info;

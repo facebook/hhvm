@@ -288,33 +288,6 @@ let check_no_sealed_on_interface_methods env m =
     | None -> ()
   end
 
-let check_no_require_package_on_interface_methods env m =
-  let inside_interface =
-    match env.Nast_check_env.classish_kind with
-    | Some ck -> Ast_defs.is_c_interface ck
-    | None -> false
-  in
-  let allow_require_package =
-    TypecheckerOptions.allow_require_package_on_interface_methods
-      (Nast_check_env.get_tcopt env)
-  in
-  if inside_interface && not allow_require_package then begin
-    match
-      find_attribute SN.UserAttributes.uaRequirePackage m.m_user_attributes
-    with
-    | Some { ua_name = (pos, attr_name); _ } ->
-      Diagnostics.add_diagnostic
-        Nast_check_error.(
-          to_user_diagnostic
-          @@ Wrong_expression_kind_builtin_attribute
-               {
-                 expr_kind = "a method declaration in an interface";
-                 pos;
-                 attr_name;
-               })
-    | None -> ()
-  end
-
 let handler =
   object
     inherit Nast_visitor.handler_base
@@ -430,7 +403,6 @@ let handler =
       check_no_sealed_on_constructors m;
       check_no_sealed_on_private_methods m;
       check_no_sealed_on_interface_methods env m;
-      check_no_require_package_on_interface_methods env m;
       List.iter check_soft_internal_on_param m.m_params;
       (* Ban variadic arguments on memoized methods. *)
       if

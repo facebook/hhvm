@@ -153,9 +153,6 @@ impl Default for GlobalOptions {
             class_pointer_ban_classname_class_const: 0,
             class_pointer_ban_class_array_key: false,
             tco_poly_function_pointers: true,
-            tco_check_packages: true,
-            tco_package_config_disable_transitivity_check: false,
-            tco_allow_require_package_on_interface_methods: true,
             tco_repo_stdlib_path: None,
         }
     }

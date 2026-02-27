@@ -11,13 +11,8 @@
   * include_path does not exist in the filesystem.  `hh` runs with `strict=true`,
   * while `hh_single_type_check` with `strict=false` to avoid false positves in
   * the test suite.
-  * If "disable_transitivity_check" then the package/deployment inclusion
-  * transitivity checks are disabled.
   *)
 val load_and_parse :
-  strict:bool ->
-  disable_transitivity_check:bool ->
-  pkgs_config_abs_path:string ->
-  Package_info.t
+  strict:bool -> pkgs_config_abs_path:string -> Package_info.t
 
 val repo_config_path : Relative_path.t

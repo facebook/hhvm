@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2efd559de02c369803a98e8d8e24fc9e>>
+// @generated SignedSource<<b6a74f994f6bac18d513d7ae8d02d037>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -406,10 +406,4 @@ pub struct GlobalOptions {
     /// Error on dict[$c => 1] when $c: class<T>
     pub class_pointer_ban_class_array_key: bool,
     pub tco_poly_function_pointers: bool,
-    /// enable static package enforcement
-    pub tco_check_packages: bool,
-    /// POC: @fzn, if true, transitivity checks for package/deployment inclusion are disabled - for intern/prod rollout only
-    pub tco_package_config_disable_transitivity_check: bool,
-    /// POC: @fzn, when true (default), allows __RequirePackage on interface methods
-    pub tco_allow_require_package_on_interface_methods: bool,
 }

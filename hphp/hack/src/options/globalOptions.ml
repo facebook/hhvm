@@ -201,9 +201,6 @@ type t = {
   class_pointer_ban_classname_class_const: int;
   class_pointer_ban_class_array_key: bool;
   tco_poly_function_pointers: bool;
-  tco_check_packages: bool;
-  tco_package_config_disable_transitivity_check: bool;
-  tco_allow_require_package_on_interface_methods: bool;
 }
 [@@deriving eq, show]
 
@@ -321,9 +318,6 @@ let default =
     class_pointer_ban_classname_class_const = 0;
     class_pointer_ban_class_array_key = false;
     tco_poly_function_pointers = true;
-    tco_check_packages = true;
-    tco_package_config_disable_transitivity_check = false;
-    tco_allow_require_package_on_interface_methods = true;
   }
 
 let set
@@ -438,9 +432,6 @@ let set
     ?class_pointer_ban_classname_class_const
     ?class_pointer_ban_class_array_key
     ?tco_poly_function_pointers
-    ?tco_check_packages
-    ?tco_package_config_disable_transitivity_check
-    ?tco_allow_require_package_on_interface_methods
     options =
   let setting setting option =
     match setting with
@@ -752,15 +743,6 @@ let set
         options.class_pointer_ban_class_array_key;
     tco_poly_function_pointers =
       setting tco_poly_function_pointers options.tco_poly_function_pointers;
-    tco_check_packages = setting tco_check_packages options.tco_check_packages;
-    tco_package_config_disable_transitivity_check =
-      setting
-        tco_package_config_disable_transitivity_check
-        options.tco_package_config_disable_transitivity_check;
-    tco_allow_require_package_on_interface_methods =
-      setting
-        tco_allow_require_package_on_interface_methods
-        options.tco_allow_require_package_on_interface_methods;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

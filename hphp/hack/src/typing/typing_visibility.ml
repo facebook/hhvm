@@ -368,16 +368,13 @@ let check_top_level_access
       None
   in
   let package_error =
-    if Env.check_packages env then
-      check_package_access
-        ~should_check_package_boundary
-        ~use_pos
-        ~def_pos
-        env
-        target_package
-        target_id
-    else
-      Package_access_ok
+    check_package_access
+      ~should_check_package_boundary
+      ~use_pos
+      ~def_pos
+      env
+      target_package
+      target_id
   in
   match (module_error, package_error) with
   | (Some e1, Package_access_error e2) -> ([e1; e2], [])

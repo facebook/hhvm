@@ -269,14 +269,6 @@ let class_pointer_ban_class_array_key = key "class_pointer_ban_class_array_key"
 
 let poly_function_pointers = key "poly_function_pointers"
 
-let check_packages = key "check_packages"
-
-let package_config_disable_transitivity_check =
-  key "package_config_disable_transitivity_check"
-
-let allow_require_package_on_interface_methods =
-  key "allow_require_package_on_interface_methods"
-
 (* server options *)
 
 let version = key "version"

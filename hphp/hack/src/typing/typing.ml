@@ -1338,7 +1338,6 @@ end = struct
             (Some fe_package_requirement);
         ]
     and (access_errs, access_linter_errors) =
-      let open Typing_error.Primary.Package in
       TVis.check_top_level_access
         ~should_check_package_boundary:(`Yes Func)
         ~in_signature:false
@@ -3633,26 +3632,24 @@ end = struct
         let (env, ty) = Env.fresh_type_error env cst_pos in
         make_result env cst_pos (Aast.Id id) ty
       | Some const ->
-        (if Env.check_packages env then
-          let open Typing_error.Primary.Package in
-          match
-            TVis.check_package_access
-              ~should_check_package_boundary:(`Yes Global_const)
-              ~use_pos:cst_pos
-              ~def_pos:const.cd_pos
-              env
-              const.cd_package
-              cst_name
-          with
-          | TVis.Package_access_error err ->
-            Typing_error_utils.add_typing_error ~env err
-          | TVis.Package_access_linter_error (pos, w) ->
-            Lints_diagnostics.package_into_override
-              pos
-              w.current_package
-              w.target_package
-              w.target_package_before_override
-          | TVis.Package_access_ok -> ());
+        (match
+           TVis.check_package_access
+             ~should_check_package_boundary:(`Yes Global_const)
+             ~use_pos:cst_pos
+             ~def_pos:const.cd_pos
+             env
+             const.cd_package
+             cst_name
+         with
+        | TVis.Package_access_error err ->
+          Typing_error_utils.add_typing_error ~env err
+        | TVis.Package_access_linter_error (pos, w) ->
+          Lints_diagnostics.package_into_override
+            pos
+            w.current_package
+            w.target_package
+            w.target_package_before_override
+        | TVis.Package_access_ok -> ());
 
         let ((env, ty_err_opt), ty) =
           Phase.localize_no_subst env ~ignore_errors:true const.cd_type
@@ -5095,7 +5092,7 @@ end = struct
     let should_check_packages =
       let (_, _, cid_) = cid in
       match cid_ with
-      | Aast.CI _ when not under_type_structure -> Env.check_packages env
+      | Aast.CI _ when not under_type_structure -> true
       | _ -> false
     in
     let env =
@@ -5107,7 +5104,6 @@ end = struct
         if (not (String.equal (snd mid) "class")) && should_check_packages then begin
           match Env.get_class env class_name with
           | Decl_entry.Found class_ ->
-            let open Typing_error.Primary.Package in
             (match
                TVis.check_package_access
                  ~should_check_package_boundary:(`Yes Class_const)
@@ -11717,16 +11713,15 @@ end = struct
         | Decl_entry.Found class_ ->
           if not is_attribute_param then (
             let should_check_package_boundary =
-              let open Typing_error.Primary.Package in
               if inside_nameof || is_attribute || is_catch then
                 `No
               else if is_const then begin
                 if Env.package_allow_classconst_violations env then
                   `No
                 else
-                  `Yes Class
+                  `Yes Typing_error.Primary.Package.Class
               end else
-                `Yes Class
+                `Yes Typing_error.Primary.Package.Class
             in
             let (access_errs, access_linter_errs) =
               TVis.check_top_level_access

@@ -297,11 +297,6 @@ type t = {
   class_pointer_ban_class_array_key: bool;
       (** Error on dict[$c => 1] when $c: class<T>  *)
   tco_poly_function_pointers: bool;
-  tco_check_packages: bool;  (** enable static package enforcement *)
-  tco_package_config_disable_transitivity_check: bool;
-      (** POC: @fzn, if true, transitivity checks for package/deployment inclusion are disabled - for intern/prod rollout only *)
-  tco_allow_require_package_on_interface_methods: bool;
-      (** POC: @fzn, when true (default), allows __RequirePackage on interface methods *)
 }
 [@@deriving eq, show]
 
@@ -417,9 +412,6 @@ val set :
   ?class_pointer_ban_classname_class_const:int ->
   ?class_pointer_ban_class_array_key:bool ->
   ?tco_poly_function_pointers:bool ->
-  ?tco_check_packages:bool ->
-  ?tco_package_config_disable_transitivity_check:bool ->
-  ?tco_allow_require_package_on_interface_methods:bool ->
   t ->
   t
 

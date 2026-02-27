@@ -251,12 +251,6 @@ val class_pointer_ban_class_array_key : string
 
 val poly_function_pointers : string
 
-val check_packages : string
-
-val package_config_disable_transitivity_check : string
-
-val allow_require_package_on_interface_methods : string
-
 (* server options *)
 
 val version : string

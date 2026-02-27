@@ -644,26 +644,24 @@ let check_consistent_enum_inclusion
   let included_kind = Cls.kind included_cls in
   let dest_kind = Cls.kind dest_cls in
   (* Check package visibility *)
-  (if Typing_env.check_packages env then
-    let open Typing_error.Primary.Package in
-    match
-      Typing_visibility.check_package_access
-        ~should_check_package_boundary:(`Yes Enum)
-        ~use_pos:dest_cls_pos
-        ~def_pos:(Cls.pos included_cls)
-        env
-        (Cls.get_package included_cls)
-        (Cls.name included_cls)
-    with
-    | Typing_visibility.Package_access_error err ->
-      Typing_error_utils.add_typing_error ~env err
-    | Typing_visibility.Package_access_linter_error (pos, w) ->
-      Lints_diagnostics.package_into_override
-        pos
-        w.current_package
-        w.target_package
-        w.target_package_before_override
-    | Typing_visibility.Package_access_ok -> ());
+  (match
+     Typing_visibility.check_package_access
+       ~should_check_package_boundary:(`Yes Enum)
+       ~use_pos:dest_cls_pos
+       ~def_pos:(Cls.pos included_cls)
+       env
+       (Cls.get_package included_cls)
+       (Cls.name included_cls)
+   with
+  | Typing_visibility.Package_access_error err ->
+    Typing_error_utils.add_typing_error ~env err
+  | Typing_visibility.Package_access_linter_error (pos, w) ->
+    Lints_diagnostics.package_into_override
+      pos
+      w.current_package
+      w.target_package
+      w.target_package_before_override
+  | Typing_visibility.Package_access_ok -> ());
   match (Cls.enum_type included_cls, Cls.enum_type dest_cls) with
   | (Some included_e, Some dest_e) ->
     (* ensure that the base types are identical *)

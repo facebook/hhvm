@@ -118,7 +118,6 @@ impl HhConfig {
         let package_config_pathbuf =
             Self::get_repo_packages_config_path(hhconfig, PACKAGE_FILE_PATH_RELATIVE_TO_ROOT);
         PackageInfo::from_text_non_strict(
-            true, // disable the include package transitivity checks
             root.as_ref()
                 .join(package_config_pathbuf)
                 .to_str()
@@ -631,16 +630,6 @@ impl HhConfig {
             )?,
             tco_poly_function_pointers: hhconfig
                 .get_bool_or("poly_function_pointers", default.tco_poly_function_pointers)?,
-            tco_check_packages: hhconfig
-                .get_bool_or("check_packages", default.tco_check_packages)?,
-            tco_package_config_disable_transitivity_check: hhconfig.get_bool_or(
-                "package_config_disable_transitivity_check",
-                default.tco_package_config_disable_transitivity_check,
-            )?,
-            tco_allow_require_package_on_interface_methods: hhconfig.get_bool_or(
-                "allow_require_package_on_interface_methods",
-                default.tco_allow_require_package_on_interface_methods,
-            )?,
             tco_repo_stdlib_path: hhconfig.get_str("repo_stdlib_path").map(|p| p.to_string()),
         };
         let mut c = Self {

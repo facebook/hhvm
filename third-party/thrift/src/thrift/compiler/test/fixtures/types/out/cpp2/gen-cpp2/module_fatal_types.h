@@ -9,5 +9,4 @@
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/included_fatal_types.h"
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_fatal.h"
-#include "thrift/compiler/test/fixtures/types/gen-cpp2/module_fatal_union.h"
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_fatal_struct.h"

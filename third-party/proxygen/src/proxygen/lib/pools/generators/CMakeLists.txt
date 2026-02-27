@@ -17,8 +17,6 @@ proxygen_add_library(proxygen_pools_generators_server_config
 proxygen_add_library(proxygen_pools_generators_server_list_generator
   SRCS
     ServerListGenerator.cpp
-  DEPS
-    glog::glog
   EXPORTED_DEPS
     proxygen_pools_generators_member_group_config
     proxygen_pools_generators_server_config

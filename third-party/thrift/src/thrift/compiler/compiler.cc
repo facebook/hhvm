@@ -194,6 +194,12 @@ Options:
                   @thrift.AllowUnsafeNonSealedKeyType annotation.
                   Default: error
 
+                duplicate_namespace=none|warn|error
+                  Action to take when a namespace is declared more than once
+                  for the same language within a single file. If not `error`,
+                  the first namespace wins.
+                  Default: none
+
                 warn_on_redundant_custom_default_values
                   DEPRECATED, prefer: redundant_custom_default_values=warn
 
@@ -1007,6 +1013,13 @@ std::string parse_args(
             continue;
           }
 
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"duplicate_namespace",
+                  &sparams.duplicate_namespace)) {
+            continue;
+          }
+
         } catch (const std::exception& e) {
           fmt::print(
               stderr,
@@ -1191,6 +1204,10 @@ void record_invocation_params(
           "unnecessary_allow_unsafe_non_sealed_key_type={}",
           fmt::underlying(
               sparams.unnecessary_allow_unsafe_non_sealed_key_type)));
+  sema_params_metric.add(
+      fmt::format(
+          "duplicate_namespace={}",
+          fmt::underlying(sparams.duplicate_namespace)));
   sema_params_metric.add(
       "warn_on_redundant_custom_default_values=" +
       std::to_string(

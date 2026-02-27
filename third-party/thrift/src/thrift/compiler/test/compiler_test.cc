@@ -3990,3 +3990,15 @@ TEST(CompilerTest, sealed_key_type_in_functions) {
   )",
       {"--extra-validation", "non_sealed_key_type=error"});
 }
+
+TEST(CompilerTest, duplicate_namespaces) {
+  check_compile(
+      R"(
+    package "facebook.com/thrift/test"
+
+    namespace cpp2 facebook.thrift
+    namespace python facebook.thrift
+    namespace cpp2 meta.thrift # expected-error: Duplicate namespace for language: cpp2
+  )",
+      {"--extra-validation", "duplicate_namespace=error"});
+}

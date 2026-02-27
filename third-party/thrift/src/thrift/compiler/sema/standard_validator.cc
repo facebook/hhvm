@@ -20,6 +20,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <boost/algorithm/string/split.hpp>
 #include <fmt/ranges.h>
@@ -385,6 +386,26 @@ void validate_filename_is_not_reserved(sema_context& ctx, const t_named& node) {
       !is_reserved_identifier(node.name()),
       "`{}` is a reserved filename. Choose a different filename that does not contain `fbthrift`.",
       node.name());
+}
+
+/**
+ * Checks that there are no duplicate `namespace` directives (i.e., for the
+ * same language).
+ */
+void validate_duplicate_namespaces(
+    sema_context& ctx, const t_program& program) {
+  std::unordered_set<std::string> languages_seen;
+  for (const t_namespace* ns : program.namespace_nodes()) {
+    if (languages_seen.insert(ns->language()).second) {
+      continue;
+    }
+    ctx.report(
+        *ns,
+        validation_to_diagnostic_level(
+            ctx.sema_parameters().duplicate_namespace),
+        "Duplicate namespace for language: {}",
+        ns->language());
+  }
 }
 
 /**
@@ -2069,6 +2090,7 @@ ast_validator standard_validator() {
   ast_validator validator;
   validator.add_definition_visitor(&validate_identifier_is_not_reserved);
   validator.add_program_visitor(&validate_filename_is_not_reserved);
+  validator.add_program_visitor(&validate_duplicate_namespaces);
   validator.add_program_visitor(&validate_python_namespaces);
   validator.add_program_visitor(&validate_program_package);
   validator.add_program_visitor(&detail::validate_annotation_scopes<>);

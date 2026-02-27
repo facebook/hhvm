@@ -1062,25 +1062,28 @@ void ConcurrentTableSharedStore::dumpRandomKeys(std::ostream& out,
 }
 
 void ConcurrentTableSharedStore::dumpKeysWithPrefixes(
-  std::ostream& out,
+  BlobEncoder& sd,
   const std::vector<std::string>& prefixes) {
   if (prefixes.empty()) return;
   std::unique_lock l(m_lock);
-  for (auto const& iter : m_vars) {
-    const StoreValue& value = iter.second;
-    if (value.c_time == 0) continue;
-    if (value.expired()) continue;
-    auto const key = iter.first;
-    // We are going to use newline to separate different keys
-    if (strpbrk(key, "\r\n")) continue;
-    bool match = std::any_of(
-      prefixes.begin(), prefixes.end(),
-      [key] (const std::string& prefix) {
-        return !strncmp(key, prefix.c_str(), prefix.size());
-      });
-    if (!match) continue;
-    out << key << "\n";
-  }
+  sd.lazyCount([&]() {
+    uint32_t count = 0;
+    for (auto const& iter : m_vars) {
+      const StoreValue& value = iter.second;
+      if (value.c_time == 0) continue;
+      if (value.expired()) continue;
+      auto const key = iter.first;
+      bool match = std::any_of(
+        prefixes.begin(), prefixes.end(),
+        [key] (const std::string& prefix) {
+          return !strncmp(key, prefix.c_str(), prefix.size());
+        });
+      if (!match) continue;
+      sd(std::string_view(key));
+      count++;
+    }
+    return count;
+  });
 }
 
 std::vector<EntryInfo>

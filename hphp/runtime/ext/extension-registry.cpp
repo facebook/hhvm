@@ -239,39 +239,47 @@ void requestShutdown() {
 bool modulesInitialised() { return s_initialized; }
 
 void serialize(jit::ProfDataSerializer& ser) {
-  std::vector<std::pair<std::string, std::string>> extData;
+  std::vector<std::pair<Extension*, BlobEncoder>> extData;
   for (auto& ext : s_ordered) {
-    auto name = ext->getName();
-    auto data = ext->serialize();
-    if (!data.size()) continue;
-    extData.push_back({std::move(name), std::move(data)});
+    BlobEncoder sd;
+    ext->serialize(sd);
+    if (!sd.size()) continue;
+    extData.push_back({ext, std::move(sd)});
   }
   uint32_t len = extData.size();
   jit::write_raw<uint32_t>(ser, len);
   for (const auto& ext : extData) {
-    len = ext.first.size();
-    jit::write_raw<uint32_t>(ser, len);
-    jit::write_raw(ser, ext.first.c_str(), len);
-    len = ext.second.size();
-    jit::write_raw<uint32_t>(ser, len);
-    jit::write_raw(ser, ext.second.c_str(), len);
+    jit::write_string(ser, ext.first->getName());
+    jit::write_string(ser, std::string_view{(const char*)ext.second.data(), ext.second.size()});
   }
 }
 
 void deserialize(jit::ProfDataDeserializer& des) {
   auto const nExts = jit::read_raw<uint32_t>(des);
   for (uint32_t i = 0; i < nExts; ++i) {
-    uint32_t len = jit::read_raw<uint32_t>(des);
-    std::string str;
-    str.resize(len);
-    jit::read_raw(des, str.data(), len);
-    auto ext = get(str.data());
+    std::string name = jit::read_cpp_string(des);
+    std::string data = jit::read_cpp_string(des);
+    auto ext = get(name.data());
     if (!ext) continue;
-    len = jit::read_raw<uint32_t>(des);
-    str.resize(len);
-    jit::read_raw(des, str.data(), len);
-    ext->deserialize(std::move(str));
+    BlobDecoder sd(data.data(), data.size());
+    ext->deserialize(sd);
   }
+}
+
+void cleanupWarmupData() {
+  std::vector<ArrayData*> allWarmupData;
+  for (auto& ext : s_ordered) {
+    auto warmupData = ext->getWarmupData();
+    if (warmupData) {
+      allWarmupData.push_back(warmupData);
+      ext->setWarmupData(nullptr);
+    };
+  }
+  Treadmill::enqueue([ads = std::move(allWarmupData)] {
+    for (auto& ad : ads) {
+      DecRefUncountedArray(ad);
+    }
+  });
 }
 
 /////////////////////////////////////////////////////////////////////////////

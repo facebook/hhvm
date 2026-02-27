@@ -139,5 +139,18 @@ void Extension::loadDeclsFrom(const std::string& name) {
   Native::registerBuiltinSymbols(serialized_decls);
 }
 
+void Extension::deserialize(BlobDecoder& sd) {
+  auto init = sd.readArrayInitWithLazyCount<VecInit>(
+    [&](VecInit& v) {
+      std::string_view sv;
+      sd(sv);
+      auto sd = StringData::MakeUncounted(sv);
+      v.append(make_tv<KindOfPersistentString>(sd));
+    });
+  auto d = init.toArray();
+  MakeUncountedEnv env {nullptr, nullptr};
+  setWarmupData(d->makeUncounted(env, false));
+}
+
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

@@ -1732,7 +1732,7 @@ void write_string(ProfDataSerializer& ser, const StringData* str) {
   write_raw_string(ser, str);
 }
 
-void write_string(ProfDataSerializer& ser, const std::string& str) {
+void write_string(ProfDataSerializer& ser, const std::string_view& str) {
   ITRACE(2, "cpp string>\n");
   uint64_t size = str.size();
   write_raw(ser, size);

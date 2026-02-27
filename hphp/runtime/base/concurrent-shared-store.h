@@ -304,11 +304,10 @@ struct ConcurrentTableSharedStore {
    */
   void dumpPrefix(std::ostream& out, const std::string &prefix, uint32_t count);
   /**
-   * Dump all non-primed keys that begin with one of the prefixes. Different
-   * keys are separated by \n in the output stream. Keys containing \r or \n
-   * will not be included.
+   * Dump all non-primed keys that begin with one of the prefixes. Writes keys
+   * to BlobEncoder using lazyCount
    */
-  void dumpKeysWithPrefixes(std::ostream& out,
+  void dumpKeysWithPrefixes(BlobEncoder& sd,
                             const std::vector<std::string>& prefixes);
   /*
    * Dump random key and entry size to output stream

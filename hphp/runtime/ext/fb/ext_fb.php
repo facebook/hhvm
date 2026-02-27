@@ -284,6 +284,9 @@ function fb_gen_user_func(string $initialDoc,
   return fb_gen_user_func_array($initialDoc, $function, $args);
 }
 
+<<__Native>>
+function extension_warmup_data(string $extension): ?vec<string>;
+
 } // namespace
 
 namespace HH {

@@ -48,6 +48,8 @@ void moduleDeclInit();
 
 bool modulesInitialised();
 
+void cleanupWarmupData();
+
 void serialize(jit::ProfDataSerializer& ser);
 void deserialize(jit::ProfDataDeserializer& des);
 

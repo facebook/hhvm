@@ -49,6 +49,7 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/code-coverage-util.h"
+#include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/fb/VariantController.h"
 #include "hphp/runtime/server/xbox-server.h"
@@ -1493,6 +1494,14 @@ Variant HHVM_FUNCTION(fb_gen_user_func_array, const String& initialDoc,
   return Variant{event->getWaitHandle()};
 }
 
+Variant HHVM_FUNCTION(extension_warmup_data, const String& extension_name) {
+  auto ext = ExtensionRegistry::get(extension_name.data(), true);
+  if (!ext) return init_null();
+  auto data = ext->getWarmupData();
+  if (!data) return init_null();
+  return Array::attach(data);
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1552,6 +1561,8 @@ struct FBExtension : Extension {
     HHVM_FE(fb_check_user_func_async);
     HHVM_FE(fb_end_user_func_async);
     HHVM_FE(fb_gen_user_func_array);
+
+    HHVM_FE(extension_warmup_data);
   }
 } s_fb_extension;
 

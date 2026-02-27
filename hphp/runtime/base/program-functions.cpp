@@ -1268,6 +1268,8 @@ static int start_server(const std::string &username) {
     InternalWarmupRequestPlayer(Cfg::Server::WarmupThreadCount,
                                 Cfg::Server::DedupeWarmupRequests)
       .runAfterDelay(Cfg::Server::WarmupRequests);
+
+    ExtensionRegistry::cleanupWarmupData();
   }
   BootStats::mark("warmup");
 

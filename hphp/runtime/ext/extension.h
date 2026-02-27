@@ -29,6 +29,9 @@
 #include <vector>
 
 namespace HPHP {
+
+struct ArrayData;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -72,7 +75,12 @@ public:
   explicit Extension(const char name[],
                      const char version[],
                      const char oncall[]);
-  virtual ~Extension() {}
+  virtual ~Extension() {
+    if (m_warmupData != nullptr) {
+      DecRefUncountedArray(m_warmupData);
+      m_warmupData = nullptr;
+    }
+  }
 
   const char* getName() const { return m_name; }
   const char* getVersion() const { return m_version; }
@@ -121,10 +129,9 @@ public:
 
   // override these functions to perform extension-specific jumpstart,
   // leveraging the JIT profile data serialization mechanisms.
-  virtual std::string serialize() { return {}; }
-  // throws std::runtime_error to abort the whole thing if needed. The extension
-  // can also choose to swallow the error.
-  virtual void deserialize(std::string) {}
+  virtual void serialize(BlobEncoder& sd) {}
+
+  virtual void deserialize(BlobDecoder& sd);
 
   using DependencySet = std::set<std::string>;
   using DependencySetMap = std::map<Extension*, DependencySet>;
@@ -146,6 +153,9 @@ public:
   const Native::FuncTable& nativeFuncs() const {
     return m_nativeFuncs;
   }
+  
+  ArrayData* getWarmupData() const { return m_warmupData; }
+  void setWarmupData(ArrayData* warmupData) { m_warmupData = warmupData; }
 
 private:
   const char* m_name;
@@ -153,6 +163,7 @@ private:
   const char* m_oncall;
   std::vector<StringData*> m_functions;
   Native::FuncTable m_nativeFuncs;
+  ArrayData* m_warmupData = nullptr;
 };
 
 struct ExtensionBuildInfo {

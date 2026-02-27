@@ -122,17 +122,8 @@ void apcExtension::requestShutdown() {
   apc_store().purgeExpired();
 }
 
-std::string apcExtension::serialize() {
-  std::ostringstream oss;
-  apc_store().dumpKeysWithPrefixes(oss, SerializePrefix);
-  return oss.str();
-}
-
-void apcExtension::deserialize(std::string data) {
-  auto sd = StringData::MakeUncounted(data);
-  data.clear();
-  apc_store().set(s_internal_preload, Variant{sd}, 0, 0, false);
-  DecRefUncountedString(sd); // APC did an uncounted inc-ref
+void apcExtension::serialize(BlobEncoder& sd) {
+  apc_store().dumpKeysWithPrefixes(sd, SerializePrefix);
 }
 
 void apcExtension::purgeDeferred(req::vector<StringData*>&& keys) {

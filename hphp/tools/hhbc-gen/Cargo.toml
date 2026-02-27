@@ -17,4 +17,4 @@ once_cell = "1.21"
 
 [build-dependencies]
 anyhow = "1.0.101"
-cc = "1.2.10"
+cc = "1.2.56"

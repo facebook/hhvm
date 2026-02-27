@@ -31,6 +31,8 @@ struct IRGS;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void emitCalleeNamedArgChecks(IRGS& env, const Func* callee, uint32_t argc,
+                              SSATmp* namedArgNames);
 /*
  * Check for presence, count and wildcard match of generics.
  *

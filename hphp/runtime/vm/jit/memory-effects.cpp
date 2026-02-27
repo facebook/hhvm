@@ -1874,6 +1874,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdCoeffectFunParamNaive:
   case RaiseModuleBoundaryViolation:
   case RaiseModulePropertyViolation:
+  case ThrowMissingNamedArgument:
+  case ThrowNamedArgumentNameMismatch:
     return may_load_store(AEmpty, AEmpty);
 
   case StaticAnalysisError:

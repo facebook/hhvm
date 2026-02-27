@@ -436,6 +436,8 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseMissingDynamicallyReferenced:
   case RaiseModuleBoundaryViolation:
   case RaiseModulePropertyViolation:
+  case ThrowMissingNamedArgument:
+  case ThrowNamedArgumentNameMismatch:
   case RaiseNotice:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:

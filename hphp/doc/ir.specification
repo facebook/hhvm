@@ -3501,6 +3501,14 @@ fields of that struct for holding intermediate values.
   Throws an InvalidOperationException indicating a readonly semantics violation
   where a collection is modified.
 
+| ThrowMissingNamedArgument<callee>, ND, S(Int), T
+  Throws an exception to indicate that too few named arguments were
+  passed to the callee.
+
+| ThrowNamedArgumentNameMismatch<callee>, ND, S(Str), T
+  Throws an exception to indicate that a named argument not present in
+  the named parameter list was passed to the callee.
+
 | ProfileType, ND, S(Cell), NF
 
   Profile the type of S0.

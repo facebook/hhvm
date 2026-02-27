@@ -3212,6 +3212,9 @@ X(RaiseCoeffectsFunParamTypeViolation,
                                 ParamData);
 X(RaiseModuleBoundaryViolation, OptClassAndFuncData);
 X(RaiseModulePropertyViolation, ModulePropAccessData);
+X(ThrowMissingNamedArgument,    FuncData);
+X(ThrowNamedArgumentNameMismatch,
+                                FuncData);
 X(CallViolatesModuleBoundary,   FuncData);
 X(CheckInOutMismatch,           BoolVecArgsData);
 X(ThrowInOutMismatch,           ParamData);

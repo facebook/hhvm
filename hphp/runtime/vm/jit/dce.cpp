@@ -554,6 +554,8 @@ bool canDCE(const IRInstruction& inst) {
   case RaiseStrToClassNotice:
   case RaiseModuleBoundaryViolation:
   case RaiseModulePropertyViolation:
+  case ThrowMissingNamedArgument:
+  case ThrowNamedArgumentNameMismatch:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckClsRGSoft:

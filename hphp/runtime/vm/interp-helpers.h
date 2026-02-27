@@ -297,7 +297,7 @@ inline void calleeNamedArgChecks(const Func* callee,
       paramIdx++;
     }
     if (paramIdx >= namedParamCount) {
-      throwNamedArgumentNameMismatch(callee, argName->toCppString());
+      throwNamedArgumentNameMismatch(callee, argName);
     }
     paramIdx++;
   }

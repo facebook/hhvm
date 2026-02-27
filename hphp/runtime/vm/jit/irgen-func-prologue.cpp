@@ -96,6 +96,42 @@ StackCheck stack_check_kind(const Func* func) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+
+void emitCalleeNamedArgChecks(IRGS& env, const Func* callee, uint32_t argc,
+                              SSATmp* namedArgNames) {
+  // TODO(named_params) support named arg checks when we don't know the named arg
+  // names statically (i.e. passed in via a register/stack.) and support optionals.
+  assertx(namedArgNames == nullptr || namedArgNames->hasConstVal(TVec));
+  uint32_t namedParamCount = callee->numNamedParams();
+  auto const namedArgNamesVal =
+    namedArgNames == nullptr ? nullptr : namedArgNames->arrLikeVal();
+  int namedArgNamesSize = namedArgNamesVal ? namedArgNamesVal->size() : 0;
+  // TODO(named_params): These checks match what the interpreter does (it looks ridiculous
+  // because the JIT side doesn't support optionals yet, so the checks we do there reduce
+  // down to this comparison) but once optionals are supported the structure will change.
+  if (namedArgNamesSize > namedParamCount) {
+    auto name = namedArgNamesVal->at(namedParamCount).val().pstr;
+    gen(env, ThrowNamedArgumentNameMismatch,
+        FuncData{callee}, cns(env, name));
+    return;
+  }
+
+  if (namedArgNamesSize < namedParamCount) {
+    gen(env, ThrowMissingNamedArgument, FuncData{callee},
+        cns(env, namedArgNamesSize));
+    return;
+  }
+
+  PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
+  for (uint32_t i = 0; i < namedParamCount; ++i) {
+    auto name = namedArgNamesVal->at(i).val().pstr;
+    if (namedParamNames[i] != name) {
+      gen(env, ThrowNamedArgumentNameMismatch,
+          FuncData{callee}, cns(env, name));
+    }
+  }
+}
+
 void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
                               SSATmp* prologueFlags, bool pushed) {
   if (!callee->hasReifiedGenerics()) {
@@ -199,8 +235,11 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
  */
 void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
                                    uint32_t& argc) {
-  if (argc < callee->numRequiredParams()) {
-    gen(env, ThrowMissingArg, FuncArgData { callee, argc });
+  // The arity checks are emitted after the named arg ones, which will
+  // populate the stack with default values for named params that weren't passed in.
+  uint32_t posArgc = argc - callee->numNamedParams();
+  if (posArgc < callee->numRequiredPositionalParams()) {
+    gen(env, ThrowMissingArg, FuncArgData { callee, posArgc });
   }
 
   if (argc > callee->numParams()) {

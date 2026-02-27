@@ -420,8 +420,7 @@ void speculateTargetFunction(IRGS& env, SSATmp* callee,
       gen(env, JmpZero, taken, equal);
     },
     [&] {
-      // TODO(named_params): support callKnown here.
-      if (profiledFunc->numNamedParams() != 0) {
+      if (profiledFunc->numNamedParams() != profiledFunc->numRequiredNamedParams()) {
         indirectCall();
       } else {
         callKnown(profiledFunc);
@@ -602,9 +601,9 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
                          SSATmp* objOrClass, bool dynamicCall,
                          bool suppressDynCallCheck) {
   assertx(callee);
-  // TODO(named_params): Add support for calling the func entry
-  // of functions with named params and remove this assertion.
-  assertx(callee->numNamedParams() == 0);
+  // TODO(named_params): Add support for calling the func entry of functions
+  // with optional named params and relax this assertion.
+  assertx(callee->numNamedParams() == callee->numRequiredNamedParams());
 
   updateStackOffset(env);
 
@@ -626,6 +625,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     auto const asyncEagerReturn = asyncEagerOffset != kInvalidOffset;
 
     if (!skipRepack) {
+      // TODO(named_params) Add prologue calling convention support.
+      if (fca.hasNamedArgs()) return interpOne(env);
       // Use the generic prologue method dispatch that can handle arg repacking.
       auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
                                    skipRepack, dynamicCall, asyncEagerReturn);
@@ -658,9 +659,13 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     // be hoisted through the parameter checks.
     auto const calleeFP = genCalleeFP(env, callee, fca.numInputs());
 
+    SSATmp* namedArgNames =
+      fca.namedArgNames == kInvalidId
+        ? nullptr
+        : cns(env, curUnit(env)->lookupArrayId(fca.namedArgNames));
     // Callee checks and input initialization.
-    // TODO(named_params) insert stack reordering work and checks here for named
-    // args.
+    // TODO(named_params) extend named arg checks to include optional named params
+    emitCalleeNamedArgChecks(env, callee, numArgsInclUnpack, namedArgNames);
     emitCalleeGenericsChecks(env, callee, prologueFlags, fca.hasGenerics());
     emitCalleeArgumentArityChecks(env, callee, numArgsInclUnpack);
     emitCalleeArgumentTypeChecks(
@@ -792,14 +797,14 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     fca.numRets,
     nullptr,  // inout-ness already checked
     nullptr,  // readonly-ness already checked
-    kInvalidId, // TODO(named_params) thread named args through properly here
+    fca.namedArgNames,
     fca.asyncEagerOffset,
     fca.context
   ), true /* skipRepack */);
 }
 
 bool canCallKnown(const Func* f) {
-  return f && f->numNamedParams() == 0;
+  return f && f->numNamedParams() == f->numRequiredNamedParams();
 }
 
 bool canCallKnown(const SSATmp* tmp) {
@@ -818,12 +823,15 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                            SSATmp* objOrClass, bool dynamicCall,
                            bool suppressDynCallCheck, bool unlikely) {
   assertx(callee->isA(TFunc));
-  // TODO(named_params): Support func entry calls with named parameters.
   if (canCallKnown(callee)) {
     prepareAndCallKnown(env, callee->funcVal(), fca, objOrClass,
                         dynamicCall, suppressDynCallCheck);
     return;
   }
+
+  // TODO(named_params) need to handle calling into prologues of unknown
+  // functions and set up the VM stack properly.
+  if (fca.namedArgNames != kInvalidId) return interpOne(env);
 
   updateStackOffset(env);
 
@@ -849,7 +857,6 @@ void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     prepareAndCallKnown(env, knownCallee, fca, objOrClass,
                         dynamicCall, suppressDynCallCheck);
   };
-  // TODO(named_params): Support func entry calls with named parameters.
   if (canCallKnown(callee)) return handleKnown(callee->funcVal());
 
   auto const handleUnknown = [&] (bool unlikely) {
@@ -1075,7 +1082,7 @@ void optimizeProfiledCallMethod(IRGS& env,
 
   MethProfile data = profile.data();
 
-  // TODO(named_params): Support func entry calls with named parameters.
+  // TODO(named_params): Support func entry calls with optional named parameters.
   if (auto const uniqueMeth = knownCallee(data.uniqueMeth())) {
     assertx(uniqueMeth->name()->same(methodName));
     if (auto const uniqueClass = data.uniqueClass()) {
@@ -1478,8 +1485,6 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
 }
 
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
-  // TODO(named_params) add JIT support for named args.
-  if (fca.hasNamedArgs()) return interpOne(env);
   auto const lookup = lookupKnownFuncMaybe(env, funcName);
   auto const fast = [&]() {
     emitModuleBoundaryCheckKnown(env, lookup.func);
@@ -1510,6 +1515,9 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
 
   switch (lookup.tag) {
     case Func::FuncLookupResult::None:
+
+      // TODO(named_params) add JIT support for named args.
+      if (fca.hasNamedArgs()) return interpOne(env);
       if (Cfg::Sandbox::Speculate && Cfg::Eval::LogClsSpeculation) {
         gen(env, LogClsSpeculation, data(nullptr, false));
       }
@@ -1517,6 +1525,8 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
     case Func::FuncLookupResult::Exact:
       return fast();
     case Func::FuncLookupResult::Maybe:
+      // TODO(named_params) add JIT support for named args.
+      if (fca.hasNamedArgs()) return interpOne(env);
       auto const loadedFunc = gen(env, LdFuncCached, FuncNameData { funcName } );
       ifThenElse(
         env,

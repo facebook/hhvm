@@ -323,15 +323,16 @@ void throwMissingNamedArgument(const Func* func, int got) {
   SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
 }
 
-void throwNamedArgumentNameMismatch(const Func* func, std::string argName) {
+void throwNamedArgumentNameMismatch(const Func* func, const StringData* argName) {
   auto const errMsg = folly::sformat(
     "Named argument {} does not match any named parameter in call to {}",
-    argName,
+    argName->toCppString(),
     func->fullNameWithClosureName()
   );
   SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
 }
 
+// TODO(named_params) this needs to be made named-args aware.
 void raiseTooManyArguments(const Func* func, int got) {
   assertx(!func->hasVariadicCaptureParam());
 
@@ -345,12 +346,15 @@ void raiseTooManyArguments(const Func* func, int got) {
   auto const errMsg = formatArgumentErrMsg(func, amount, total, got);
 
   if (Cfg::Eval::WarnOnTooManyArguments > 1 || func->isCPPBuiltin()) {
+    // TODO(named_params): Once we have named param support, this should always
+    // throw.
     SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
   } else {
     raise_warning(errMsg);
   }
 }
 
+// TODO(named_params) this needs to be made named-args aware.
 void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
   SCOPE_EXIT { decRefArr(unpackArgs); };
   if (unpackArgs->empty()) return;

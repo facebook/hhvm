@@ -67,6 +67,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.containerTypedef",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_map_i16_string,
+                NewFunc:            func() any { return NewContainerTypedef() },
             },
     }
     premadeCodecTypeSpec_module_ComplexUnion = &thrift.TypeSpec{

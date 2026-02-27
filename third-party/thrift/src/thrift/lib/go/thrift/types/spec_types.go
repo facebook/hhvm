@@ -67,6 +67,7 @@ type CodecPrimitiveSpec struct {
 // CodecEnumSpec is a spec for an enum type.
 type CodecEnumSpec struct {
 	ScopedName string
+	NewFunc    func() any
 }
 
 // CodecSetSpec is a spec for a set type.
@@ -100,6 +101,7 @@ type CodecStructSpec struct {
 type CodecTypedefSpec struct {
 	ScopedName         string
 	UnderlyingTypeSpec *TypeSpec
+	NewFunc            func() any
 }
 
 // TypeSpec is a union of all concrete specs.

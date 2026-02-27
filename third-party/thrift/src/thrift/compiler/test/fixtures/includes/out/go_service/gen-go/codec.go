@@ -24,6 +24,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "service.IncludesIncluded",
                 UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.Included"),
+                NewFunc:            func() any { return NewIncludesIncluded() },
             },
     }
     premadeCodecTypeSpec_service_IncludesTransitiveFoo = &thrift.TypeSpec{
@@ -32,6 +33,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "service.IncludesTransitiveFoo",
                 UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.TransitiveFoo"),
+                NewFunc:            func() any { return NewIncludesTransitiveFoo() },
             },
     }
     premadeCodecTypeSpec_void = &thrift.TypeSpec{

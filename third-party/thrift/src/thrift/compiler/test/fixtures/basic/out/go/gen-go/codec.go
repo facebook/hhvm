@@ -19,6 +19,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.MyEnum",
+                NewFunc:    func() any { return MyEnum(0) },
             },
     }
     premadeCodecTypeSpec_module_HackEnum = &thrift.TypeSpec{
@@ -26,6 +27,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.HackEnum",
+                NewFunc:    func() any { return HackEnum(0) },
             },
     }
     premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
@@ -57,6 +59,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyDataItemAlias",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyDataItem,
+                NewFunc:            func() any { return NewMyDataItemAlias() },
             },
     }
     premadeCodecTypeSpec_bool = &thrift.TypeSpec{
@@ -138,6 +141,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyEnumAlias",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyEnum,
+                NewFunc:            func() any { return NewMyEnumAlias() },
             },
     }
     premadeCodecTypeSpec_module_MyUnion = &thrift.TypeSpec{

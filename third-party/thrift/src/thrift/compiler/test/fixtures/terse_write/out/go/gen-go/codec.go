@@ -19,6 +19,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "terse_write.MyEnum",
+                NewFunc:    func() any { return MyEnum(0) },
             },
     }
     premadeCodecTypeSpec_terse_write_MyStruct = &thrift.TypeSpec{
@@ -161,6 +162,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "terse_write.MyInteger",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+                NewFunc:            func() any { return NewMyInteger() },
             },
     }
     premadeCodecTypeSpec_terse_write_AdaptedFields = &thrift.TypeSpec{

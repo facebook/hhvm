@@ -19,6 +19,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.Color",
+                NewFunc:    func() any { return Color(0) },
             },
     }
     premadeCodecTypeSpec_module_ThriftAdaptedEnum = &thrift.TypeSpec{
@@ -26,6 +27,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.ThriftAdaptedEnum",
+                NewFunc:    func() any { return ThriftAdaptedEnum(0) },
             },
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
@@ -57,6 +59,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.i32_5137",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+                NewFunc:            func() any { return NewI32_5137() },
             },
     }
     premadeCodecTypeSpec_set_string = &thrift.TypeSpec{
@@ -73,6 +76,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.SetWithAdapter",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_set_string,
+                NewFunc:            func() any { return NewSetWithAdapter() },
             },
     }
     premadeCodecTypeSpec_module_StringWithAdapter = &thrift.TypeSpec{
@@ -81,6 +85,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.StringWithAdapter",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                NewFunc:            func() any { return NewStringWithAdapter() },
             },
     }
     premadeCodecTypeSpec_list_module_StringWithAdapter = &thrift.TypeSpec{
@@ -97,6 +102,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.ListWithElemAdapter",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_list_module_StringWithAdapter,
+                NewFunc:            func() any { return NewListWithElemAdapter() },
             },
     }
     premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter = &thrift.TypeSpec{
@@ -105,6 +111,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.ListWithElemAdapter_withAdapter",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_ListWithElemAdapter,
+                NewFunc:            func() any { return NewListWithElemAdapterWithAdapter() },
             },
     }
     premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter_2312 = &thrift.TypeSpec{
@@ -113,6 +120,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.ListWithElemAdapter_withAdapter_2312",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter,
+                NewFunc:            func() any { return NewListWithElemAdapterWithAdapter_2312() },
             },
     }
     premadeCodecTypeSpec_map_string_module_ListWithElemAdapter_withAdapter_2312 = &thrift.TypeSpec{
@@ -131,6 +139,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.map_string_ListWithElemAdapter_withAdapter_8454",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_map_string_module_ListWithElemAdapter_withAdapter_2312,
+                NewFunc:            func() any { return NewMapString_ListWithElemAdapterWithAdapter_8454() },
             },
     }
     premadeCodecTypeSpec_binary = &thrift.TypeSpec{
@@ -146,6 +155,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.binary_5673",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_binary,
+                NewFunc:            func() any { return NewBinary_5673() },
             },
     }
     premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
@@ -161,6 +171,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyI64",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
+                NewFunc:            func() any { return NewMyI64() },
             },
     }
     premadeCodecTypeSpec_module_DoubleTypedefI64 = &thrift.TypeSpec{
@@ -169,6 +180,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.DoubleTypedefI64",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyI64,
+                NewFunc:            func() any { return NewDoubleTypedefI64() },
             },
     }
     premadeCodecTypeSpec_list_i32 = &thrift.TypeSpec{
@@ -247,6 +259,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.Foo_6868",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_Foo,
+                NewFunc:            func() any { return NewFoo_6868() },
             },
     }
     premadeCodecTypeSpec_module_Foo_3943 = &thrift.TypeSpec{
@@ -255,6 +268,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.Foo_3943",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_Foo,
+                NewFunc:            func() any { return NewFoo_3943() },
             },
     }
     premadeCodecTypeSpec_module_FooWithAdapter = &thrift.TypeSpec{
@@ -263,6 +277,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.FooWithAdapter",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_Foo,
+                NewFunc:            func() any { return NewFooWithAdapter() },
             },
     }
     premadeCodecTypeSpec_module_FooWithAdapter_9317 = &thrift.TypeSpec{
@@ -271,6 +286,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.FooWithAdapter_9317",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_FooWithAdapter,
+                NewFunc:            func() any { return NewFooWithAdapter_9317() },
             },
     }
     premadeCodecTypeSpec_list_module_FooWithAdapter_9317 = &thrift.TypeSpec{
@@ -287,6 +303,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.Baz_7352",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_Baz,
+                NewFunc:            func() any { return NewBaz_7352() },
             },
     }
     premadeCodecTypeSpec_module_DirectlyAdapted = &thrift.TypeSpec{
@@ -312,6 +329,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.ListOfFooTypedef",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_list_module_Foo,
+                NewFunc:            func() any { return NewListOfFooTypedef() },
             },
     }
     premadeCodecTypeSpec_module_Bar = &thrift.TypeSpec{
@@ -365,6 +383,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AdaptedA",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_A,
+                NewFunc:            func() any { return NewAdaptedA() },
             },
     }
     premadeCodecTypeSpec_module_B = &thrift.TypeSpec{
@@ -400,6 +419,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.DurationMs",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
+                NewFunc:            func() any { return NewDurationMs() },
             },
     }
     premadeCodecTypeSpec_module_IOBuf = &thrift.TypeSpec{
@@ -408,6 +428,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.IOBuf",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_binary,
+                NewFunc:            func() any { return NewIOBuf() },
             },
     }
     premadeCodecTypeSpec_module_CustomProtocolType = &thrift.TypeSpec{
@@ -416,6 +437,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.CustomProtocolType",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_IOBuf,
+                NewFunc:            func() any { return NewCustomProtocolType() },
             },
     }
     premadeCodecTypeSpec_module_IndirectionString = &thrift.TypeSpec{
@@ -424,6 +446,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.IndirectionString",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                NewFunc:            func() any { return NewIndirectionString() },
             },
     }
     premadeCodecTypeSpec_bool = &thrift.TypeSpec{
@@ -439,6 +462,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AdaptedBool",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_bool,
+                NewFunc:            func() any { return NewAdaptedBool() },
             },
     }
     premadeCodecTypeSpec_module_AdaptedInteger = &thrift.TypeSpec{
@@ -447,6 +471,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AdaptedInteger",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+                NewFunc:            func() any { return NewAdaptedInteger() },
             },
     }
     premadeCodecTypeSpec_module_AdaptTestStruct = &thrift.TypeSpec{
@@ -471,6 +496,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AdaptedByte",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_byte,
+                NewFunc:            func() any { return NewAdaptedByte() },
             },
     }
     premadeCodecTypeSpec_i16 = &thrift.TypeSpec{
@@ -486,6 +512,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AdaptedShort",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i16,
+                NewFunc:            func() any { return NewAdaptedShort() },
             },
     }
     premadeCodecTypeSpec_module_AdaptedLong = &thrift.TypeSpec{
@@ -494,6 +521,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AdaptedLong",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
+                NewFunc:            func() any { return NewAdaptedLong() },
             },
     }
     premadeCodecTypeSpec_double = &thrift.TypeSpec{
@@ -509,6 +537,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AdaptedDouble",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_double,
+                NewFunc:            func() any { return NewAdaptedDouble() },
             },
     }
     premadeCodecTypeSpec_module_AdaptedString = &thrift.TypeSpec{
@@ -517,6 +546,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AdaptedString",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                NewFunc:            func() any { return NewAdaptedString() },
             },
     }
     premadeCodecTypeSpec_list_i64 = &thrift.TypeSpec{
@@ -551,6 +581,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AdaptedEnum",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_ThriftAdaptedEnum,
+                NewFunc:            func() any { return NewAdaptedEnum() },
             },
     }
     premadeCodecTypeSpec_module_DoubleTypedefBool = &thrift.TypeSpec{
@@ -559,6 +590,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.DoubleTypedefBool",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_AdaptedBool,
+                NewFunc:            func() any { return NewDoubleTypedefBool() },
             },
     }
     premadeCodecTypeSpec_module_AdaptTemplatedTestStruct = &thrift.TypeSpec{
@@ -612,6 +644,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AdaptedTypedef",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_AdaptedStruct,
+                NewFunc:            func() any { return NewAdaptedTypedef() },
             },
     }
     premadeCodecTypeSpec_module_TypedefOfDirect = &thrift.TypeSpec{
@@ -620,6 +653,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.TypedefOfDirect",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_DirectlyAdaptedStruct,
+                NewFunc:            func() any { return NewTypedefOfDirect() },
             },
     }
     premadeCodecTypeSpec_module_StructFieldAdaptedStruct = &thrift.TypeSpec{
@@ -655,6 +689,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AdaptedCircularAdaptee",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_CircularAdaptee,
+                NewFunc:            func() any { return NewAdaptedCircularAdaptee() },
             },
     }
     premadeCodecTypeSpec_module_DeclaredAfterStruct = &thrift.TypeSpec{
@@ -744,6 +779,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.CountingInt",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
+                NewFunc:            func() any { return NewCountingInt() },
             },
     }
     premadeCodecTypeSpec_module_CountingStruct = &thrift.TypeSpec{
@@ -788,6 +824,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyI32",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+                NewFunc:            func() any { return NewMyI32() },
             },
     }
     premadeCodecTypeSpec_module_StructWithAdapter = &thrift.TypeSpec{
@@ -796,6 +833,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.StructWithAdapter",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_Bar,
+                NewFunc:            func() any { return NewStructWithAdapter() },
             },
     }
     premadeCodecTypeSpec_module_UnionWithAdapter = &thrift.TypeSpec{
@@ -804,6 +842,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.UnionWithAdapter",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_Baz,
+                NewFunc:            func() any { return NewUnionWithAdapter() },
             },
     }
     premadeCodecTypeSpec_module_StringWithCppAdapter = &thrift.TypeSpec{
@@ -812,6 +851,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.StringWithCppAdapter",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                NewFunc:            func() any { return NewStringWithCppAdapter() },
             },
     }
     premadeCodecTypeSpec_module_MyI32_4873 = &thrift.TypeSpec{
@@ -820,6 +860,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyI32_4873",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyI32,
+                NewFunc:            func() any { return NewMyI32_4873() },
             },
     }
     premadeCodecTypeSpec_module_StringWithAdapter_7208 = &thrift.TypeSpec{
@@ -828,6 +869,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.StringWithAdapter_7208",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_StringWithAdapter,
+                NewFunc:            func() any { return NewStringWithAdapter_7208() },
             },
     }
 )

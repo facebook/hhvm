@@ -19,6 +19,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.Animal",
+                NewFunc:    func() any { return Animal(0) },
             },
     }
     premadeCodecTypeSpec_double = &thrift.TypeSpec{
@@ -73,6 +74,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.PersonID",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
+                NewFunc:            func() any { return NewPersonID() },
             },
     }
     premadeCodecTypeSpec_i16 = &thrift.TypeSpec{

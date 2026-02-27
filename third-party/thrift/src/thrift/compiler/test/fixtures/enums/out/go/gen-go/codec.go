@@ -21,6 +21,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.Metasyntactic",
+                NewFunc:    func() any { return Metasyntactic(0) },
             },
     }
     premadeCodecTypeSpec_module_MyEnum1 = &thrift.TypeSpec{
@@ -28,6 +29,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.MyEnum1",
+                NewFunc:    func() any { return MyEnum1(0) },
             },
     }
     premadeCodecTypeSpec_module_MyEnum2 = &thrift.TypeSpec{
@@ -35,6 +37,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.MyEnum2",
+                NewFunc:    func() any { return MyEnum2(0) },
             },
     }
     premadeCodecTypeSpec_module_MyEnum3 = &thrift.TypeSpec{
@@ -42,6 +45,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.MyEnum3",
+                NewFunc:    func() any { return MyEnum3(0) },
             },
     }
     premadeCodecTypeSpec_module_MyEnum4 = &thrift.TypeSpec{
@@ -49,6 +53,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.MyEnum4",
+                NewFunc:    func() any { return MyEnum4(0) },
             },
     }
     premadeCodecTypeSpec_module_MyBitmaskEnum1 = &thrift.TypeSpec{
@@ -56,6 +61,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.MyBitmaskEnum1",
+                NewFunc:    func() any { return MyBitmaskEnum1(0) },
             },
     }
     premadeCodecTypeSpec_module_MyBitmaskEnum2 = &thrift.TypeSpec{
@@ -63,6 +69,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.MyBitmaskEnum2",
+                NewFunc:    func() any { return MyBitmaskEnum2(0) },
             },
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
@@ -104,6 +111,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.IncludedEnumAlias",
                 UnderlyingTypeSpec: includedEnum.GetCodecTypeSpec("included_enum.IncludedEnum"),
+                NewFunc:            func() any { return NewIncludedEnumAlias() },
             },
     }
 )

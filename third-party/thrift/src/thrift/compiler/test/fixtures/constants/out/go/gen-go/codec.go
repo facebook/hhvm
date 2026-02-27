@@ -19,6 +19,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.EmptyEnum",
+                NewFunc:    func() any { return EmptyEnum(0) },
             },
     }
     premadeCodecTypeSpec_module_City = &thrift.TypeSpec{
@@ -26,6 +27,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.City",
+                NewFunc:    func() any { return City(0) },
             },
     }
     premadeCodecTypeSpec_module_Company = &thrift.TypeSpec{
@@ -33,6 +35,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.Company",
+                NewFunc:    func() any { return Company(0) },
             },
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
@@ -149,6 +152,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyCompany",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_Company,
+                NewFunc:            func() any { return NewMyCompany() },
             },
     }
     premadeCodecTypeSpec_module_MyStringIdentifier = &thrift.TypeSpec{
@@ -157,6 +161,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyStringIdentifier",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                NewFunc:            func() any { return NewMyStringIdentifier() },
             },
     }
     premadeCodecTypeSpec_module_MyIntIdentifier = &thrift.TypeSpec{
@@ -165,6 +170,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyIntIdentifier",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+                NewFunc:            func() any { return NewMyIntIdentifier() },
             },
     }
     premadeCodecTypeSpec_map_string_string = &thrift.TypeSpec{
@@ -183,6 +189,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.MyMapIdentifier",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_map_string_string,
+                NewFunc:            func() any { return NewMyMapIdentifier() },
             },
     }
     premadeCodecTypeSpec_list_module_City = &thrift.TypeSpec{
@@ -209,6 +216,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.CompanyLocationsMap",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_map_module_Company_list_module_City,
+                NewFunc:            func() any { return NewCompanyLocationsMap() },
             },
     }
 )

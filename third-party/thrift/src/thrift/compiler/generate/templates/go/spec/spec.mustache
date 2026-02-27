@@ -39,6 +39,7 @@
 &thrift.CodecTypedefSpec{
     ScopedName:         "{{type.scoped_name}}",
     UnderlyingTypeSpec: {{type.resolved.codec_type_spec_getter}},
+    NewFunc:            func() any { return {{type.go_qualified_new_func}}() },
 },
 {{#else if type.primitive?}}
 &thrift.CodecPrimitiveSpec{
@@ -47,6 +48,7 @@
 {{#else if type.enum?}}
 &thrift.CodecEnumSpec{
     ScopedName: "{{type.scoped_name}}",
+    NewFunc:    func() any { return {{type.go_name}}(0) },
 },
 {{#else if type.structured?}}
 &thrift.CodecStructSpec{

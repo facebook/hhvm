@@ -19,6 +19,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module2.Enum",
+                NewFunc:    func() any { return Enum(0) },
             },
     }
 )

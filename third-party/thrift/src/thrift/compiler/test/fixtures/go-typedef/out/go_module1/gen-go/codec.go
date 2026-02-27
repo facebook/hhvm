@@ -31,6 +31,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Plate",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                NewFunc:            func() any { return NewPlate() },
             },
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
@@ -46,6 +47,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Year",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+                NewFunc:            func() any { return NewYear() },
             },
     }
     premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
@@ -62,6 +64,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Drivers",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
+                NewFunc:            func() any { return NewDrivers() },
             },
     }
     premadeCodecTypeSpec_module1_Accessory = &thrift.TypeSpec{
@@ -70,6 +73,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Accessory",
                 UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.Accessory"),
+                NewFunc:            func() any { return NewAccessory() },
             },
     }
     premadeCodecTypeSpec_list_module1_Accessory = &thrift.TypeSpec{
@@ -86,6 +90,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.PartName",
                 UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.PartName"),
+                NewFunc:            func() any { return NewCarPartName() },
             },
     }
     premadeCodecTypeSpec_map_i32_module1_PartName = &thrift.TypeSpec{
@@ -148,6 +153,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Car",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module1_Automobile,
+                NewFunc:            func() any { return NewCar() },
             },
     }
     premadeCodecTypeSpec_module1_Pair = &thrift.TypeSpec{
@@ -190,6 +196,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.State",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                NewFunc:            func() any { return NewState() },
             },
     }
     premadeCodecTypeSpec_module1_Enum = &thrift.TypeSpec{
@@ -198,6 +205,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module1.Enum",
                 UnderlyingTypeSpec: module2.GetCodecTypeSpec("module2.Enum"),
+                NewFunc:            func() any { return NewEnum() },
             },
     }
 )

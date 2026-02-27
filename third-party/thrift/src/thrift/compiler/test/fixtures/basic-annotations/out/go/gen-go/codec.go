@@ -19,6 +19,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.MyEnum",
+                NewFunc:    func() any { return MyEnum(0) },
             },
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
@@ -67,6 +68,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.list_string_6884",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
+                NewFunc:            func() any { return NewListString_6884() },
             },
     }
     premadeCodecTypeSpec_module_MyStruct = &thrift.TypeSpec{
@@ -102,6 +104,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.AwesomeStruct",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyStruct,
+                NewFunc:            func() any { return NewIncredibleStruct() },
             },
     }
     premadeCodecTypeSpec_module_FantasticStruct = &thrift.TypeSpec{
@@ -110,6 +113,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.FantasticStruct",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyStruct,
+                NewFunc:            func() any { return NewBrilliantStruct() },
             },
     }
     premadeCodecTypeSpec_void = &thrift.TypeSpec{

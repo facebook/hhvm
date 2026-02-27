@@ -19,6 +19,7 @@ var (
         CodecEnumSpec:
             &thrift.CodecEnumSpec{
                 ScopedName: "module.B",
+                NewFunc:    func() any { return B(0) },
             },
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
@@ -68,6 +69,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.lanyard",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                NewFunc:            func() any { return NewLanyard() },
             },
     }
     premadeCodecTypeSpec_module_number = &thrift.TypeSpec{
@@ -76,6 +78,7 @@ var (
             &thrift.CodecTypedefSpec{
                 ScopedName:         "module.number",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+                NewFunc:            func() any { return NewNumber() },
             },
     }
     premadeCodecTypeSpec_void = &thrift.TypeSpec{

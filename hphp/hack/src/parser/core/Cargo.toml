@@ -11,7 +11,7 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-heapless = "0.9.1"
+heapless = "0.9.2"
 operator = { version = "0.0.0", path = "../cargo/operator" }
 parser_core_types = { version = "0.0.0", path = "../cargo/core_types" }
 smallvec = { version = "1.15", features = ["impl_bincode", "serde", "specialization", "union"] }

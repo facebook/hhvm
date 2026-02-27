@@ -12,4 +12,4 @@ path = "lib.rs"
 
 [dependencies]
 psm = "0.1.29"
-stacker = "0.1.14"
+stacker = "0.1.23"

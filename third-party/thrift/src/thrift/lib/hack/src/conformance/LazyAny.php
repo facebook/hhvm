@@ -29,7 +29,7 @@ final class LazyAny implements JsonSerializable {
 
   <<__Memoize>>
   public function get<T as IThriftStruct>(
-    classname<T> $cls,
+    class<T> $cls,
     ?apache_thrift_StandardProtocol $protocol = null,
   )[write_props]: T {
     return $this->data->map(
@@ -39,11 +39,7 @@ final class LazyAny implements JsonSerializable {
         } else {
           self::validateAny($serialized, $cls);
           $serializer = self::getSerializer($protocol ?? $serialized->protocol);
-          return HH\classname_to_class($serializer)
-            |> $$::deserialize(
-              $serialized->data,
-              HH\classname_to_class($cls) |> new $$(),
-            );
+          return $serializer::deserialize($serialized->data, new $cls());
         }
       },
       $deserialized ==> ArgAssert::isInstance($deserialized, $cls),
@@ -51,7 +47,7 @@ final class LazyAny implements JsonSerializable {
   }
 
   public function getReified<reify T as IThriftStruct>()[write_props]: T {
-    return $this->get(HH\ReifiedGenerics\get_classname<T>());
+    return $this->get(HH\ReifiedGenerics\get_class_from_type<T>());
   }
 
   <<__Memoize>>
@@ -61,7 +57,7 @@ final class LazyAny implements JsonSerializable {
     return $this->data->map(
       $serialized ==> {
         if (self::isEmptyAny($serialized)) {
-          return new $cls();
+          return HH\classname_to_class($cls) |> new $$();
         } else {
           self::validateAny($serialized, $cls);
           return TBinarySerializer::deserialize(
@@ -104,7 +100,7 @@ final class LazyAny implements JsonSerializable {
         }
 
         return $this->get(
-          ArgAssert::isClassname($class, IThriftStruct::class),
+          Classes::assertAndLoad($class, IThriftStruct::class),
           $protocol,
         );
       },
@@ -205,7 +201,7 @@ final class LazyAny implements JsonSerializable {
   // changed if binary protocol is added.
   private static function getSerializer(
     ?apache_thrift_StandardProtocol $protocol,
-  )[]: classname<TProtocolWritePropsSerializer> {
+  )[]: class<TProtocolWritePropsSerializer> {
     switch ($protocol ?? apache_thrift_StandardProtocol::Compact) {
       case apache_thrift_StandardProtocol::Compact:
         return TCompactSerializer::class;

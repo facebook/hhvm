@@ -527,7 +527,8 @@ scanRuntimeCalls(tc::FuncMetaInfo& info, const ProfData* pd) {
             // profile execution count.
             for (auto const& block : rt->region->blocks()) {
               if (block->start() == blockSk ||
-                  (block->start().func() == blockSk.func() &&
+                  (!blockSk.prologue() && !blockSk.funcEntry() &&
+                   block->start().func() == blockSk.func() &&
                    block->start().offset() <= blockSk.offset() &&
                    blockSk.offset() <= block->last().offset())) {
                 auto const bid = block->profTransID();

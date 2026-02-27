@@ -20,4 +20,4 @@ proc-macro2 = { version = "1.0.106", features = ["span-locations"] }
 quote = "1.0.44"
 signed_source = { version = "0.0.0", path = "../utils/rust/signed_source" }
 syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
-synstructure = "0.12"
+synstructure = "0.12.6"

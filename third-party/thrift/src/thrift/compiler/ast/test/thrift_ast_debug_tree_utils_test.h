@@ -43,8 +43,8 @@ constexpr auto kVirtualTestFileExpected = R"([t_program_bundle]
       ├─ includes_for_codegen (size: 0)
       ├─ namespaces (size: 1)
       │  ╰─ py3: foo.bar
-      ├─ namespace_nodes (size: 1)
-      │  ╰─ namespace_nodes[0] [t_namespace] @0xNORMALIZED_5
+      ├─ all_namespace_nodes (size: 1)
+      │  ╰─ all_namespace_nodes[0] [t_namespace] @0xNORMALIZED_5
       │     ├─ (base) [t_node] @0xNORMALIZED_5
       │     │  ├─ src_range [source_range]
       │     │  │  ├─ begin (offset): 0
@@ -634,8 +634,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  ├─ js: thrift.annotation.thrift
    │  │  ├─ py: thrift.annotation.thrift
    │  │  ╰─ py.asyncio: facebook_thrift_asyncio.annotation.thrift
-   │  ├─ namespace_nodes (size: 7)
-   │  │  ├─ namespace_nodes[0] [t_namespace] @0xNORMALIZED_30
+   │  ├─ all_namespace_nodes (size: 7)
+   │  │  ├─ all_namespace_nodes[0] [t_namespace] @0xNORMALIZED_30
    │  │  │  ├─ (base) [t_node] @0xNORMALIZED_30
    │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  ├─ begin (offset): 704
@@ -643,7 +643,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  ╰─ unstructured_annotations (size: 0)
    │  │  │  ├─ language: java
    │  │  │  ╰─ ns: com.facebook.thrift.annotation_deprecated
-   │  │  ├─ namespace_nodes[1] [t_namespace] @0xNORMALIZED_31
+   │  │  ├─ all_namespace_nodes[1] [t_namespace] @0xNORMALIZED_31
    │  │  │  ├─ (base) [t_node] @0xNORMALIZED_31
    │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  ├─ begin (offset): 761
@@ -651,7 +651,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  ╰─ unstructured_annotations (size: 0)
    │  │  │  ├─ language: android
    │  │  │  ╰─ ns: com.facebook.thrift.annotation_deprecated
-   │  │  ├─ namespace_nodes[2] [t_namespace] @0xNORMALIZED_32
+   │  │  ├─ all_namespace_nodes[2] [t_namespace] @0xNORMALIZED_32
    │  │  │  ├─ (base) [t_node] @0xNORMALIZED_32
    │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  ├─ begin (offset): 821
@@ -659,7 +659,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  ╰─ unstructured_annotations (size: 0)
    │  │  │  ├─ language: js
    │  │  │  ╰─ ns: thrift.annotation.thrift
-   │  │  ├─ namespace_nodes[3] [t_namespace] @0xNORMALIZED_33
+   │  │  ├─ all_namespace_nodes[3] [t_namespace] @0xNORMALIZED_33
    │  │  │  ├─ (base) [t_node] @0xNORMALIZED_33
    │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  ├─ begin (offset): 859
@@ -667,7 +667,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  ╰─ unstructured_annotations (size: 0)
    │  │  │  ├─ language: py.asyncio
    │  │  │  ╰─ ns: facebook_thrift_asyncio.annotation.thrift
-   │  │  ├─ namespace_nodes[4] [t_namespace] @0xNORMALIZED_34
+   │  │  ├─ all_namespace_nodes[4] [t_namespace] @0xNORMALIZED_34
    │  │  │  ├─ (base) [t_node] @0xNORMALIZED_34
    │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  ├─ begin (offset): 922
@@ -675,7 +675,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  ╰─ unstructured_annotations (size: 0)
    │  │  │  ├─ language: go
    │  │  │  ╰─ ns: thrift.annotation.thrift
-   │  │  ├─ namespace_nodes[5] [t_namespace] @0xNORMALIZED_35
+   │  │  ├─ all_namespace_nodes[5] [t_namespace] @0xNORMALIZED_35
    │  │  │  ├─ (base) [t_node] @0xNORMALIZED_35
    │  │  │  │  ├─ src_range [source_range]
    │  │  │  │  │  ├─ begin (offset): 960
@@ -683,7 +683,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │  │  │  ╰─ unstructured_annotations (size: 0)
    │  │  │  ├─ language: py
    │  │  │  ╰─ ns: thrift.annotation.thrift
-   │  │  ╰─ namespace_nodes[6] [t_namespace] @0xNORMALIZED_36
+   │  │  ╰─ all_namespace_nodes[6] [t_namespace] @0xNORMALIZED_36
    │  │     ├─ (base) [t_node] @0xNORMALIZED_36
    │  │     │  ├─ src_range [source_range]
    │  │     │  │  ├─ begin (offset): 998
@@ -3316,8 +3316,8 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  ├─ js: thrift.annotation.scope
       │  ├─ py: thrift.annotation.scope
       │  ╰─ py.asyncio: facebook_thrift_asyncio.annotation.scope
-      ├─ namespace_nodes (size: 6)
-      │  ├─ namespace_nodes[0] [t_namespace] @0xNORMALIZED_180
+      ├─ all_namespace_nodes (size: 6)
+      │  ├─ all_namespace_nodes[0] [t_namespace] @0xNORMALIZED_180
       │  │  ├─ (base) [t_node] @0xNORMALIZED_180
       │  │  │  ├─ src_range [source_range]
       │  │  │  │  ├─ begin (offset): 1111
@@ -3325,7 +3325,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  ╰─ unstructured_annotations (size: 0)
       │  │  ├─ language: java
       │  │  ╰─ ns: com.facebook.thrift.annotation_deprecated
-      │  ├─ namespace_nodes[1] [t_namespace] @0xNORMALIZED_181
+      │  ├─ all_namespace_nodes[1] [t_namespace] @0xNORMALIZED_181
       │  │  ├─ (base) [t_node] @0xNORMALIZED_181
       │  │  │  ├─ src_range [source_range]
       │  │  │  │  ├─ begin (offset): 1168
@@ -3333,7 +3333,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  ╰─ unstructured_annotations (size: 0)
       │  │  ├─ language: android
       │  │  ╰─ ns: com.facebook.thrift.annotation_deprecated
-      │  ├─ namespace_nodes[2] [t_namespace] @0xNORMALIZED_182
+      │  ├─ all_namespace_nodes[2] [t_namespace] @0xNORMALIZED_182
       │  │  ├─ (base) [t_node] @0xNORMALIZED_182
       │  │  │  ├─ src_range [source_range]
       │  │  │  │  ├─ begin (offset): 1228
@@ -3341,7 +3341,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  ╰─ unstructured_annotations (size: 0)
       │  │  ├─ language: js
       │  │  ╰─ ns: thrift.annotation.scope
-      │  ├─ namespace_nodes[3] [t_namespace] @0xNORMALIZED_183
+      │  ├─ all_namespace_nodes[3] [t_namespace] @0xNORMALIZED_183
       │  │  ├─ (base) [t_node] @0xNORMALIZED_183
       │  │  │  ├─ src_range [source_range]
       │  │  │  │  ├─ begin (offset): 1265
@@ -3349,7 +3349,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  ╰─ unstructured_annotations (size: 0)
       │  │  ├─ language: py.asyncio
       │  │  ╰─ ns: facebook_thrift_asyncio.annotation.scope
-      │  ├─ namespace_nodes[4] [t_namespace] @0xNORMALIZED_184
+      │  ├─ all_namespace_nodes[4] [t_namespace] @0xNORMALIZED_184
       │  │  ├─ (base) [t_node] @0xNORMALIZED_184
       │  │  │  ├─ src_range [source_range]
       │  │  │  │  ├─ begin (offset): 1327
@@ -3357,7 +3357,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
       │  │  │  ╰─ unstructured_annotations (size: 0)
       │  │  ├─ language: go
       │  │  ╰─ ns: thrift.annotation.scope
-      │  ╰─ namespace_nodes[5] [t_namespace] @0xNORMALIZED_185
+      │  ╰─ all_namespace_nodes[5] [t_namespace] @0xNORMALIZED_185
       │     ├─ (base) [t_node] @0xNORMALIZED_185
       │     │  ├─ src_range [source_range]
       │     │  │  ├─ begin (offset): 1364

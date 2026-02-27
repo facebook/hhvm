@@ -395,7 +395,7 @@ void validate_filename_is_not_reserved(sema_context& ctx, const t_named& node) {
 void validate_duplicate_namespaces(
     sema_context& ctx, const t_program& program) {
   std::unordered_set<std::string> languages_seen;
-  for (const t_namespace* ns : program.namespace_nodes()) {
+  for (const t_namespace* ns : program.all_namespace_nodes()) {
     if (languages_seen.insert(ns->language()).second) {
       continue;
     }

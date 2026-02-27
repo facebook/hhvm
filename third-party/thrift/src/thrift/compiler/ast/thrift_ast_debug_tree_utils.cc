@@ -584,13 +584,14 @@ scope& addChildForProgram(
     }
   }
 
-  const std::vector<t_namespace*>& namespaceNodes = program.namespace_nodes();
+  const std::vector<t_namespace*>& namespaceNodes =
+      program.all_namespace_nodes();
   if (!namespaceNodes.empty()) {
     scope& nsNodesScope = programScope.make_child(
-        "namespace_nodes (size: {})", namespaceNodes.size());
+        "all_namespace_nodes (size: {})", namespaceNodes.size());
     for (std::size_t i = 0; i < namespaceNodes.size(); ++i) {
       addChildForNamespaceNode(
-          fmt::format("namespace_nodes[{}]", i),
+          fmt::format("all_namespace_nodes[{}]", i),
           *namespaceNodes[i],
           nsNodesScope);
     }

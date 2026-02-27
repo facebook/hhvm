@@ -213,9 +213,7 @@ class t_program : public t_named {
     nodes_.push_back(std::move(ns));
     namespace_nodes_.push_back(ns_ptr);
 
-    if (!namespaces_.contains(language)) {
-      namespaces_[language] = ns_ptr;
-    }
+    namespaces_.try_emplace(language, ns_ptr);
   }
 
   /**
@@ -248,11 +246,28 @@ class t_program : public t_named {
 
   t_global_scope* global_scope() const { return global_scope_.get(); }
 
+  /**
+   * Returns the node corresponding to the *first* namespace directive parsed
+   * for each distinct language, in the source IDL file.
+   *
+   * See also: `all_namespace_nodes()`
+   */
   const std::map<std::string, t_namespace*>& namespaces() const {
     return namespaces_;
   }
 
-  const std::vector<t_namespace*>& namespace_nodes() const {
+  /**
+   * Returns all the `namespace` nodes parsed from the source IDL file.
+   *
+   * This differs from `namespaces()` above, in that the former follows a
+   * "first-wins" approach: if the source file contains multiple `namespace`
+   * directives with the same language, only the first one is returned by
+   * `namespaces()`.
+   *
+   * As of February 2026, work is ongoing to forbid duplicate namespaces from
+   * Thrift IDL, so eventually the distinction above should become irrelevant.
+   */
+  const std::vector<t_namespace*>& all_namespace_nodes() const {
     return namespace_nodes_;
   }
 

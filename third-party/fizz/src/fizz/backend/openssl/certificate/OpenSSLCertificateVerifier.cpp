@@ -6,11 +6,12 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/protocol/DefaultCertificateVerifier.h>
+#include <fizz/backend/openssl/certificate/OpenSSLCertificateVerifier.h>
 #include <folly/FileUtil.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
 namespace fizz {
+namespace openssl {
 
 struct STACK_OF_X509_deleter {
   void operator()(STACK_OF(X509) * sk) {
@@ -45,17 +46,17 @@ static AlertDescription toTLSAlert(int opensslVerifyErr) {
   }
 }
 
-/* static */ std::unique_ptr<DefaultCertificateVerifier>
-DefaultCertificateVerifier::createFromCAFile(
+/* static */ std::unique_ptr<OpenSSLCertificateVerifier>
+OpenSSLCertificateVerifier::createFromCAFile(
     VerificationContext context,
     const std::string& caFile) {
   auto store = folly::ssl::OpenSSLCertUtils::readStoreFromFile(caFile);
-  return std::make_unique<DefaultCertificateVerifier>(
+  return std::make_unique<OpenSSLCertificateVerifier>(
       context, std::move(store));
 }
 
-/* static */ std::unique_ptr<DefaultCertificateVerifier>
-DefaultCertificateVerifier::createFromCAFiles(
+/* static */ std::unique_ptr<OpenSSLCertificateVerifier>
+OpenSSLCertificateVerifier::createFromCAFiles(
     VerificationContext context,
     const std::vector<std::string>& caFiles) {
   std::string certBuffer;
@@ -67,13 +68,13 @@ DefaultCertificateVerifier::createFromCAFiles(
     }
     folly::toAppend(readBuffer, &certBuffer);
   }
-  return std::make_unique<DefaultCertificateVerifier>(
+  return std::make_unique<OpenSSLCertificateVerifier>(
       context,
       folly::ssl::OpenSSLCertUtils::readStoreFromBuffer(
           folly::StringPiece(certBuffer)));
 }
 
-std::shared_ptr<const Cert> DefaultCertificateVerifier::verify(
+std::shared_ptr<const Cert> OpenSSLCertificateVerifier::verify(
     const std::vector<std::shared_ptr<const fizz::PeerCert>>& certs) const {
   std::ignore = verifyWithX509StoreCtx(certs);
   // Just return the original cert in the default case
@@ -81,7 +82,7 @@ std::shared_ptr<const Cert> DefaultCertificateVerifier::verify(
 }
 
 folly::ssl::X509StoreCtxUniquePtr
-DefaultCertificateVerifier::verifyWithX509StoreCtx(
+OpenSSLCertificateVerifier::verifyWithX509StoreCtx(
     const std::vector<std::shared_ptr<const fizz::PeerCert>>& certs) const {
   if (certs.empty()) {
     throw std::runtime_error("no certificates to verify");
@@ -157,7 +158,7 @@ DefaultCertificateVerifier::verifyWithX509StoreCtx(
   return ctx;
 }
 
-void DefaultCertificateVerifier::createAuthorities() {
+void OpenSSLCertificateVerifier::createAuthorities() {
   CertificateAuthorities auth;
   X509_STORE* store = x509Store_ ? x509Store_.get() : getDefaultX509Store();
   // X509_STORE stores CA certs as objects in this stack.
@@ -185,7 +186,7 @@ void DefaultCertificateVerifier::createAuthorities() {
   authorities_ = std::move(auth);
 }
 
-X509_STORE* DefaultCertificateVerifier::getDefaultX509Store() {
+X509_STORE* OpenSSLCertificateVerifier::getDefaultX509Store() {
   static folly::ssl::X509StoreUniquePtr defaultStore([]() {
     X509_STORE* store = X509_STORE_new();
 
@@ -204,7 +205,7 @@ X509_STORE* DefaultCertificateVerifier::getDefaultX509Store() {
 }
 
 std::vector<Extension>
-DefaultCertificateVerifier::getCertificateRequestExtensions() const {
+OpenSSLCertificateVerifier::getCertificateRequestExtensions() const {
   std::vector<Extension> exts;
   Extension ext;
   Error err;
@@ -213,4 +214,5 @@ DefaultCertificateVerifier::getCertificateRequestExtensions() const {
   return exts;
 }
 
+} // namespace openssl
 } // namespace fizz

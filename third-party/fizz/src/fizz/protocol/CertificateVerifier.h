@@ -49,7 +49,7 @@ class CertificateVerifier {
  *
  * This forces callers to configure a real CertificateVerifier rather than
  * silently skipping verification. Used as the DefaultCertificateVerifier
- * on platforms without OpenSSL (e.g. mnscrypto-only builds).
+ * on platforms without OpenSSL.
  */
 class TerminatingCertificateVerifier : public CertificateVerifier {
  public:

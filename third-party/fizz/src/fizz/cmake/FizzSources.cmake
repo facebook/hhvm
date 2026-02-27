@@ -11,6 +11,7 @@ set(
         backend/liboqs/OQSKeyExchange.cpp
         backend/libsodium/crypto/exchange/X25519.cpp
         backend/openssl/certificate/CertUtils.cpp
+        backend/openssl/certificate/OpenSSLCertificateVerifier.cpp
         backend/openssl/crypto/OpenSSLKeyUtils.cpp
         backend/openssl/crypto/Sha.cpp
         backend/openssl/crypto/aead/OpenSSLEVPCipher.cpp
@@ -66,7 +67,6 @@ set(
         extensions/tokenbinding/Validator.cpp
         protocol/AsyncFizzBase.cpp
         protocol/Certificate.cpp
-        protocol/DefaultCertificateVerifier.cpp
         protocol/Events.cpp
         protocol/Exporter.cpp
         protocol/Factory.cpp

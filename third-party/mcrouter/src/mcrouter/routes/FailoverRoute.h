@@ -131,14 +131,13 @@ class FailoverRoute {
     // Look into LeaseTokenMap
     auto& proxy = fiber_local<RouterInfo>::getSharedCtx()->proxy();
     auto& map = proxy.router().leaseTokenMap();
-    if (auto item = map.query(name_, *req.leaseToken_ref())) {
+    if (auto item = map.query(name_, *req.leaseToken())) {
       auto mutReq = req;
-      mutReq.leaseToken_ref() = item->originalToken;
+      mutReq.leaseToken() = item->originalToken;
       proxy.stats().increment(redirected_lease_set_count_stat);
       if (targets_.size() <= item->routeHandleChildIndex) {
         McLeaseSetReply errorReply(carbon::Result::LOCAL_ERROR);
-        errorReply.message_ref() =
-            "LeaseSet failover destination out-of-range.";
+        errorReply.message() = "LeaseSet failover destination out-of-range.";
         return errorReply;
       }
       return targets_[item->routeHandleChildIndex]->route(mutReq);

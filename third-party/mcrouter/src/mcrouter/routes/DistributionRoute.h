@@ -266,15 +266,14 @@ class DistributionRoute {
   std::optional<std::string> inferDistributionRegionForReplay(
       const McDeleteRequest& req,
       ProxyBase& proxy) const {
-    auto sourceIt =
-        req.attributes_ref()->find(memcache::kMcDeleteReqAttrSource);
-    if (FOLLY_LIKELY(sourceIt == req.attributes_ref()->end())) {
+    auto sourceIt = req.attributes()->find(memcache::kMcDeleteReqAttrSource);
+    if (FOLLY_LIKELY(sourceIt == req.attributes()->end())) {
       return std::nullopt;
     }
     switch (static_cast<McDeleteRequestSource>(sourceIt->second)) {
       case McDeleteRequestSource::CROSS_REGION_DIRECTED_INVALIDATION:
-        if (!req.key_ref()->routingPrefix().empty()) {
-          auto routingPrefix = RoutingPrefix(req.key_ref()->routingPrefix());
+        if (!req.key()->routingPrefix().empty()) {
+          auto routingPrefix = RoutingPrefix(req.key()->routingPrefix());
           return routingPrefix.getRegion().str();
         }
         proxy.stats().increment(

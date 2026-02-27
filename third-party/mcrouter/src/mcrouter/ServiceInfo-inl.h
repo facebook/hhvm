@@ -181,7 +181,7 @@ class RouteCommandDispatcher {
             str.append(d);
           }
           ReplyT<ServiceInfoRequest> reply(carbon::Result::FOUND);
-          reply.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, str);
+          reply.value() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, str);
           ctx->sendReply(std::move(reply));
         });
   }
@@ -272,7 +272,7 @@ class GetBucketCommandDispatcher {
                 tenantId > 0 ? folly::to<std::string>(tenantId) : "null");
           }
           ReplyT<ServiceInfoRequest> reply(carbon::Result::FOUND);
-          reply.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, str);
+          reply.value() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, str);
           ctx->sendReply(std::move(reply));
         });
   }
@@ -629,7 +629,7 @@ void ServiceInfo<RouterInfo>::ServiceInfoImpl::handleRequest(
     replyStr = std::string("ERROR: ") + e.what();
   }
   ReplyT<ServiceInfoRequest> reply(carbon::Result::FOUND);
-  reply.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, replyStr);
+  reply.value() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, replyStr);
   ctx->sendReply(std::move(reply));
 }
 

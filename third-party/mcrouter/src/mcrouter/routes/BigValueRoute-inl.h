@@ -295,7 +295,7 @@ McLeaseGetReply BigValueRoute<RouterInfo>::doLeaseGetRoute(
     // if bigValue item, create a new reply with result, lease-token and return
     // so that we don't send any meta data that may be present in initialReply
     McLeaseGetReply reply(*initialReply.result_ref());
-    reply.leaseToken_ref() = *initialReply.leaseToken_ref();
+    reply.leaseToken() = *initialReply.leaseToken_ref();
     return reply;
   }
 
@@ -305,16 +305,16 @@ McLeaseGetReply BigValueRoute<RouterInfo>::doLeaseGetRoute(
     // err on the side of allowing clients to make progress by returning a lease
     // token of -1.
     McLeaseGetReply missReply(carbon::Result::NOTFOUND);
-    missReply.leaseToken_ref() = static_cast<uint64_t>(-1);
+    missReply.leaseToken() = static_cast<uint64_t>(-1);
     return missReply;
   }
 
   // Send a gets request for the metadata while sending ordinary get requests
   // to fetch the subpieces. We may need to use the returned CAS token to
   // invalidate the metadata piece later on.
-  const auto key = req.key_ref()->fullKey();
+  const auto key = req.key()->fullKey();
   McGetsRequest getsMetadataReq(key);
-  getsMetadataReq.flags_ref() = *req.flags_ref();
+  getsMetadataReq.flags() = *req.flags();
   const auto reqs = chunkGetRequests(req, chunksInfo);
   std::vector<std::function<McGetReply()>> fs;
   fs.reserve(reqs.size());
@@ -343,12 +343,12 @@ McLeaseGetReply BigValueRoute<RouterInfo>::doLeaseGetRoute(
     return reducedReply;
   }
 
-  if (isErrorResult(*getsMetadataReply.result_ref())) {
+  if (isErrorResult(*getsMetadataReply.result())) {
     if (retriesLeft > 0) {
       return doLeaseGetRoute(req, --retriesLeft);
     }
-    McLeaseGetReply errorReply(*getsMetadataReply.result_ref());
-    errorReply.message_ref() = std::move(*getsMetadataReply.message_ref());
+    McLeaseGetReply errorReply(*getsMetadataReply.result());
+    errorReply.message() = std::move(*getsMetadataReply.message());
     return errorReply;
   }
 
@@ -358,15 +358,15 @@ McLeaseGetReply BigValueRoute<RouterInfo>::doLeaseGetRoute(
   // to get a valid lease token.
   // TODO: Consider also firing off async deletes for the subpieces for better
   // cache use.
-  if (isHitResult(*getsMetadataReply.result_ref())) {
+  if (isHitResult(*getsMetadataReply.result())) {
     McCasRequest invalidateReq(key);
-    invalidateReq.exptime_ref() = -1;
-    invalidateReq.casToken_ref() = *getsMetadataReply.casToken_ref();
-    invalidateReq.flags_ref() = *req.flags_ref();
+    invalidateReq.exptime() = -1;
+    invalidateReq.casToken() = *getsMetadataReply.casToken();
+    invalidateReq.flags() = *req.flags();
     auto invalidateReply = ch_->route(invalidateReq);
     if (isErrorResult(*invalidateReply.result_ref())) {
       McLeaseGetReply errorReply(*invalidateReply.result_ref());
-      errorReply.message_ref() = std::move(*invalidateReply.message_ref());
+      errorReply.message() = std::move(*invalidateReply.message_ref());
       return errorReply;
     }
   }
@@ -376,7 +376,7 @@ McLeaseGetReply BigValueRoute<RouterInfo>::doLeaseGetRoute(
   }
 
   McLeaseGetReply reply(carbon::Result::REMOTE_ERROR);
-  reply.message_ref() = fmt::format(
+  reply.message() = fmt::format(
       "BigValueRoute: exhausted retries for lease-get for key {}", key);
   return reply;
 }

@@ -10,14 +10,10 @@
 #include <algorithm>
 #include <atomic>
 
-#include <limits.h>
 #include <linux/futex.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <sys/syscall.h>
 #include <unistd.h>
-
-#include "mcrouter/lib/fbi/util.h"
 
 #define fbi_futex_wait(p, val)         \
   syscall(                             \

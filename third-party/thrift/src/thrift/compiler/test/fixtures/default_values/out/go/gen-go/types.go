@@ -1920,6 +1920,14 @@ func (x *StructWithCollectionDefaultValues) GetThriftStructMetadata() *metadata.
 }
 
 
+func init() {
+    thrift.InternalRegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/TrivialStruct", premadeCodecTypeSpec_module_TrivialStruct)
+    thrift.InternalRegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/TrivialStructWithDefault", premadeCodecTypeSpec_module_TrivialStructWithDefault)
+    thrift.InternalRegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/StructWithNoCustomDefaultValues", premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues)
+    thrift.InternalRegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCustomDefaultValues", premadeCodecTypeSpec_module_StructWithCustomDefaultValues)
+    thrift.InternalRegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCollectionDefaultValues", premadeCodecTypeSpec_module_StructWithCollectionDefaultValues)
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)

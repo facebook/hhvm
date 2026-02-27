@@ -5560,6 +5560,21 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) setDefaults() *respDbMixedStack
 }
 
 
+func init() {
+    thrift.InternalRegisterType("test.dev/fixtures/basic/MyStruct", premadeCodecTypeSpec_module_MyStruct)
+    thrift.InternalRegisterType("test.dev/fixtures/basic/Containers", premadeCodecTypeSpec_module_Containers)
+    thrift.InternalRegisterType("test.dev/fixtures/basic/MyDataItem", premadeCodecTypeSpec_module_MyDataItem)
+    thrift.InternalRegisterType("test.dev/fixtures/basic/MyUnion", premadeCodecTypeSpec_module_MyUnion)
+    thrift.InternalRegisterType("test.dev/fixtures/basic/MyException", premadeCodecTypeSpec_module_MyException)
+    thrift.InternalRegisterType("test.dev/fixtures/basic/MyExceptionWithMessage", premadeCodecTypeSpec_module_MyExceptionWithMessage)
+    thrift.InternalRegisterType("test.dev/fixtures/basic/ReservedKeyword", premadeCodecTypeSpec_module_ReservedKeyword)
+    thrift.InternalRegisterType("test.dev/fixtures/basic/UnionToBeRenamed", premadeCodecTypeSpec_module_UnionToBeRenamed)
+    thrift.InternalRegisterType("test.dev/fixtures/basic/MyEnumAlias", premadeCodecTypeSpec_module_MyEnumAlias)
+    thrift.InternalRegisterType("test.dev/fixtures/basic/MyDataItemAlias", premadeCodecTypeSpec_module_MyDataItemAlias)
+    thrift.InternalRegisterType("test.dev/fixtures/basic/MyEnum", premadeCodecTypeSpec_module_MyEnum)
+    thrift.InternalRegisterType("test.dev/fixtures/basic/HackEnum", premadeCodecTypeSpec_module_HackEnum)
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)

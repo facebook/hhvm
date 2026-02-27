@@ -4118,6 +4118,10 @@ func (x *respBadInteractionFoo) setDefaults() *respBadInteractionFoo {
 }
 
 
+func init() {
+    thrift.InternalRegisterType("facebook.com/thrift/compiler/test/fixtures/basic_annotations/src/module/MyStruct", premadeCodecTypeSpec_module_MyStruct)
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)

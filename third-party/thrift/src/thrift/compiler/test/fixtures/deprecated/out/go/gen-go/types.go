@@ -630,6 +630,11 @@ func (x *ExampleUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
 }
 
 
+func init() {
+    thrift.InternalRegisterType("facebook.com/thrift/test/User", premadeCodecTypeSpec_module_User)
+    thrift.InternalRegisterType("facebook.com/thrift/test/ExampleUnion", premadeCodecTypeSpec_module_ExampleUnion)
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)

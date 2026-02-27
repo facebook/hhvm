@@ -491,3 +491,6 @@ func (x *respMyLeafDoLeaf) setDefaults() *respMyLeafDoLeaf {
 }
 
 
+func init() {
+}
+

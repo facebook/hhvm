@@ -962,6 +962,18 @@ func (x *MyStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
 }
 
 
+func init() {
+    thrift.InternalRegisterType("test.dev/fixtures/enums/SomeStruct", premadeCodecTypeSpec_module_SomeStruct)
+    thrift.InternalRegisterType("test.dev/fixtures/enums/MyStruct", premadeCodecTypeSpec_module_MyStruct)
+    thrift.InternalRegisterType("test.dev/fixtures/enums/Metasyntactic", premadeCodecTypeSpec_module_Metasyntactic)
+    thrift.InternalRegisterType("test.dev/fixtures/enums/MyEnum1", premadeCodecTypeSpec_module_MyEnum1)
+    thrift.InternalRegisterType("test.dev/fixtures/enums/MyEnum2", premadeCodecTypeSpec_module_MyEnum2)
+    thrift.InternalRegisterType("test.dev/fixtures/enums/MyEnum3", premadeCodecTypeSpec_module_MyEnum3)
+    thrift.InternalRegisterType("test.dev/fixtures/enums/MyEnum4", premadeCodecTypeSpec_module_MyEnum4)
+    thrift.InternalRegisterType("test.dev/fixtures/enums/MyBitmaskEnum1", premadeCodecTypeSpec_module_MyBitmaskEnum1)
+    thrift.InternalRegisterType("test.dev/fixtures/enums/MyBitmaskEnum2", premadeCodecTypeSpec_module_MyBitmaskEnum2)
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)

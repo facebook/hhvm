@@ -6523,6 +6523,9 @@ func (x *respGetEntityMyMethodWithConflictingParamAccessors) setDefaults() *resp
 }
 
 
+func init() {
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)

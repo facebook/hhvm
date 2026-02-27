@@ -468,6 +468,9 @@ func (x *Foo2) GetThriftStructMetadata() *metadata.ThriftStruct {
 }
 
 
+func init() {
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)

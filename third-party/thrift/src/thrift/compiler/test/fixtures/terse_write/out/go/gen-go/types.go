@@ -4505,6 +4505,18 @@ func (x *TerseException) TypeName() string {
 }
 
 
+func init() {
+    thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/MyStruct", premadeCodecTypeSpec_terse_write_MyStruct)
+    thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/MyUnion", premadeCodecTypeSpec_terse_write_MyUnion)
+    thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/MyStructWithCustomDefault", premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault)
+    thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/StructLevelTerseStruct", premadeCodecTypeSpec_terse_write_StructLevelTerseStruct)
+    thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/FieldLevelTerseStruct", premadeCodecTypeSpec_terse_write_FieldLevelTerseStruct)
+    thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/AdaptedFields", premadeCodecTypeSpec_terse_write_AdaptedFields)
+    thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/TerseException", premadeCodecTypeSpec_terse_write_TerseException)
+    thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/MyInteger", premadeCodecTypeSpec_terse_write_MyInteger)
+    thrift.InternalRegisterType("facebook.com/thrift/test/fixtures/terse_write/MyEnum", premadeCodecTypeSpec_terse_write_MyEnum)
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)

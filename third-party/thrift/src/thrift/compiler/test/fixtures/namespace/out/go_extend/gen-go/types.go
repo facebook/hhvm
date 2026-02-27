@@ -297,3 +297,6 @@ func (x *respExtendTestServiceCheck) setDefaults() *respExtendTestServiceCheck {
 }
 
 
+func init() {
+}
+

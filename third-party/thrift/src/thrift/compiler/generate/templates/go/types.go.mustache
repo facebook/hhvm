@@ -68,6 +68,24 @@ var _ = metadata.GoUnusedProtection__
 
 {{/each}}
 
+func init() {
+    {{#each root_program.structured_definitions as |struct|}}
+    {{#if struct.uri}}
+    thrift.InternalRegisterType("{{struct.uri}}", {{struct.codec_type_spec_name}})
+    {{/if struct.uri}}
+    {{/each}}
+    {{#each root_program.typedefs as |typedef|}}
+    {{#if typedef.uri}}
+    thrift.InternalRegisterType("{{typedef.uri}}", {{typedef.codec_type_spec_name}})
+    {{/if typedef.uri}}
+    {{/each}}
+    {{#each root_program.enums as |enum|}}
+    {{#if enum.uri}}
+    thrift.InternalRegisterType("{{enum.uri}}", {{enum.codec_type_spec_name}})
+    {{/if enum.uri}}
+    {{/each}}
+}
+
 {{#if root_program.structs?}}
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {

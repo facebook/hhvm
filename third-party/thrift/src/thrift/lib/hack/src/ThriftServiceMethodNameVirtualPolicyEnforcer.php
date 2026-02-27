@@ -105,14 +105,12 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     return $result;
   }
 
-  <<StringMetadataExtractor>>
   private static async function genPrivacyLibResults(
     string $asset_type,
     string $policy_enforcer_api,
     PolicyEnforcerCallerIdentity $caller,
     PolicyEnforcerContext $context,
   )[zoned_local]: Awaitable<(TPolicyEnforcerResult, ?PrivacyLibModuleFailure)> {
-    HH\set_frame_metadata('PAALC_NEW:THRIFT');
     // Thrift endpoint has this context set
     $asset_xid = $context->get(#ThriftPolicyZones)
       ?->getXID() ??

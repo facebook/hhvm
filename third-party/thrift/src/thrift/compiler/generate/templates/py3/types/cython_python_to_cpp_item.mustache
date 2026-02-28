@@ -59,7 +59,7 @@ key, include the parallel CythonPythonToCppKey file instead.
 }}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
   }}{{^program:auto_migrate?}}{{!
-    }}{{> types/container_to_cpp }}(item){{!
+    }}{{#partial types.container_to_cpp type=type:self}}(item){{!
   }}{{/program:auto_migrate?}}{{!
   }}{{#program:auto_migrate?}}{{!
     }}{{type:flat_name}}__make_instance(item){{!

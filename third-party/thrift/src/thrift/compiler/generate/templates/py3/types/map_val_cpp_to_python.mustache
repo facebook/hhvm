@@ -46,7 +46,7 @@ Used to convert C++ `cval` to python object.
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval)){{!
   }}{{/program:inplace_migrate?}}{{!
 }}{{/type:structured}}{{!
-}}{{#type:container?}}{{> types/container_from_cpp }}(cval){{/type:container?}}{{!
+}}{{#type:container?}}{{#partial types.container_from_cpp type=type:self}}(cval){{/type:container?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
     }}{{#partial types.python_type type=type:self}}, <int> cval){{/type:enum}}{{!
 }}{{/type:customBinaryType?}}

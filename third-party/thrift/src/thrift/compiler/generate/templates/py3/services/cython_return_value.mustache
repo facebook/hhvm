@@ -64,7 +64,7 @@ to the client.
 }}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
   }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
-    }}{{> types/container_to_cpp}}(result){{!
+    }}{{#partial types.container_to_cpp type=type:self}}(result){{!
   }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
 }}{{/type:container?}}{{!
 }}{{#type:void?}}c_unit{{/type:void?}}{{!

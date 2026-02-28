@@ -24,7 +24,7 @@ it in the self.py_value variable.
     self.py_value = None
 else:
 {{#type:container?}}
-    self.py_value = {{> types/container_from_cpp }}({{!
+    self.py_value = {{#partial types.container_from_cpp type=type:self}}({{!
       }}deref(deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}())){{!
 }}{{/type:container?}}{{!
 }}{{^type:container?}}{{!
@@ -79,7 +79,7 @@ else:
   }}deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}())){{!
 }}{{/type:structured?}}{{!
 }}{{#type:container?}}{{!
-}}self.py_value = {{> types/container_from_cpp}}({{!
+}}self.py_value = {{#partial types.container_from_cpp type=type:self}}({{!
   }}deref(self.{{> types/cpp_obj}}).get_{{field:py_name}}()){{!
 }}{{/type:container?}}{{!
 }}{{/field:reference?}}

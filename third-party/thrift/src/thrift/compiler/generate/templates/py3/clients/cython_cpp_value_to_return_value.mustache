@@ -49,7 +49,7 @@ to a python type.
   }}__deref_const[{{> types/cython_cpp_type }}](result.value()))){{!
 }}{{/program:inplace_migrate?}}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
-  }}{{> types/container_from_cpp}}(cmove(result.value())){{!
+  }}{{#partial types.container_from_cpp type=type:self}}(cmove(result.value())){{!
 }}{{/type:container?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{#partial types.python_type type=type:self}}(<int> result.value()){{/type:enum}}{{!

@@ -22,7 +22,7 @@ on a union.
 }}{{#field:reference?}}{{!
 }}{{#type:container?}}{{!
     }}deref(c_inst).set_{{field:py_name}}({{!
-}}{{> types/container_to_cpp }}({{field:py_name}})){{!
+}}{{#partial types.container_to_cpp type=type:self}}({{field:py_name}})){{!
 }}{{/type:container?}}{{!
 }}{{^type:container?}}{{!
     }}deref(c_inst).set_{{field:py_name}}({{!
@@ -82,6 +82,6 @@ on a union.
 }}{{/type:structured?}}{{!
 }}{{#type:container?}}{{!
   }}deref(c_inst).set_{{field:py_name}}({{!
-    }}{{> types/container_to_cpp }}({{field:py_name}})){{!
+    }}{{#partial types.container_to_cpp type=type:self}}({{field:py_name}})){{!
 }}{{/type:container?}}{{!
 }}{{/field:reference?}}

@@ -41,16 +41,10 @@ file.
 }}{{#value:string?}}{{!
     }}{{#if value:type.binary?}}b"{{value:string_value}}"{{#else}}"{{value:unicode_value}}"{{/if}}{{!
 }}{{/value:string?}}{{!
-}}{{#value:map?}}{{!
-    }}{{#value:type.true_type}}{{!
-    }}{{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{#partial types.c_binding node=constant:self}}()){{!
-    }}{{/value:type.true_type}}{{!
-}}{{/value:map?}}{{!
-}}{{#value:list?}}{{!
-    }}{{#value:type.true_type}}{{!
-    }}{{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{#partial types.c_binding node=constant:self}}()){{!
-    }}{{/value:type.true_type}}{{!
-}}{{/value:list?}}{{!
+}}{{#if (or value:map? value:list?)}}{{!
+    }}{{#partial types.container_from_cpp type=value:type.true_type}}({{!
+    }}{{> types/current_module_cbindings}}.{{#partial types.c_binding node=constant:self}}()){{!
+}}{{/if (or value:map? value:list?)}}{{!
 }}{{#value:enum?}}{{!
     }}{{^value:enum_value?}}__BadEnum({{/value:enum_value?}}{{!
     }}{{#value:type.true_type}}{{#type:need_module_path?}}{{type:modulePath}}.{{!

@@ -31,7 +31,7 @@ on a struct.
 }}{{^type:customBinaryType?}}{{!
 }}{{#field:reference?}}{{!
 }}{{#type:container?}}{{!
-}}{{> types/lift_to_heap }}({{> types/container_to_cpp }}(_fbthrift_value)){{!
+}}{{> types/lift_to_heap }}({{#partial types.container_to_cpp type=type:self}}(_fbthrift_value)){{!
 }}{{/type:container?}}{{^type:container?}}{{!
   }}{{#field:unique_ref?}}{{!
     For unique references, we just make a copy of the target object - it's not
@@ -58,7 +58,7 @@ on a struct.
     }}deref((<{{> types/cython_python_type }}?> _fbthrift_value).{{> types/cpp_obj}}){{!
 }}{{/type:structured?}}{{!
 }}{{#type:container?}}{{!
-    }}{{> types/container_to_cpp }}(_fbthrift_value){{!
+    }}{{#partial types.container_to_cpp type=type:self}}(_fbthrift_value){{!
 }}{{/type:container?}}{{!
 }}{{/field:reference?}}{{!
 }}{{/type:customBinaryType?}}

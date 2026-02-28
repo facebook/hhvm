@@ -48,3 +48,19 @@ in the client or server source rather than the type definition source.
 {{#pragma ignore-newlines}}
 c{{node.name}}
 {{/let partial}}
+
+{{!
+This are used to resolve container converter prefix. The prefix used depends whether
+referenced from types.pyx main file, field_setter, or container converter.
+}}
+{{#let export partial container_from_cpp |type|}}
+{{#pragma ignore-newlines}}
+{{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{type.flat_name}}
+__from_cpp
+{{/let partial}}
+
+{{#let export partial container_to_cpp |type|}}
+{{#pragma ignore-newlines}}
+{{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{type.flat_name}}
+__make_instance
+{{/let partial}}

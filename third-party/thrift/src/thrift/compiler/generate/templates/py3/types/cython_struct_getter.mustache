@@ -48,7 +48,7 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
         managed by the top-level object, possible via a unique_ptr }}
     self.__fbthrift_cached_{{field:py_name}} = {{!
       }}{{#type:container?}}{{!
-      }}{{> types/container_from_cpp }}({{!
+      }}{{#partial types.container_from_cpp type=type:self}}({{!
         }}deref(deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}_ref())){{!
       }}{{/type:container?}}{{!
       }}{{^type:container?}}{{!
@@ -72,7 +72,7 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
         }}{{#partial types.python_type type=type:self}}, <int>({{!
         }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}{{!
       }})){{/type:enum}}{{!
-      }}{{#type:container?}}{{> types/container_from_cpp }}({{!
+      }}{{#type:container?}}{{#partial types.container_from_cpp type=type:self}}({{!
         }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_ref}}){{!
       }}{{/type:container?}}{{!
       }}{{^type:enum?}}{{^type:container?}}{{!

@@ -47,7 +47,7 @@ to be converted from unicode to binary representation.
   }}{{/program:inplace_migrate?}}{{!
 }}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
-  }}{{> types/container_from_cpp}}({{field:py_name}}){{!
+  }}{{#partial types.container_from_cpp type=type:self}}({{field:py_name}}){{!
 }}{{/type:container?}}{{!
 }}{{#type:enum?}}{{#partial types.python_type type=type:self}}(<int> {{field:py_name}}){{/type:enum?}}{{!
 }}{{/type:customBinaryType?}}

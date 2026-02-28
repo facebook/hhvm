@@ -53,7 +53,7 @@ citem.
     }}make_shared[{{> types/cython_cpp_type }}](c_vec[idx])){{!
   }}{{/program:inplace_migrate?}}{{!
 }}{{/type:structured}}{{!
-}}{{#type:container?}}{{> types/container_from_cpp }}(c_vec[idx]){{/type:container?}}{{!
+}}{{#type:container?}}{{#partial types.container_from_cpp type=type:self}}(c_vec[idx]){{/type:container?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
     }}{{#partial types.python_type type=type:self}}, <int> c_vec[idx]){{/type:enum}}{{!
 }}{{/type:customBinaryType?}}

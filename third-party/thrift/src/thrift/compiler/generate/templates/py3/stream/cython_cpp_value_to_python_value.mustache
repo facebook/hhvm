@@ -49,7 +49,7 @@ to a python type.
   }}{{/program:inplace_migrate?}}{{!
 }}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
-  }}{{> types/container_from_cpp }}(_value){{!
+  }}{{#partial types.container_from_cpp type=type:self}}(_value){{!
 }}{{/type:container?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{#partial types.python_type type=type:self}}(<int> _value){{/type:enum}}{{!

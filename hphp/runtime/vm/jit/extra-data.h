@@ -3368,10 +3368,10 @@ X(RaiseStrToClassNotice,        StrToClassData);
 
 template<bool hasExtra, Opcode opc, class T> struct AssertExtraTypes {
   static void doassertx() {
-    assertx(!"called extra on an opcode without extra data");
+    assertx(false && "called extra on an opcode without extra data");
   }
   static void doassert_same() {
-    assertx(!"called extra on an opcode without extra data");
+    assertx(false && "called extra on an opcode without extra data");
   }
 };
 
@@ -3380,15 +3380,15 @@ template<Opcode opc, class T> struct AssertExtraTypes<true,opc,T> {
 
   static void doassertx() {
     if (!std::is_base_of<T,ExtraType>::value) {
-      assertx(!"extra<T> was called with an extra data "
-              "type that doesn't match the opcode type");
+      assertx(false && "extra<T> was called with an extra data "
+                       "type that doesn't match the opcode type");
     }
   }
   static void doassert_same() {
     if (!std::is_same<T,ExtraType>::value) {
       fprintf(stderr, "opcode = %s\n", opcodeName(opc));   \
-      assertx(!"extra<T> was called with an extra data type that "
-             "doesn't exactly match the opcode type");
+      assertx(false && "extra<T> was called with an extra data type that "
+                       "doesn't exactly match the opcode type");
     }
   }
 };

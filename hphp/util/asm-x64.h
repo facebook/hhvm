@@ -1774,8 +1774,8 @@ private:
   // In 64-bit mode, you can't mix accesses to high byte registers
   // with low byte registers other than al,cl,bl,dl.  We assert this.
   void byteRegMisuse() const {
-    assert(!"High byte registers can't be used with new x64 registers, or"
-            " anything requiring a REX prefix");
+    assert(false && "High byte registers can't be used with new x64 registers, or"
+                    " anything requiring a REX prefix");
   }
 
   int computeImmediateSize(X64Instr op,

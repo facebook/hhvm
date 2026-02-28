@@ -4600,7 +4600,7 @@ OPTBLD_INLINE void iopBareThis(BareThisOp bto) {
     case BareThisOp::Notice:   raise_notice(Strings::WARN_NULL_THIS); break;
     case BareThisOp::NoNotice: break;
     case BareThisOp::NeverNull:
-      assertx(!"$this cannot be null in BareThis with NeverNull option");
+      assertx(false && "$this cannot be null in BareThis with NeverNull option");
       break;
     }
   }

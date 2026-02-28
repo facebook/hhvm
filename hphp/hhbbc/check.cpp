@@ -51,7 +51,7 @@ bool DEBUG_ONLY checkBlock(const php::Func& f, const php::Block& b) {
     assertx(it->op != Op::Jmp && "unconditional Jmp mid-block");
     if (std::next(it) == end(b.hhbcs)) break;
     forEachTakenEdge(*it, [&](BlockId /*blk*/) {
-      assertx(!"Instruction in middle of block had a jump target");
+      assertx(false && "Instruction in middle of block had a jump target");
     });
   }
 

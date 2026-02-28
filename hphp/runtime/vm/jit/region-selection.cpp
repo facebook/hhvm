@@ -833,13 +833,13 @@ void RegionDesc::Block::checkInstruction(SrcKey sk) const {
 
   if (instrFlags(sk.op()) & TF) {
     FTRACE(1, "Bad block: {}\n", show(*this));
-    assertx(!"Block may not contain non-fallthrough instruction unless "
-           "they are last");
+    assertx(false && "Block may not contain non-fallthrough instruction unless "
+                     "they are last");
   }
   if (instrIsNonCallControlFlow(sk.op())) {
     FTRACE(1, "Bad block: {}\n", show(*this));
-    assertx(!"Block may not contain control flow instructions unless "
-           "they are last");
+    assertx(false && "Block may not contain control flow instructions unless "
+                     "they are last");
   }
 }
 

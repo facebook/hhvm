@@ -58,7 +58,7 @@ size_t getIndirectMemSize(tv_rval lval, bool recurse = true) {
   if (!isRefcountedType(type)) {
     return 0;
   }
-  assertx(!"Unsupported Variant type for getMemSize()");
+  assertx(false && "Unsupported Variant type for getMemSize()");
   return 0;
 }
 
@@ -116,7 +116,7 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::RClsMeth:
       return getMemSize(APCRClsMeth::fromHandle(handle));
   }
-  assertx(!"Unsupported APCHandle Type in getMemSize");
+  assertx(false && "Unsupported APCHandle Type in getMemSize");
   return 0;
 }
 
@@ -218,7 +218,7 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
     return size;
   }
   default:
-    assertx(!"Unsupported Array type in getMemSize");
+    assertx(false && "Unsupported Array type in getMemSize");
   }
   return 0;
 }

@@ -593,7 +593,7 @@ Id FuncEmitter::allocUnnamedLocal() {
 
 EHEnt& FuncEmitter::addEHEnt() {
   assertx(!m_ehTabSorted
-    || "should only mark the ehtab as sorted after adding all of them");
+      && "should only mark the ehtab as sorted after adding all of them");
   ehtab.emplace_back();
   ehtab.back().m_parentIndex = 7777;
   return ehtab.back();

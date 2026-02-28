@@ -11,6 +11,7 @@ import json
 import os
 import os.path
 import sys
+import time
 
 from watchman.integration.lib import WatchmanTestCase
 
@@ -46,6 +47,8 @@ class TestFSEventsResync(WatchmanTestCase.WatchmanTestCase):
         # on our next query, and not see evidence of a recrawl
         os.unlink(os.path.join(root, "111"))
         self.touchRelative(root, "222")
+
+        time.sleep(1)
 
         res = self.watchmanCommand(
             "query",

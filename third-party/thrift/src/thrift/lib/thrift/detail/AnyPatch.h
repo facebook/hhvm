@@ -214,17 +214,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   /// Ensures the given type is set in Thrift Any.
   void ensureAny(type::AnyStruct ensureAny) {
     throwIfInvalidOrUnsupportedAny(ensureAny);
-    if (data_.assign().has_value()) {
-      data_.clear() = true;
-      data_.ensureAny() = std::move(data_.assign().value());
-      data_.assign().reset();
-    }
-
-    if (ensures(ensureAny.type().value())) {
-      return;
-    }
-
-    data_.ensureAny() = std::move(ensureAny);
+    ensureAnyWithoutValidation(std::move(ensureAny));
   }
 
   /// Patches the value in Thrift Any if the type matches with the provided
@@ -242,7 +232,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   void ensureAndPatch(const VPatch& patch) {
     static_assert(op::is_patch_v<VPatch>);
     using VTag = op::patched_type_tag_t<VPatch>;
-    ensureAny(type::AnyData::toAny<VTag>({}).toThrift());
+    ensureAnyWithoutValidation(type::AnyData::toAny<VTag>({}).toThrift());
     patchIfTypeIsImpl(patch, true);
   }
 
@@ -261,7 +251,6 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   // The provided type in ensureAny MUST match with the value type of patch
   // stored in provided patch as Thrift Any.
   void ensureAndPatch(type::AnyStruct ensure, type::AnyStruct patch) {
-    throwIfInvalidOrUnsupportedAny(ensure);
     throwIfInvalidOrUnsupportedAny(patch);
     type::Type type = ensure.type().value();
     ensureAny(std::move(ensure));
@@ -272,7 +261,6 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   // meaning you need to make sure the DynamicPatch you provide applies to the
   // type represented by the ensured Any. If not you will corrupt your data.
   void ensureAndPatch(type::AnyStruct ensure, protocol::DynamicPatch patch) {
-    throwIfInvalidOrUnsupportedAny(ensure);
     type::Type type = ensure.type().value();
     ensureAny(std::move(ensure));
     patchIfTypeIsImpl(std::move(type), std::move(patch), true);
@@ -407,9 +395,25 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
         return;
       }
       data_.clear() = true;
-      ensureAny(std::move(data_.assign().value()));
+      data_.ensureAny() = std::move(data_.assign().value());
       data_.assign().reset();
     }
+  }
+
+  // Callers that have already validated the AnyStruct should use this to avoid
+  // redundant work.
+  void ensureAnyWithoutValidation(type::AnyStruct ensureAny) {
+    if (data_.assign().has_value()) {
+      data_.clear() = true;
+      data_.ensureAny() = std::move(data_.assign().value());
+      data_.assign().reset();
+    }
+
+    if (ensures(ensureAny.type().value())) {
+      return;
+    }
+
+    data_.ensureAny() = std::move(ensureAny);
   }
 
   template <typename VPatch>

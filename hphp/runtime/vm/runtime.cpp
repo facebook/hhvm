@@ -23,6 +23,7 @@
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/conv-10.h"
+#include "hphp/util/random.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/text-util.h"
 
@@ -172,7 +173,7 @@ void raiseWarning(const StringData* sd) {
 }
 
 void raiseNotice(uint32_t sampleRate, const StringData* sd) {
-  if (folly::Random::oneIn(sampleRate)) {
+  if (folly::Random::oneIn(sampleRate, threadLocalRng64())) {
     raise_notice("%s", sd->data());
   }
 }
@@ -542,7 +543,7 @@ void raiseModuleBoundaryViolation(const Class* cls,
 const StaticString s___DynamicallyReferenced("__DynamicallyReferenced");
 
 void raiseMissingDynamicallyReferenced(const Class* cls) {
-  if (folly::Random::oneIn(Cfg::Eval::DynamicallyReferencedNoticeSampleRate)) {
+  if (folly::Random::oneIn(Cfg::Eval::DynamicallyReferencedNoticeSampleRate, threadLocalRng64())) {
     auto const& attrs = cls->preClass()->userAttributes();
     auto const it = attrs.find(s___DynamicallyReferenced.get());
     if (it != attrs.end()) {
@@ -550,7 +551,7 @@ void raiseMissingDynamicallyReferenced(const Class* cls) {
       auto const args = val(it->second).parr;
       assertx(args->size() == 1);
       auto const rate = tvAssertInt(args->at(int64_t{0}));
-      if (folly::Random::oneIn(rate)) {
+      if (folly::Random::oneIn(rate, threadLocalRng64())) {
         raise_notice(Strings::SOFT_MISSING_DYNAMICALLY_REFERENCED,
                      cls->name()->data(),
                      rate);

@@ -25,7 +25,9 @@
 #include "hphp/runtime/vm/unit-gen-helpers.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/hash-map.h"
+#include "hphp/util/random.h"
 
+#include <folly/Random.h>
 #include <folly/Range.h>
 
 namespace HPHP {
@@ -282,7 +284,7 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
             }
             case kind::LazyClass:{
               if (folly::Random::oneIn(
-                    Cfg::Eval::RaiseClassConversionNoticeSampleRate)) {
+                    Cfg::Eval::RaiseClassConversionNoticeSampleRate, threadLocalRng64())) {
                 raise_class_to_string_conversion_notice("dict key");
               }
               auto const s = toStaticString(elt.key.LazyClass._0._0);

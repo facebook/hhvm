@@ -24,6 +24,7 @@
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/match.h"
+#include "hphp/util/random.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/annot-type.h"
 
@@ -1289,12 +1290,12 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val,
           // verify*Fail will deal with the conversion/warning
           return false;
         case AnnotAction::WarnClassname:
-          if (folly::Random::oneIn(Cfg::Eval::ClassnameNoticesSampleRate)) {
+          if (folly::Random::oneIn(Cfg::Eval::ClassnameNoticesSampleRate, threadLocalRng64())) {
             raise_notice(Strings::CLASS_TO_CLASSNAME);
           }
           return true;
         case AnnotAction::WarnClass:
-          if (folly::Random::oneIn(Cfg::Eval::ClassNoticesSampleRate)) {
+          if (folly::Random::oneIn(Cfg::Eval::ClassNoticesSampleRate, threadLocalRng64())) {
             raise_notice(Strings::STRING_TO_CLASS);
           }
           return true;
@@ -1525,12 +1526,12 @@ bool TypeConstraint::checkImpl(tv_rval val,
       // verify*Fail will deal with the conversion/warning
       return false;
     case AnnotAction::WarnClassname:
-      if (folly::Random::oneIn(Cfg::Eval::ClassnameNoticesSampleRate)) {
+      if (folly::Random::oneIn(Cfg::Eval::ClassnameNoticesSampleRate, threadLocalRng64())) {
         raise_notice(Strings::CLASS_TO_CLASSNAME);
       }
       return true;
     case AnnotAction::WarnClass:
-      if (folly::Random::oneIn(Cfg::Eval::ClassNoticesSampleRate)) {
+      if (folly::Random::oneIn(Cfg::Eval::ClassNoticesSampleRate, threadLocalRng64())) {
         raise_notice(Strings::STRING_TO_CLASS);
       }
       return true;
@@ -1817,7 +1818,7 @@ bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
 
   if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
       checkStringCompatible()) {
-    if (folly::Random::oneIn(Cfg::Eval::ClassStringHintNoticesSampleRate)) {
+    if (folly::Random::oneIn(Cfg::Eval::ClassStringHintNoticesSampleRate, threadLocalRng64())) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT, tcInfo().c_str());
     }
     val.val().pstr = isClassType(val.type()) ?

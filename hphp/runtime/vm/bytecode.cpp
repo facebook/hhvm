@@ -32,6 +32,7 @@
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/portability.h"
+#include "hphp/util/random.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
@@ -2308,7 +2309,7 @@ OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
 }
 
 OPTBLD_INLINE void iopRaiseClassStringConversionNotice() {
-  if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate)) {
+  if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate, threadLocalRng64())) {
     raise_class_to_string_conversion_notice("bytecode");
   }
 }
@@ -4703,7 +4704,7 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
 // Verify that the type of an expression matches a type structure
 OPTBLD_INLINE void iopVerifyTypeTS() {
   auto const cell = vmStack().indC(1);
-  if (folly::Random::oneIn(Cfg::Eval::CheckedUnsafeCastSampleRate)) {
+  if (folly::Random::oneIn(Cfg::Eval::CheckedUnsafeCastSampleRate, threadLocalRng64())) {
     assertx(Cfg::Eval::CheckedUnsafeCast);
     auto const ts = maybeResolveAndErrorOnTypeStructure(TypeStructResolveOp::Resolve, true, false);
     std::string givenType, expectedType, errorKey;

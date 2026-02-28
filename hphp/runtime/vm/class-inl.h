@@ -26,6 +26,7 @@
 
 #include "hphp/util/configs/repo.h"
 #include "hphp/util/configs/sandbox.h"
+#include "hphp/util/random.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -805,7 +806,7 @@ inline bool classHasPersistentRDS(const Class* cls) {
 
 inline const StringData* classToStringHelper(const Class* cls,
                                              const char* source) {
-  if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate)) {
+  if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate, threadLocalRng64())) {
     raise_class_to_string_conversion_notice(source);
  }
  return cls->name();

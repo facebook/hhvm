@@ -23,8 +23,10 @@
 #include "hphp/util/configs/errorhandling.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/php7.h"
+#include "hphp/util/random.h"
 #include "hphp/util/string-vsnprintf.h"
 
+#include <folly/Random.h>
 #include <folly/logging/RateLimiter.h>
 #include <folly/Range.h>
 
@@ -530,7 +532,7 @@ void raise_str_to_class_notice(const StringData* name, jit::StrToClassKind kind)
         return "dynamic_class_meth()";
     }
   }();
-  if (folly::Random::oneIn(Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate)) {
+  if (folly::Random::oneIn(Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate, threadLocalRng64())) {
     raise_notice("Implicit string to Class conversion for classname %s for %s",
                  name->data(), source);
   }

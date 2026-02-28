@@ -56,6 +56,7 @@
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/portability.h"
+#include "hphp/util/random.h"
 #include "hphp/util/service-data.h"
 
 namespace HPHP {
@@ -327,7 +328,7 @@ void VerifyTypeImpl(TypedValue value, ArrayData* ts,
                                  const Class* ctx, const Func* func) {
   // We shouldn't even have generated code if flag isn't set
   assertx(Cfg::Eval::CheckedUnsafeCast);
-  if (folly::Random::oneIn(Cfg::Eval::CheckedUnsafeCastSampleRate)) {
+  if (folly::Random::oneIn(Cfg::Eval::CheckedUnsafeCastSampleRate, threadLocalRng64())) {
     req::vector<Array> tsList;
     std::string givenType, expectedType, errorKey;
     auto resolved_ts = resolveAndVerifyTypeStructure<false>(

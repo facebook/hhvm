@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/random.h"
 
 namespace HPHP {
 
@@ -417,7 +418,7 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
 bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
                    int64_t sample_rate,
                    int64_t error_type /* = (int)ErrorMode::USER_NOTICE */) {
-  if (!folly::Random::oneIn(sample_rate)) {
+  if (!folly::Random::oneIn(sample_rate, threadLocalRng64())) {
     return true;
   }
   return HHVM_FN(trigger_error)(error_msg, error_type);

@@ -30,6 +30,8 @@
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/rclass-meth-data.h"
 
+#include "hphp/util/random.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -174,7 +176,7 @@ struct Eq {
   bool eqStringishTypes(TypedValue lhs, const StringData* rhs) const {
     assertx(tvIsLazyClass(lhs) || tvIsString(lhs));
     if (tvIsLazyClass(lhs)) return lhs.m_data.plazyclass.name() == rhs;
-    if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate)) {
+    if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate, threadLocalRng64())) {
       raise_class_to_string_conversion_notice("comparison");
     }
     return lhs.m_data.pstr->equal(rhs);

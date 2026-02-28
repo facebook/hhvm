@@ -27,6 +27,7 @@
 #include "hphp/util/configs/server.h"
 #include "hphp/util/gzip.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/random.h"
 #include "hphp/util/zstd.h"
 
 namespace HPHP {
@@ -362,7 +363,7 @@ ZstdCompressor* ZstdResponseCompressor::getCompressor() {
     auto target_block_size = RID().getZstdTargetBlockSize();
 
     m_compressor = std::make_unique<ZstdCompressor>(
-        compression_level, folly::Random::oneIn(checksum_rate), window_log, target_block_size);
+        compression_level, folly::Random::oneIn(checksum_rate, threadLocalRng64()), window_log, target_block_size);
   }
 
   return m_compressor.get();

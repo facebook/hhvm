@@ -21,6 +21,10 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
+#include <folly/Random.h>
+
+#include "hphp/util/random.h"
+
 
 namespace HPHP::jit {
 
@@ -91,7 +95,7 @@ void TransStats::logCallCounts() const {
   for (TransID i = 0; i < m_transStatsRecs.size(); ++i) {
     const auto& rec = m_transStatsRecs[i];
     auto callCount = transStatsCounter(i);
-    if (!folly::Random::oneIn(Cfg::Jit::TranslationStatsSampleRate)) {
+    if (!folly::Random::oneIn(Cfg::Jit::TranslationStatsSampleRate, threadLocalRng64())) {
       continue;
     }
     if (callCount >= Cfg::Jit::ReportTranslationStatsMinCallCount) {

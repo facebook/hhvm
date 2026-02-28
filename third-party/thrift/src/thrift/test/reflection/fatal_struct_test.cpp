@@ -19,7 +19,6 @@
 #include <thrift/test/reflection/gen-cpp2/reflection_fatal_types.h>
 
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
-#include <thrift/lib/cpp2/reflection/invoke_by_field_name.h>
 
 #include <gtest/gtest.h>
 
@@ -413,32 +412,6 @@ TEST(FatalStruct, Terse) {
       required<apache::thrift::optionality::terse>,
       fatal::get<traits::members, ident::fieldA, fatal::get_type::tag>::
           optional>();
-}
-
-TEST(FatalStruct, InvokeByFieldName) {
-  using apache::thrift::reflection::invokeByFieldName;
-  using traits = apache::thrift::reflect_struct<struct1>;
-
-  for (auto name : {"field0", "field1", "field2", "field3", "field4"}) {
-    invokeByFieldName<traits::members>(name, [name]<class Member>(Member) {
-      EXPECT_STREQ(Member::type::getName().data(), name);
-    });
-  }
-
-  bool found = invokeByFieldName<traits::members>(
-      "field0",
-      []<class Member>(Member, int input) {
-        EXPECT_STREQ(Member::type::getName().data(), "field0");
-        EXPECT_EQ(input, 10);
-      },
-      10);
-  EXPECT_TRUE(found);
-
-  found =
-      invokeByFieldName<traits::members>("nonexist", []<class Member>(Member) {
-        EXPECT_TRUE(false); // unreachable
-      });
-  EXPECT_FALSE(found);
 }
 
 } // namespace test_cpp2::cpp_reflection

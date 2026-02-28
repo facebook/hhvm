@@ -347,8 +347,9 @@ bool MemOperand::IsPostIndex() const {
 
 
 // Assembler
-Assembler::Assembler(HPHP::CodeBlock& cb)
+Assembler::Assembler(HPHP::CodeBlock& cb, HPHP::jit::CGMeta* meta)
     : cb_(cb)
+    , meta_(meta)
     , next_literal_pool_check_(cb.frontier() + kLiteralPoolCheckInterval)
     , literal_pool_monitor_(0) {
   // Assert that this is an LP64 system.

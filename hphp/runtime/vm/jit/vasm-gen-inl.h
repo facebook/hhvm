@@ -100,6 +100,7 @@ TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
   if (!meta) {
     dummy_meta.addressImmediates.clear();
     dummy_meta.fallthru.reset();
+    dummy_meta.alignments.clear();
   }
   assertx(dummy_meta.empty());
 

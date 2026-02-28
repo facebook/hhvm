@@ -36,7 +36,7 @@ keys (conventionally used for sets, lists, and map values).
 }}{{#type:binary?}}key{{/type:binary?}}{{!
 }}{{#type:structured}}{{!
   }}{{^program:auto_migrate?}}{{^program:inplace_migrate?}}{{!
-    }}deref((<{{> types/cython_python_type}}>key).{{> types/cpp_obj}}){{!
+    }}deref((<{{> types/cython_python_type}}>key).{{#partial types.cpp_obj}}){{!
   }}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
     }}__deref_const[{{> types/cython_cpp_type}}]({{!
     }}{{type:capi_converter_path}}.{{struct:name}}_convert_to_cpp(key._to_python())){{!

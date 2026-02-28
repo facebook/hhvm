@@ -79,12 +79,12 @@ cdef shared_ptr[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}
 {{#program:gen_py3_cython?}}
     {{^struct:cpp_noncopyable?}}
     return make_shared[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}](deref(
-        (<_fbthrift_ctypes.{{struct:name}}?>inst).{{> types/cpp_obj}}
+        (<_fbthrift_ctypes.{{struct:name}}?>inst).{{#partial types.cpp_obj}}
     ))
     {{/struct:cpp_noncopyable?}}{{#struct:cpp_noncopyable?}}
     cdef unique_ptr[_folly__iobuf.cIOBuf] _fbthrift__iobuf = cmove(
         __cserialize(
-            (<_fbthrift_ctypes.{{struct:name}}?>inst).{{> types/cpp_obj }}.get(),
+            (<_fbthrift_ctypes.{{struct:name}}?>inst).{{#partial types.cpp_obj}}.get(),
             Protocol.BINARY,
         )
     )

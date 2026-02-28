@@ -50,6 +50,15 @@ c{{node.name}}
 {{/let partial}}
 
 {{!
+The expansion of ._cpp_obj to discourage non-thrift usage.
+Non-thrift users should use the .converter private API wrappers.
+}}
+{{#let export partial cpp_obj}}
+{{#pragma ignore-newlines}}
+_cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+{{/let partial}}
+
+{{!
 This are used to resolve container converter prefix. The prefix used depends whether
 referenced from types.pyx main file, field_setter, or container converter.
 }}

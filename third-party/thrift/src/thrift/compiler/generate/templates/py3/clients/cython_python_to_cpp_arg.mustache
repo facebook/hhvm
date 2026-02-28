@@ -39,7 +39,7 @@ This template assumes that the Python object is in a variable named <field>.
 }}{{#type:string?}}{{field:py_name}}.encode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}{{field:py_name}}{{/type:binary?}}{{!
 }}{{#type:structured}}{{^program:inplace_migrate?}}{{!
-  }}deref((<{{> types/cython_python_type}}>{{field:py_name}}).{{> types/cpp_obj}}){{!
+  }}deref((<{{> types/cython_python_type}}>{{field:py_name}}).{{#partial types.cpp_obj}}){{!
 }}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
   }}{{type:capi_converter_path}}.{{struct:name}}_convert_to_cpp({{field:py_name}}._to_python()){{!
 }}{{/program:inplace_migrate?}}{{/type:structured}}{{!

@@ -36,13 +36,13 @@ on a struct.
   }}{{#field:unique_ref?}}{{!
     For unique references, we just make a copy of the target object - it's not
     especially efficient but there isn't much else we can do from a shared ptr
-    }}make_unique[{{> types/cython_cpp_type}}](deref({{> types/cython_cast_or_create_python_type}}.{{> types/cpp_obj}})){{!
+    }}make_unique[{{> types/cython_cpp_type}}](deref({{> types/cython_cast_or_create_python_type}}.{{#partial types.cpp_obj}})){{!
   }}{{/field:unique_ref?}}{{!
   }}{{#field:shared_ref?}}{{!
-    }}{{> types/cython_cast_or_create_python_type}}.{{> types/cpp_obj}}{{!
+    }}{{> types/cython_cast_or_create_python_type}}.{{#partial types.cpp_obj}}{{!
   }}{{/field:shared_ref?}}{{!
   }}{{#field:shared_const_ref?}}{{!
-    }}const_pointer_cast({{> types/cython_cast_or_create_python_type}}.{{> types/cpp_obj}}){{!
+    }}const_pointer_cast({{> types/cython_cast_or_create_python_type}}.{{#partial types.cpp_obj}}){{!
   }}{{/field:shared_const_ref?}}{{!
 }}{{/type:container?}}{{!
 }}{{/field:reference?}}{{^field:reference?}}{{!
@@ -55,7 +55,7 @@ on a struct.
 }}{{/type:primitive?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>_fbthrift_value{{/type:enum?}}{{!
 }}{{#type:structured?}}{{!
-    }}deref((<{{> types/cython_python_type }}?> _fbthrift_value).{{> types/cpp_obj}}){{!
+    }}deref((<{{> types/cython_python_type }}?> _fbthrift_value).{{#partial types.cpp_obj}}){{!
 }}{{/type:structured?}}{{!
 }}{{#type:container?}}{{!
     }}{{#partial types.container_to_cpp type=type:self}}(_fbthrift_value){{!

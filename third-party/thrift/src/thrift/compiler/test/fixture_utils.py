@@ -381,6 +381,7 @@ def assert_identical_output(
     # Compare that the generated files are the same
     test.assertEqual(gen_file_relpaths, fixture_file_relpaths)
 
+    differences = []
     for gen_file_relpath in gen_file_relpaths:
         gen_file_path = actual_dir / gen_file_relpath
         fixture_file_path = expected_dir / gen_file_relpath
@@ -389,21 +390,24 @@ def assert_identical_output(
         if gen_file_contents == fixture_file_contents:
             continue
 
+        diff = "\n".join(
+            difflib.unified_diff(
+                fixture_file_contents.splitlines(),
+                gen_file_contents.splitlines(),
+                fromfile=str(fixture_file_path),
+                tofile=str(gen_file_path),
+                lineterm="",
+            )
+        )
+        differences.append(f"--- Differences found in '{gen_file_relpath}' ---\n{diff}")
+
+    if differences:
         message = textwrap.dedent("""\
-        Differences found in '{relpath}':
-        {diff}
+        {differences}
+        ---
         WORKDIR: {workdir}
         COMMAND: {command}""").format(
-            relpath=gen_file_relpath,
-            diff="\n".join(
-                difflib.unified_diff(
-                    fixture_file_contents.splitlines(),
-                    gen_file_contents.splitlines(),
-                    fromfile=str(fixture_file_path),
-                    tofile=str(gen_file_path),
-                    lineterm="",
-                )
-            ),
+            differences="\n\n".join(differences),
             workdir=working_dir,
             command=command,
         )

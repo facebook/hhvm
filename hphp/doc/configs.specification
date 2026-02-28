@@ -692,6 +692,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Synchronize class loading between threads
 
+- uint32_t Eval.ServiceRouterJumpstartWarmup = 0, nikunjm
+
+  Maximum number of ServiceRouter tiers to store in the jumpstart profile.
+  Tiers are recorded during profiling and warmed up when the profile is loaded.
+
 - uint64_t Eval.VMStackElms, UNKNOWN
 
   Maximum number of elements on the VM execution stack.

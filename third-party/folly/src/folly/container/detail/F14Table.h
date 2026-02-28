@@ -16,6 +16,8 @@
 
 #pragma once
 
+#define FOLLY_PURE_SVE 1
+
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -1706,6 +1708,24 @@ class F14Table : public Policy {
       if (prefetch == Prefetch::ENABLED && sizeof(Chunk) > 64) {
         prefetchAddr(chunk->itemAddr(8));
       }
+#if FOLLY_PURE_SVE
+      svuint8_t tagV = svld1_u8(pred, &chunk->tags_[0]);
+      svbool_t eqV = svcmpeq_n_u8(pred, tagV, static_cast<uint8_t>(hp.second));
+      if (svptest_any(eqV, eqV)) {
+        svbool_t nextBit = svpnext_b8(eqV, svpfalse());
+        do {
+          svbool_t maskUpToBit = svbrkb_b_z(svptrue_b8(), nextBit);
+          uint64_t i = svcntp_b8(maskUpToBit, maskUpToBit);
+          if (FOLLY_LIKELY(this->keyMatchesItem(key, chunk->item(i)))) {
+            // Tag match and key match were both successful.  The chance
+            // of a false tag match is 1/128 for each key in the chunk
+            // (with a proper hash function).
+            return ItemIter{chunk, i};
+          }
+          nextBit = svpnext_b8(eqV, nextBit);
+        } while (svptest_any(eqV, nextBit));
+      }
+#else
 #if FOLLY_ARM_FEATURE_NEON_SVE_BRIDGE
       svbool_t outPred;
       auto hits = chunk->tagMatchIter(needleV, pred, outPred);
@@ -1726,6 +1746,7 @@ class F14Table : public Policy {
           }
         } while (hits.hasNext());
       }
+#endif
       if (FOLLY_LIKELY(chunk->outboundOverflowCount() == 0)) {
         // No keys that wanted to be placed in this chunk were denied
         // entry, so our search is over.  This is the common case.

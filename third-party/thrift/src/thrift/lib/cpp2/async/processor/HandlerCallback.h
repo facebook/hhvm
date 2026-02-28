@@ -41,8 +41,41 @@ struct IsUniquePtr<std::unique_ptr<T>> {
   constexpr static bool value = true;
 };
 
+/// Extracts the decorator arg from a compound response type that has a
+/// ResponseType typedef and .response member.
+template <CompoundResponseType T>
+struct CompoundResponseExtractor {
+  using RawResponse = typename T::ResponseType;
+  using InnerResponse = typename inner_type<RawResponse>::type;
+  using ArgType = typename DecoratorArgType<InnerResponse>::type;
+
+  static constexpr ArgType extract(const T& compound) {
+    if constexpr (IsUniquePtr<RawResponse>::value) {
+      return *compound.response;
+    } else {
+      return compound.response;
+    }
+  }
+};
+
+/// DecoratorAfterCallback for compound types with a .response member.
 template <typename T>
-concept ResponseIsUniquePtr = IsUniquePtr<T>::value;
+struct CompoundDecoratorAfterCallback
+    : public DecoratorAfterCallbackWithResult<
+          CompoundDecoratorAfterCallback<T>,
+          const T&,
+          typename CompoundResponseExtractor<T>::ArgType> {
+  static constexpr auto extractDecoratorArg(const T& result) {
+    return CompoundResponseExtractor<T>::extract(result);
+  }
+};
+
+/// DecoratorAfterCallback for types with no decorator-visible response.
+template <typename T>
+struct VoidDecoratorAfterCallback : public DecoratorAfterCallbackWithResult<
+                                        VoidDecoratorAfterCallback<T>,
+                                        const T&,
+                                        void> {};
 
 } // namespace detail
 
@@ -268,23 +301,16 @@ struct TileAndResponse<InteractionIf, void> {
 
 template <typename InteractionIf, typename Response>
 struct InteractionInnerResponseHelper {
-  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
+  using InnerResp = typename detail::inner_type<Response>::type;
+  using DecoratorArgType = typename detail::DecoratorArgType<InnerResp>::type;
 
   static constexpr DecoratorArgType extractInnerResponse(
       const TileAndResponse<InteractionIf, Response>& result) {
-    return result.response;
-  }
-};
-
-template <typename InteractionIf, typename Response>
-struct InteractionInnerResponseHelper<
-    InteractionIf,
-    std::unique_ptr<Response>> {
-  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
-
-  static constexpr DecoratorArgType extractInnerResponse(
-      const TileAndResponse<InteractionIf, std::unique_ptr<Response>>& result) {
-    return *result.response;
+    if constexpr (detail::IsUniquePtr<Response>::value) {
+      return *result.response;
+    } else {
+      return result.response;
+    }
   }
 };
 
@@ -293,79 +319,20 @@ struct InteractionInnerResponseHelper<InteractionIf, void> {
   using DecoratorArgType = void;
 };
 
-template <typename InteractionIf, typename Response, typename StreamItem>
-struct InteractionInnerResponseHelper<
-    InteractionIf,
-    ResponseAndServerStream<Response, StreamItem>> {
-  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
+template <typename InteractionIf, detail::CompoundResponseType T>
+struct InteractionInnerResponseHelper<InteractionIf, T> {
+  using Extractor = detail::CompoundResponseExtractor<T>;
+  using DecoratorArgType = typename Extractor::ArgType;
 
   static constexpr DecoratorArgType extractInnerResponse(
-      const TileAndResponse<
-          InteractionIf,
-          ResponseAndServerStream<Response, StreamItem>>& result) {
-    return result.response.response;
-  }
-};
-
-template <typename InteractionIf, typename Response, typename StreamItem>
-struct InteractionInnerResponseHelper<
-    InteractionIf,
-    ResponseAndServerStream<std::unique_ptr<Response>, StreamItem>> {
-  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
-
-  static constexpr DecoratorArgType extractInnerResponse(
-      const TileAndResponse<
-          InteractionIf,
-          ResponseAndServerStream<std::unique_ptr<Response>, StreamItem>>&
-          result) {
-    return *result.response.response;
+      const TileAndResponse<InteractionIf, T>& result) {
+    return Extractor::extract(result.response);
   }
 };
 
 template <typename InteractionIf, typename StreamItem>
 struct InteractionInnerResponseHelper<InteractionIf, ServerStream<StreamItem>> {
   using DecoratorArgType = void;
-};
-
-template <
-    typename InteractionIf,
-    typename Response,
-    typename SinkElement,
-    typename FinalResponse>
-struct InteractionInnerResponseHelper<
-    InteractionIf,
-    ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>> {
-  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
-
-  static constexpr DecoratorArgType extractInnerResponse(
-      const TileAndResponse<
-          InteractionIf,
-          ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>>&
-          result) {
-    return result.response.response;
-  }
-};
-
-template <
-    typename InteractionIf,
-    typename Response,
-    typename SinkElement,
-    typename FinalResponse>
-struct InteractionInnerResponseHelper<
-    InteractionIf,
-    ResponseAndSinkConsumer<
-        std::unique_ptr<Response>,
-        SinkElement,
-        FinalResponse>> {
-  using DecoratorArgType = typename detail::DecoratorArgType<Response>::type;
-
-  static constexpr DecoratorArgType extractInnerResponse(
-      const TileAndResponse<
-          InteractionIf,
-          ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>>&
-          result) {
-    return *result.response.response;
-  }
 };
 
 template <typename InteractionIf, typename SinkElement, typename FinalResponse>
@@ -586,14 +553,6 @@ void HandlerCallback<T>::doResult(InputType r) {
 }
 
 namespace detail {
-template <class S>
-struct inner_type {
-  using type = S;
-};
-template <class S>
-struct inner_type<std::unique_ptr<S>> {
-  using type = S;
-};
 
 template <typename T>
 struct HandlerCallbackHelper {
@@ -634,36 +593,15 @@ template <typename Response, typename StreamItem>
 struct HandlerCallbackHelper<ResponseAndServerStream<Response, StreamItem>>
     : public HandlerCallbackHelperServerStream<
           ResponseAndServerStream<Response, StreamItem>> {
-  struct DecoratorAfterCallback
-      : public DecoratorAfterCallbackWithResult<
-            DecoratorAfterCallback,
-            const ResponseAndServerStream<Response, StreamItem>&,
-            typename DecoratorArgType<
-                typename inner_type<Response>::type>::type> {
-    using ArgType =
-        typename DecoratorArgType<typename inner_type<Response>::type>::type;
-
-    template <typename InnerResponseType>
-    static constexpr ArgType extractDecoratorArg(
-        const ResponseAndServerStream<InnerResponseType, StreamItem>& result) {
-      return result.response;
-    }
-
-    template <ResponseIsUniquePtr InnerResponseType>
-    static constexpr ArgType extractDecoratorArg(
-        const ResponseAndServerStream<InnerResponseType, StreamItem>& result) {
-      return *result.response;
-    }
-  };
+  using DecoratorAfterCallback = CompoundDecoratorAfterCallback<
+      ResponseAndServerStream<Response, StreamItem>>;
 };
 
 template <typename StreamItem>
 struct HandlerCallbackHelper<ServerStream<StreamItem>>
     : public HandlerCallbackHelperServerStream<ServerStream<StreamItem>> {
-  struct DecoratorAfterCallback : public DecoratorAfterCallbackWithResult<
-                                      DecoratorAfterCallback,
-                                      const ServerStream<StreamItem>&,
-                                      void> {};
+  using DecoratorAfterCallback =
+      VoidDecoratorAfterCallback<ServerStream<StreamItem>>;
 };
 
 template <typename SinkInputType>
@@ -684,47 +622,16 @@ struct HandlerCallbackHelper<
     ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>>
     : public HandlerCallbackHelperSink<
           ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>> {
-  struct DecoratorAfterCallback
-      : public DecoratorAfterCallbackWithResult<
-            DecoratorAfterCallback,
-            const ResponseAndSinkConsumer<
-                Response,
-                SinkElement,
-                FinalResponse>&,
-            typename DecoratorArgType<
-                typename inner_type<Response>::type>::type> {
-    using ArgType =
-        typename DecoratorArgType<typename inner_type<Response>::type>::type;
-
-    template <typename InnerResponseType>
-    static constexpr ArgType extractDecoratorArg(
-        const ResponseAndSinkConsumer<
-            InnerResponseType,
-            SinkElement,
-            FinalResponse>& result) {
-      return result.response;
-    }
-
-    template <ResponseIsUniquePtr InnerResponseType>
-    static constexpr ArgType extractDecoratorArg(
-        const ResponseAndSinkConsumer<
-            InnerResponseType,
-            SinkElement,
-            FinalResponse>& result) {
-      return *result.response;
-    }
-  };
+  using DecoratorAfterCallback = CompoundDecoratorAfterCallback<
+      ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>>;
 };
 
 template <typename SinkElement, typename FinalResponse>
 struct HandlerCallbackHelper<SinkConsumer<SinkElement, FinalResponse>>
     : public HandlerCallbackHelperSink<
           SinkConsumer<SinkElement, FinalResponse>> {
-  struct DecoratorAfterCallback
-      : public DecoratorAfterCallbackWithResult<
-            DecoratorAfterCallback,
-            const SinkConsumer<SinkElement, FinalResponse>&,
-            void> {};
+  using DecoratorAfterCallback =
+      VoidDecoratorAfterCallback<SinkConsumer<SinkElement, FinalResponse>>;
 };
 
 template <typename In, typename Out>
@@ -738,10 +645,8 @@ struct HandlerCallbackHelper<StreamTransformation<In, Out>> {
     return cob(ctx, ex, std::move(input));
   }
 
-  struct DecoratorAfterCallback : public DecoratorAfterCallbackWithResult<
-                                      DecoratorAfterCallback,
-                                      const StreamTransformation<In, Out>&,
-                                      void> {};
+  using DecoratorAfterCallback =
+      VoidDecoratorAfterCallback<StreamTransformation<In, Out>>;
 };
 
 template <typename Response, typename In, typename Out>
@@ -756,29 +661,8 @@ struct HandlerCallbackHelper<
     return cob(ctx, ex, std::move(input));
   }
 
-  struct DecoratorAfterCallback
-      : public DecoratorAfterCallbackWithResult<
-            DecoratorAfterCallback,
-            const ResponseAndStreamTransformation<Response, In, Out>&,
-            typename DecoratorArgType<
-                typename inner_type<Response>::type>::type> {
-    using ArgType =
-        typename DecoratorArgType<typename inner_type<Response>::type>::type;
-
-    template <typename InnerResponseType>
-    static constexpr ArgType extractDecoratorArg(
-        const ResponseAndStreamTransformation<InnerResponseType, In, Out>&
-            result) {
-      return result.response;
-    }
-
-    template <ResponseIsUniquePtr InnerResponseType>
-    static constexpr ArgType extractDecoratorArg(
-        const ResponseAndStreamTransformation<InnerResponseType, In, Out>&
-            result) {
-      return *result.response;
-    }
-  };
+  using DecoratorAfterCallback = CompoundDecoratorAfterCallback<
+      ResponseAndStreamTransformation<Response, In, Out>>;
 };
 
 } // namespace detail

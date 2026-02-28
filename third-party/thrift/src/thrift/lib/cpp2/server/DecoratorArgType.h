@@ -37,6 +37,22 @@ template <typename T>
 concept SmallTriviallyCopyable =
     std::is_trivially_copyable_v<T> && sizeof(T) <= 64;
 
+/// Unwraps std::unique_ptr<T> to T; identity for non-unique_ptr types.
+template <typename T>
+struct inner_type {
+  using type = T;
+};
+template <typename T>
+struct inner_type<std::unique_ptr<T>> {
+  using type = T;
+};
+
+/// Detects compound response types that have a ResponseType typedef and a
+/// .response member (e.g. ResponseAndServerStream, ResponseAndSinkConsumer,
+/// ResponseAndStreamTransformation).
+template <typename T>
+concept CompoundResponseType = requires { typename T::ResponseType; };
+
 /**
  * DecoratorArgType is a helper class for determining the type of the arg
  * passed to the decorator. For small trivially copyable types <= 64 bytes,
@@ -54,51 +70,20 @@ struct DecoratorArgType<T> {
 };
 
 /**
- * DecoratorReturnType is a helper class for determining the type of the arg
- * passed to the decorator after_ methods. For small trivially copyable types
- * <= 64 bytes, we just pass by value and allow the copy to happen. For
- * everything else, we pass by const reference.
+ * DecoratorReturnType determines the type of the arg passed to the decorator
+ * after_ methods. Delegates to DecoratorArgType for pass-by-value vs
+ * const-ref logic. For compound response types, recursively unwraps to the
+ * inner response type.
  */
 template <typename T>
 struct DecoratorReturnType {
-  using type = const T&;
+  using type = typename DecoratorArgType<T>::type;
 };
 
-template <SmallTriviallyCopyable T>
-struct DecoratorReturnType<T> {
-  using type = T;
+template <CompoundResponseType T>
+struct DecoratorReturnType<T>
+    : DecoratorReturnType<typename inner_type<typename T::ResponseType>::type> {
 };
-
-template <typename Response, typename StreamItem>
-struct DecoratorReturnType<ResponseAndServerStream<Response, StreamItem>>
-    : public DecoratorReturnType<Response> {};
-
-template <typename Response, typename StreamItem>
-struct DecoratorReturnType<
-    ResponseAndServerStream<std::unique_ptr<Response>, StreamItem>>
-    : public DecoratorReturnType<Response> {};
-
-template <typename Response, typename SinkElement, typename FinalResponse>
-struct DecoratorReturnType<
-    ResponseAndSinkConsumer<Response, SinkElement, FinalResponse>>
-    : public DecoratorReturnType<Response> {};
-
-template <typename Response, typename SinkElement, typename FinalResponse>
-struct DecoratorReturnType<ResponseAndSinkConsumer<
-    std::unique_ptr<Response>,
-    SinkElement,
-    FinalResponse>> : public DecoratorReturnType<Response> {};
-
-template <typename Response, typename InputElement, typename OutputElement>
-struct DecoratorReturnType<
-    ResponseAndStreamTransformation<Response, InputElement, OutputElement>>
-    : public DecoratorReturnType<Response> {};
-
-template <typename Response, typename InputElement, typename OutputElement>
-struct DecoratorReturnType<ResponseAndStreamTransformation<
-    std::unique_ptr<Response>,
-    InputElement,
-    OutputElement>> : public DecoratorReturnType<Response> {};
 
 } // namespace detail
 
